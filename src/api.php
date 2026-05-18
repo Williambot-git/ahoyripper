@@ -1,0 +1,350 @@
+<?php
+/**
+ * AhoyRipper - API Endpoint
+ * Handles: info extraction, format listing, and download serving
+ */
+
+// CORS headers for API access
+header('Content-Type: application/json');
+header('X-Content-Type-Options: nosniff');
+
+// Rate limiting - simple IP-based gate
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
+$rate_limit = 30; // requests per minute
+$rate_window = 60;
+
+if (file_exists($rate_file)) {
+    $data = json_decode(file_get_contents($rate_file), true);
+    if ($data && time() - $data['t'] < $rate_window) {
+        if ($data['c'] >= $rate_limit) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many requests. Slow down.']);
+            exit;
+        }
+        $data['c']++;
+    } else {
+        $data = ['t' => time(), 'c' => 1];
+    }
+} else {
+    $data = ['t' => time(), 'c' => 1];
+}
+file_put_contents($rate_file, json_encode($data));
+
+// Only allow safe characters in URL
+function isValidUrl($url) {
+    return filter_var($url, FILTER_VALIDATE_URL) !== false
+        && preg_match('/^https?:\/\//', $url);
+}
+
+// Run yt-dlp with timeout and capture output
+function runYtdlp($args, &$stdout, &$stderr, &$exit) {
+    $cmd = '/usr/local/bin/yt-dlp ' . $args;
+    $desc = [
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+    $proc = proc_open($cmd . ' 2>&1', $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
+
+    if (!$proc) return false;
+
+    $tout = stream_set_timeout($pipes[1], 30);
+    $EOUT = stream_set_timeout($pipes[2], 30);
+
+    $stdout = '';
+    while (!feof($pipes[1])) {
+        $s = fread($pipes[1], 8192);
+        if ($s === '' || $s === false) break;
+        $stdout .= $s;
+    }
+    while (!feof($pipes[2])) {
+        $s = fread($pipes[2], 8192);
+        if ($s === '' || $s === false) break;
+        $stderr .= $s;
+    }
+
+    $exit = proc_close($proc);
+    return true;
+}
+
+// Sanitize string for JSON output
+function clean($s) {
+    if ($s === null) return '';
+    return htmlspecialchars((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+// Parse yt-dlp output to extract formats
+function parseFormats($json_str) {
+    $data = json_decode($json_str, true);
+    if (!$data) return null;
+
+    $title = clean($data['title'] ?? 'Unknown');
+    $thumbnail = clean($data['thumbnail'] ?? '');
+    $duration = (int)($data['duration'] ?? 0);
+    $uploader = clean($data['uploader'] ?? '');
+
+    $formats = [];
+    foreach (($data['formats'] ?? []) as $f) {
+        $ext = clean($f['ext'] ?? '');
+        $format_id = clean($f['format_id'] ?? '');
+        $format_note = clean($f['format_note'] ?? '');
+        $tbr = isset($f['tbr']) ? round((float)$f['tbr']) : null;
+        $filesize = isset($f['filesize']) ? (int)$f['filesize'] : (isset($f['filesize_approx']) ? (int)$f['filesize_approx'] : 0);
+        $width = isset($f['width']) ? (int)$f['width'] : 0;
+        $height = isset($f['height']) ? (int)$f['height'] : 0;
+        $vcodec = clean($f['vcodec'] ?? 'none');
+        $acodec = clean($f['acodec'] ?? 'none');
+        $fps = isset($f['fps']) ? (int)$f['fps'] : null;
+        $language = clean($f['language'] ?? '');
+
+        // Build label
+        $label = '';
+        if ($vcodec !== 'none' && $acodec !== 'none') {
+            // Video+audio combined
+            if ($height > 0) {
+                $label = "{$height}p";
+                if ($fps) $label .= "{$fps}";
+                if ($format_note) $label .= " {$format_note}";
+                $label .= " {$ext}";
+            } else {
+                $label = strtoupper($ext);
+            }
+        } elseif ($vcodec !== 'none') {
+            // Video only
+            if ($height > 0) {
+                $label = "Video {$height}p";
+                if ($fps) $label .= " {$fps}fps";
+                $label .= " {$ext}";
+            } else {
+                $label = "Video {$ext}";
+            }
+        } elseif ($acodec !== 'none') {
+            // Audio only
+            $br = $tbr ?? (isset($f['abr']) ? (int)$f['abr'] : null);
+            if ($br) {
+                $label = "{$br}kbps {$ext}";
+            } else {
+                $label = "Audio {$ext}";
+            }
+        } else {
+            continue; // skip unknown
+        }
+
+        // Estimate filesize if not available
+        if ($filesize === 0) {
+            $duration_secs = $duration ?: 180;
+            if ($vcodec !== 'none' && $acodec !== 'none') {
+                // Video+audio
+                $bitrate_kbps = $tbr ?? (($height > 720) ? 5000 : ($height > 480) ? 2500 : 1000);
+                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            } elseif ($vcodec !== 'none') {
+                $bitrate_kbps = $tbr ?? (($height > 720) ? 4000 : 1500);
+                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            } else {
+                $bitrate_kbps = $tbr ?? 128;
+                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            }
+        }
+
+        $filesize_mb = round($filesize / 1048576, 1);
+
+        $formats[] = [
+            'id' => $format_id,
+            'label' => $label,
+            'ext' => $ext,
+            'filesize_mb' => $filesize_mb,
+            'height' => $height,
+            'fps' => $fps,
+            'tbr' => $tbr,
+            'vcodec' => $vcodec,
+            'acodec' => $acodec,
+            'direct' => ($vcodec === 'none' || $acodec === 'none') ? false : true,
+        ];
+    }
+
+    // Sort: video+audio first, then by height/bitrate
+    usort($formats, function($a, $b) {
+        // Combined first
+        if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
+        if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
+        // Then by height/quality
+        if ($a['height'] !== $b['height']) return ($b['height'] ?? 0) - ($a['height'] ?? 0);
+        return ($b['tbr'] ?? 0) - ($a['tbr'] ?? 0);
+    });
+
+    return [
+        'title' => $title,
+        'thumbnail' => $thumbnail,
+        'duration' => $duration,
+        'uploader' => $uploader,
+        'formats' => $formats,
+    ];
+}
+
+// ─── ROUTING ──────────────────────────────────────────────
+
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+switch ($action) {
+    case 'info': {
+        // Get video info + formats
+        $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+        if (!$url || !isValidUrl($url)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.']);
+            exit;
+        }
+
+        $shell_url = escapeshellarg($url);
+        runYtdlp("--dump-json --no-warnings --no-playlist -- $shell_url", $out, $err, $exit);
+
+        if ($exit !== 0 || !$out) {
+            $err_msg = strip_tags(trim($err ?: $out));
+            if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            http_response_code(422);
+            echo json_encode(['error' => "Could not fetch that URL. $err_msg"]);
+            exit;
+        }
+
+        $parsed = parseFormats($out);
+        if (!$parsed) {
+            http_response_code(422);
+            echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
+            exit;
+        }
+
+        echo json_encode($parsed);
+        break;
+    }
+
+    case 'download': {
+        // Serve a format for download via redirect
+        $url = trim($_GET['url'] ?? '');
+        $format_id = trim($_GET['format'] ?? '');
+        if (!$url || !isValidUrl($url) || !$format_id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing URL or format.']);
+            exit;
+        }
+
+        $u_shell = escapeshellarg($url);
+        $f_shell = escapeshellarg($format_id);
+        $out_file = '/tmp/ahoyrip_' . uniqid() . '.tmp';
+
+        // Build output template
+        $cmd = "/usr/local/bin/yt-dlp -f $f_shell -o " . escapeshellarg($out_file) . " --no-playlist -- $u_shell 2>&1";
+
+        $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+        $pipes = null;
+        $proc = proc_open($cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
+
+        if (!$proc) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to start download process.']);
+            exit;
+        }
+
+        // Wait with timeout (stream the download to the user)
+        $start = time();
+        $timeout = 300; // 5 min max
+
+        // Read output as it comes
+        $download_started = false;
+        $done = false;
+
+        while (!feof($pipes[1]) && !feof($pipes[2])) {
+            if (time() - $start > $timeout) {
+                proc_close($proc);
+                if (file_exists($out_file)) unlink($out_file);
+                http_response_code(504);
+                echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
+                exit;
+            }
+            $read = [$pipes[1], $pipes[2]];
+            $w = $e = null;
+            $changed = @stream_select($read, $w, $e, 1, 0);
+            if ($changed === false) break;
+
+            foreach ($read as $pipe) {
+                $buf = fread($pipe, 8192);
+                if (strlen($buf) > 0 && !$download_started) {
+                    // Check if download started (look for filename in output)
+                }
+            }
+
+            // Check if file exists and has content
+            if (!$done && file_exists($out_file) && filesize($out_file) > 0) {
+                $done = true;
+            }
+
+            usleep(100000); // small sleep to prevent busy loop
+        }
+
+        proc_close($proc);
+
+        if (!file_exists($out_file) || filesize($out_file) === 0) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Download failed. The format may not be available.']);
+            exit;
+        }
+
+        // Stream the file to user then delete
+        $filesize = filesize($out_file);
+        $filename = basename($out_file); // We'll rename via header
+
+        // Get original extension from the file
+        $mime_types = [
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'mkv' => 'video/x-matroska',
+            'mp3' => 'audio/mpeg',
+            'm4a' => 'audio/mp4',
+            'flac' => 'audio/flac',
+            'ogg' => 'audio/ogg',
+            'wav' => 'audio/wav',
+            '3gp' => 'video/3gpp',
+        ];
+
+        // Detect extension from file
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($out_file);
+        $ext = pathinfo($out_file, PATHINFO_EXTENSION);
+
+        // For mp3/m4a we want proper extensions in filename
+        $download_name = 'ahoyrip.' . ($ext ?: 'mp4');
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . $filesize);
+        header('Content-Disposition: attachment; filename="' . $download_name . '"');
+        header('Cache-Control: no-cache');
+        header('X-Content-Type-Options: nosniff');
+
+        ignore_user_abort(true);
+        ini_set('memory_limit', '256M');
+
+        $fp = fopen($out_file, 'rb');
+        while (!feof($fp) && connection_abandoned() === false) {
+            echo fread($fp, 65536);
+            flush();
+        }
+        fclose($fp);
+        unlink($out_file);
+        exit;
+    }
+
+    case 'progress': {
+        // Lightweight ping to check yt-dlp is available
+        $version = shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null');
+        echo json_encode([
+            'status' => 'ok',
+            'yt_dlp_version' => trim($version ?: 'not installed'),
+            'ffmpeg_version' => trim(shell_exec('ffmpeg -version 2>/dev/null | head -1')),
+        ]);
+        break;
+    }
+
+    default: {
+        http_response_code(400);
+        echo json_encode(['error' => 'Unknown action. Use ?action=info or ?action=download']);
+    }
+}

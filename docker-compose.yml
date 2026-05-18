@@ -1,0 +1,11 @@
+services:
+  ahoyripper:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    # Increase memory for big rips
+    mem_limit: 2gb
+    cpus: 2
