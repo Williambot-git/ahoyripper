@@ -88,9 +88,9 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit) {
 // Sanitize string for JSON output
 function clean($s) {
     if ($s === null) return '';
-    // Use ENT_NOQUOTES (faster) — we output as JSON, not HTML attribute values
-    // Only use htmlspecialchars to prevent XSS if output lands in HTML context
-    return htmlspecialchars((string)$s, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
+    // No htmlspecialchars — API outputs JSON, not HTML.
+    // Type coercion to string is sufficient.
+    return (string)$s;
 }
 
 // Parse yt-dlp output to extract formats
