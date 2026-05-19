@@ -98,7 +98,7 @@ $VERSION = '1.0.0';
       <div class="spinner"></div>
       <p class="progress-text" id="progressText">Fetching info...</p>
       <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        <div class="progress-bar-fill" id="progressBar" style="width:30%"></div>
       </div>
     </div>
 
@@ -187,8 +187,15 @@ $VERSION = '1.0.0';
   const ripAgain = document.getElementById('ripAgain');
 
   function setProgress(pct, text) {
-    progressBar.style.width = pct + '%';
-    if (text) progressText.textContent = text;
+    // Progress is driven by state, not real percentage
+    // Show a smooth indeterminate animation when we have an active step
+    const bar = progressBar;
+    if (text) {
+      progressText.textContent = text;
+      // Animate bar with a pulsing indeterminate look
+      bar.style.width = '80%';
+      bar.style.transition = 'width 1.5s ease';
+    }
   }
 
   function showError(msg) {

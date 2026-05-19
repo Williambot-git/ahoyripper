@@ -237,16 +237,47 @@ switch ($action) {
         echo json_encode($parsed);
         break;
     }
+// ─── Download rate limiting (separate from info) ──────────
+$dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
+$dl_rate_limit = 10; // download requests per minute
+$dl_rate_window = 60;
 
-    case 'download': {
-        // Serve a format for download via redirect
-        $url = trim($_GET['url'] ?? '');
-        $format_id = trim($_GET['format'] ?? '');
-        if (!$url || !isValidUrl($url) || !$format_id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Missing URL or format.']);
+if (file_exists($dl_rate_file)) {
+    $dl_data = json_decode(file_get_contents($dl_rate_file), true);
+    if ($dl_data && time() - $dl_data['t'] < $dl_rate_window) {
+        if ($dl_data['c'] >= $dl_rate_limit) {
+            http_response_code(429);
+            header('Retry-After: 30');
+            echo json_encode(['error' => 'Too many download requests. Slow down.']);
             exit;
         }
+        $dl_data['c']++;
+    } else {
+        $dl_data = ['t' => time(), 'c' => 1];
+    }
+} else {
+    $dl_data = ['t' => time(), 'c' => 1];
+}
+file_put_contents($dl_rate_file, json_encode($dl_data));
+
+// ─── Download action ──────────────────────────────────────
+case 'download': {
+    // Serve a format for download via redirect
+    $url = trim($_GET['url'] ?? '');
+    $format_id = trim($_GET['format'] ?? '');
+    if (!$url || !isValidUrl($url) || !$format_id) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing URL or format.']);
+        exit;
+    }
+
+    // Validate format_id: alphanumeric + safe chars only, no shell injection
+    if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid format ID.']);
+        exit;
+    }
 
         $u_shell = escapeshellarg($url);
         $f_shell = escapeshellarg($format_id);
