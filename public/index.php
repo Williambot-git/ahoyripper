@@ -21,6 +21,12 @@ $VERSION = '1.0.0';
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
 
+  <!-- Security headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+
   <!-- Canonical URL -->
   <link rel="canonical" href="https://ahoyripper.com">
 

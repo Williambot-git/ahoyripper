@@ -237,47 +237,47 @@ switch ($action) {
         echo json_encode($parsed);
         break;
     }
-// ─── Download rate limiting (separate from info) ──────────
-$dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
-$dl_rate_limit = 10; // download requests per minute
-$dl_rate_window = 60;
 
-if (file_exists($dl_rate_file)) {
-    $dl_data = json_decode(file_get_contents($dl_rate_file), true);
-    if ($dl_data && time() - $dl_data['t'] < $dl_rate_window) {
-        if ($dl_data['c'] >= $dl_rate_limit) {
-            http_response_code(429);
-            header('Retry-After: 30');
-            echo json_encode(['error' => 'Too many download requests. Slow down.']);
+    case 'download': {
+        // ─── Download rate limiting (inside case, not between cases) ───
+        $dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
+        $dl_rate_limit = 10; // download requests per minute
+        $dl_rate_window = 60;
+
+        if (file_exists($dl_rate_file)) {
+            $dl_data = json_decode(file_get_contents($dl_rate_file), true);
+            if ($dl_data && time() - $dl_data['t'] < $dl_rate_window) {
+                if ($dl_data['c'] >= $dl_rate_limit) {
+                    http_response_code(429);
+                    header('Retry-After: 30');
+                    echo json_encode(['error' => 'Too many download requests. Slow down.']);
+                    exit;
+                }
+                $dl_data['c']++;
+            } else {
+                $dl_data = ['t' => time(), 'c' => 1];
+            }
+        } else {
+            $dl_data = ['t' => time(), 'c' => 1];
+        }
+        file_put_contents($dl_rate_file, json_encode($dl_data));
+
+        // Serve a format for download
+        $url = trim($_GET['url'] ?? '');
+        $format_id = trim($_GET['format'] ?? '');
+        if (!$url || !isValidUrl($url) || !$format_id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing URL or format.']);
             exit;
         }
-        $dl_data['c']++;
-    } else {
-        $dl_data = ['t' => time(), 'c' => 1];
-    }
-} else {
-    $dl_data = ['t' => time(), 'c' => 1];
-}
-file_put_contents($dl_rate_file, json_encode($dl_data));
 
-// ─── Download action ──────────────────────────────────────
-case 'download': {
-    // Serve a format for download via redirect
-    $url = trim($_GET['url'] ?? '');
-    $format_id = trim($_GET['format'] ?? '');
-    if (!$url || !isValidUrl($url) || !$format_id) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Missing URL or format.']);
-        exit;
-    }
-
-    // Validate format_id: alphanumeric + safe chars only, no shell injection
-    if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid format ID.']);
-        exit;
-    }
+        // Validate format_id: alphanumeric + safe chars only, no shell injection
+        if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid format ID.']);
+            exit;
+        }
 
         $u_shell = escapeshellarg($url);
         $f_shell = escapeshellarg($format_id);
@@ -301,8 +301,6 @@ case 'download': {
         $start = time();
         $timeout = 300; // 5 min max
 
-        // Read output as it comes
-        $download_started = false;
         $done = false;
         $proc_killed = false;
 
@@ -319,13 +317,6 @@ case 'download': {
             $w = $e = null;
             $changed = @stream_select($read, $w, $e, 1, 0);
             if ($changed === false) break;
-
-            foreach ($read as $pipe) {
-                $buf = fread($pipe, 8192);
-                if (strlen($buf) > 0 && !$download_started) {
-                    // Check if download started (look for filename in output)
-                }
-            }
 
             // Check if file exists and has content
             if (!$done && file_exists($out_file) && filesize($out_file) > 0) {
@@ -347,27 +338,11 @@ case 'download': {
 
         // Stream the file to user then delete
         $filesize = filesize($out_file);
-        $filename = basename($out_file); // We'll rename via header
-
-        // Get original extension from the file
-        $mime_types = [
-            'mp4' => 'video/mp4',
-            'webm' => 'video/webm',
-            'mkv' => 'video/x-matroska',
-            'mp3' => 'audio/mpeg',
-            'm4a' => 'audio/mp4',
-            'flac' => 'audio/flac',
-            'ogg' => 'audio/ogg',
-            'wav' => 'audio/wav',
-            '3gp' => 'video/3gpp',
-        ];
 
         // Detect extension from file
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($out_file);
         $ext = pathinfo($out_file, PATHINFO_EXTENSION);
-
-        // For mp3/m4a we want proper extensions in filename
         $download_name = 'ahoyrip.' . ($ext ?: 'mp4');
 
         header('Content-Type: ' . $mime);
