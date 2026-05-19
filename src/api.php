@@ -56,31 +56,58 @@ function isValidUrl($url) {
 }
 
 // Run yt-dlp with timeout and capture output
-function runYtdlp($args, &$stdout, &$stderr, &$exit) {
+// $timeout = max seconds for the whole process; 0 = no limit
+function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     $cmd = '/usr/local/bin/yt-dlp ' . $args;
     $desc = [
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
+    $pipes = null;
     $proc = proc_open($cmd . ' 2>&1', $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
     if (!$proc) return false;
 
-    $tout = stream_set_timeout($pipes[1], 30);
-    $EOUT = stream_set_timeout($pipes[2], 30);
+    stream_set_timeout($pipes[1], 30);
+    stream_set_timeout($pipes[2], 30);
 
     $stdout = '';
-    while (!feof($pipes[1])) {
-        $s = fread($pipes[1], 8192);
-        if ($s === '' || $s === false) break;
-        $stdout .= $s;
-    }
-    while (!feof($pipes[2])) {
-        $s = fread($pipes[2], 8192);
-        if ($s === '' || $s === false) break;
-        $stderr .= $s;
+    $stderr = '';
+    $start = time();
+
+    while (!feof($pipes[1]) || !feof($pipes[2])) {
+        if ($timeout > 0 && (time() - $start) > $timeout) {
+            proc_terminate($proc, 9);
+            $stderr .= "\nProcess timed out after {$timeout}s";
+            $exit = -1;
+            foreach ($pipes as $p) { if ($p) fclose($p); }
+            proc_close($proc);
+            return false;
+        }
+        $read = [];
+        if (!feof($pipes[1])) $read[] = $pipes[1];
+        if (!feof($pipes[2])) $read[] = $pipes[2];
+        if (empty($read)) break;
+        $w = $e = null;
+        $changed = @stream_select($read, $w, $e, 1, 0);
+        if ($changed === false || $changed === 0) {
+            usleep(100000);
+            continue;
+        }
+        foreach ($read as $p) {
+            if ($p === $pipes[1]) {
+                $s = fread($p, 8192);
+                if ($s === false || $s === '') { feof($pipes[1]); continue; }
+                $stdout .= $s;
+            } elseif ($p === $pipes[2]) {
+                $s = fread($p, 8192);
+                if ($s === false || $s === '') { feof($pipes[2]); continue; }
+                $stderr .= $s;
+            }
+        }
     }
 
+    foreach ($pipes as $p) { if ($p) fclose($p); }
     $exit = proc_close($proc);
     return true;
 }
@@ -217,7 +244,7 @@ switch ($action) {
         }
 
         $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-warnings --no-playlist -- $shell_url", $out, $err, $exit);
+        runYtdlp("--dump-json --no-warnings --no-playlist -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             $err_msg = strip_tags(trim($err ?: $out));
