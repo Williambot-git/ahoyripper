@@ -1,19 +1,26 @@
-# Temp files
-*.tmp
-*.log
-.env
-
-# Rate limit files (server-side)
+# Temp files (PHP rate limiting)
+/tmp/ahoyrip_*
 /tmp/ahoyrip_rate_*
+/tmp/ahoyrip_dl_*
 
-# IDE
-.idea/
-.vscode/
-*.swp
-
-# OS
+# OS artifacts
 .DS_Store
 Thumbs.db
 
-# Downloaded media (should never be here)
-/downloads/
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Build artifacts
+node_modules/
+dist/
+build/
+
+# Environment
+.env
+.env.local
