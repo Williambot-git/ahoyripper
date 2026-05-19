@@ -308,7 +308,12 @@ switch ($action) {
         runYtdlp("--dump-json --no-playlist --no-warnings -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
-            $err_msg = strip_tags(trim($err ?: $out));
+            // Extract a clean, readable error from yt-dlp output
+            // Strip HTML tags and control chars; truncate to a useful length
+            $raw_err = trim($err ?: $out);
+            $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw_err); // remove control chars
+            $err_msg = strip_tags($err_msg); // remove any HTML markup
+            $err_msg = preg_replace('/\s+/', ' ', $err_msg); // collapse whitespace
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
             http_response_code(422);
             echo json_encode(['error' => "Could not fetch that URL. $err_msg"]);

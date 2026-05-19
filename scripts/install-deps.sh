@@ -14,8 +14,8 @@ if ! command -v yt-dlp &>/dev/null; then
     pip install -q yt-dlp || pip3 install -q yt-dlp
 fi
 
-# Keep yt-dlp updated
-yt-dlp -U
+# Keep yt-dlp updated (--self-update is the correct flag; -U is deprecated)
+yt-dlp --self-update
 
 echo "==> Installing ffmpeg..."
 apt-get install -y ffmpeg > /dev/null 2>&1
