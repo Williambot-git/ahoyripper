@@ -330,9 +330,28 @@ $VERSION = '1.0.0';
 
       card.addEventListener('click', function(e) {
         e.preventDefault();
-        window.location.href = card.href;
-        card.style.borderColor = 'var(--color-success)';
-        setTimeout(function() { card.style.borderColor = ''; }, 1500);
+        var dlUrl = card.href;
+        fetch(dlUrl, { signal: AbortSignal.timeout(300000) })
+          .then(function(resp) {
+            if (!resp.ok) {
+              resp.json().catch(function() { return { error: 'Download failed. Try another format.' }; })
+            .then(function(err) { showError(err.error || 'Download failed.'); });
+              return;
+            }
+            return resp.blob().then(function(blob) {
+              var a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = card.download || 'ahoyrip';
+              a.click();
+              URL.revokeObjectURL(a.href);
+              card.style.borderColor = 'var(--color-success)';
+              setTimeout(function() { card.style.borderColor = ''; }, 1500);
+            });
+            } else {
+              window.location.href = dlUrl;
+            }
+          })
+          .catch(function() { showError('Download failed. Try another format.'); });
       });
 
       return card;
