@@ -60,7 +60,7 @@ $VERSION = '1.0.0';
 <!-- Navigation -->
 <nav class="ahoy-nav">
   <a href="/" class="ahoy-nav-logo">
-    <img src="/AhoyMonthly_transparent.png" alt="AhoyRipper" onerror="this.style.display='none'">
+    <img src="/AhoyMonthly_transparent.png" alt="AhoyRipper logo" onerror="this.style.display='none'">
     <span>AhoyRipper</span>
   </a>
   <div class="ahoy-nav-links">
