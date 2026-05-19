@@ -115,6 +115,7 @@ function isValidUrl($url) {
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     $cmd = '/usr/local/bin/yt-dlp ' . $args;
     $desc = [
+        0 => ['pipe', 'r'],  // stdin — keep open but unref so proc can read if needed
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
@@ -122,6 +123,11 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     $proc = proc_open($cmd . ' 2>&1', $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
     if (!$proc) return false;
+
+    // Close stdin immediately — yt-dlp doesn't need interactive input
+    // and an unclosed stdin pipe can cause the process to hang
+    fclose($pipes[0]);
+    unset($pipes[0]);
 
     stream_set_timeout($pipes[1], 30);
     stream_set_timeout($pipes[2], 30);
@@ -419,38 +425,54 @@ switch ($action) {
             exit;
         }
 
-        // Wait with timeout (stream the download to the user)
+// Wait with timeout (yt-dlp writes the actual file to $out_file via -o)
         $start = time();
         $timeout = 300; // 5 min max
-
-        $done = false;
         $proc_killed = false;
 
-        while (!feof($pipes[1]) && !feof($pipes[2])) {
-            if (time() - $start > $timeout) {
-                proc_terminate($proc, 9); // SIGKILL
+        stream_set_timeout($pipes[1], 5); // stdout (progress/info)
+        stream_set_timeout($pipes[2], 5); // stderr (yt-dlp logs)
+
+        while (true) {
+            if ($timeout > 0 && (time() - $start) > $timeout) {
+                proc_terminate($proc, 9);
                 $proc_killed = true;
-                if (file_exists($out_file)) unlink($out_file);
+                if (file_exists($out_file)) @unlink($out_file);
                 http_response_code(504);
                 echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
                 exit;
             }
-            $read = [$pipes[1], $pipes[2]];
-            $w = $e = null;
-            $changed = @stream_select($read, $w, $e, 1, 0);
-            if ($changed === false) break;
 
-            // Check if file exists and has content
-            if (!$done && file_exists($out_file) && filesize($out_file) > 0) {
-                $done = true;
+            $read = [];
+            if (!feof($pipes[1])) $read[] = $pipes[1];
+            if (!feof($pipes[2])) $read[] = $pipes[2];
+
+            if (empty($read)) {
+                // Both pipes closed — process finished
+                break;
             }
 
-            usleep(100000); // small sleep to prevent busy loop
+            $w = $e = null;
+            $changed = @stream_select($read, $w, $e, 1, 0);
+            if ($changed === false || $changed === 0) {
+                usleep(100000);
+                continue;
+            }
+
+            foreach ($read as $p) {
+                $s = @fread($p, 65536);
+                if ($s === false || $s === '') {
+                    if (feof($p)) fclose($p);
+                }
+            }
+
+            // Check periodically if the file has started being written
+            if (!$proc_killed && file_exists($out_file) && filesize($out_file) > 0) {
+                // File is being written — continue waiting
+            }
         }
 
-        if (!$proc_killed) {
-            proc_close($proc);
-        }
+        proc_close($proc);
 
         if (!file_exists($out_file) || filesize($out_file) === 0) {
             http_response_code(500);
