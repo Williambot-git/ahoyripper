@@ -25,6 +25,7 @@ if (file_exists($rate_file)) {
     if ($data && time() - $data['t'] < $rate_window) {
         if ($data['c'] >= $rate_limit) {
             http_response_code(429);
+            header('Retry-After: 30');
             echo json_encode(['error' => 'Too many requests. Slow down.']);
             exit;
         }
@@ -272,10 +273,12 @@ switch ($action) {
         // Read output as it comes
         $download_started = false;
         $done = false;
+        $proc_killed = false;
 
         while (!feof($pipes[1]) && !feof($pipes[2])) {
             if (time() - $start > $timeout) {
-                proc_close($proc);
+                proc_terminate($proc, 9); // SIGKILL
+                $proc_killed = true;
                 if (file_exists($out_file)) unlink($out_file);
                 http_response_code(504);
                 echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
@@ -301,7 +304,9 @@ switch ($action) {
             usleep(100000); // small sleep to prevent busy loop
         }
 
-        proc_close($proc);
+        if (!$proc_killed) {
+            proc_close($proc);
+        }
 
         if (!file_exists($out_file) || filesize($out_file) === 0) {
             http_response_code(500);
@@ -338,6 +343,7 @@ switch ($action) {
         header('Content-Length: ' . $filesize);
         header('Content-Disposition: attachment; filename="' . $download_name . '"');
         header('Cache-Control: no-cache');
+        header('Connection: close'); // Prevent keep-alive during file streaming
         header('X-Content-Type-Options: nosniff');
 
         ignore_user_abort(true);
