@@ -13,6 +13,9 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'; report-uri /csp-report');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Resource-Policy: same-origin');
+header('Cross-Origin-Embedder-Policy: require-corp');
 
 // Anti-hotlinking: validate origin for API requests
 // Accept requests with no referer (direct) or from the same origin
