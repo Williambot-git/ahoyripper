@@ -278,14 +278,13 @@ $VERSION = '1.0.0';
         <div class="format-size">${size}</div>
       `;
 
-      // Direct click to download
       card.addEventListener('click', function(e) {
         e.preventDefault();
-        // Track a click
-        window.open(card.href, '_blank', 'noopener');
-        // Small feedback
+        // Navigate to download URL (triggers browser download)
+        window.location.href = card.href;
+        // Visual feedback that click was registered
         card.style.borderColor = 'var(--color-success)';
-        setTimeout(() => { card.style.borderColor = ''; }, 800);
+        setTimeout(() => { card.style.borderColor = ''; }, 1500);
       });
 
       formatGrid.appendChild(card);

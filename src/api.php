@@ -279,17 +279,25 @@ switch ($action) {
             exit;
         }
 
-        $u_shell = escapeshellarg($url);
         $f_shell = escapeshellarg($format_id);
         $tmp_dir = sys_get_temp_dir();
         $out_file = $tmp_dir . '/ahoyrip_' . bin2hex(random_bytes(8)) . '.tmp';
 
-        // Build output template
-        $cmd = "/usr/local/bin/yt-dlp -f $f_shell -o " . escapeshellarg($out_file) . " --no-playlist -- $u_shell 2>&1";
+        // Build output template — use exec array to bypass shell entirely
+        // URL is validated by isValidUrl(); bypass_shell prevents shell interpretation
+        // but yt-dlp still sees options-like strings, so we pass it as -- separator arg
+        $ytdlp_cmd = [
+            '/usr/local/bin/yt-dlp',
+            '-f', $format_id,
+            '-o', $out_file,
+            '--no-playlist',
+            '--',
+            $url,  // validated URL, bypass_shell=true skips shell expansion
+        ];
 
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
         $pipes = null;
-        $proc = proc_open($cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
+        $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
         if (!$proc) {
             http_response_code(500);
