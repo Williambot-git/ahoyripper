@@ -85,15 +85,86 @@ ahoyripper/
 GET /src/api.php?action=info&url=<url>
 ```
 
+**Success response:**
+```json
+{
+  "title": "Video Title",
+  "thumbnail": "https://...",
+  "duration": 180,
+  "uploader": "Channel Name",
+  "formats": [
+    {
+      "id": "22",
+      "label": "720p Video mp4",
+      "ext": "mp4",
+      "filesize_mb": 45.2,
+      "height": 720,
+      "fps": 30,
+      "tbr": 2500,
+      "vcodec": "avc1.64001F",
+      "acodec": "mp4a.40.2",
+      "direct": true,
+      "language": null
+    }
+  ]
+}
+```
+
+**Error responses:**
+| Code | Meaning |
+|------|---------|
+| `400` | Invalid URL or missing parameters |
+| `422` | URL could not be fetched or parsed |
+| `429` | Rate limit exceeded (see headers below) |
+| `503` | Service temporarily unavailable |
+
 ### Download a format
 ```
 GET /src/api.php?action=download&url=<url>&format=<format_id>
 ```
 
+The `format_id` comes from the `id` field in the info response. The API streams the file directly.
+
 ### Health check
 ```
 GET /src/api.php?action=progress
 ```
+
+Returns:
+```json
+{
+  "status": "ok",
+  "yt_dlp_version": "2024.x.x",
+  "ffmpeg_version": "ffmpeg version 6.x"
+}
+```
+
+### Rate Limits
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| `/src/api.php?action=info` | 30 requests | 60 seconds |
+| `/src/api.php?action=download` | 10 requests | 60 seconds |
+
+Response headers on every API response:
+- `X-RateLimit-Limit` — max requests allowed
+- `X-RateLimit-Remaining` — requests left in window
+- `X-RateLimit-Reset` — Unix timestamp when window resets
+- `X-RateLimit-Window` — window size in seconds
+
+For download endpoint, headers are `X-DL-RateLimit-*`.
+
+---
+
+## Troubleshooting
+
+**"Could not fetch that URL"** — The site may not be supported by yt-dlp, or the video is geo-restricted/private/unavailable.
+
+**Rate limited (429)** — Wait 30 seconds. Limits reset every 60 seconds.
+
+**Download times out** — Try an audio-only format or a lower resolution. Large 4K rips can exceed the 5-minute timeout.
+
+**Empty download** — The format may not be available in that combination. Try another format from the list.
 
 ---
 
