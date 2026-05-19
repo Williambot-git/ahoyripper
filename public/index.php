@@ -74,8 +74,8 @@ $VERSION = '1.0.0';
     <h1>Rip any video, <span>anywhere.</span></h1>
     <p>Paste a link from YouTube, Twitter, SoundCloud, TikTok, Instagram, or one of dozens of other platforms. We'll rip it. Free, no signup, no tracked.</p>
 
-    <!-- Error message -->
-    <div class="rip-error" id="errorBox"></div>
+    <!-- Error message (aria-live for screen reader announcements) -->
+    <div class="rip-error" id="errorBox" role="alert" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Input form -->
     <div class="rip-box">
