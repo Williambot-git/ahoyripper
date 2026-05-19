@@ -18,15 +18,29 @@ $VERSION = '1.0.0';
   <title>AhoyRipper - Free Media Ripper | YouTube, Twitter, TikTok & More</title>
   <meta name="description" content="Rip video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, and more. Free, fast, no signup required.">
   <meta name="robots" content="noindex">
+  <meta name="author" content="AhoyVPN">
+  <meta name="theme-color" content="#0f0f0f">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://ahoyripper.com">
 
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
   <meta property="og:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads, no bullshit.">
   <meta property="og:site_name" content="AhoyRipper">
+  <meta property="og:image" content="https://ahoyripper.com/og-image.png">
+  <meta property="og:url" content="https://ahoyripper.com">
 
-  <!-- Favicon: use AhoyVPN logo -->
-  <link rel="icon" href="/favicon.ico">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@ahoyvpn">
+  <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
+  <meta name="twitter:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads.">
+  <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
+
+  <!-- SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' font-size='20' fill='white'>R</text></svg>">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
