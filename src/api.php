@@ -7,6 +7,9 @@
 // CORS headers for API access
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 
 // Rate limiting - simple IP-based gate
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -229,7 +232,8 @@ switch ($action) {
 
         $u_shell = escapeshellarg($url);
         $f_shell = escapeshellarg($format_id);
-        $out_file = '/tmp/ahoyrip_' . uniqid() . '.tmp';
+        $tmp_dir = sys_get_temp_dir();
+        $out_file = $tmp_dir . '/ahoyrip_' . bin2hex(random_bytes(8)) . '.tmp';
 
         // Build output template
         $cmd = "/usr/local/bin/yt-dlp -f $f_shell -o " . escapeshellarg($out_file) . " --no-playlist -- $u_shell 2>&1";
