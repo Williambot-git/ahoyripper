@@ -42,6 +42,13 @@ if ($raw) {
     }
 }
 
+// Add rate limit response headers for client visibility
+$reset = $data['t'] + $rate_window;
+header('X-RateLimit-Limit: ' . $rate_limit);
+header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+header('X-RateLimit-Reset: ' . $reset);
+header('X-RateLimit-Window: ' . $rate_window);
+
 if (time() - $data['t'] < $rate_window) {
     if ($data['c'] >= $rate_limit) {
         flock($fp, LOCK_UN);
@@ -318,6 +325,13 @@ switch ($action) {
                 $dl_data = $dl_decoded;
             }
         }
+
+// Add download rate limit response headers
+        $dl_reset = $dl_data['t'] + $dl_rate_window;
+        header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+        header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+        header('X-DL-RateLimit-Reset: ' . $dl_reset);
+        header('X-DL-RateLimit-Window: ' . $dl_rate_window);
 
         if (time() - $dl_data['t'] < $dl_rate_window) {
             if ($dl_data['c'] >= $dl_rate_limit) {
