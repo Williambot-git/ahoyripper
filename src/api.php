@@ -9,6 +9,9 @@ header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 
 // Rate limiting - simple IP-based gate
@@ -327,7 +330,7 @@ switch ($action) {
         ini_set('memory_limit', '256M');
 
         $fp = fopen($out_file, 'rb');
-        while (!feof($fp) && connection_abandoned() === false) {
+        while (!feof($fp) && !connection_aborted()) {
             echo fread($fp, 65536);
             flush();
         }

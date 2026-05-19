@@ -65,8 +65,7 @@ ahoyripper/
 │   └── index.php          # Main page
 ├── src/
 │   ├── style.css          # CSS (AhoyVPN brand)
-│   ├── api.php            # yt-dlp API (info, download)
-│   └── api.php            # Backend handler
+│   └── api.php            # yt-dlp API (info, download)
 ├── deploy/
 │   └── nginx.conf         # Nginx config
 ├── scripts/
