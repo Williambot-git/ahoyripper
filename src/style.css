@@ -270,6 +270,23 @@ body {
   font-size: 0.8rem;
   color: var(--color-text-sec);
 }
+.format-group-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-ter);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 0.25rem;
+  grid-column: 1 / -1;
+}
+.format-group-sep {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.5rem 0;
+}
 .format-size {
   font-size: 0.75rem;
   color: var(--color-text-ter);

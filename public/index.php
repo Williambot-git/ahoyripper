@@ -278,48 +278,89 @@ $VERSION = '1.0.0';
 
     var formats = data.formats || [];
 
+    // Group formats by type for better UX
+    var groups = { combined: [], videoOnly: [], audioOnly: [] };
     formats.forEach(function(f) {
-      const card = document.createElement('a');
-      card.className = 'format-card';
-
-      // Label: use the pretty label
-      const label = f.label || (f.ext ? f.ext.toUpperCase() : 'Format');
-
-      // Type badge
-      let badge = '';
       if (f.vcodec !== 'none' && f.acodec !== 'none') {
-        badge = '<span class="format-ext">Video</span>';
+        groups.combined.push(f);
       } else if (f.vcodec !== 'none') {
-        badge = '<span class="format-ext" style="color:#a855f7">Video Only</span>';
+        groups.videoOnly.push(f);
       } else {
-        badge = '<span class="format-ext" style="color:#22c55e">Audio</span>';
+        groups.audioOnly.push(f);
       }
+    });
 
-      const size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
+    function renderGroupheader(label) {
+      var h = document.createElement('div');
+      h.className = 'format-group-header';
+      h.textContent = label;
+      return h;
+    }
 
-      card.href = buildDownloadUrl(url, f.id, label);
+    function renderFormatCard(f) {
+      var card = document.createElement('a');
+      card.className = 'format-card';
+      card.href = buildDownloadUrl(url, f.id, f.label || f.ext);
       card.download = '';
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
 
-      card.innerHTML = `
-        ${badge}
-        <div class="format-label">${label}</div>
-        <div class="format-meta">${f.ext ? f.ext.toUpperCase() : ''} ${f.tbr ? f.tbr + 'kbps' : ''}</div>
-        <div class="format-size">${size}</div>
-      `;
+      var badgeColor = 'var(--color-accent)';
+      var badgeLabel = 'Video';
+      if (f.vcodec === 'none') {
+        badgeColor = 'var(--color-success)';
+        badgeLabel = 'Audio';
+      } else if (f.acodec === 'none') {
+        badgeColor = '#a855f7';
+        badgeLabel = 'Video Only';
+      }
+
+      var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
+      var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
+      var extMeta = f.ext ? f.ext.toUpperCase() : '';
+      var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
+
+      card.innerHTML =
+        '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
+        '<div class="format-label">' + (f.label || (f.ext ? f.ext.toUpperCase() : 'Format')) + '</div>' +
+        '<div class="format-meta">' + metaParts + '</div>' +
+        '<div class="format-size">' + size + '</div>';
 
       card.addEventListener('click', function(e) {
         e.preventDefault();
-        // Navigate to download URL (triggers browser download)
         window.location.href = card.href;
-        // Visual feedback that click was registered
         card.style.borderColor = 'var(--color-success)';
-        setTimeout(() => { card.style.borderColor = ''; }, 1500);
+        setTimeout(function() { card.style.borderColor = ''; }, 1500);
       });
 
-      formatGrid.appendChild(card);
-    });
+      return card;
+    }
+
+    var renderedSomething = false;
+    if (groups.combined.length > 0) {
+      formatGrid.appendChild(renderGroupheader('Video + Audio'));
+      groups.combined.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      renderedSomething = true;
+    }
+    if (groups.videoOnly.length > 0) {
+      if (renderedSomething) {
+        var sep = document.createElement('div');
+        sep.className = 'format-group-sep';
+        formatGrid.appendChild(sep);
+      }
+      formatGrid.appendChild(renderGroupheader('Video Only'));
+      groups.videoOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      renderedSomething = true;
+    }
+    if (groups.audioOnly.length > 0) {
+      if (renderedSomething) {
+        var sep = document.createElement('div');
+        sep.className = 'format-group-sep';
+        formatGrid.appendChild(sep);
+      }
+      formatGrid.appendChild(renderGroupheader('Audio Only'));
+      groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+    }
   }
 
   // On page load, if URL was pre-filled, kick off auto-fetch
