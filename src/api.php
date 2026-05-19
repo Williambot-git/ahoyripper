@@ -15,7 +15,9 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
-header('Cross-Origin-Embedder-Policy: require-corp');
+// Note: COEP removed — require-corp breaks cross-origin image loads (e.g. thumbnails
+// from CDNs) which are common in media rippers. Omit unless you use SharedArrayBuffer
+// or other COEP-locked features.
 
 // Anti-hotlinking: validate origin for API requests
 // Accept requests with no referer (direct) or from the same origin

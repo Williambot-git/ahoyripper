@@ -35,7 +35,9 @@ $VERSION = '1.0.0';
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
   <meta property="og:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads, no bullshit.">
   <meta property="og:site_name" content="AhoyRipper">
-  <meta property="og:image" content="https://ahoyripper.com/og-image.png" crossorigin="anonymous">
+  <meta property="og:image" content="https://ahoyripper.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://ahoyripper.com">
 
   <!-- Twitter Card -->
@@ -43,7 +45,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads.">
-  <meta name="twitter:image" content="https://ahoyripper.com/og-image.png" crossorigin="anonymous">
+  <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
 
   <!-- SVG Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' font-size='20' fill='white'>R</text></svg>">
