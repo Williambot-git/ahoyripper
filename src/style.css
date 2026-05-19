@@ -389,8 +389,19 @@ footer a:hover { color: var(--color-accent); }
 /* Responsive */
 @media (max-width: 600px) {
   .rip-form { flex-direction: column; }
+  .rip-input { max-width: 100%; font-size: 0.9rem; }
+  .rip-btn { width: 100%; padding: 0.85rem; font-size: 1rem; }
   .ahoy-nav { padding: 1rem; }
   .ahoy-nav-links { gap: 1rem; }
   .hero { padding: 3rem 1rem 2rem; }
+  .hero p { font-size: 1rem; }
   .features-grid { grid-template-columns: 1fr; }
+  .format-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .spinner { width: 28px; height: 28px; }
+}
+
+/* Tablet refinement — prevent squished inputs on narrow landscape tablets */
+@media (min-width: 601px) and (max-width: 768px) {
+  .rip-input { min-width: 0; flex: 1 1 0; }
+  .format-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
