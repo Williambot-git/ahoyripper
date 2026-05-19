@@ -450,6 +450,7 @@ switch ($action) {
         header('Cache-Control: no-cache');
         header('Connection: close'); // Prevent keep-alive during file streaming
         header('X-Content-Type-Options: nosniff');
+        header('X-Download-Options: noopen'); // Prevent direct execution in browser context
 
         // Guard: even if client aborts, clean up the temp file
         ignore_user_abort(true);

@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /src/
+Disallow: /?action=
+Disallow: /src/api.php
+Allow: /
+
+# Prevent indexing of dynamic rip endpoints
+User-agent: GPTBot
+Disallow: /
+User-agent: ChatGPT-User
+Disallow: /
+User-agent: CCBot
+Disallow: /
