@@ -269,7 +269,7 @@ function parseFormats($json_str) {
             'tbr' => $tbr,
             'vcodec' => $vcodec,
             'acodec' => $acodec,
-            'direct' => ($vcodec !== 'none' && $acodec !== 'none') ? true : false,
+            'format_type' => ($vcodec !== 'none' && $acodec !== 'none') ? 'combined' : ($vcodec !== 'none' ? 'video' : 'audio'),
             'language' => $language ?: null,
         ];
     }

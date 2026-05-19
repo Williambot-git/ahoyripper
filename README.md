@@ -103,7 +103,7 @@ GET /src/api.php?action=info&url=<url>
       "tbr": 2500,
       "vcodec": "avc1.64001F",
       "acodec": "mp4a.40.2",
-      "direct": true,
+      "format_type": "combined",
       "language": null
     }
   ]
