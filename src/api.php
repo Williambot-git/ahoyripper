@@ -135,7 +135,7 @@ function parseFormats($json_str) {
             $duration_secs = $duration ?: 180;
             if ($vcodec !== 'none' && $acodec !== 'none') {
                 // Video+audio
-                $bitrate_kbps = $tbr ?? (($height > 720) ? 5000 : ($height > 480) ? 2500 : 1000);
+                $bitrate_kbps = $tbr ?? (($height > 720) ? 5000 : (($height > 480) ? 2500 : 1000));
                 $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
             } elseif ($vcodec !== 'none') {
                 $bitrate_kbps = $tbr ?? (($height > 720) ? 4000 : 1500);
