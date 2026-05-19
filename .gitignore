@@ -1,0 +1,19 @@
+# Temp files
+*.tmp
+*.log
+.env
+
+# Rate limit files (server-side)
+/tmp/ahoyrip_rate_*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Downloaded media (should never be here)
+/downloads/
