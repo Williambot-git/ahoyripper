@@ -276,7 +276,7 @@ switch ($action) {
         }
 
         $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-playlist --no-warn -- $shell_url", $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --quiet -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             $err_msg = strip_tags(trim($err ?: $out));
