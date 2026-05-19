@@ -331,12 +331,18 @@ $VERSION = '1.0.0';
       card.addEventListener('click', function(e) {
         e.preventDefault();
         var dlUrl = card.href;
+        card.classList.add('downloading');
+        setLoading(true);
         fetch(dlUrl, { signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
-              resp.json().catch(function() { return { error: 'Download failed. Try another format.' }; })
-            .then(function(err) { showError(err.error || 'Download failed.'); });
-              return;
+              return resp.json().catch(function() {
+                return { error: 'Download failed. Try another format.' };
+              }).then(function(err) {
+                showError(err.error || 'Download failed.');
+                setLoading(false);
+                card.classList.remove('downloading');
+              });
             }
             return resp.blob().then(function(blob) {
               var a = document.createElement('a');
@@ -346,12 +352,15 @@ $VERSION = '1.0.0';
               URL.revokeObjectURL(a.href);
               card.style.borderColor = 'var(--color-success)';
               setTimeout(function() { card.style.borderColor = ''; }, 1500);
+              setLoading(false);
+              card.classList.remove('downloading');
             });
-            } else {
-              window.location.href = dlUrl;
-            }
           })
-          .catch(function() { showError('Download failed. Try another format.'); });
+          .catch(function() {
+            showError('Download failed. Try another format.');
+            setLoading(false);
+            card.classList.remove('downloading');
+          });
       });
 
       return card;

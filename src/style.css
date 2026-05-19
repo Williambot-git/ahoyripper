@@ -194,6 +194,25 @@ body {
   animation: progress-indeterminate 1.4s ease-in-out infinite;
 }
 
+/* Download in-progress overlay on format card */
+.format-card.downloading {
+  opacity: 0.75;
+  pointer-events: none;
+  position: relative;
+}
+.format-card.downloading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--color-accent);
+  animation: pulse-border 1s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
 /* Results */
 .rip-results { display: none; }
 .rip-results.active { display: block; }
