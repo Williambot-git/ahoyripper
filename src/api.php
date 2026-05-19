@@ -30,12 +30,23 @@ if (file_exists($rate_file)) {
         }
         $data['c']++;
     } else {
+        // Window expired — reset
         $data = ['t' => time(), 'c' => 1];
     }
 } else {
     $data = ['t' => time(), 'c' => 1];
 }
 file_put_contents($rate_file, json_encode($data));
+
+// Periodic cleanup of stale rate files (1% chance per request)
+if (mt_rand(1, 100) === 1) {
+    foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
+        $d = json_decode(@file_get_contents($f), true);
+        if (!$d || (time() - $d['t']) > $rate_window * 2) {
+            @unlink($f);
+        }
+    }
+}
 
 // Only allow safe characters in URL
 function isValidUrl($url) {
@@ -164,7 +175,8 @@ function parseFormats($json_str) {
             'tbr' => $tbr,
             'vcodec' => $vcodec,
             'acodec' => $acodec,
-            'direct' => ($vcodec === 'none' || $acodec === 'none') ? false : true,
+            'direct' => ($vcodec !== 'none' && $acodec !== 'none') ? true : false,
+            'language' => $language ?: null,
         ];
     }
 
