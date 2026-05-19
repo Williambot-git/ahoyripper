@@ -14,36 +14,61 @@ header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; styl
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 
-// Rate limiting - simple IP-based gate
+// Rate limiting - atomic IP-based gate using flock
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = 30; // requests per minute
 $rate_window = 60;
 
-if (file_exists($rate_file)) {
-    $data = json_decode(file_get_contents($rate_file), true);
-    if ($data && time() - $data['t'] < $rate_window) {
-        if ($data['c'] >= $rate_limit) {
-            http_response_code(429);
-            header('Retry-After: 30');
-            echo json_encode(['error' => 'Too many requests. Slow down.']);
-            exit;
-        }
-        $data['c']++;
-    } else {
-        // Window expired — reset
-        $data = ['t' => time(), 'c' => 1];
+$fp = fopen($rate_file, 'c+');
+if (!$fp) {
+    http_response_code(503);
+    echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+    exit;
+}
+if (!flock($fp, LOCK_EX)) {
+    fclose($fp);
+    http_response_code(503);
+    echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+    exit;
+}
+
+$data = ['t' => time(), 'c' => 0];
+$raw = fread($fp, 4096);
+if ($raw) {
+    $decoded = json_decode($raw, true);
+    if ($decoded && is_array($decoded)) {
+        $data = $decoded;
     }
+}
+
+if (time() - $data['t'] < $rate_window) {
+    if ($data['c'] >= $rate_limit) {
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        http_response_code(429);
+        header('Retry-After: 30');
+        echo json_encode(['error' => 'Too many requests. Slow down.']); // @codingStandardsIgnoreLine
+        exit;
+    }
+    $data['c']++;
 } else {
     $data = ['t' => time(), 'c' => 1];
 }
-file_put_contents($rate_file, json_encode($data));
+
+// Write back atomically
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, json_encode($data));
+fflush($fp);
+flock($fp, LOCK_UN);
+fclose($fp);
 
 // Periodic cleanup of stale rate files (1% chance per request)
 if (mt_rand(1, 100) === 1) {
     foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
-        $d = json_decode(@file_get_contents($f), true);
-        if (!$d || (time() - $d['t']) > $rate_window * 2) {
+        $d = @json_decode(@file_get_contents($f), true);
+        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $rate_window * 2) {
             @unlink($f);
         }
     }
@@ -266,29 +291,54 @@ switch ($action) {
     }
 
     case 'download': {
-        // ─── Download rate limiting (inside case, not between cases) ───
+        // ─── Download rate limiting (atomic via flock) ───
         $dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
         $dl_rate_limit = 10; // download requests per minute
         $dl_rate_window = 60;
 
-        if (file_exists($dl_rate_file)) {
-            $dl_data = json_decode(file_get_contents($dl_rate_file), true);
-            if ($dl_data && time() - $dl_data['t'] < $dl_rate_window) {
-                if ($dl_data['c'] >= $dl_rate_limit) {
-                    http_response_code(429);
-                    header('Retry-After: 30');
-                    echo json_encode(['error' => 'Too many download requests. Slow down.']);
-                    exit;
-                }
-                $dl_data['c']++;
-            } else {
-                $dl_data = ['t' => time(), 'c' => 1];
+        $dl_fp = fopen($dl_rate_file, 'c+');
+        if (!$dl_fp) {
+            http_response_code(503);
+            echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+            exit;
+        }
+        if (!flock($dl_fp, LOCK_EX)) {
+            fclose($dl_fp);
+            http_response_code(503);
+            echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+            exit;
+        }
+
+        $dl_data = ['t' => time(), 'c' => 0];
+        $dl_raw = fread($dl_fp, 4096);
+        if ($dl_raw) {
+            $dl_decoded = json_decode($dl_raw, true);
+            if ($dl_decoded && is_array($dl_decoded)) {
+                $dl_data = $dl_decoded;
             }
+        }
+
+        if (time() - $dl_data['t'] < $dl_rate_window) {
+            if ($dl_data['c'] >= $dl_rate_limit) {
+                flock($dl_fp, LOCK_UN);
+                fclose($dl_fp);
+                http_response_code(429);
+                header('Retry-After: 30');
+                echo json_encode(['error' => 'Too many download requests. Slow down.']); // @codingStandardsIgnoreLine
+                exit;
+            }
+            $dl_data['c']++;
         } else {
             $dl_data = ['t' => time(), 'c' => 1];
         }
-        file_put_contents($dl_rate_file, json_encode($dl_data));
+
+        ftruncate($dl_fp, 0);
+        rewind($dl_fp);
+        fwrite($dl_fp, json_encode($dl_data));
+        fflush($dl_fp);
+        flock($dl_fp, LOCK_UN);
+        fclose($dl_fp);
 
         // Serve a format for download
         $url = trim($_GET['url'] ?? '');
