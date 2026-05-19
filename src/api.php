@@ -526,12 +526,14 @@ switch ($action) {
     }
 
     case 'progress': {
-        // Lightweight ping to check yt-dlp is available
-        $version = shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null');
+        // Lightweight ping to check yt-dlp is available — returns JSON
+        // Note: all security/rate-limit headers are already set at the top of the script
+        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
         echo json_encode([
             'status' => 'ok',
-            'yt_dlp_version' => trim($version ?: 'not installed'),
-            'ffmpeg_version' => trim(shell_exec('ffmpeg -version 2>/dev/null | head -1')),
+            'yt_dlp_version' => $version,
+            'ffmpeg_version' => $ffmpeg,
         ]);
         break;
     }
