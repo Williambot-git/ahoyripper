@@ -110,10 +110,16 @@ $VERSION = '1.0.0';
 
     <!-- Results -->
     <div class="rip-results" id="resultsBox">
-      <p class="results-title">
-        <span class="check">&#10003;</span>
-        <span id="resultsTitle">Ready to download</span>
-      </p>
+      <div class="results-meta" id="resultsMeta">
+        <img class="results-thumb" id="resultsThumb" src="" alt="" hidden>
+        <div class="results-info">
+          <p class="results-title">
+            <span class="check">&#10003;</span>
+            <span id="resultsTitle">Ready to download</span>
+          </p>
+          <p class="results-sub" id="resultsSub"></p>
+        </div>
+      </div>
       <div class="format-grid" id="formatGrid"></div>
       <div style="margin-top:1.5rem; text-align:center;">
         <button class="rip-again" id="ripAgain">Rip another</button>
@@ -194,13 +200,9 @@ $VERSION = '1.0.0';
 
   function setProgress(pct, text) {
     // Progress is driven by state, not real percentage
-    // Show a smooth indeterminate animation when we have an active step
-    const bar = progressBar;
+    // The bar runs an indeterminate animation via CSS; JS only updates text
     if (text) {
       progressText.textContent = text;
-      // Animate bar with a pulsing indeterminate look
-      bar.style.width = '80%';
-      bar.style.transition = 'width 1.5s ease';
     }
   }
 
@@ -229,6 +231,15 @@ $VERSION = '1.0.0';
     resultsBox.classList.toggle('active', on);
   }
 
+  function formatDuration(secs) {
+    if (!secs) return '';
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    var s = secs % 60;
+    if (h > 0) return h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
   function formatBytes(mb) {
     if (mb >= 1000) return (mb / 1000).toFixed(1) + ' GB';
     if (mb >= 1) return mb + ' MB';
@@ -245,7 +256,27 @@ $VERSION = '1.0.0';
     formatGrid.innerHTML = '';
     resultsTitle.textContent = data.title || 'Select a format to download';
 
-    const formats = data.formats || [];
+    // Populate metadata: thumbnail, uploader, duration
+    var thumb = document.getElementById('resultsThumb');
+    var sub = document.getElementById('resultsSub');
+    if (thumb) {
+      if (data.thumbnail) {
+        thumb.src = data.thumbnail;
+        thumb.hidden = false;
+        thumb.alt = data.title || '';
+      } else {
+        thumb.src = '';
+        thumb.hidden = true;
+      }
+    }
+    if (sub) {
+      var parts = [];
+      if (data.uploader) parts.push(data.uploader);
+      if (data.duration) parts.push(formatDuration(data.duration));
+      sub.textContent = parts.join(' \u00b7 ');
+    }
+
+    var formats = data.formats || [];
 
     formats.forEach(function(f) {
       const card = document.createElement('a');
@@ -347,6 +378,10 @@ $VERSION = '1.0.0';
     input.value = '';
     showResults(false);
     hideError();
+    var thumb = document.getElementById('resultsThumb');
+    var sub = document.getElementById('resultsSub');
+    if (thumb) { thumb.src = ''; thumb.hidden = true; }
+    if (sub) sub.textContent = '';
     input.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });

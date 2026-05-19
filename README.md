@@ -156,6 +156,26 @@ For download endpoint, headers are `X-DL-RateLimit-*`.
 
 ---
 
+## Supported Platforms
+
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/docs/supported_sites.md) under the hood. It supports **1800+ platforms** including:
+
+**Video:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, and more
+
+**Audio:** SoundCloud, Bandcamp, Spotify (with auth), Apple Music, Deezer, Mixcloud, Audiomack, and more
+
+**To see the full and current list:**
+```bash
+yt-dlp --list-extractors
+```
+
+You can also test individual URLs directly:
+```bash
+yt-dlp --no-playlist --dump-json "https://example.com/video"
+```
+
+---
+
 ## Troubleshooting
 
 **"Could not fetch that URL"** — The site may not be supported by yt-dlp, or the video is geo-restricted/private/unavailable.
