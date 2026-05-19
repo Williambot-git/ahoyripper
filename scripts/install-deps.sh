@@ -11,7 +11,9 @@ fi
 
 # Install yt-dlp via pip or git
 if ! command -v yt-dlp &>/dev/null; then
-    pip install -q yt-dlp || pip3 install -q yt-dlp
+    pip install -q yt-dlp 2>/dev/null || pip3 install -q yt-dlp 2>/dev/null || \
+    pip install --break-system-packages -q yt-dlp 2>/dev/null || \
+    pip3 install --break-system-packages -q yt-dlp
 fi
 
 # Keep yt-dlp updated (--self-update is the correct flag; -U is deprecated)
