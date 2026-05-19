@@ -5,14 +5,37 @@
  */
 
 // CORS headers for API access
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'');
+header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'; report-uri /csp-report');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
+
+// Anti-hotlinking: validate origin for API requests
+// Accept requests with no referer (direct) or from the same origin
+$allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+if ($referer) {
+    $ref_parts = parse_url($referer);
+    $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
+    $allowed = false;
+    foreach ($allowed_origins as $origin) {
+        if (strcasecmp($ref_origin, $origin) === 0) {
+            $allowed = true;
+            break;
+        }
+    }
+    if (!$allowed) {
+        // Log and block suspicious cross-site requests
+        error_log("AhoyRipper: blocked cross-site request from referer: $referer");
+        http_response_code(403);
+        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.']);
+        exit;
+    }
+}
 
 // Rate limiting - atomic IP-based gate using flock
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
