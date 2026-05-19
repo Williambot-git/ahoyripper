@@ -24,7 +24,11 @@ header('Cross-Origin-Resource-Policy: same-origin');
 $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
 if ($referer) {
-    $ref_parts = parse_url($referer);
+    $ref_parts = @parse_url($referer);
+    // Guard against malformed URLs that cause parse_url to return false/null
+    if (!is_array($ref_parts)) {
+        $ref_parts = [];
+    }
     $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
     $allowed = false;
     foreach ($allowed_origins as $origin) {
