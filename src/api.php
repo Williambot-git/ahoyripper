@@ -437,16 +437,31 @@ switch ($action) {
         header('Connection: close'); // Prevent keep-alive during file streaming
         header('X-Content-Type-Options: nosniff');
 
+        // Guard: even if client aborts, clean up the temp file
         ignore_user_abort(true);
+        register_shutdown_function(function() use($out_file) {
+            if (file_exists($out_file)) {
+                @unlink($out_file);
+            }
+        });
+
         ini_set('memory_limit', '256M');
 
         $fp = fopen($out_file, 'rb');
+        if (!$fp) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to read downloaded file.']); // @codingStandardsIgnoreLine
+            exit;
+        }
         while (!feof($fp) && !connection_aborted()) {
             echo fread($fp, 65536);
             flush();
         }
         fclose($fp);
-        unlink($out_file);
+        // Shutdown function handles unlink; call it explicitly on success
+        if (file_exists($out_file)) {
+            @unlink($out_file);
+        }
         exit;
     }
 
