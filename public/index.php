@@ -461,16 +461,13 @@ $VERSION = '1.0.0';
       renderFormats(url, data);
 
     } catch (e) {
+      var msg = 'Could not connect to the ripper. Please try again in a moment.';
       if (e.name === 'AbortError') {
-        showError('Request timed out. The video might be too large or unavailable. Try again.');
-      } else {
-        var msg = 'Could not connect to the ripper. Please try again in a moment.';
-        if (e.name === 'AbortError') {
-          msg = 'Request timed out. The video might be too large or unavailable.';
-        } else if (e.message && e.message.includes('DAILY_LIMIT')) {
-          msg = 'Daily limit reached. Get unlimited rips with AhoyVPN: https://ahoyvpn.net';
-        }
+        msg = 'Request timed out. The video might be too large or unavailable. Try again.';
+      } else if (e.message && e.message.includes('DAILY_LIMIT')) {
+        msg = 'Daily limit reached. Get unlimited rips with AhoyVPN: https://ahoyvpn.net';
       }
+      showError(msg);
     } finally {
       setLoading(false);
       showProgress(false);
@@ -494,7 +491,7 @@ $VERSION = '1.0.0';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // Auto-submit on URL paste
+// Auto-submit on URL paste
   input.addEventListener('paste', function() {
     setTimeout(function() {
       if (input.value && input.value.startsWith('http')) {
@@ -502,7 +499,6 @@ $VERSION = '1.0.0';
       }
     }, 100);
   });
-})();
 </script>
 
 </body>
