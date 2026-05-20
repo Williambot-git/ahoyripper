@@ -580,6 +580,11 @@ case 'progress':
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: -1');
+        // Mirror download-specific rate headers for consistency
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: -1');
 
         $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
@@ -617,7 +622,7 @@ case 'progress':
     }
     default: {
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, or ?action=health.'], JSON_PRETTY_PRINT | JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, or ?action=health.'], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 }
