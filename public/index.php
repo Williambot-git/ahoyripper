@@ -17,7 +17,7 @@ $VERSION = '1.0.0';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
   <meta name="description" content="Free online media ripper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. No signup, no ads.">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
 
