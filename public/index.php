@@ -15,8 +15,8 @@ $VERSION = '1.0.0';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AhoyRipper - Free Media Ripper | YouTube, Twitter, TikTok & More</title>
-  <meta name="description" content="Rip video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, and more. Free, fast, no signup required.">
+  <title>AhoyRipper - Free Media Ripper | Download from Any Source</title>
+  <meta name="description" content="Download video and audio from most online platforms. Free, fast, no signup required.">
   <meta name="robots" content="noindex">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
@@ -33,7 +33,7 @@ $VERSION = '1.0.0';
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
-  <meta property="og:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads, no bullshit.">
+  <meta property="og:description" content="Download video and audio from most online platforms. No signup, no ads, no bullshit.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="https://ahoyripper.com/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -44,7 +44,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
-  <meta name="twitter:description" content="Download video and audio from YouTube, Twitter, TikTok, SoundCloud and more. No signup, no ads.">
+  <meta name="twitter:description" content="Download video and audio from most online platforms. No signup, no ads.">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
 
   <!-- SVG Favicon -->
@@ -74,7 +74,7 @@ $VERSION = '1.0.0';
 <main>
   <section class="hero">
     <h1>Rip any video, <span>anywhere.</span></h1>
-    <p>Paste a link from YouTube, Twitter, SoundCloud, TikTok, Instagram, or one of dozens of other platforms. We'll rip it. Free, no signup, no tracked.</p>
+    <p>Paste a link from almost any video or audio platform. We'll rip it. Free, no signup, no tracked.</p>
 
     <!-- Error message (aria-live for screen reader announcements) -->
     <div class="rip-error" id="errorBox" role="alert" aria-live="polite" aria-atomic="true"></div>
@@ -97,16 +97,8 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Supported: YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo & many more
+        Works with most video and audio platforms
       </p>
-    </div>
-
-    <!-- Full-page loading overlay for downloads -->
-    <div class="page-loading-overlay" id="pageOverlay" hidden>
-      <div class="page-loading-inner">
-        <div class="spinner"></div>
-        <p class="progress-text" id="overlayText">Preparing download...</p>
-      </div>
     </div>
 
     <!-- Progress -->
@@ -137,16 +129,13 @@ $VERSION = '1.0.0';
     </div>
   </section>
 
-  <!-- Supported sites -->
+  <!-- Sources -->
   <div class="sites-bar" style="padding: 0 2rem; max-width:720px;margin:0 auto;">
-    <span class="site-badge">YouTube</span>
-    <span class="site-badge">X/Twitter</span>
-    <span class="site-badge">SoundCloud</span>
-    <span class="site-badge">TikTok</span>
-    <span class="site-badge">Instagram</span>
-    <span class="site-badge">Facebook</span>
-    <span class="site-badge">Vimeo</span>
-    <span class="site-badge">+1800 more</span>
+    <span class="site-badge">Video Sites</span>
+    <span class="site-badge">Audio Sites</span>
+    <span class="site-badge">Social Media</span>
+    <span class="site-badge">Streamers</span>
+    <span class="site-badge">And More</span>
   </div>
 
   <!-- Features -->
@@ -162,7 +151,7 @@ $VERSION = '1.0.0';
       </div>
       <div class="feature-card">
         <h3>Many Platforms</h3>
-        <p>YouTube, Twitter/X, SoundCloud, TikTok, Instagram, Facebook, Vimeo and 1800+ other sites.</p>
+        <p>Most video and audio platforms are supported.</p>
       </div>
       <div class="feature-card">
         <h3>Fast</h3>
@@ -207,8 +196,6 @@ $VERSION = '1.0.0';
   const formatGrid = document.getElementById('formatGrid');
   const resultsTitle = document.getElementById('resultsTitle');
   const ripAgain = document.getElementById('ripAgain');
-  const pageOverlay = document.getElementById('pageOverlay');
-  const overlayText = document.getElementById('overlayText');
 
   function setProgress(pct, text) {
     // Progress is driven by state, not real percentage
@@ -241,15 +228,6 @@ $VERSION = '1.0.0';
 
   function showResults(on) {
     resultsBox.classList.toggle('active', on);
-  }
-
-  function showOverlay(text) {
-    if (overlayText) overlayText.textContent = text || 'Preparing download...';
-    if (pageOverlay) pageOverlay.hidden = false;
-  }
-
-  function hideOverlay() {
-    if (pageOverlay) pageOverlay.hidden = true;
   }
 
   function formatDuration(secs) {
@@ -352,7 +330,6 @@ $VERSION = '1.0.0';
         var dlUrl = card.href;
         card.classList.add('downloading');
         setLoading(true);
-        showOverlay('Downloading... this may take a moment for larger files.');
         fetch(dlUrl, { signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
@@ -361,7 +338,6 @@ $VERSION = '1.0.0';
               }).then(function(err) {
                 showError(err.error || 'Download failed.');
                 setLoading(false);
-                hideOverlay();
                 card.classList.remove('downloading');
               });
             }
@@ -374,14 +350,12 @@ $VERSION = '1.0.0';
               card.style.borderColor = 'var(--color-success)';
               setTimeout(function() { card.style.borderColor = ''; }, 1500);
               setLoading(false);
-              hideOverlay();
               card.classList.remove('downloading');
             });
           })
           .catch(function() {
             showError('Download failed. Try another format.');
             setLoading(false);
-            hideOverlay();
             card.classList.remove('downloading');
           });
       });

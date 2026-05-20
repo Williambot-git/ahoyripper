@@ -10,7 +10,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
+header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'; report-uri /csp-report');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 header('Cross-Origin-Opener-Policy: same-origin');
@@ -107,16 +107,10 @@ if (mt_rand(1, 100) === 1) {
     }
 }
 
-// Validate URL protocol — block dangerous schemes before they reach yt-dlp.
-// yt-dlp itself may reject these, but we catch them early to avoid
-// unnecessary process spawning.
+// Only allow safe characters in URL
 function isValidUrl($url) {
-    if (filter_var($url, FILTER_VALIDATE_URL) === false) return false;
-    if (!preg_match('/^https?:\/\//', $url)) return false;
-    $parsed = parse_url($url);
-    $scheme = strtolower($parsed['scheme'] ?? '');
-    // Reject data:, javascript:, file:, etc. — yt-dlp only handles http(s)
-    return !in_array($scheme, ['data', 'javascript', 'file', 'ftp', 'sftp', 'smb', 'ssh'], true);
+    return filter_var($url, FILTER_VALIDATE_URL) !== false
+        && preg_match('/^https?:\/\//', $url);
 }
 
 // Run yt-dlp with timeout and capture output
@@ -418,8 +412,6 @@ switch ($action) {
             exit;
         }
 
-        header('X-Download-Options: noopen');
-
         $f_shell = escapeshellarg($format_id);
         $tmp_dir = sys_get_temp_dir();
         $out_file = $tmp_dir . '/ahoyrip_' . bin2hex(random_bytes(8)) . '.tmp';
@@ -555,51 +547,28 @@ switch ($action) {
         exit;
     }
 
-    case 'progress':
-    case 'health': {
-        // Lightweight ping to check yt-dlp and ffmpeg availability
-        // Returns JSON with version info and system status
-        $yt_version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+    case 'progress': {
+        // Lightweight ping to check yt-dlp is available — returns JSON
+        // Note: all security/rate-limit headers are already set at the top of the script
+        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
-        $mem_available_pct = null;
-        $disk_free = null;
-
-        // Fetch system metrics when possible (linux only)
-        if (function_exists('sys_getloadavg')) {
-            $load = sys_getloadavg();
-        }
-        if (is_readable('/proc/meminfo')) {
-            $meminfo = @file_get_contents('/proc/meminfo', false, null, 0, 200);
-            if ($meminfo) {
-                preg_match('/MemAvailable:\s+(\d+)/', $meminfo, $m);
-                preg_match('/MemTotal:\s+(\d+)/', $meminfo, $mt);
-                if ($m && $mt && $mt[1] > 0) {
-                    $mem_available_pct = round(($m[1] / $mt[1]) * 100, 1);
-                }
-            }
-        }
-        if (function_exists('disk_free_space')) {
-            $df = @disk_free_space('/');
-            if ($df !== false) {
-                $disk_free = round($df / 1073741824, 1); // GB
-            }
-        }
-
-        $response = [
+        echo json_encode([
             'status' => 'ok',
-            'yt_dlp_version' => $yt_version,
+            'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
-        ];
-        if ($load !== null) {
-            $response['load_avg'] = array_map(fn($v) => round($v, 2), $load);
-        }
-        if ($mem_available_pct !== null) {
-            $response['memory_available_pct'] = $mem_available_pct;
-        }
-        if ($disk_free !== null) {
-            $response['disk_free_gb'] = $disk_free;
-        }
-        echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
+        break;
+    }
+
+    case 'health': {
+        // Alias for /progress — same endpoint with a more intuitive name
+        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
+        echo json_encode([
+            'status' => 'ok',
+            'yt_dlp_version' => $version,
+            'ffmpeg_version' => $ffmpeg,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 

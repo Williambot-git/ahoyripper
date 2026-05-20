@@ -79,7 +79,6 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
-  scroll-behavior: smooth;
 }
 .hero h1 span { color: var(--color-accent); }
 .hero p {
@@ -154,16 +153,7 @@ body {
   color: var(--color-text-sec);
   transition: border-color var(--transition), color var(--transition);
 }
-.site-badge:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  cursor: pointer;
-}
-
-.format-card:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
+.site-badge:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
 /* Progress */
 .rip-progress {
@@ -404,23 +394,6 @@ body {
 }
 .feature-card p { font-size: 0.85rem; color: var(--color-text-sec); line-height: 1.6; }
 
-/* Page loading overlay */
-.page-loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 15, 15, 0.85);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.page-loading-overlay[hidden] { display: none; }
-.page-loading-inner {
-  text-align: center;
-  color: var(--color-text-sec);
-}
-
 /* Footer */
 footer {
   text-align: center;
@@ -435,12 +408,7 @@ footer a:hover { color: var(--color-accent); }
 /* Responsive */
 @media (max-width: 600px) {
   .rip-form { flex-direction: column; }
-  .rip-input {
-    max-width: 100%;
-    font-size: 0.9rem;
-    padding: 0.75rem 0.875rem;
-    min-height: 48px;
-  }
+  .rip-input { max-width: 100%; font-size: 0.9rem; }
   .rip-btn { width: 100%; padding: 0.85rem; font-size: 1rem; }
   .ahoy-nav { padding: 1rem; }
   .ahoy-nav-links { gap: 1rem; }
@@ -449,15 +417,6 @@ footer a:hover { color: var(--color-accent); }
   .features-grid { grid-template-columns: 1fr; }
   .format-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .spinner { width: 28px; height: 28px; }
-  .rip-results { min-height: 200px; }
-  .format-card { min-height: 88px; }
-}
-
-/* Very small screens (≤360px) */
-@media (max-width: 360px) {
-  .hero h1 { font-size: 1.6rem; }
-  .format-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-  .format-card { padding: 0.75rem; font-size: 0.85rem; }
 }
 
 /* Tablet refinement — prevent squished inputs on narrow landscape tablets */
