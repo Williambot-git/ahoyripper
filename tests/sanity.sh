@@ -80,4 +80,22 @@ else
 fi
 
 echo ""
+echo "==> Checking download exit-code error handling..."
+if grep -q "actual_exit" src/api.php; then
+    echo "  ✓ Download exit-code validation present"
+else
+    echo "  ✗ Download exit-code validation not found"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking yt-dlp stderr capture in download..."
+if grep -q "proc_stderr" src/api.php; then
+    echo "  ✓ Download stderr capture present"
+else
+    echo "  ✗ Download stderr capture not found"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."

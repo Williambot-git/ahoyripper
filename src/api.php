@@ -591,6 +591,8 @@ switch ($action) {
         $start = time();
         $timeout = 300; // 5 min max
         $proc_killed = false;
+        $proc_stdout = '';
+        $proc_stderr = '';
 
         stream_set_timeout($pipes[1], 5);
         stream_set_timeout($pipes[2], 5);
@@ -624,11 +626,52 @@ switch ($action) {
                 $s = @fread($p, 65536);
                 if ($s === false || $s === '') {
                     if (feof($p)) fclose($p);
+                } else {
+                    if ($p === $pipes[1]) {
+                        $proc_stdout .= $s;
+                    } elseif ($p === $pipes[2]) {
+                        $proc_stderr .= $s;
+                    }
                 }
             }
         }
 
         proc_close($proc);
+
+        // ─── Check exit code before streaming ───────────────────────────────────
+        // yt-dlp can exit non-zero even while producing partial output (e.g.
+        // format not available, network glitch, post-processing failure).
+        // Surface the actual error to the client instead of letting them download
+        // a corrupt/empty file.
+        $actual_exit = $exit;
+        unset($exit); // free the reference (intentional, clear the now-closed proc ref)
+        if ($actual_exit !== 0) {
+            foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+            // Build a descriptive error from the captured stderr/stdout
+            $proc_err = trim($proc_stderr ?? '');
+            if (!$proc_err) {
+                $proc_err = trim($proc_stdout ?? '');
+            }
+            $proc_err = preg_replace('/[\x00-\x1F\x7F]/', '', $proc_err);
+            $proc_err = strip_tags($proc_err);
+            $proc_err = preg_replace('/\s+/', ' ', $proc_err);
+            if (strlen($proc_err) > 200) $proc_err = substr($proc_err, 0, 200) . '...';
+            $err_classified = classifyYtdlpError($proc_err);
+            if ($err_classified) {
+                http_response_code(422);
+                echo json_encode([
+                    'error' => $err_classified['msg'],
+                    'error_code' => $err_classified['code'],
+                ]);
+            } else {
+                http_response_code(422);
+                echo json_encode([
+                    'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
+                    'error_code' => 'YTDLP_ERROR',
+                ]);
+            }
+            exit;
+        }
 
         // Find the actual downloaded file — glob for the resolved extension
         $glob_pattern = $tmp_dir . '/' . $out_base . '.*';
