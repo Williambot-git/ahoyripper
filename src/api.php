@@ -116,6 +116,8 @@ function isValidUrl($url) {
 // Run yt-dlp with timeout and capture output
 // $timeout = max seconds for the whole process; 0 = no limit
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
+    // Pre-check: confirm yt-dlp is present and get version for error reporting
+    $ytdlp_version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
     $cmd = '/usr/local/bin/yt-dlp ' . $args;
     $desc = [
         0 => ['pipe', 'r'],  // stdin — keep open but unref so proc can read if needed
@@ -125,7 +127,10 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     $pipes = null;
     $proc = proc_open($cmd . ' 2>&1', $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
-    if (!$proc) return false;
+    if (!$proc) {
+        $exit = -1;
+        return false;
+    }
 
     // Close stdin immediately — yt-dlp doesn't need interactive input
     // and an unclosed stdin pipe can cause the process to hang
@@ -337,8 +342,9 @@ switch ($action) {
             $err_msg = strip_tags($err_msg); // remove any HTML markup
             $err_msg = preg_replace('/\s+/', ' ', $err_msg); // collapse whitespace
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            $version_info = $ytdlp_version ? " (yt-dlp $ytdlp_version)" : '';
             http_response_code(422);
-            echo json_encode(['error' => "Could not fetch that URL. $err_msg"]);
+            echo json_encode(['error' => "Could not fetch that URL. $err_msg$version_info"]);
             exit;
         }
 
