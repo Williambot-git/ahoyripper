@@ -382,7 +382,7 @@ switch ($action) {
         }
 
         $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-playlist --no-warning -- $shell_url", $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --no-warnings -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
@@ -403,7 +403,6 @@ switch ($action) {
         if (!$parsed) {
             http_response_code(422);
             echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
-            exit;
         }
         if (isset($parsed['error'])) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422

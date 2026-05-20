@@ -480,8 +480,6 @@ $VERSION = '1.0.0';
       var msg = 'Could not connect to the ripper. Please try again in a moment.';
       if (e.name === 'AbortError') {
         msg = 'Request timed out. The video might be too large or unavailable. Try again.';
-      } else if (e.message && e.message.includes('DAILY_LIMIT')) {
-        msg = 'Daily limit reached. Get unlimited rips with AhoyVPN: https://ahoyvpn.net';
       }
       showError(msg);
     } finally {
