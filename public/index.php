@@ -123,7 +123,7 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Supports most platforms &mdash; 2 free rips/day
+        Supports most platforms &mdash; 10 free rips/day
       </p>
     </div>
 
@@ -203,7 +203,7 @@ $VERSION = '1.0.0';
     <!-- VPN Upsell -->
     <div class="vpn-banner" style="margin-top:2rem; text-align:center; padding:2rem; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:12px; border:1px solid #3b82f6;">
       <h2 style="color:#fff; margin-bottom:0.5rem; font-size:1.5rem;">Unlimited Rips with AhoyVPN</h2>
-      <p style="color:#ccc; margin-bottom:1.5rem;">2 free rips per day &mdash; or get unlimited access with our VPN plan for just $5.99/month. No logs, no tracking, cancel anytime.</p>
+      <p style="color:#ccc; margin-bottom:1.5rem;">10 free rips per day &mdash; or get unlimited access with our VPN plan for just $5.99/month. No logs, no tracking, cancel anytime.</p>
       <a href="https://ahoyvpn.net" class="vpn-btn" style="font-size:1.1rem; padding:0.75rem 2rem;">Get AhoyVPN &mdash; $5.99/mo</a>
     </div>
 </section>
@@ -464,7 +464,12 @@ $VERSION = '1.0.0';
       if (e.name === 'AbortError') {
         showError('Request timed out. The video might be too large or unavailable. Try again.');
       } else {
-        showError('Could not connect to the ripper. Please try again in a moment.');
+        var msg = 'Could not connect to the ripper. Please try again in a moment.';
+        if (e.name === 'AbortError') {
+          msg = 'Request timed out. The video might be too large or unavailable.';
+        } else if (e.message && e.message.includes('DAILY_LIMIT')) {
+          msg = 'Daily limit reached. Get unlimited rips with AhoyVPN: https://ahoyvpn.net';
+        }
       }
     } finally {
       setLoading(false);
