@@ -378,7 +378,8 @@ $VERSION = '1.0.0';
             return resp.blob().then(function(blob) {
               var a = document.createElement('a');
               a.href = URL.createObjectURL(blob);
-              a.download = card.download || 'ahoyrip';
+              // Let the browser use the filename from Content-Disposition header
+              a.download = '';
               a.click();
               URL.revokeObjectURL(a.href);
               card.style.borderColor = 'var(--color-success)';
