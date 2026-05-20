@@ -26,6 +26,7 @@ $VERSION = '1.0.0';
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'none';">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://ahoyripper.com">
@@ -468,9 +469,14 @@ $VERSION = '1.0.0';
             'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
             'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
+            'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
+            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.net',
+            'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
           };
-          if (errorHints[err.error_code]) {
+          if (err.error_code && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];
+          } else if (resp.status === 504) {
+            msg = 'The download timed out. Try a smaller format (audio or lower resolution).';
           }
         }
         showError(msg);
