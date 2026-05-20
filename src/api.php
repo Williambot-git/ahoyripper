@@ -114,8 +114,24 @@ function isValidUrl($url) {
         && preg_match('/^https?:\/\//', $url);
 }
 
-// Cache yt-dlp version in a global to avoid repeated subprocess calls
-$GLOBALS['__ytdlp_version'] ??= trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
+// Cache yt-dlp version in a global to avoid repeated subprocess calls within a request.
+// Across requests a file-based cache keeps it efficient (avoids spawning a subprocess on every hit).
+$version_cache_file = '/tmp/ahoyrip_ytdlp_ver.cache';
+$GLOBALS['__ytdlp_version'] = null;
+if ($version_cache_file && is_readable($version_cache_file)) {
+    $cached = @json_decode(@file_get_contents($version_cache_file), true);
+    if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+        $GLOBALS['__ytdlp_version'] = $cached['ver'] ?? null;
+    }
+}
+if (!$GLOBALS['__ytdlp_version']) {
+    // Note: yt-dlp uses -V (not --version) for version output
+    $ver = trim(shell_exec('/usr/local/bin/yt-dlp -V 2>/dev/null') ?: '');
+    $GLOBALS['__ytdlp_version'] = $ver;
+    if ($version_cache_file) {
+        @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'exp' => time() + 3600]));
+    }
+}
 
 // Run yt-dlp with timeout and capture output
 // $timeout = max seconds for the whole process; 0 = no limit
