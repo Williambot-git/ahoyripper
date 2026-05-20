@@ -503,21 +503,31 @@ switch ($action) {
         }
 
         // Stream the file to user then delete
-        $filesize = filesize($out_file);
+        $filesize = @filesize($out_file);
+        if ($filesize === false) $filesize = 0;
 
-        // Detect extension from file
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($out_file);
+        // Detect extension from file — guard against missing/incomplete file
         $ext = pathinfo($out_file, PATHINFO_EXTENSION);
         $download_name = 'ahoyrip.' . ($ext ?: 'mp4');
+
+        // Detect MIME type; fall back gracefully if finfo fails
+        $mime = 'application/octet-stream';
+        if (file_exists($out_file) && filesize($out_file) > 0) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $detected = $finfo->file($out_file);
+            if ($detected !== false && strpos($detected, '/') !== false) {
+                $mime = $detected;
+            }
+        }
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . $filesize);
         header('Content-Disposition: attachment; filename="' . $download_name . '"');
         header('Cache-Control: no-cache');
-        header('Connection: close'); // Prevent keep-alive during file streaming
         header('X-Content-Type-Options: nosniff');
-        header('X-Download-Options: noopen'); // Prevent direct execution in browser context
+        header('X-Download-Options: noopen');
+        // Suppress PHP's automatic chunked transfer encoding for binary streams
+        header('Transfer-Encoding: identity');
 
         // Guard: even if client aborts, clean up the temp file
         ignore_user_abort(true);
