@@ -556,13 +556,39 @@ case 'progress':
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: -1');
+
         $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
-        echo json_encode([
+
+        $response = [
             'status' => 'ok',
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
-        ], JSON_INVALID_UTF8_SUBSTITUTE);
+        ];
+
+        // System resource metrics (Linux-only, gracefully omitted on other platforms)
+        if (function_exists('sys_getloadavg')) {
+            $load = sys_getloadavg();
+            if ($load !== false) {
+                $response['load_avg'] = array_map(fn($v) => round($v, 2), $load);
+            }
+        }
+
+        $meminfo = @file_get_contents('/proc/meminfo');
+        if ($meminfo) {
+            // Match "MemAvailable:" (available since kernel 3.14) or fall back to MemFree
+            if (preg_match('/MemAvailable:\s+(\d+)\s+kB/', $meminfo, $avail_m) &&
+                preg_match('/MemTotal:\s+(\d+)\s+kB/', $meminfo, $total_m)) {
+                $response['memory_available_pct'] = round(($avail_m[1] / $total_m[1]) * 100, 1);
+            }
+        }
+
+        $free = @disk_free_space('/');
+        if ($free !== false) {
+            $response['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
+        }
+
+        echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
     default: {
