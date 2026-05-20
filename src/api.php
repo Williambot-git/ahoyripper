@@ -107,10 +107,16 @@ if (mt_rand(1, 100) === 1) {
     }
 }
 
-// Only allow safe characters in URL
+// Validate URL protocol — block dangerous schemes before they reach yt-dlp.
+// yt-dlp itself may reject these, but we catch them early to avoid
+// unnecessary process spawning.
 function isValidUrl($url) {
-    return filter_var($url, FILTER_VALIDATE_URL) !== false
-        && preg_match('/^https?:\/\//', $url);
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) return false;
+    if (!preg_match('/^https?:\/\//', $url)) return false;
+    $parsed = parse_url($url);
+    $scheme = strtolower($parsed['scheme'] ?? '');
+    // Reject data:, javascript:, file:, etc. — yt-dlp only handles http(s)
+    return !in_array($scheme, ['data', 'javascript', 'file', 'ftp', 'sftp', 'smb', 'ssh'], true);
 }
 
 // Run yt-dlp with timeout and capture output
