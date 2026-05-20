@@ -169,27 +169,27 @@ $VERSION = '1.0.0';
   <section class="features">
     <div class="features-grid">
       <div class="feature-card">
-        <h2>No Signup</h2>
+        <h3>No Signup</h3>
         <p>Paste a link, click Rip It, download. No account, no email, no tracking.</p>
       </div>
       <div class="feature-card">
-        <h2>Many Formats</h2>
+        <h3>Many Formats</h3>
         <p>MP4, WEBM, MP3, M4A, FLAC, OGG, and more depending on what the source offers.</p>
       </div>
       <div class="feature-card">
-        <h2>Many Platforms</h2>
+        <h3>Many Platforms</h3>
         <p>Most video and audio platforms are supported.</p>
       </div>
       <div class="feature-card">
-        <h2>Fast</h2>
+        <h3>Fast</h3>
         <p>Direct server-side rip. No waiting in a queue, no BS.</p>
       </div>
       <div class="feature-card">
-        <h2>No Ads in the Rip</h2>
+        <h3>No Ads in the Rip</h3>
         <p>Clean conversion flow. The download is the download.</p>
       </div>
       <div class="feature-card">
-        <h2>Privacy-First</h2>
+        <h3>Privacy-First</h3>
         <p>Files are not stored on our servers. What you rip is between you and your hard drive.</p>
       </div>
     </div>
