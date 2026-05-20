@@ -123,8 +123,11 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Supports most platforms &mdash; 10 free rips/day
+        Supports most platforms &mdash; 5 free rips/day
       </p>
+      <div class="rip-key-wrap">
+        <input type="password" id="apiKey" class="rip-key-input" placeholder="AhoyVPN unlimited key (optional)" autocomplete="off">
+      </div>
     </div>
 
     <!-- Progress -->
@@ -441,7 +444,9 @@ $VERSION = '1.0.0';
     setProgress(30, 'Fetching video info...');
 
     try {
-      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url), {
+      const key = document.getElementById('apiKey') && document.getElementById('apiKey').value;
+      const keyParam = key ? '&key=' + encodeURIComponent(key) : '';
+      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + keyParam, {
         signal: AbortSignal.timeout(60000)
       });
 

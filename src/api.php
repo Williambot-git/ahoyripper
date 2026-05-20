@@ -436,7 +436,13 @@ switch ($action) {
         break;
     }
 
+    define('UNLIMITED_API_KEY', 'RIPPER2026');
+
     case 'download': {
+        // ─── Check for unlimited API key ───
+        $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
+        $unlimited = ($api_key === UNLIMITED_API_KEY);
+
         // ─── Download rate limiting (atomic via flock) ───
         $dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
@@ -493,43 +499,45 @@ switch ($action) {
         flock($dl_fp, LOCK_UN);
         fclose($dl_fp);
 
-        // Daily download quota (10 free per day)
-        $daily_file = '/tmp/ahoyrip_daily_' . md5($dl_ip);
-        $daily_limit = 10;
-        $daily_fp = fopen($daily_file, 'c+');
-        if ($daily_fp) {
-            flock($daily_fp, LOCK_EX);
-            $daily_data = ['t' => date('Y-m-d'), 'c' => 0];
-            $daily_raw = fread($daily_fp, 4096);
-            if ($daily_raw) {
-                $decoded = json_decode($daily_raw, true);
-                if ($decoded && is_array($decoded)) {
-                    $daily_data = $decoded;
+        // ─── Daily download quota (5 free per day, skip if unlimited key) ───
+        if (!$unlimited) {
+            $daily_file = '/tmp/ahoyrip_daily_' . md5($dl_ip);
+            $daily_limit = 5;
+            $daily_fp = fopen($daily_file, 'c+');
+            if ($daily_fp) {
+                flock($daily_fp, LOCK_EX);
+                $daily_data = ['t' => date('Y-m-d'), 'c' => 0];
+                $daily_raw = fread($daily_fp, 4096);
+                if ($daily_raw) {
+                    $decoded = json_decode($daily_raw, true);
+                    if ($decoded && is_array($decoded)) {
+                        $daily_data = $decoded;
+                    }
                 }
-            }
-            $today = date('Y-m-d');
-            if ($daily_data['t'] !== $today) {
-                $daily_data = ['t' => $today, 'c' => 0];
-            }
-            if ($daily_data['c'] >= $daily_limit) {
+                $today = date('Y-m-d');
+                if ($daily_data['t'] !== $today) {
+                    $daily_data = ['t' => $today, 'c' => 0];
+                }
+                if ($daily_data['c'] >= $daily_limit) {
+                    flock($daily_fp, LOCK_UN);
+                    fclose($daily_fp);
+                    http_response_code(429);
+                    echo json_encode([
+                        'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
+                        'error_code' => 'DAILY_LIMIT',
+                        'upgrade_url' => 'https://ahoyvpn.net',
+                        'daily_limit' => $daily_limit
+                    ]);
+                    exit;
+                }
+                $daily_data['c']++;
+                ftruncate($daily_fp, 0);
+                rewind($daily_fp);
+                fwrite($daily_fp, json_encode($daily_data));
+                fflush($daily_fp);
                 flock($daily_fp, LOCK_UN);
                 fclose($daily_fp);
-                http_response_code(429);
-                echo json_encode([
-                    'error' => 'Daily limit reached. You get 10 free rips per day. For unlimited access, use AhoyVPN.',
-                    'error_code' => 'DAILY_LIMIT',
-                    'upgrade_url' => 'https://ahoyvpn.net',
-                    'daily_limit' => $daily_limit
-                ]);
-                exit;
             }
-            $daily_data['c']++;
-            ftruncate($daily_fp, 0);
-            rewind($daily_fp);
-            fwrite($daily_fp, json_encode($daily_data));
-            fflush($daily_fp);
-            flock($daily_fp, LOCK_UN);
-            fclose($daily_fp);
         }
 
         // Serve a format for download
