@@ -24,3 +24,8 @@ build/
 # Environment
 .env
 .env.local
+
+# Backup files (never commit these)
+*.bak
+*.backup
+*~
