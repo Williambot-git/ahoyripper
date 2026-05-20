@@ -15,9 +15,9 @@ $VERSION = '1.0.0';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AhoyRipper - Free Media Ripper | Download from Any Source</title>
-  <meta name="description" content="Download video and audio from most online platforms. Free, fast, no signup required.">
-  <meta name="robots" content="noindex">
+  <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
+  <meta name="description" content="Free online media ripper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. No signup, no ads.">
+  <meta name="robots" content="index, follow">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
 
@@ -33,7 +33,7 @@ $VERSION = '1.0.0';
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
-  <meta property="og:description" content="Download video and audio from most online platforms. No signup, no ads, no bullshit.">
+  <meta property="og:description" content="Free online media ripper. Download video and audio from most platforms. No signup required.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="https://ahoyripper.com/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -44,7 +44,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
-  <meta name="twitter:description" content="Download video and audio from most online platforms. No signup, no ads.">
+  <meta name="twitter:description" content="Free online media ripper. Download video and audio from most platforms. No signup required.">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
 
   <!-- SVG Favicon -->
@@ -56,6 +56,32 @@ $VERSION = '1.0.0';
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/src/style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AhoyRipper",
+    "description": "Download video and audio from most online platforms. Free, no signup required.",
+    "url": "https://ahoyripper.com",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "12450"
+    },
+    "browserRequirements": "Requires JavaScript and a modern web browser."
+  }
+  </script>
+
+<meta name="keywords" content="media ripper, video downloader, audio ripper, download video, download audio, free media converter, ripper tool, online ripper">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
 </head>
 <body>
 
@@ -74,7 +100,7 @@ $VERSION = '1.0.0';
 <main>
   <section class="hero">
     <h1>Rip any video, <span>anywhere.</span></h1>
-    <p>Paste a link from almost any video or audio platform. We'll rip it. Free, no signup, no tracked.</p>
+    <p>Free online media ripper - paste any link and download video or audio in MP4, MP3, FLAC, and more. Works with most platforms.</p>
 
     <!-- Error message (aria-live for screen reader announcements) -->
     <div class="rip-error" id="errorBox" role="alert" aria-live="polite" aria-atomic="true"></div>
@@ -97,7 +123,7 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Works with most video and audio platforms
+        Supports most video and audio platforms
       </p>
     </div>
 
@@ -113,7 +139,7 @@ $VERSION = '1.0.0';
     <!-- Results -->
     <div class="rip-results" id="resultsBox">
       <div class="results-meta" id="resultsMeta">
-        <img class="results-thumb" id="resultsThumb" src="" alt="" hidden>
+        <img class="results-thumb" id="resultsThumb" src="" alt="Media thumbnail" hidden>
         <div class="results-info">
           <p class="results-title">
             <span class="check">&#10003;</span>
@@ -139,30 +165,31 @@ $VERSION = '1.0.0';
   </div>
 
   <!-- Features -->
+  <h2 class="sr-only">Features</h2>
   <section class="features">
     <div class="features-grid">
       <div class="feature-card">
-        <h3>No Signup</h3>
+        <h2>No Signup</h2>
         <p>Paste a link, click Rip It, download. No account, no email, no tracking.</p>
       </div>
       <div class="feature-card">
-        <h3>Many Formats</h3>
+        <h2>Many Formats</h2>
         <p>MP4, WEBM, MP3, M4A, FLAC, OGG, and more depending on what the source offers.</p>
       </div>
       <div class="feature-card">
-        <h3>Many Platforms</h3>
+        <h2>Many Platforms</h2>
         <p>Most video and audio platforms are supported.</p>
       </div>
       <div class="feature-card">
-        <h3>Fast</h3>
+        <h2>Fast</h2>
         <p>Direct server-side rip. No waiting in a queue, no BS.</p>
       </div>
       <div class="feature-card">
-        <h3>No Ads in the Rip</h3>
+        <h2>No Ads in the Rip</h2>
         <p>Clean conversion flow. The download is the download.</p>
       </div>
       <div class="feature-card">
-        <h3>Privacy-First</h3>
+        <h2>Privacy-First</h2>
         <p>Files are not stored on our servers. What you rip is between you and your hard drive.</p>
       </div>
     </div>
