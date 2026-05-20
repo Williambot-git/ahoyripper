@@ -10,7 +10,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'; report-uri /csp-report');
+header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
@@ -114,11 +114,12 @@ function isValidUrl($url) {
         && preg_match('/^https?:\/\//', $url);
 }
 
+// Cache yt-dlp version in a global to avoid repeated subprocess calls
+$GLOBALS['__ytdlp_version'] ??= trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
+
 // Run yt-dlp with timeout and capture output
 // $timeout = max seconds for the whole process; 0 = no limit
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
-    // Pre-check: confirm yt-dlp is present and get version for error reporting
-    $ytdlp_version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
     $cmd = '/usr/local/bin/yt-dlp ' . $args;
     $desc = [
         0 => ['pipe', 'r'],  // stdin — keep open but unref so proc can read if needed
@@ -343,7 +344,8 @@ switch ($action) {
             $err_msg = strip_tags($err_msg); // remove any HTML markup
             $err_msg = preg_replace('/\s+/', ' ', $err_msg); // collapse whitespace
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
-            $version_info = $ytdlp_version ? " (yt-dlp $ytdlp_version)" : '';
+            $ytdlp_ver = $GLOBALS['__ytdlp_version'];
+            $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
             http_response_code(422);
             echo json_encode(['error' => "Could not fetch that URL. $err_msg$version_info"]);
             exit;
@@ -632,11 +634,12 @@ case 'progress':
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: -1');
 
-        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+        $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
 
         $response = [
             'status' => 'ok',
+            'server_time' => date('c'),
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
         ];
