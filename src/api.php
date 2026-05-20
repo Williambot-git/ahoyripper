@@ -389,7 +389,13 @@ function parseFormats($json_str, &$raw_error_out = null) {
     ];
 }
 
-// ─── ROUTING ──────────────────────────────────────────────
+// ─── CONSTANTS ──────────────────────────────────────────────
+// Internal API key constant — declared at file scope so it is in scope
+// for all code paths (especially the download case below).
+// Keep the value in a single place to simplify rotation.
+define('AHOY_UNLIMITED_KEY', 'RIPPER2026');
+
+// ─── ROUTING ────────────────────────────────────────────────
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
@@ -446,12 +452,10 @@ switch ($action) {
         break;
     }
 
-    define('UNLIMITED_API_KEY', 'RIPPER2026');
-
     case 'download': {
         // ─── Check for unlimited API key ───
         $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
-        $unlimited = ($api_key === UNLIMITED_API_KEY);
+        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Download rate limiting (atomic via flock) ───
         $dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
