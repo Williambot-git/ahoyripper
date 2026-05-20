@@ -547,9 +547,15 @@ switch ($action) {
         exit;
     }
 
-    case 'progress': {
+case 'progress':
+    case 'health': {
         // Lightweight ping to check yt-dlp is available — returns JSON
         // Note: all security/rate-limit headers are already set at the top of the script
+        // Add informational rate-limit headers so clients can track status consistently
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: -1');
         $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
         echo json_encode([
@@ -559,19 +565,6 @@ switch ($action) {
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
-
-    case 'health': {
-        // Alias for /progress — same endpoint with a more intuitive name
-        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
-        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
-        echo json_encode([
-            'status' => 'ok',
-            'yt_dlp_version' => $version,
-            'ffmpeg_version' => $ffmpeg,
-        ], JSON_INVALID_UTF8_SUBSTITUTE);
-        break;
-    }
-
     default: {
         http_response_code(400);
         echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, or ?action=progress.'], JSON_INVALID_UTF8_SUBSTITUTE);
