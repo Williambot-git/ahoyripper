@@ -127,10 +127,6 @@ The `format_id` comes from the `id` field in the info response. The API streams 
 
 ### Health check
 ```
-GET /src/api.php?action=progress
-```
-or:
-```
 GET /src/api.php?action=health
 ```
 
