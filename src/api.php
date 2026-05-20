@@ -549,28 +549,51 @@ switch ($action) {
         exit;
     }
 
-    case 'progress': {
-        // Lightweight ping to check yt-dlp is available — returns JSON
-        // Note: all security/rate-limit headers are already set at the top of the script
-        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
-        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
-        echo json_encode([
-            'status' => 'ok',
-            'yt_dlp_version' => $version,
-            'ffmpeg_version' => $ffmpeg,
-        ], JSON_INVALID_UTF8_SUBSTITUTE);
-        break;
-    }
-
+    case 'progress':
     case 'health': {
-        // Alias for /progress — same endpoint with a more intuitive name
-        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+        // Lightweight ping to check yt-dlp and ffmpeg availability
+        // Returns JSON with version info and system status
+        $yt_version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
         $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
-        echo json_encode([
+        $mem_available_pct = null;
+        $disk_free = null;
+
+        // Fetch system metrics when possible (linux only)
+        if (function_exists('sys_getloadavg')) {
+            $load = sys_getloadavg();
+        }
+        if (is_readable('/proc/meminfo')) {
+            $meminfo = @file_get_contents('/proc/meminfo', false, null, 0, 200);
+            if ($meminfo) {
+                preg_match('/MemAvailable:\s+(\d+)/', $meminfo, $m);
+                preg_match('/MemTotal:\s+(\d+)/', $meminfo, $mt);
+                if ($m && $mt && $mt[1] > 0) {
+                    $mem_available_pct = round(($m[1] / $mt[1]) * 100, 1);
+                }
+            }
+        }
+        if (function_exists('disk_free_space')) {
+            $df = @disk_free_space('/');
+            if ($df !== false) {
+                $disk_free = round($df / 1073741824, 1); // GB
+            }
+        }
+
+        $response = [
             'status' => 'ok',
-            'yt_dlp_version' => $version,
+            'yt_dlp_version' => $yt_version,
             'ffmpeg_version' => $ffmpeg,
-        ], JSON_INVALID_UTF8_SUBSTITUTE);
+        ];
+        if ($load !== null) {
+            $response['load_avg'] = array_map(fn($v) => round($v, 2), $load);
+        }
+        if ($mem_available_pct !== null) {
+            $response['memory_available_pct'] = $mem_available_pct;
+        }
+        if ($disk_free !== null) {
+            $response['disk_free_gb'] = $disk_free;
+        }
+        echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 

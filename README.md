@@ -129,15 +129,24 @@ The `format_id` comes from the `id` field in the info response. The API streams 
 ```
 GET /src/api.php?action=progress
 ```
+or:
+```
+GET /src/api.php?action=health
+```
 
 Returns:
 ```json
 {
   "status": "ok",
   "yt_dlp_version": "2024.x.x",
-  "ffmpeg_version": "ffmpeg version 6.x"
+  "ffmpeg_version": "ffmpeg version 6.x",
+  "load_avg": [0.15, 0.08, 0.05],
+  "memory_available_pct": 72.4,
+  "disk_free_gb": 48.2
 }
 ```
+
+Fields marked with `?` are only present when available on the host system (`load_avg` requires Linux, `memory_available_pct` reads `/proc/meminfo`, `disk_free_gb` uses `disk_free_space()`).
 
 ### Rate Limits
 
