@@ -30,18 +30,11 @@ if ($referer) {
         $ref_parts = [];
     }
     $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
-    $allowed = false;
-    foreach ($allowed_origins as $origin) {
-        if (strcasecmp($ref_origin, $origin) === 0) {
-            $allowed = true;
-            break;
-        }
-    }
-    if (!$allowed) {
+    if (!$referer || !in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
         // Log and block suspicious cross-site requests
         error_log("AhoyRipper: blocked cross-site request from referer: $referer");
         http_response_code(403);
-        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.']);
+        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN']);
         exit;
     }
 }
@@ -320,7 +313,7 @@ switch ($action) {
         }
 
         $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-playlist --no-warnings -- $shell_url", $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --no-warning -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
