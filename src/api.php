@@ -506,7 +506,7 @@ switch ($action) {
 
         proc_close($proc);
 
-        if (!file_exists($out_file) || filesize($out_file) === 0) {
+        if (!file_exists($out_file) || @filesize($out_file) === 0) {
             // Clean up partial/empty temp file before responding
             if (file_exists($out_file)) {
                 @unlink($out_file);
