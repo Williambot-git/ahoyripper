@@ -398,7 +398,7 @@ switch ($action) {
         }
 
         $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-playlist --no-warnings -- $shell_url", $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --no-warning -- $shell_url", $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
