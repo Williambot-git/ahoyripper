@@ -254,7 +254,7 @@ function classifyYtdlpError($raw_err) {
 }
 
 // Parse yt-dlp output to extract formats
-function parseFormats($json_str) {
+function parseFormats($json_str, &$raw_error_out = null) {
     $data = json_decode($json_str, true);
     if (!$data) {
         // Differentiate yt-dlp errors from actual parsing failures
@@ -269,10 +269,16 @@ function parseFormats($json_str) {
             // Classify into actionable categories
             $classified = classifyYtdlpError($err_msg);
             if ($classified) {
+                if ($raw_error_out !== null) {
+                    $raw_error_out = $err_msg;
+                }
                 return [
                     'error' => $classified['msg'],
                     'error_code' => $classified['code'],
                 ];
+            }
+            if ($raw_error_out !== null) {
+                $raw_error_out = $err_msg;
             }
             return ['error' => 'yt-dlp error: ' . $err_msg];
         }
@@ -415,7 +421,7 @@ switch ($action) {
             exit;
         }
 
-        $parsed = parseFormats($out);
+        $parsed = parseFormats($out, $raw_err);
         if (!$parsed) {
             http_response_code(422);
             echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
@@ -427,6 +433,10 @@ switch ($action) {
             $resp = ['error' => $parsed['error']];
             if (!empty($parsed['error_code'])) {
                 $resp['error_code'] = $parsed['error_code'];
+            }
+            // Surface the raw yt-dlp output so the client can show diagnostic info
+            if ($raw_err) {
+                $resp['raw_error'] = $raw_err;
             }
             echo json_encode($resp);
             exit;
