@@ -101,6 +101,14 @@ $VERSION = '1.0.0';
       </p>
     </div>
 
+    <!-- Full-page loading overlay for downloads -->
+    <div class="page-loading-overlay" id="pageOverlay" hidden>
+      <div class="page-loading-inner">
+        <div class="spinner"></div>
+        <p class="progress-text" id="overlayText">Preparing download...</p>
+      </div>
+    </div>
+
     <!-- Progress -->
     <div class="rip-progress" id="progressBox">
       <div class="spinner"></div>
@@ -199,6 +207,8 @@ $VERSION = '1.0.0';
   const formatGrid = document.getElementById('formatGrid');
   const resultsTitle = document.getElementById('resultsTitle');
   const ripAgain = document.getElementById('ripAgain');
+  const pageOverlay = document.getElementById('pageOverlay');
+  const overlayText = document.getElementById('overlayText');
 
   function setProgress(pct, text) {
     // Progress is driven by state, not real percentage
@@ -231,6 +241,15 @@ $VERSION = '1.0.0';
 
   function showResults(on) {
     resultsBox.classList.toggle('active', on);
+  }
+
+  function showOverlay(text) {
+    if (overlayText) overlayText.textContent = text || 'Preparing download...';
+    if (pageOverlay) pageOverlay.hidden = false;
+  }
+
+  function hideOverlay() {
+    if (pageOverlay) pageOverlay.hidden = true;
   }
 
   function formatDuration(secs) {
@@ -333,6 +352,7 @@ $VERSION = '1.0.0';
         var dlUrl = card.href;
         card.classList.add('downloading');
         setLoading(true);
+        showOverlay('Downloading... this may take a moment for larger files.');
         fetch(dlUrl, { signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
@@ -341,6 +361,7 @@ $VERSION = '1.0.0';
               }).then(function(err) {
                 showError(err.error || 'Download failed.');
                 setLoading(false);
+                hideOverlay();
                 card.classList.remove('downloading');
               });
             }
@@ -353,12 +374,14 @@ $VERSION = '1.0.0';
               card.style.borderColor = 'var(--color-success)';
               setTimeout(function() { card.style.borderColor = ''; }, 1500);
               setLoading(false);
+              hideOverlay();
               card.classList.remove('downloading');
             });
           })
           .catch(function() {
             showError('Download failed. Try another format.');
             setLoading(false);
+            hideOverlay();
             card.classList.remove('downloading');
           });
       });

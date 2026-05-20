@@ -404,6 +404,23 @@ body {
 }
 .feature-card p { font-size: 0.85rem; color: var(--color-text-sec); line-height: 1.6; }
 
+/* Page loading overlay */
+.page-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-loading-overlay[hidden] { display: none; }
+.page-loading-inner {
+  text-align: center;
+  color: var(--color-text-sec);
+}
+
 /* Footer */
 footer {
   text-align: center;
