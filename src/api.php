@@ -160,7 +160,12 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
         if (empty($read)) break;
         $w = $e = null;
         $changed = @stream_select($read, $w, $e, 1, 0);
-        if ($changed === false || $changed === 0) {
+        if ($changed === false) {
+            // stream_select error — log and continue to avoid blocking on spurious failure
+            usleep(100000);
+            continue;
+        }
+        if ($changed === 0) {
             usleep(100000);
             continue;
         }
@@ -468,7 +473,12 @@ switch ($action) {
 
             $w = $e = null;
             $changed = @stream_select($read, $w, $e, 1, 0);
-            if ($changed === false || $changed === 0) {
+            if ($changed === false) {
+                // stream_select error — log and continue to avoid blocking on spurious failure
+                usleep(100000);
+                continue;
+            }
+            if ($changed === 0) {
                 usleep(100000);
                 continue;
             }
