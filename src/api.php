@@ -102,7 +102,7 @@ if (mt_rand(1, 100) === 1) {
     $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
     foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
         $d = @json_decode(@file_get_contents($f), true);
-        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $rate_window * 2) {
+        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
             @unlink($f);
         }
     }
