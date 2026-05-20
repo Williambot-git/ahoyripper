@@ -213,7 +213,19 @@ function clean($s) {
 // Parse yt-dlp output to extract formats
 function parseFormats($json_str) {
     $data = json_decode($json_str, true);
-    if (!$data) return null;
+    if (!$data) {
+        // Differentiate yt-dlp errors from actual parsing failures
+        $raw = trim($json_str);
+        if (preg_match('/^(ERROR|WARNING)/im', $raw)) {
+            // yt-dlp returned an error message — surface it clearly
+            $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
+            $err_msg = strip_tags($err_msg);
+            $err_msg = preg_replace('/\s+/', ' ', $err_msg);
+            if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            return ['error' => 'yt-dlp error: ' . $err_msg];
+        }
+        return null;
+    }
 
     $title = clean($data['title'] ?? 'Unknown');
     $thumbnail = clean($data['thumbnail'] ?? '');
@@ -355,6 +367,12 @@ switch ($action) {
         if (!$parsed) {
             http_response_code(422);
             echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
+            exit;
+        }
+        if (isset($parsed['error'])) {
+            // parseFormats surfaced a yt-dlp error message — pass it through with 422
+            http_response_code(422);
+            echo json_encode(['error' => $parsed['error']]);
             exit;
         }
 
