@@ -13,3 +13,15 @@ Disallow: /
 
 User-agent: AnthropicBot
 Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent:Omgilibot
+Disallow: /
