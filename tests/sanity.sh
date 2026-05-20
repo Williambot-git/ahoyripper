@@ -33,6 +33,7 @@ REQUIRED_HEADERS=(
     "X-Frame-Options"
     "Strict-Transport-Security"
     "Content-Security-Policy"
+    "X-Download-Options"
 )
 for header in "${REQUIRED_HEADERS[@]}"; do
     if grep -q "$header" src/api.php; then

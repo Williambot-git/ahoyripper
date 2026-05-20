@@ -10,7 +10,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\'; report-uri /csp-report');
+header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Request-ID: ' . bin2hex(random_bytes(8)));
 header('Cross-Origin-Opener-Policy: same-origin');
@@ -411,6 +411,8 @@ switch ($action) {
             echo json_encode(['error' => 'Invalid format ID.']);
             exit;
         }
+
+        header('X-Download-Options: noopen');
 
         $f_shell = escapeshellarg($format_id);
         $tmp_dir = sys_get_temp_dir();
