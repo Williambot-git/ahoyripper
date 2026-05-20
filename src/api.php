@@ -548,12 +548,25 @@ switch ($action) {
             'status' => 'ok',
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
-        ]);
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
+        break;
+    }
+
+    case 'health': {
+        // Alias for /progress — same endpoint with a more intuitive name
+        $version = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: 'not installed');
+        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
+        echo json_encode([
+            'status' => 'ok',
+            'yt_dlp_version' => $version,
+            'ffmpeg_version' => $ffmpeg,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 
     default: {
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action. Use ?action=info or ?action=download']);
+        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, or ?action=progress.'], JSON_INVALID_UTF8_SUBSTITUTE);
+        break;
     }
 }
