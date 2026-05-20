@@ -419,6 +419,7 @@ switch ($action) {
         if (!$parsed) {
             http_response_code(422);
             echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
+            exit;
         }
         if (isset($parsed['error'])) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422
