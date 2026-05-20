@@ -166,14 +166,28 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
         foreach ($read as $p) {
             if ($p === $pipes[1]) {
                 $s = fread($p, 8192);
-                if ($s === false || $s === '') { feof($pipes[1]); continue; }
+                if ($s === false || $s === '') {
+                    if (feof($pipes[1])) {
+                        fclose($pipes[1]);
+                        $pipes[1] = null;
+                    }
+                    continue;
+                }
                 $stdout .= $s;
             } elseif ($p === $pipes[2]) {
                 $s = fread($p, 8192);
-                if ($s === false || $s === '') { feof($pipes[2]); continue; }
+                if ($s === false || $s === '') {
+                    if (feof($pipes[2])) {
+                        fclose($pipes[2]);
+                        $pipes[2] = null;
+                    }
+                    continue;
+                }
                 $stderr .= $s;
             }
         }
+        // Exit when both pipes are closed
+        if ($pipes[1] === null && $pipes[2] === null) break;
     }
 
     foreach ($pipes as $p) { if ($p) fclose($p); }
