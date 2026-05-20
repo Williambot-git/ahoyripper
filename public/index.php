@@ -449,7 +449,23 @@ $VERSION = '1.0.0';
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: 'Unknown error' }));
-        showError(err.error || 'Something went wrong. Try again.');
+        // Surface error_code for classified yt-dlp errors
+        var msg = err.error || 'Something went wrong. Try again.';
+        if (err.error_code) {
+          var errorHints = {
+            'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.net',
+            'PRIVATE_VIDEO': 'This video is private and cannot be downloaded.',
+            'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
+            'UNSUPPORTED_SITE': 'This site is not supported. Check the list at yt-dlp.github.io/supported-sites.',
+            'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
+            'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
+            'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
+          };
+          if (errorHints[err.error_code]) {
+            msg = errorHints[err.error_code];
+          }
+        }
+        showError(msg);
         return;
       }
 

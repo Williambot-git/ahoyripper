@@ -210,6 +210,33 @@ function clean($s) {
     return (string)$s;
 }
 
+// Classify yt-dlp error messages into actionable error codes
+function classifyYtdlpError($raw_err) {
+    $err_lower = strtolower($raw_err);
+    if (preg_match('/geo.*restriction|this video is available in/i', $err_lower)) {
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.'];
+    }
+    if (preg_match('/video is private|this video is private/i', $err_lower)) {
+        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.'];
+    }
+    if (preg_match('/login.*required|authentication.*required|this video requires login/i', $err_lower)) {
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.'];
+    }
+    if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
+        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.'];
+    }
+    if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
+        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.'];
+    }
+    if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
+        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.'];
+    }
+    if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
+    }
+    return null;
+}
+
 // Parse yt-dlp output to extract formats
 function parseFormats($json_str) {
     $data = json_decode($json_str, true);
@@ -222,6 +249,15 @@ function parseFormats($json_str) {
             $err_msg = strip_tags($err_msg);
             $err_msg = preg_replace('/\s+/', ' ', $err_msg);
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+
+            // Classify into actionable categories
+            $classified = classifyYtdlpError($err_msg);
+            if ($classified) {
+                return [
+                    'error' => $classified['msg'],
+                    'error_code' => $classified['code'],
+                ];
+            }
             return ['error' => 'yt-dlp error: ' . $err_msg];
         }
         return null;
@@ -372,7 +408,11 @@ switch ($action) {
         if (isset($parsed['error'])) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422
             http_response_code(422);
-            echo json_encode(['error' => $parsed['error']]);
+            $resp = ['error' => $parsed['error']];
+            if (!empty($parsed['error_code'])) {
+                $resp['error_code'] = $parsed['error_code'];
+            }
+            echo json_encode($resp);
             exit;
         }
 
