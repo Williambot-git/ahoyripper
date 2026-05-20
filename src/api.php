@@ -560,16 +560,22 @@ switch ($action) {
         $tmp_dir = sys_get_temp_dir();
         $out_file = $tmp_dir . '/ahoyrip_' . bin2hex(random_bytes(8)) . '.tmp';
 
-        // Build output template — use exec array to bypass shell entirely
-        // URL is validated by isValidUrl(); bypass_shell prevents shell interpretation
-        // but yt-dlp still sees options-like strings, so we pass it as -- separator arg
+        // Build output template — use exec array to bypass shell entirely.
+        // yt-dlp resolves the output path *before* downloading, so we use a
+        // directory template with a known prefix so we can find the real file
+        // after download (yt-dlp appends the real extension to the base name).
+        $tmp_dir = sys_get_temp_dir();
+        $out_base = 'ahoyrip_' . bin2hex(random_bytes(8));
+        $out_template = $tmp_dir . '/' . $out_base . '.tmp';  // yt-dlp appends e.g. .mp4
+        $out_file = $out_template; // reference used for cleanup
+
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
-            '-o', $out_file,
+            '-o', $out_template,
             '--no-playlist',
             '--',
-            $url,  // validated URL, bypass_shell=true skips shell expansion
+            $url,
         ];
 
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
@@ -582,19 +588,18 @@ switch ($action) {
             exit;
         }
 
-// Wait with timeout (yt-dlp writes the actual file to $out_file via -o)
         $start = time();
         $timeout = 300; // 5 min max
         $proc_killed = false;
 
-        stream_set_timeout($pipes[1], 5); // stdout (progress/info)
-        stream_set_timeout($pipes[2], 5); // stderr (yt-dlp logs)
+        stream_set_timeout($pipes[1], 5);
+        stream_set_timeout($pipes[2], 5);
 
         while (true) {
             if ($timeout > 0 && (time() - $start) > $timeout) {
                 proc_terminate($proc, 9);
                 $proc_killed = true;
-                if (file_exists($out_file)) @unlink($out_file);
+                foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 http_response_code(504);
                 echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
                 exit;
@@ -605,18 +610,12 @@ switch ($action) {
             if (!feof($pipes[2])) $read[] = $pipes[2];
 
             if (empty($read)) {
-                // Both pipes closed — process finished
                 break;
             }
 
             $w = $e = null;
             $changed = @stream_select($read, $w, $e, 1, 0);
-            if ($changed === false) {
-                // stream_select error — log and continue to avoid blocking on spurious failure
-                usleep(100000);
-                continue;
-            }
-            if ($changed === 0) {
+            if ($changed === false || $changed === 0) {
                 usleep(100000);
                 continue;
             }
@@ -627,41 +626,35 @@ switch ($action) {
                     if (feof($p)) fclose($p);
                 }
             }
-
-            // Check periodically if the file has started being written
-            if (!$proc_killed && file_exists($out_file) && filesize($out_file) > 0) {
-                // File is being written — continue waiting
-            }
         }
 
         proc_close($proc);
 
-        if (!file_exists($out_file) || @filesize($out_file) === 0) {
-            // Clean up partial/empty temp file before responding
-            if (file_exists($out_file)) {
-                @unlink($out_file);
-            }
+        // Find the actual downloaded file — glob for the resolved extension
+        $glob_pattern = $tmp_dir . '/' . $out_base . '.*';
+        $matched = glob($glob_pattern);
+        $actual_file = $matched[0] ?? null;
+
+        if (!$actual_file || !is_file($actual_file) || @filesize($actual_file) === 0) {
+            foreach (glob($glob_pattern) as $f) { @unlink($f); }
             http_response_code(500);
-            echo json_encode(['error' => 'Download failed. The format may not be available.']); // @codingStandardsIgnoreLine
+            echo json_encode(['error' => 'Download failed. The format may not be available.']);
             exit;
         }
 
         // Stream the file to user then delete
-        $filesize = @filesize($out_file);
+        $filesize = @filesize($actual_file);
         if ($filesize === false) $filesize = 0;
 
-        // Detect extension from file — guard against missing/incomplete file
-        $ext = pathinfo($out_file, PATHINFO_EXTENSION);
+        // Detect extension and MIME from the actual downloaded file
+        $ext = pathinfo($actual_file, PATHINFO_EXTENSION);
         $download_name = 'ahoyrip.' . ($ext ?: 'mp4');
 
-        // Detect MIME type; fall back gracefully if finfo fails
         $mime = 'application/octet-stream';
-        if (file_exists($out_file) && filesize($out_file) > 0) {
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $detected = $finfo->file($out_file);
-            if ($detected !== false && strpos($detected, '/') !== false) {
-                $mime = $detected;
-            }
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $detected = $finfo->file($actual_file);
+        if ($detected !== false && strpos($detected, '/') !== false) {
+            $mime = $detected;
         }
 
         header('Content-Type: ' . $mime);
@@ -673,17 +666,14 @@ switch ($action) {
         // Suppress PHP's automatic chunked transfer encoding for binary streams
         header('Transfer-Encoding: identity');
 
-        // Guard: even if client aborts, clean up the temp file
         ignore_user_abort(true);
-        register_shutdown_function(function() use($out_file) {
-            if (file_exists($out_file)) {
-                @unlink($out_file);
-            }
+        register_shutdown_function(function() use($glob_pattern) {
+            foreach (glob($glob_pattern) as $f) { @unlink($f); }
         });
 
         ini_set('memory_limit', '256M');
 
-        $fp = fopen($out_file, 'rb');
+        $fp = fopen($actual_file, 'rb');
         if (!$fp) {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to read downloaded file.']); // @codingStandardsIgnoreLine
@@ -695,8 +685,8 @@ switch ($action) {
         }
         fclose($fp);
         // Shutdown function handles unlink; call it explicitly on success
-        if (file_exists($out_file)) {
-            @unlink($out_file);
+        if ($actual_file && file_exists($actual_file)) {
+            @unlink($actual_file);
         }
         exit;
     }
