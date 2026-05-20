@@ -500,8 +500,12 @@ switch ($action) {
         proc_close($proc);
 
         if (!file_exists($out_file) || filesize($out_file) === 0) {
+            // Clean up partial/empty temp file before responding
+            if (file_exists($out_file)) {
+                @unlink($out_file);
+            }
             http_response_code(500);
-            echo json_encode(['error' => 'Download failed. The format may not be available.']);
+            echo json_encode(['error' => 'Download failed. The format may not be available.']); // @codingStandardsIgnoreLine
             exit;
         }
 
