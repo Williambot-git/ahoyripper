@@ -285,7 +285,10 @@ $VERSION = '1.0.0';
   function buildDownloadUrl(url, formatId, label) {
     // For combined video+audio formats, we need to merge streams
     // yt-dlp handles this with the format string
-    return `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}`;
+    // Include API key for unlimited users (bypasses daily limit + higher rate limit)
+    var keyInput = document.getElementById('apiKey');
+    var key = (keyInput && keyInput.value) ? '&key=' + encodeURIComponent(keyInput.value) : '';
+    return `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}${key}`;
   }
 
   function renderFormats(url, data) {
