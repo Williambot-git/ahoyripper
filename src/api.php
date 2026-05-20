@@ -31,7 +31,7 @@ if ($referer) {
         $ref_parts = [];
     }
     $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
-    if (!$referer || !in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
+    if (!in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
         // Log and block suspicious cross-site requests
         error_log("AhoyRipper: blocked cross-site request from referer: $referer");
         http_response_code(403);
