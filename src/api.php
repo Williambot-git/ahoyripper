@@ -81,7 +81,11 @@ if (time() - $data['t'] < $rate_window) {
         fclose($fp);
         http_response_code(429);
         header('Retry-After: 30');
-        echo json_encode(['error' => 'Too many requests. Slow down.']); // @codingStandardsIgnoreLine
+        echo json_encode([
+            'error' => 'Too many requests. Slow down.',
+            'error_code' => 'RATE_LIMIT_EXCEEDED',
+            'upgrade_url' => 'https://ahoyvpn.net',
+        ]); // @codingStandardsIgnoreLine
         exit;
     }
     $data['c']++;

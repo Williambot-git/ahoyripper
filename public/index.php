@@ -469,6 +469,7 @@ $VERSION = '1.0.0';
         var msg = err.error || 'Something went wrong. Try again.';
         if (err.error_code) {
           var errorHints = {
+            'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.net',
             'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.net',
             'PRIVATE_VIDEO': 'This video is private and cannot be downloaded.',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
