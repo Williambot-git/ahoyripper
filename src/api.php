@@ -780,10 +780,6 @@ switch ($action) {
             $download_filename = 'ahoyrip';
         }
 
-        $f_shell = escapeshellarg($format_id);
-        $tmp_dir = sys_get_temp_dir();
-        $out_file = $tmp_dir . '/ahoyrip_' . bin2hex(random_bytes(8)) . '.tmp';
-
         // Build output template — use exec array to bypass shell entirely.
         // yt-dlp resolves the output path *before* downloading, so we use a
         // directory template with a known prefix so we can find the real file
