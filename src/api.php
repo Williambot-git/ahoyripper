@@ -133,6 +133,24 @@ if (!$GLOBALS['__ytdlp_version']) {
     }
 }
 
+// Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
+// is wasteful and adds latency under load.
+$ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
+$GLOBALS['__ffmpeg_version'] = null;
+if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
+    $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
+    if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+        $GLOBALS['__ffmpeg_version'] = $cached['ver'] ?? null;
+    }
+}
+if (!$GLOBALS['__ffmpeg_version']) {
+    $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: '');
+    $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
+    if ($ffmpeg_cache_file) {
+        @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'exp' => time() + 3600]));
+    }
+}
+
 // Run yt-dlp with timeout and capture output
 // $timeout = max seconds for the whole process; 0 = no limit
 // Uses array exec form so bypass_shell=true actually takes effect —
@@ -772,7 +790,7 @@ case 'progress':
         header('X-DL-RateLimit-Window: -1');
 
         $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
-        $ffmpeg = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: 'not installed');
+        $ffmpeg = $GLOBALS['__ffmpeg_version'] ?: 'not installed';
 
         $response = [
             'status' => 'ok',
