@@ -414,26 +414,22 @@ $VERSION = '1.0.0';
                 setLoading(false);
                 card.classList.remove('downloading');
               });
+              return;
             }
-            return resp.blob().then(function(blob) {
-              var a = document.createElement('a');
-              a.href = URL.createObjectURL(blob);
-              // Let the browser use the filename from Content-Disposition header
-              a.download = '';
-              a.click();
-              URL.revokeObjectURL(a.href);
-              card.style.borderColor = 'var(--color-success)';
-              setTimeout(function() { card.style.borderColor = ''; }, 1500);
+            // Navigate to download URL — server sets Content-Disposition with filename
+            window.location.href = dl.url;
+            setTimeout(function() {
               setLoading(false);
               card.classList.remove('downloading');
-            });
+              card.style.borderColor = 'var(--color-success)';
+              setTimeout(function() { card.style.borderColor = ''; }, 1500);
+            }, 500);
           })
           .catch(function() {
             showError('Download failed. Try another format.');
             setLoading(false);
             card.classList.remove('downloading');
           });
-      });
 
       return card;
     }
