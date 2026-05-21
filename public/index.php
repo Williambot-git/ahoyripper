@@ -114,7 +114,7 @@ $VERSION = '1.0.0';
           class="rip-input"
           id="urlInput"
           placeholder="Paste a link here..."
-          value="<?= htmlspecialchars($default_url) ?>"
+          value="<?= htmlspecialchars($default_url, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="off"
