@@ -330,6 +330,13 @@ function parseFormats($json_str, &$raw_error_out = null) {
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
     $uploader = clean($data['uploader'] ?? '');
+    // Sanitize a derived filename from the title for use in Content-Disposition.
+    // yt-dlp would name the file this way; we use it so the browser saves a
+    // meaningful name instead of the generic "ahoyrip.mp4".
+    $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
+    $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
+    if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
+    $derived_filename = $raw_fn ?: 'ahoyrip';
 
     $formats = [];
     foreach (($data['formats'] ?? []) as $f) {
@@ -432,6 +439,7 @@ usort($formats, function($a, $b) use ($sort) {
         'thumbnail' => $thumbnail,
         'duration' => $duration,
         'uploader' => $uploader,
+        'derived_filename' => $derived_filename,
         'formats' => $formats,
     ];
 }
@@ -684,6 +692,7 @@ switch ($action) {
         // Serve a format for download
         $url = trim($_GET['url'] ?? '');
         $format_id = trim($_GET['format'] ?? '');
+        $download_filename = trim($_GET['filename'] ?? '');
         if (!$url || !isValidUrl($url) || !$format_id) {
             http_response_code(400);
             echo json_encode(['error' => 'Missing URL or format.']);
@@ -695,6 +704,18 @@ switch ($action) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid format ID.']);
             exit;
+        }
+
+        // Sanitize optional derived filename: strip control chars, restrict length,
+        // allow only safe chars; fall back to generic name if empty/too long.
+        if ($download_filename !== '') {
+            $download_filename = preg_replace('/[^\w\s._-]/', '', $download_filename);
+            $download_filename = preg_replace('/\s+/', '_', trim($download_filename));
+            if (strlen($download_filename) > 80 || $download_filename === '') {
+                $download_filename = 'ahoyrip';
+            }
+        } else {
+            $download_filename = 'ahoyrip';
         }
 
         $f_shell = escapeshellarg($format_id);
@@ -842,7 +863,9 @@ switch ($action) {
 
         // Detect extension and MIME from the actual downloaded file
         $ext = pathinfo($actual_file, PATHINFO_EXTENSION);
-        $download_name = 'ahoyrip.' . ($ext ?: 'mp4');
+        // Use the sanitized derived filename from the URL param, falling back to
+        // the generic "ahoyrip.<ext>" so the browser still proposes a useful name.
+        $download_name = $download_filename . '.' . ($ext ?: 'mp4');
 
         $mime = 'application/octet-stream';
         $finfo = new finfo(FILEINFO_MIME_TYPE);

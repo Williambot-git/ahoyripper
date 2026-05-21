@@ -299,13 +299,15 @@ $VERSION = '1.0.0';
     return '<1 MB';
   }
 
-  function buildDownloadUrl(url, formatId, label) {
+  function buildDownloadUrl(url, formatId, label, derivedFilename) {
     // For combined video+audio formats, we need to merge streams
     // yt-dlp handles this with the format string
     // Key is sent via Authorization header, not URL (keeps key out of logs)
+    // Filename is the sanitized video title, used to set a meaningful download name
     var keyInput = document.getElementById('apiKey');
     var key = (keyInput && keyInput.value) ? keyInput.value : '';
-    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}`, key };
+    var fn = derivedFilename ? '&filename=' + encodeURIComponent(derivedFilename) : '';
+    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}` + fn, key };
   }
 
   function renderFormats(url, data) {
@@ -356,7 +358,7 @@ $VERSION = '1.0.0';
     function renderFormatCard(f) {
       var card = document.createElement('a');
       card.className = 'format-card';
-      card.href = buildDownloadUrl(url, f.id, f.label || f.ext);
+      card.href = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
       card.download = '';
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
@@ -384,7 +386,7 @@ $VERSION = '1.0.0';
 
       card.addEventListener('click', function(e) {
         e.preventDefault();
-        var dl = buildDownloadUrl(url, f.id, f.label || f.ext);
+        var dl = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
         var dlHeaders = {};
         if (dl.key) { dlHeaders['Authorization'] = 'Bearer ' + encodeURIComponent(dl.key); }
         card.classList.add('downloading');
