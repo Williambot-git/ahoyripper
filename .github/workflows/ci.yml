@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  sanity:
+    name: Sanity Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP syntax check
+        run: |
+          php -l src/api.php
+          php -l public/index.php
+
+      - name: Check required files
+        run: |
+          for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do
+            if [ ! -f "$f" ]; then echo "Missing: $f"; exit 1; fi
+          done
+
+      - name: Check security headers
+        run: |
+          for header in X-Content-Type-Options X-Frame-Options Strict-Transport-Security Content-Security-Policy X-Download-Options; do
+            if ! grep -q "$header" src/api.php; then echo "Missing: $header"; exit 1; fi
+          done
+
+      - name: Check rate limiting
+        run: |
+          grep -q "rate_limit = 30" src/api.php
+          grep -q "dl_rate_limit = 10" src/api.php
+
+      - name: Check format_id validation
+        run: |
+          grep -q "preg_match.*format_id" src/api.php
+
+      - name: Check deprecated yt-dlp flags
+        run: |
+          if grep -q -- '--no-warnings' src/api.php; then echo "NOTE: --no-warnings found (yt-dlp prefers --no-warning)"; fi
+
+      - name: Check shell injection prevention
+        run: |
+          grep -q "escapeshellarg" src/api.php
+          grep -q "bypass_shell.*true" src/api.php
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t ahoyripper-test .
+      - name: List Docker layers
+        run: docker history ahoyripper-test
