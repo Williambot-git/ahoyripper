@@ -587,6 +587,30 @@ switch ($action) {
         runYtdlp("--dump-json --no-playlist --no-warnings -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
+            // The fetch failed — undo the quota increment so failed attempts don't
+            // burn the user's daily limit. Only count successful info retrievals.
+            if (!$unlimited) {
+                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                    $undo_raw = fread($undo_fp, 4096);
+                    $undo_data = ['t' => date('Y-m-d'), 'c' => 0];
+                    if ($undo_raw) {
+                        $decoded = json_decode($undo_raw, true);
+                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                    }
+                    // Only decrement if it's the current day's record
+                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] > 0) {
+                        $undo_data['c']--;
+                        ftruncate($undo_fp, 0);
+                        rewind($undo_fp);
+                        fwrite($undo_fp, json_encode($undo_data));
+                        fflush($undo_fp);
+                    }
+                    flock($undo_fp, LOCK_UN);
+                    fclose($undo_fp);
+                }
+            }
+
             // Extract a clean, readable error from yt-dlp output
             // Strip HTML tags and control chars; truncate to a useful length
             $raw_err = trim($err ?: $out);
