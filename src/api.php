@@ -877,7 +877,7 @@ case 'progress':
             $response['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
         }
 
-        echo json_encode($response, JSON_PRETTY_PRINT | JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
     default: {
