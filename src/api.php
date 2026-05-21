@@ -33,6 +33,7 @@ if ($referer) {
     $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
     if (!in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
         // Log and block suspicious cross-site requests
+        logRequest('cors_block', 403, ['reason' => 'invalid_origin', 'referer' => $referer]);
         error_log("AhoyRipper: blocked cross-site request from referer: $referer");
         http_response_code(403);
         echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN']);
@@ -444,6 +445,48 @@ usort($formats, function($a, $b) use ($sort) {
     ];
 }
 
+// ─── Structured Request Logging ──────────────────────────────────────────
+// Logs request metadata to /var/log/ahoyripper/requests.log for monitoring.
+// Uses JSON Lines format (one JSON object per line) for easy grep/jq parsing.
+// Requires: /var/log/ahoyripper/ to be created and writable by the web server.
+// Falls back to error_log silently if the file is not writable.
+function logRequest($action, $status, $extra = []) {
+    static $log_dir = '/var/log/ahoyripper';
+    static $log_file = '/var/log/ahoyripper/requests.log';
+    static $log_init = false;
+
+    // Attempt to create log dir on first call if it doesn't exist
+    if (!$log_init) {
+        $log_init = true;
+        if (!is_dir($log_dir)) {
+            @mkdir($log_dir, 0755, true);
+        }
+    }
+
+    $entry = [
+        'ts' => date('c'),
+        'req_id' => $_SERVER['HTTP_X_REQUEST_ID'] ?? '',
+        'action' => $action,
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        'uri' => $_SERVER['REQUEST_URI'] ?? '',
+        'ua' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
+        'status' => $status,
+    ];
+    if ($extra) {
+        foreach ($extra as $k => $v) {
+            // Omit sensitive fields from extra
+            if (in_array($k, ['api_key', 'key', 'url', 'filename'], true)) continue;
+            $entry[$k] = is_string($v) ? substr($v, 0, 200) : $v;
+        }
+    }
+
+    $line = json_encode($entry, JSON_UNESCAPED_SLASHES) . "\n";
+    if (@file_put_contents($log_file, $line, FILE_APPEND | LOCK_EX) === false) {
+        // Fallback to PHP error_log if file write fails
+        @error_log("AhoyRipper [$action]: " . json_encode($entry, JSON_UNESCAPED_SLASHES));
+    }
+}
+
 // ─── CONSTANTS ──────────────────────────────────────────────
 // Internal API key constant — declared at file scope so it is in scope
 // for all code paths (especially the download case below).
@@ -474,6 +517,7 @@ switch ($action) {
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
         if (!$url || !isValidUrl($url)) {
             http_response_code(400);
+            logRequest('info', 400, ['reason' => 'invalid_url']);
             echo json_encode(['error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.']);
             exit;
         }
@@ -510,6 +554,7 @@ switch ($action) {
             if ($daily_data['c'] >= $daily_limit) {
                 flock($daily_fp, LOCK_UN);
                 fclose($daily_fp);
+                logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
@@ -542,6 +587,7 @@ switch ($action) {
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
             $ytdlp_ver = $GLOBALS['__ytdlp_version'];
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
+            logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => substr($err_msg, 0, 100)]);
             http_response_code(422);
             echo json_encode(['error' => "Could not fetch that URL. $err_msg$version_info"]);
             exit;
@@ -549,12 +595,15 @@ switch ($action) {
 
         $parsed = parseFormats($out, $raw_err);
         if (!$parsed) {
+            logRequest('info', 422, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code(422);
             echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
             exit;
         }
         if (isset($parsed['error'])) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422
+            $err_code = $parsed['error_code'] ?? 'PARSE_ERROR';
+            logRequest('info', 422, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
             http_response_code(422);
             $resp = ['error' => $parsed['error']];
             if (!empty($parsed['error_code'])) {
@@ -569,6 +618,7 @@ switch ($action) {
         }
 
         echo json_encode($parsed);
+        logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
     }
 
@@ -671,6 +721,7 @@ switch ($action) {
             if ($daily_data['c'] >= $daily_limit) {
                 flock($daily_fp, LOCK_UN);
                 fclose($daily_fp);
+                logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
@@ -695,6 +746,7 @@ switch ($action) {
         $download_filename = trim($_GET['filename'] ?? '');
         if (!$url || !isValidUrl($url) || !$format_id) {
             http_response_code(400);
+            logRequest('download', 400, ['reason' => 'missing_params']);
             echo json_encode(['error' => 'Missing URL or format.']);
             exit;
         }
@@ -702,6 +754,7 @@ switch ($action) {
         // Validate format_id: alphanumeric + safe chars only, no shell injection
         if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
             http_response_code(400);
+            logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode(['error' => 'Invalid format ID.']);
             exit;
         }
@@ -830,12 +883,14 @@ switch ($action) {
             if (strlen($proc_err) > 200) $proc_err = substr($proc_err, 0, 200) . '...';
             $err_classified = classifyYtdlpError($proc_err);
             if ($err_classified) {
+                logRequest('download', 422, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code(422);
                 echo json_encode([
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
                 ]);
             } else {
+                logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
                 echo json_encode([
                     'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
@@ -908,6 +963,7 @@ switch ($action) {
         if ($actual_file && file_exists($actual_file)) {
             @unlink($actual_file);
         }
+        logRequest('download', 200, ['filesize_bytes' => $filesize, 'format_id' => $format_id]);
         exit;
     }
 
