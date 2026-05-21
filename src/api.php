@@ -93,7 +93,7 @@ if ($is_rate_limited) {
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
-                'upgrade_url' => 'https://ahoyvpn.net',
+                'upgrade_url' => 'https://ahoyvpn.com',
             ]); // @codingStandardsIgnoreLine
             exit;
         }
@@ -568,7 +568,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
-                    'upgrade_url' => 'https://ahoyvpn.net',
+                    'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit
                 ]);
                 exit;
@@ -759,7 +759,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
-                    'upgrade_url' => 'https://ahoyvpn.net',
+                    'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit
                 ]);
                 exit;

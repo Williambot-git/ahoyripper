@@ -100,7 +100,7 @@ $VERSION = '1.0.0';
     <span>AhoyRipper</span>
   </a>
   <div class="ahoy-nav-links">
-    <a href="https://ahoyvpn.net">AhoyVPN</a>
+    <a href="https://ahoyvpn.com">AhoyVPN</a>
   </div>
 </nav>
 
@@ -216,20 +216,20 @@ $VERSION = '1.0.0';
     <!-- VPN Banner -->
     <div class="vpn-banner">
       <p><strong>Want unlimited, unrestricted access?</strong> Route through our VPN for total privacy and to bypass any restrictions.</p>
-      <a href="https://ahoyvpn.net" class="vpn-btn">Get AhoyVPN &mdash; $5.99/mo</a>
+      <a href="https://ahoyvpn.com" class="vpn-btn">Get AhoyVPN &mdash; $5.99/mo</a>
     </div>
   
     <!-- VPN Upsell -->
     <div class="vpn-banner" style="margin-top:2rem; text-align:center; padding:2rem; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:12px; border:1px solid #3b82f6;">
       <h2 style="color:#fff; margin-bottom:0.5rem; font-size:1.5rem;">Unlimited Rips with AhoyVPN</h2>
       <p style="color:#ccc; margin-bottom:1.5rem;">10 free rips per day &mdash; or get unlimited access with our VPN plan for just $5.99/month. No logs, no tracking, cancel anytime.</p>
-      <a href="https://ahoyvpn.net" class="vpn-btn" style="font-size:1.1rem; padding:0.75rem 2rem;">Get AhoyVPN &mdash; $5.99/mo</a>
+      <a href="https://ahoyvpn.com" class="vpn-btn" style="font-size:1.1rem; padding:0.75rem 2rem;">Get AhoyVPN &mdash; $5.99/mo</a>
     </div>
 </section>
 </main>
 
 <footer>
-  <p>For personal use only. Respect copyright. &nbsp;|&nbsp; <a href="https://ahoyvpn.net">AhoyVPN</a> &nbsp;|&nbsp; <a href="mailto:dmca@ahoyvpn.com">DMCA</a></p>
+  <p>For personal use only. Respect copyright. &nbsp;|&nbsp; <a href="https://ahoyvpn.com">AhoyVPN</a> &nbsp;|&nbsp; <a href="mailto:dmca@ahoyvpn.com">DMCA</a></p>
   <p style="margin-top:0.5rem">&copy; <?= date('Y') ?> AhoyRipper. All rights reserved.</p>
 </footer>
 
@@ -509,16 +509,16 @@ $VERSION = '1.0.0';
         var msg = err.error || 'Something went wrong. Try again.';
         if (err.error_code) {
           var errorHints = {
-            'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.net',
-            'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.net',
-            'PRIVATE_VIDEO': 'This video is private and cannot be downloaded.',
+'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
+            'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.com',
+            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
             'UNSUPPORTED_SITE': 'This site is not supported. Check the list at yt-dlp.github.io/supported-sites.',
             'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
             'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
             'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
-            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.net',
+            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
             'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
             'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
