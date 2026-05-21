@@ -23,5 +23,5 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
-User-agent:Omgilibot
+User-agent: Omgilibot
 Disallow: /
