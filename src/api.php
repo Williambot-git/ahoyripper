@@ -41,74 +41,83 @@ if ($referer) {
     }
 }
 
+// Rate limiting applies to expensive actions only (info, download).
+// Lightweight endpoints (health, progress) are exempt to allow frequent monitoring
+// without burning the user's rate budget.
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$rate_limited_actions = ['info', 'download'];
+$is_rate_limited = in_array($action, $rate_limited_actions, true);
+
 // Rate limiting - atomic IP-based gate using flock
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = 30; // requests per minute
 $rate_window = 60;
 
-$fp = fopen($rate_file, 'c+');
-if (!$fp) {
-    http_response_code(503);
-    echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
-    exit;
-}
-if (!flock($fp, LOCK_EX)) {
-    fclose($fp);
-    http_response_code(503);
-    echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
-    exit;
-}
-
-$data = ['t' => time(), 'c' => 0];
-$raw = fread($fp, 4096);
-if ($raw) {
-    $decoded = json_decode($raw, true);
-    if ($decoded && is_array($decoded)) {
-        $data = $decoded;
-    }
-}
-
-// Add rate limit response headers for client visibility
-$reset = $data['t'] + $rate_window;
-header('X-RateLimit-Limit: ' . $rate_limit);
-header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
-header('X-RateLimit-Reset: ' . $reset);
-header('X-RateLimit-Window: ' . $rate_window);
-
-if (time() - $data['t'] < $rate_window) {
-    if ($data['c'] >= $rate_limit) {
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        http_response_code(429);
-        header('Retry-After: 30');
-        echo json_encode([
-            'error' => 'Too many requests. Slow down.',
-            'error_code' => 'RATE_LIMIT_EXCEEDED',
-            'upgrade_url' => 'https://ahoyvpn.net',
-        ]); // @codingStandardsIgnoreLine
+if ($is_rate_limited) {
+    $fp = fopen($rate_file, 'c+');
+    if (!$fp) {
+        http_response_code(503);
+        echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
         exit;
     }
-    $data['c']++;
-} else {
-    $data = ['t' => time(), 'c' => 1];
-}
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        http_response_code(503);
+        echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+        exit;
+    }
 
-// Write back atomically
-ftruncate($fp, 0);
-rewind($fp);
-fwrite($fp, json_encode($data));
-fflush($fp);
-flock($fp, LOCK_UN);
-fclose($fp);
+    $data = ['t' => time(), 'c' => 0];
+    $raw = fread($fp, 4096);
+    if ($raw) {
+        $decoded = json_decode($raw, true);
+        if ($decoded && is_array($decoded)) {
+            $data = $decoded;
+        }
+    }
 
-// Periodic cleanup of stale rate files (1% chance per request)
-if (mt_rand(1, 100) === 1) {
-    $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
-    foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
-        $d = @json_decode(@file_get_contents($f), true);
-        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
-            @unlink($f);
+    // Add rate limit response headers for client visibility
+    $reset = $data['t'] + $rate_window;
+    header('X-RateLimit-Limit: ' . $rate_limit);
+    header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+    header('X-RateLimit-Reset: ' . $reset);
+    header('X-RateLimit-Window: ' . $rate_window);
+
+    if (time() - $data['t'] < $rate_window) {
+        if ($data['c'] >= $rate_limit) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            http_response_code(429);
+            header('Retry-After: 30');
+            echo json_encode([
+                'error' => 'Too many requests. Slow down.',
+                'error_code' => 'RATE_LIMIT_EXCEEDED',
+                'upgrade_url' => 'https://ahoyvpn.net',
+            ]); // @codingStandardsIgnoreLine
+            exit;
+        }
+        $data['c']++;
+    } else {
+        $data = ['t' => time(), 'c' => 1];
+    }
+
+    // Write back atomically
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($data));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    // Periodic cleanup of stale rate files (1% chance per request)
+    if (mt_rand(1, 100) === 1) {
+        $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
+        foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
+            $d = @json_decode(@file_get_contents($f), true);
+            if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
+                @unlink($f);
+            }
         }
     }
 }
