@@ -533,6 +533,10 @@ $VERSION = '1.0.0';
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
             'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
+            'PARSE_ERROR': 'Could not parse the video response. The site may be temporarily unavailable.',
+            '504': 'The request timed out. The video might be too large or the site is slow. Try a smaller format.',
+            '502': 'The server encountered an error. Please try again in a moment.',
+            '503': 'Service temporarily unavailable. Please try again shortly.',
             'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
             'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
             'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
@@ -541,8 +545,8 @@ $VERSION = '1.0.0';
           };
           if (err.error_code && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];
-          } else if (resp.status === 504) {
-            msg = 'The download timed out. Try a smaller format (audio or lower resolution).';
+          } else if (errorHints[resp.status]) {
+            msg = errorHints[resp.status];
           }
         }
         showError(msg);
