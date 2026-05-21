@@ -286,10 +286,10 @@ $VERSION = '1.0.0';
   function buildDownloadUrl(url, formatId, label) {
     // For combined video+audio formats, we need to merge streams
     // yt-dlp handles this with the format string
-    // Include API key for unlimited users (bypasses daily limit + higher rate limit)
+    // Key is sent via Authorization header, not URL (keeps key out of logs)
     var keyInput = document.getElementById('apiKey');
-    var key = (keyInput && keyInput.value) ? '&key=' + encodeURIComponent(keyInput.value) : '';
-    return `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}${key}`;
+    var key = (keyInput && keyInput.value) ? keyInput.value : '';
+    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}`, key };
   }
 
   function renderFormats(url, data) {
@@ -368,10 +368,12 @@ $VERSION = '1.0.0';
 
       card.addEventListener('click', function(e) {
         e.preventDefault();
-        var dlUrl = card.href;
+        var dl = buildDownloadUrl(url, f.id, f.label || f.ext);
+        var dlHeaders = {};
+        if (dl.key) { dlHeaders['Authorization'] = 'Bearer ' + encodeURIComponent(dl.key); }
         card.classList.add('downloading');
         setLoading(true);
-        fetch(dlUrl, { signal: AbortSignal.timeout(300000) })
+        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
               return resp.json().catch(function() {
@@ -449,8 +451,12 @@ $VERSION = '1.0.0';
 
     try {
       const key = document.getElementById('apiKey') && document.getElementById('apiKey').value;
-      const keyParam = key ? '&key=' + encodeURIComponent(key) : '';
-      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + keyParam, {
+      const headers = {};
+      if (key) {
+        headers['Authorization'] = 'Bearer ' + encodeURIComponent(key);
+      }
+      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url), {
+        headers,
         signal: AbortSignal.timeout(60000)
       });
 

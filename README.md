@@ -121,6 +121,7 @@ GET /src/api.php?action=info&url=<url>
 ### Download a format
 ```
 GET /src/api.php?action=download&url=<url>&format=<format_id>
+Authorization: Bearer <api_key>
 ```
 
 The `format_id` comes from the `id` field in the info response. The API streams the file directly.

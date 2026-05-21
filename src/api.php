@@ -488,7 +488,14 @@ switch ($action) {
 
     case 'download': {
         // ─── Check for unlimited API key ───
-        $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
+        // Accept key from Authorization: Bearer header (preferred, keeps key out of URLs/logs)
+        // Fall back to GET/POST query param for backwards compatibility.
+        $bearer = null;
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
+            $bearer = trim($m[1]);
+        }
+        $api_key = $bearer ?? ($_GET['key'] ?? $_POST['key'] ?? null);
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Download rate limiting (atomic via flock) ───
