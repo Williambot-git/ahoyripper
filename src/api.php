@@ -446,6 +446,12 @@ define('AHOY_UNLIMITED_KEY', 'RIPPER2026');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+// $unlimited is set in the download case below after reading the API key.
+// Default to false here so the info-action daily-quota check (which runs
+// before the switch) has a safe fallback — it will be overwritten with the
+// real value when action=download, which is the only place a key is sent.
+$unlimited = false;
+
 // Enforce GET for all API actions — POST is not used or documented.
 // Rejecting wrong methods early gives a clear 405 instead of ambiguous behaviour.
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -516,7 +522,7 @@ switch ($action) {
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
-        runYtdlp("--dump-json --no-playlist --no-warning -- " . $url, $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --no-warnings -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
