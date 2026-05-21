@@ -687,6 +687,8 @@ switch ($action) {
             if ($timeout > 0 && (time() - $start) > $timeout) {
                 proc_terminate($proc, 9);
                 $proc_killed = true;
+                // Use glob pattern — $out_file was never set in this scope.
+                // $out_base was set above and holds the safe base name.
                 foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 http_response_code(504);
                 echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
