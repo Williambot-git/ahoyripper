@@ -13,7 +13,11 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
-header('X-Request-ID: ' . bin2hex(random_bytes(8)));
+$request_id = bin2hex(random_bytes(8));
+header('X-Request-ID: ' . $request_id);
+
+// Make request ID available to logRequest via a static global
+$GLOBALS['__request_id'] = $request_id;
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 // Note: COEP removed — require-corp breaks cross-origin image loads (e.g. thumbnails
@@ -474,7 +478,7 @@ function logRequest($action, $status, $extra = []) {
 
     $entry = [
         'ts' => date('c'),
-        'req_id' => $_SERVER['HTTP_X_REQUEST_ID'] ?? '',
+        'req_id' => $GLOBALS['__request_id'] ?? '',
         'action' => $action,
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
         'uri' => $_SERVER['REQUEST_URI'] ?? '',
