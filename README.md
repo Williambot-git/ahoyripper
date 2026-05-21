@@ -114,9 +114,27 @@ GET /src/api.php?action=info&url=<url>
 | Code | Meaning |
 |------|---------|
 | `400` | Invalid URL or missing parameters |
-| `422` | URL could not be fetched or parsed |
-| `429` | Rate limit exceeded (see headers below) |
+| `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
+| `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
+| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body |
 | `503` | Service temporarily unavailable |
+
+**Classified error codes** (surfaced in the `error_code` field of 422 responses):
+
+| error_code | Meaning |
+|------------|---------|
+| `GEOBLOCKED` | Video is geo-restricted in your region |
+| `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
+| `LOGIN_REQUIRED` | Video requires login or subscription on the source platform |
+| `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
+| `PLAYLIST_MISSING` | Playlist not found or no longer exists |
+| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests — try again shortly |
+| `SSL_ERROR` | Secure connection to the source failed |
+| `CONNECTION_FAILED` | Could not connect to the source |
+| `FILE_TOO_LARGE` | File exceeds the server's maximum size |
+| `FORMAT_UNAVAILABLE` | That format is not available for this video |
+| `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) |
 
 ### Download a format
 ```
@@ -135,15 +153,20 @@ Returns:
 ```json
 {
   "status": "ok",
+  "server_time": "2026-05-21T16:00:00+00:00",
   "yt_dlp_version": "2024.x.x",
   "ffmpeg_version": "ffmpeg version 6.x",
+  "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
+  "yt_dlp_cache_age_seconds": 542,
+  "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
+  "ffmpeg_cache_age_seconds": 542,
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2
 }
 ```
 
-Fields marked with `?` are only present when available on the host system (`load_avg` requires Linux, `memory_available_pct` reads `/proc/meminfo`, `disk_free_gb` uses `disk_free_space()`).
+`load_avg` requires Linux. `memory_available_pct` reads `/proc/meminfo`. `disk_free_gb` uses `disk_free_space()`. Cache fields reflect internal version-caching TTLs (1 hour).
 
 ### Rate Limits
 
