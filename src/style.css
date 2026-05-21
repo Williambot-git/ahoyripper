@@ -222,6 +222,7 @@ body {
   gap: 1rem;
   margin-bottom: 1.25rem;
   text-align: left;
+  flex-wrap: wrap;
 }
 .results-thumb {
   width: 72px;
@@ -249,6 +250,29 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.results-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+.sort-label {
+  font-size: 0.75rem;
+  color: var(--color-text-ter);
+  white-space: nowrap;
+}
+.sort-select {
+  background: var(--color-surface-el);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.sort-select:focus { border-color: var(--color-accent); outline: none; }
 .format-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

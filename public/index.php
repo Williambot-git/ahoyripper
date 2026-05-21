@@ -152,6 +152,14 @@ $VERSION = '1.0.0';
           </p>
           <p class="results-sub" id="resultsSub"></p>
         </div>
+        <div class="results-sort">
+          <label for="sortSelect" class="sort-label">Sort:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="height">Quality</option>
+            <option value="filesize">Size</option>
+            <option value="tbr">Bitrate</option>
+          </select>
+        </div>
       </div>
       <div class="format-grid" id="formatGrid"></div>
       <div style="margin-top:1.5rem; text-align:center;">
@@ -235,6 +243,13 @@ $VERSION = '1.0.0';
   const formatGrid = document.getElementById('formatGrid');
   const resultsTitle = document.getElementById('resultsTitle');
   const ripAgain = document.getElementById('ripAgain');
+  const sortSelect = document.getElementById('sortSelect');
+
+  // Persist and restore sort preference
+  var currentSort = localStorage.getItem('ahoyrip_sort') || 'height';
+  if (sortSelect) {
+    sortSelect.value = currentSort;
+  }
 
   function setProgress(pct, text) {
     // Progress is driven by state, not real percentage
@@ -441,6 +456,18 @@ $VERSION = '1.0.0';
     setTimeout(fetchInfo, 300);
   }
 
+  // Sort preference change — re-fetch with new sort order
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function() {
+      var s = sortSelect.value;
+      localStorage.setItem('ahoyrip_sort', s);
+      // Re-fetch if we already have a URL loaded
+      if (input.value && input.value.startsWith('http')) {
+        fetchInfo();
+      }
+    });
+  }
+
   async function fetchInfo() {
     const url = input.value.trim();
     if (!url) return;
@@ -456,7 +483,8 @@ $VERSION = '1.0.0';
       if (key) {
         headers['Authorization'] = 'Bearer ' + encodeURIComponent(key);
       }
-      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url), {
+      const sort = sortSelect ? sortSelect.value : 'height';
+      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + '&sort=' + encodeURIComponent(sort), {
         headers,
         signal: AbortSignal.timeout(60000)
       });
