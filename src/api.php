@@ -524,6 +524,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
+// Verify the Accept header expects JSON — reject non-JSON requests
+// to prevent the API from returning HTML/error pages to API clients.
+$accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+if ($accept && !preg_match('/application\/json/i', $accept) && !preg_match('/\*/i', $accept)) {
+    http_response_code(406);
+    echo json_encode(['error' => 'Not acceptable. API only returns application/json.', 'error_code' => 'NOT_ACCEPTABLE']);
+    exit;
+}
+
 switch ($action) {
     case 'info': {
         // Get video info + formats
