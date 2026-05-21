@@ -464,6 +464,56 @@ switch ($action) {
             exit;
         }
 
+        // ─── Daily download quota (5 free per day, skip if unlimited key) ───
+        // Enforce on info action too — yt-dlp is equally expensive here.
+        if (!$unlimited) {
+            $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
+            $daily_limit = 5;
+            $daily_fp = fopen($daily_file, 'c+');
+            if (!$daily_fp) {
+                http_response_code(503);
+                echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+                exit;
+            }
+            if (!flock($daily_fp, LOCK_EX)) {
+                fclose($daily_fp);
+                http_response_code(503);
+                echo json_encode(['error' => 'Service temporarily unavailable.']); // @codingStandardsIgnoreLine
+                exit;
+            }
+            $daily_data = ['t' => date('Y-m-d'), 'c' => 0];
+            $daily_raw = fread($daily_fp, 4096);
+            if ($daily_raw) {
+                $decoded = json_decode($daily_raw, true);
+                if ($decoded && is_array($decoded)) {
+                    $daily_data = $decoded;
+                }
+            }
+            $today = date('Y-m-d');
+            if ($daily_data['t'] !== $today) {
+                $daily_data = ['t' => $today, 'c' => 0];
+            }
+            if ($daily_data['c'] >= $daily_limit) {
+                flock($daily_fp, LOCK_UN);
+                fclose($daily_fp);
+                http_response_code(429);
+                echo json_encode([
+                    'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
+                    'error_code' => 'DAILY_LIMIT',
+                    'upgrade_url' => 'https://ahoyvpn.net',
+                    'daily_limit' => $daily_limit
+                ]);
+                exit;
+            }
+            $daily_data['c']++;
+            ftruncate($daily_fp, 0);
+            rewind($daily_fp);
+            fwrite($daily_fp, json_encode($daily_data));
+            fflush($daily_fp);
+            flock($daily_fp, LOCK_UN);
+            fclose($daily_fp);
+        }
+
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
         runYtdlp("--dump-json --no-playlist --no-warning -- " . $url, $out, $err, $exit, 45);
