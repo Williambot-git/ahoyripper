@@ -479,6 +479,11 @@ $VERSION = '1.0.0';
             'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.net',
             'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
+            'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
+            'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
+            'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
+            'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
+            'YTDLP_ERROR': 'The download failed. Try another format or wait a moment.',
           };
           if (err.error_code && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];

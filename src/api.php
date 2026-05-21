@@ -275,6 +275,18 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
         return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
     }
+    if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
+        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
+    }
+    if (preg_match('/connection.*fail|dns.*fail|could not connect|i/o timeout|connection timed out/i', $err_lower)) {
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
+    }
+    if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
+        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.'];
+    }
+    if (preg_match('/requested format|not.*available|does not contain|match/i', $err_lower)) {
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
+    }
     return null;
 }
 
