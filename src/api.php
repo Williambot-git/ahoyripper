@@ -424,6 +424,14 @@ define('AHOY_UNLIMITED_KEY', 'RIPPER2026');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+// Enforce GET for all API actions — POST is not used or documented.
+// Rejecting wrong methods early gives a clear 405 instead of ambiguous behaviour.
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed. Use GET.', 'error_code' => 'METHOD_NOT_ALLOWED']);
+    exit;
+}
+
 switch ($action) {
     case 'info': {
         // Get video info + formats
