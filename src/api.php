@@ -696,7 +696,11 @@ switch ($action) {
             foreach ($read as $p) {
                 $s = @fread($p, 65536);
                 if ($s === false || $s === '') {
-                    if (feof($p)) fclose($p);
+                    if (feof($p)) {
+                        fclose($p);
+                        if ($p === $pipes[1]) $pipes[1] = null;
+                        elseif ($p === $pipes[2]) $pipes[2] = null;
+                    }
                 } else {
                     if ($p === $pipes[1]) {
                         $proc_stdout .= $s;
@@ -706,6 +710,9 @@ switch ($action) {
                 }
             }
         }
+        // Close any remaining open pipes
+        if ($pipes[1] !== null) fclose($pipes[1]);
+        if ($pipes[2] !== null) fclose($pipes[2]);
 
         proc_close($proc);
 
