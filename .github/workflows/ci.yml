@@ -41,8 +41,10 @@ jobs:
 
       - name: Check yt-dlp flags
         run: |
-          # Ensure --no-warning (not --no-warnings) and no deprecated flags
-          if grep -q -- '--no-warnings' src/api.php; then echo "FAIL: deprecated --no-warnings"; exit 1; fi
+          # --no-warning (singular) is deprecated; --no-warnings (plural) is current
+          # The grep below catches the deprecated singular form as a failure.
+          # The codebase should use --no-warnings (plural) throughout.
+          if grep -q -- '--no-warning$' src/api.php; then echo "FAIL: deprecated --no-warning (singular) found — use --no-warnings"; exit 1; fi
 
       - name: Check shell injection prevention
         run: |
