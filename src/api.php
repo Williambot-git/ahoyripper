@@ -679,8 +679,8 @@ switch ($action) {
             }
 
             $read = [];
-            if (!feof($pipes[1])) $read[] = $pipes[1];
-            if (!feof($pipes[2])) $read[] = $pipes[2];
+            if ($pipes[1] !== null && !feof($pipes[1])) $read[] = $pipes[1];
+            if ($pipes[2] !== null && !feof($pipes[2])) $read[] = $pipes[2];
 
             if (empty($read)) {
                 break;
