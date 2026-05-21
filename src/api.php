@@ -715,7 +715,7 @@ switch ($action) {
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
-            '--no-warning',
+            '--no-warnings',
             '--',
             $url,
         ];

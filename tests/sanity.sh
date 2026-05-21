@@ -9,10 +9,12 @@ php -l src/api.php
 php -l public/index.php
 echo "  ✓ PHP syntax OK"
 
+# yt-dlp supports --no-warnings (suppresses extraction warnings, the recommended flag).
+# The old --no-warning (singular) is deprecated and no longer documented.
 echo ""
 echo "==> Checking yt-dlp flags in source..."
-if grep -q -- '--no-warnings' src/api.php; then
-    echo "  ✗ Deprecated --no-warnings flag found (use --no-warning instead)"
+if grep -q -- '--no-warning$' src/api.php; then
+    echo "  ✗ Deprecated --no-warning flag found (yt-dlp uses --no-warnings plural)"
     exit 1
 fi
 echo "  ✓ No deprecated yt-dlp flags"
