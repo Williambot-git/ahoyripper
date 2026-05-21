@@ -444,7 +444,7 @@ switch ($action) {
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
-        runYtdlp("--dump-json --no-playlist --no-warning -- " . escapeshellarg($url), $out, $err, $exit, 45);
+        runYtdlp("--dump-json --no-playlist --no-warning -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
