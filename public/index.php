@@ -26,7 +26,7 @@ $VERSION = '1.0.0';
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'none'; connect-src 'self' https://ahoyripper.com;">
   <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
 
   <!-- Canonical URL -->
