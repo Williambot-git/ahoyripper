@@ -354,11 +354,17 @@ $VERSION = '1.0.0';
       }
     });
 
-    function renderGroupheader(label) {
+    function renderGroupHeader(label) {
       var h = document.createElement('div');
       h.className = 'format-group-header';
       h.textContent = label;
       return h;
+    }
+
+    function renderSeparator() {
+      var sep = document.createElement('div');
+      sep.className = 'format-group-sep';
+      return sep;
     }
 
     function renderFormatCard(f) {
@@ -431,29 +437,30 @@ $VERSION = '1.0.0';
       return card;
     }
 
-    var renderedSomething = false;
+    // Use flexbox instead of CSS grid — flex handles mixed children (cards + headers +
+    // separators) properly since all are direct children of the same flex container.
+    // CSS grid only applies to *direct* children, so using grid with ::before pseudo-
+    // elements and non-grid siblings causes alignment confusion; flex wrap is simpler.
+    formatGrid.style.display = 'flex';
+    formatGrid.style.flexDirection = 'row';
+    formatGrid.style.flexWrap = 'wrap';
+    formatGrid.style.gap = '0';
+
+    var addedAnything = false;
     if (groups.combined.length > 0) {
-      formatGrid.appendChild(renderGroupheader('Video + Audio'));
+      formatGrid.appendChild(renderGroupHeader('Video + Audio'));
       groups.combined.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
-      renderedSomething = true;
+      addedAnything = true;
     }
     if (groups.videoOnly.length > 0) {
-      if (renderedSomething) {
-        var sep = document.createElement('div');
-        sep.className = 'format-group-sep';
-        formatGrid.appendChild(sep);
-      }
-      formatGrid.appendChild(renderGroupheader('Video Only'));
+      if (addedAnything) formatGrid.appendChild(renderSeparator());
+      formatGrid.appendChild(renderGroupHeader('Video Only'));
       groups.videoOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
-      renderedSomething = true;
+      addedAnything = true;
     }
     if (groups.audioOnly.length > 0) {
-      if (renderedSomething) {
-        var sep = document.createElement('div');
-        sep.className = 'format-group-sep';
-        formatGrid.appendChild(sep);
-      }
-      formatGrid.appendChild(renderGroupheader('Audio Only'));
+      if (addedAnything) formatGrid.appendChild(renderSeparator());
+      formatGrid.appendChild(renderGroupHeader('Audio Only'));
       groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
     }
   }
