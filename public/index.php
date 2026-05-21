@@ -507,6 +507,7 @@ $VERSION = '1.0.0';
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
             'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.net',
+            'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
             'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
             'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
             'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
