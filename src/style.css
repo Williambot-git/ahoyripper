@@ -189,9 +189,12 @@ body {
   background: var(--color-accent);
   height: 100%;
   width: 40%;
-  transition: none;
   border-radius: 4px;
   animation: progress-indeterminate 1.4s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.rip-progress.active .progress-bar-fill {
+  animation-play-state: running;
 }
 
 /* Download in-progress overlay on format card */
