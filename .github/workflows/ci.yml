@@ -39,9 +39,10 @@ jobs:
         run: |
           grep -q "preg_match.*format_id" src/api.php
 
-      - name: Check deprecated yt-dlp flags
+      - name: Check yt-dlp flags
         run: |
-          if grep -q -- '--no-warnings' src/api.php; then echo "NOTE: --no-warnings found (yt-dlp prefers --no-warning)"; fi
+          # Ensure --no-warning (not --no-warnings) and no deprecated flags
+          if grep -q -- '--no-warnings' src/api.php; then echo "FAIL: deprecated --no-warnings"; exit 1; fi
 
       - name: Check shell injection prevention
         run: |

@@ -10,11 +10,12 @@ php -l public/index.php
 echo "  ✓ PHP syntax OK"
 
 echo ""
-echo "==> Checking for deprecated yt-dlp flags in source..."
+echo "==> Checking yt-dlp flags in source..."
 if grep -q -- '--no-warnings' src/api.php; then
-    # --no-warnings is valid in yt-dlp but deprecated in favor of --no-warning
-    echo "  ⚠ --no-warnings flag found (note: yt-dlp also accepts --no-warning)"
+    echo "  ✗ Deprecated --no-warnings flag found (use --no-warning instead)"
+    exit 1
 fi
+echo "  ✓ No deprecated yt-dlp flags"
 
 echo ""
 echo "==> Verifying required files exist..."
