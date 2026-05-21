@@ -131,7 +131,7 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Supports most platforms &mdash; 5 free rips/day
+        Supports most platforms &mdash; <span id="quotaDisplay">5</span> free rips/day
       </p>
       <div class="rip-key-wrap">
         <input type="password" id="apiKey" class="rip-key-input" placeholder="AhoyVPN unlimited key (optional)" autocomplete="off">
@@ -489,6 +489,16 @@ $VERSION = '1.0.0';
     showProgress(true);
     setProgress(30, 'Fetching video info...');
 
+    // Read quota from last info response and update the display
+    function updateQuotaFromHeaders(resp) {
+      var rem = resp.headers.get('X-DailyLimit-Remaining');
+      var lim = resp.headers.get('X-DailyLimit-Limit');
+      var el = document.getElementById('quotaDisplay');
+      if (el && rem !== null && lim !== null) {
+        el.textContent = rem;
+      }
+    }
+
     try {
       const key = document.getElementById('apiKey') && document.getElementById('apiKey').value;
       const headers = {};
@@ -500,6 +510,8 @@ $VERSION = '1.0.0';
         headers,
         signal: AbortSignal.timeout(60000)
       });
+
+      updateQuotaFromHeaders(resp);
 
       setProgress(80, 'Parsing...');
 

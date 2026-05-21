@@ -580,6 +580,12 @@ switch ($action) {
             fflush($daily_fp);
             flock($daily_fp, LOCK_UN);
             fclose($daily_fp);
+
+            // Surface daily quota state so the client can display remaining rips
+            header('X-DailyLimit-Limit: ' . $daily_limit);
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
+            header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
+            header('X-DailyLimit-Window: daily');
         }
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
@@ -771,6 +777,12 @@ switch ($action) {
             fflush($daily_fp);
             flock($daily_fp, LOCK_UN);
             fclose($daily_fp);
+
+            // Surface daily quota state so the client can display remaining rips
+            header('X-DailyLimit-Limit: ' . $daily_limit);
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
+            header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
+            header('X-DailyLimit-Window: daily');
         }
 
         // Serve a format for download
