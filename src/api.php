@@ -433,20 +433,20 @@ function parseFormats($json_str, &$raw_error_out = null) {
     }
 
     // Sort: video+audio first, then by height/bitrate
-// Accepts: height (default), filesize, tbr
-$sort = $_GET['sort'] ?? 'height';
-usort($formats, function($a, $b) use ($sort) {
-    // Combined first
-    if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
-    if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
-    // Then by selected sort key
-    if ($sort === 'filesize') {
-        return ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
-    } elseif ($sort === 'tbr') {
-        return ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
-    }
-    return ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
-});
+    // Accepts: height (default), filesize, tbr
+    $sort = $_GET['sort'] ?? 'height';
+    usort($formats, function($a, $b) use ($sort) {
+        // Combined first
+        if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
+        if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
+        // Then by selected sort key
+        if ($sort === 'filesize') {
+            return ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+        } elseif ($sort === 'tbr') {
+            return ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+        }
+        return ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+    });
 
     return [
         'title' => $title,
