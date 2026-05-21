@@ -135,15 +135,22 @@ if (!$GLOBALS['__ytdlp_version']) {
 
 // Run yt-dlp with timeout and capture output
 // $timeout = max seconds for the whole process; 0 = no limit
+// Uses array exec form so bypass_shell=true actually takes effect —
+// no shell is spawned, eliminating shell injection risk for URL args.
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
-    $cmd = '/usr/local/bin/yt-dlp ' . $args;
+    // Build the command as an array so bypass_shell works as intended.
+    // Shell redirection ('2>&1') is unnecessary — we capture stderr via pipe.
+    $ytdlp_bin = '/usr/local/bin/yt-dlp';
+    // Split args preserving quoted strings (handles $shell_url = "'https://...'")
+    $parts = preg_split('/\s+(?=(?:[^"\']|["\'][^"\']*["\'])*$)/', trim($args));
+    $cmd = array_merge([$ytdlp_bin], $parts);
     $desc = [
-        0 => ['pipe', 'r'],  // stdin — keep open but unref so proc can read if needed
+        0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
     $pipes = null;
-    $proc = proc_open($cmd . ' 2>&1', $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
+    $proc = proc_open($cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
     if (!$proc) {
         $exit = -1;
@@ -409,8 +416,9 @@ switch ($action) {
             exit;
         }
 
-        $shell_url = escapeshellarg($url);
-        runYtdlp("--dump-json --no-playlist --no-warning -- $shell_url", $out, $err, $exit, 45);
+        // URL is already validated by isValidUrl(); no shell metacharacters possible
+        // when passed as a direct array element to proc_open (no shell involved).
+        runYtdlp("--dump-json --no-playlist --no-warning -- " . escapeshellarg($url), $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // Extract a clean, readable error from yt-dlp output
