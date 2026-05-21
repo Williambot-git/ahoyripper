@@ -193,9 +193,9 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/docs/suppo
 
 **Audio:** SoundCloud, Bandcamp, Spotify (with auth), Apple Music, Deezer, Mixcloud, Audiomack, and more
 
-**To see the full and current list:**
+**To see the full and current list of supported sites:**
 ```bash
-yt-dlp --list-extractors
+yt-dlp --list-extractor
 ```
 
 You can also test individual URLs directly:

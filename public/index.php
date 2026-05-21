@@ -41,7 +41,7 @@ $VERSION = '1.0.0';
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
-  <meta property="og:description" content="Free online media ripper. Download video and audio from most platforms. No signup required.">
+  <meta property="og:description" content="Download video & audio from YouTube, TikTok, Twitter, SoundCloud & 1800+ sites. Free, no signup, no ads.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="https://ahoyripper.com/og-image.svg">
   <meta property="og:image:width" content="1200">
@@ -52,7 +52,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
-  <meta name="twitter:description" content="Free online media ripper. Download video and audio from most platforms. No signup required.">
+  <meta name="twitter:description" content="Rip any video or audio from 1800+ platforms. Free, fast, no signup needed.">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.svg">
 
   <!-- SVG Favicon -->
@@ -300,9 +300,10 @@ $VERSION = '1.0.0';
   }
 
   function formatBytes(mb) {
-    if (mb >= 1000) return (mb / 1000).toFixed(1) + ' GB';
-    if (mb >= 1) return mb + ' MB';
-    return '<1 MB';
+    if (mb >= 1000) return (mb / 1000).toFixed(mb % 1000 === 0 ? 0 : 1) + ' GB';
+    if (mb >= 1) return mb.toFixed(1) + ' MB';
+    if (mb > 0) return '<1 MB';
+    return '0 B';
   }
 
   function buildDownloadUrl(url, formatId, label, derivedFilename) {
