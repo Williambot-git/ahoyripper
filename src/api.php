@@ -787,6 +787,9 @@ switch ($action) {
         header('X-Download-Options: noopen');
         // Suppress PHP's automatic chunked transfer encoding for binary streams
         header('Transfer-Encoding: identity');
+        // Explicitly close connection after this response to prevent keep-alive
+        // issues on long-running downloads that can cause premature client cuts.
+        header('Connection: close');
 
         ignore_user_abort(true);
         register_shutdown_function(function() use($glob_pattern) {

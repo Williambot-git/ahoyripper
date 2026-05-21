@@ -99,4 +99,13 @@ else
 fi
 
 echo ""
+echo "==> Checking download connection header (prevents keep-alive cut-off)..."
+if grep -q "Connection: close" src/api.php; then
+    echo "  ✓ Connection: close header present in download path"
+else
+    echo "  ✗ Connection: close header missing"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."
