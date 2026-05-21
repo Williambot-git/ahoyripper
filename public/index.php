@@ -14,12 +14,18 @@ $VERSION = '1.0.0';
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
   <meta name="description" content="Free online media ripper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. No signup, no ads.">
   <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
   <meta name="author" content="AhoyVPN">
-  <meta name="theme-color" content="#0f0f0f">
+  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AhoyRipper">
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Security headers -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
