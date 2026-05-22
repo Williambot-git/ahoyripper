@@ -501,10 +501,11 @@ function logRequest($action, $status, $extra = []) {
 }
 
 // ─── CONSTANTS ──────────────────────────────────────────────
-// Internal API key constant — declared at file scope so it is in scope
-// for all code paths (especially the download case below).
+// Unlimited API key — read from environment variable in production.
+// The env var takes precedence; falling back to a compile-time default
+// only for local development / docker where env is not set.
 // Keep the value in a single place to simplify rotation.
-define('AHOY_UNLIMITED_KEY', 'RIPPER2026');
+define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 
 // ─── ROUTING ────────────────────────────────────────────────
 
