@@ -680,7 +680,11 @@ switch ($action) {
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
             logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => substr($err_msg, 0, 100)]);
             http_response_code(422);
-            echo json_encode(['error' => "Could not fetch that URL. $err_msg$version_info"]);
+            echo json_encode([
+                'error' => "Could not fetch that URL. $err_msg$version_info",
+                'error_code' => 'YTDLP_ERROR',
+                'action' => 'info',
+            ]);
             exit;
         }
 
@@ -688,7 +692,10 @@ switch ($action) {
         if (!$parsed) {
             logRequest('info', 422, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code(422);
-            echo json_encode(['error' => 'Could not parse video info. The site may not be supported.']);
+            echo json_encode([
+                'error' => 'Could not parse video info. The site may not be supported.',
+                'error_code' => 'PARSE_ERROR',
+            ]);
             exit;
         }
         if (isset($parsed['error'])) {
@@ -1194,7 +1201,7 @@ case 'progress':
     }
     default: {
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, or ?action=health.'], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.', 'error_code' => 'UNKNOWN_ACTION'], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 }
