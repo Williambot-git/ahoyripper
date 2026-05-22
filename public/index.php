@@ -391,12 +391,14 @@ $VERSION = '1.0.0';
       var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
       var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
       var extMeta = f.ext ? f.ext.toUpperCase() : '';
+      var langMeta = f.language ? f.language.toUpperCase() : '';
       var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
+      var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
 
       card.innerHTML =
         '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
         '<div class="format-label">' + (f.label || (f.ext ? f.ext.toUpperCase() : 'Format')) + '</div>' +
-        '<div class="format-meta">' + metaParts + '</div>' +
+        '<div class="format-meta">' + metaParts + langBadge + '</div>' +
         '<div class="format-size">' + size + '</div>';
 
 card.addEventListener('click', function(e) {

@@ -319,6 +319,18 @@ body {
   font-size: 0.8rem;
   color: var(--color-text-sec);
 }
+.format-lang {
+  display: inline-block;
+  background: var(--color-surface-el);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-sec);
+  margin-left: 0.3rem;
+  vertical-align: middle;
+}
 .format-group-header {
   width: 100%;
   font-size: 0.7rem;
