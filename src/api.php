@@ -916,15 +916,11 @@ switch ($action) {
         if ($pipes[1] !== null) fclose($pipes[1]);
         if ($pipes[2] !== null) fclose($pipes[2]);
 
-        proc_close($proc);
-
-        // ─── Check exit code before streaming ───────────────────────────────────
-        // yt-dlp can exit non-zero even while producing partial output (e.g.
-        // format not available, network glitch, post-processing failure).
-        // Surface the actual error to the client instead of letting them download
-        // a corrupt/empty file.
-        $actual_exit = $exit;
-        unset($exit); // free the reference (intentional, clear the now-closed proc ref)
+        // proc_close() returns the exit code — call it here to capture the status.
+        // Capture it in a separate statement so it can't be mistaken for a void
+        // discard. Pipe handles were already closed above.
+        $actual_exit = proc_close($proc);
+        unset($exit);
         if ($actual_exit !== 0) {
             foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
             // Build a descriptive error from the captured stderr/stdout
