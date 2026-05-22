@@ -374,6 +374,8 @@ function parseFormats($json_str, &$raw_error_out = null) {
         $acodec = clean($f['acodec'] ?? 'none');
         $fps = isset($f['fps']) ? (int)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
+        $quality = clean($f['quality'] ?? '');
+        $format_description = clean($f['format_description'] ?? '');
 
         // Build label
         $label = '';
@@ -408,6 +410,10 @@ function parseFormats($json_str, &$raw_error_out = null) {
             continue; // skip unknown
         }
 
+        // Build human-readable description (used by frontend to show what format is)
+        // Falls back to the label when no extra descriptive info is available.
+        $description = $format_description ?: $label;
+
         // Estimate filesize if not available
         if ($filesize === 0) {
             $duration_secs = $duration ?: 180;
@@ -429,6 +435,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
+            'description' => $description,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
@@ -1004,8 +1011,13 @@ switch ($action) {
 
         if (!$actual_file || !is_file($actual_file) || @filesize($actual_file) === 0) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
+            logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
-            echo json_encode(['error' => 'Download failed. The format may not be available.']);
+            echo json_encode([
+                'error' => 'Download failed. The format may not be available. Try another format from the list.',
+                'error_code' => 'DOWNLOAD_FAILED',
+                'request_id' => $request_id,
+            ]);
             exit;
         }
 

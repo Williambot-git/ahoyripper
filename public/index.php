@@ -398,10 +398,14 @@ $VERSION = '1.0.0';
       var langMeta = f.language ? f.language.toUpperCase() : '';
       var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
       var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
+      // Use description (human-readable yt-dlp description) when available, else label.
+      // description carries extra context like "720p60 HDR" or "audio only" that
+      // label doesn't always capture — particularly for audio and alternative formats.
+      var displayLabel = f.description || f.label || (f.ext ? f.ext.toUpperCase() : 'Format');
 
       card.innerHTML =
         '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
-        '<div class="format-label">' + (f.label || (f.ext ? f.ext.toUpperCase() : 'Format')) + '</div>' +
+        '<div class="format-label">' + displayLabel + '</div>' +
         '<div class="format-meta">' + metaParts + langBadge + '</div>' +
         '<div class="format-size">' + size + '</div>';
 

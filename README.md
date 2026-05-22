@@ -138,13 +138,30 @@ GET /src/api.php?action=info&url=<url>
 
 ### Download a format
 ```
-GET /src/api.php?action=download&url=<url>&format=<format_id>
-Authorization: Bearer <ahoyvpn_key>
+GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>
+Authorization: Bearer ***
 ```
 
 The `format_id` comes from the `id` field in the info response. The API reads the key from the `Authorization: Bearer` header (preferred — keeps the key out of URLs and server logs). A `key` query parameter is also accepted for backwards compatibility but is discouraged.
 
+The `filename` param (optional) sets the downloaded file's name. Only alphanumeric, spaces, dots, underscores, and hyphens are allowed; everything else is stripped. Falls back to `ahoyrip.<ext>` if omitted or empty.
+
 > **Note:** The free tier allows 5 downloads/day. Unlimited-key holders have no daily cap.
+
+**Download error responses** (any of these may be returned when the rip itself fails):
+
+| Code | `error_code` | Meaning |
+|------|--------------|---------|
+| `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
+| `422` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
+| `422` | `LOGIN_REQUIRED` | Video requires login or subscription |
+| `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `422` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
+| `422` | `CONNECTION_FAILED` | Could not connect to the source |
+| `422` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
+| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
+| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
+| `500` | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 
 ### Health check
 ```
