@@ -53,6 +53,9 @@ $rate_limited_actions = ['info', 'download'];
 $is_rate_limited = in_array($action, $rate_limited_actions, true);
 
 // Rate limiting - atomic IP-based gate using flock
+// $ip is used for both rate limiting and daily quota; declared early so it is
+// available for both the rate-limit block and the daily-quota block (info action
+// reads it at line 593, download action at line 818).
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = 30; // requests per minute
@@ -590,6 +593,9 @@ switch ($action) {
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
         // Enforce on info action too — yt-dlp is equally expensive here.
         if (!$unlimited) {
+            // Use the same $ip variable declared above for the rate-limit gate.
+            // Both info and download actions share the same daily-quota file so
+            // that a user hitting 5 info calls has no download quota left.
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
             $daily_limit = 5;
             $daily_fp = fopen($daily_file, 'c+');
@@ -655,6 +661,8 @@ switch ($action) {
             // The fetch failed — undo the quota increment so failed attempts don't
             // burn the user's daily limit. Only count successful info retrievals.
             if (!$unlimited) {
+                // Use the same $ip variable declared at the top of the script so the undo
+                // targets the correct daily-quota file regardless of which action ran.
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if ($undo_fp && flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
@@ -815,7 +823,9 @@ switch ($action) {
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
         if (!$unlimited) {
-            $daily_file = '/tmp/ahoyrip_daily_' . md5($dl_ip);
+            // Use the same $ip variable declared at the top of the script for the
+            // rate-limit gate. Both info and download share the daily-quota file.
+            $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
             $daily_limit = 5;
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
