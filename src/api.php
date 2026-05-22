@@ -717,6 +717,29 @@ switch ($action) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422
             $err_code = $parsed['error_code'] ?? 'PARSE_ERROR';
             logRequest('info', 422, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
+            // Undo the quota increment — parseFormats succeeded (returned a classified error
+            // like GEOBLOCKED/PRIVATE_VIDEO) but the content is not downloadable. We don't
+            // burn the user's daily limit for content that simply can't be ripped.
+            if (!$unlimited) {
+                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                    $undo_raw = fread($undo_fp, 4096);
+                    $undo_data = ['t' => date('Y-m-d'), 'c' => 0];
+                    if ($undo_raw) {
+                        $decoded = json_decode($undo_raw, true);
+                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                    }
+                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] > 0) {
+                        $undo_data['c']--;
+                        ftruncate($undo_fp, 0);
+                        rewind($undo_fp);
+                        fwrite($undo_fp, json_encode($undo_data));
+                        fflush($undo_fp);
+                    }
+                    flock($undo_fp, LOCK_UN);
+                    fclose($undo_fp);
+                }
+            }
             http_response_code(422);
             $resp = ['error' => $parsed['error']];
             if (!empty($parsed['error_code'])) {

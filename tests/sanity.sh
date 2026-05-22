@@ -83,13 +83,29 @@ else
 fi
 
 echo ""
-echo "==> Checking API key support in info action (unlimited-key bypass)..." 
+echo "==> Checking API key support in info action (unlimited-key bypass)..."
 # The info case must read and honour the Bearer API key so that unlimited-key
 # holders do not have their daily quota burned before they even attempt a download.
 if sed -n "/case 'info':/,/case '/p" src/api.php | grep -q "HTTP_AUTHORIZATION" && sed -n "/case 'info':/,/case '/p" src/api.php | grep -q "Bearer"; then
     echo "  ✓ info action reads Bearer API key"
 else
     echo "  ✗ info action does not read Bearer API key — unlimited-key holders lose quota on info"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking quota undo when parseFormats returns a classified error..."
+# When parseFormats returns a classified error (e.g. GEOBLOCKED, PRIVATE_VIDEO),
+# the quota increment should be undone so failed/unavailable content doesn't
+# burn the user's daily limit. The undo block must be inside the
+# "if (isset(\$parsed['error']))" branch, not just in the $out-empty branch.
+# Extract the info case and check for quota-undo logic after parseFormats error.
+INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
+# The undo block appears AFTER the logRequest for 'parse_formats_ytdlp_error'
+if echo "$INFO_CASE" | grep -A 30 "parseFormats.*error" | grep -q "ahoyrip_daily_.*md5.*ip"; then
+    echo "  ✓ Quota undo present for parseFormats classified errors"
+else
+    echo "  ✗ Quota undo missing for parseFormats classified errors — daily limit burned on unavailable content"
     exit 1
 fi
 
