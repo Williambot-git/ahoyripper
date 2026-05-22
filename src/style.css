@@ -283,8 +283,8 @@ body {
   gap: 0.75rem;
 }
 .format-card {
-  flex: 1 1 180px;
-  max-width: 100%;
+  flex: 1 1 160px;
+  max-width: calc(50% - 0.375rem);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
