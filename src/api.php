@@ -114,16 +114,24 @@ if ($is_rate_limited) {
     flock($fp, LOCK_UN);
     fclose($fp);
 
-    // Periodic cleanup of stale rate files (1% chance per request)
-    if (mt_rand(1, 100) === 1) {
-        $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
-        foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
-            $d = @json_decode(@file_get_contents($f), true);
-            if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
-                @unlink($f);
-            }
+// Periodic cleanup of stale rate files (1% chance per request)
+if (mt_rand(1, 100) === 1) {
+    $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
+    foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
+        $d = @json_decode(@file_get_contents($f), true);
+        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
+            @unlink($f);
         }
     }
+    // Clean up stale version cache files (yt-dlp and ffmpeg) — they expire after 1 hour
+    // but the files themselves accumulate on long-running servers if not removed.
+    foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
+        $d = @json_decode(@file_get_contents($cache), true);
+        if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
+            @unlink($cache);
+        }
+    }
+}
 }
 
 // Only allow safe characters in URL
