@@ -1070,7 +1070,42 @@ case 'progress':
             'yt_dlp_cache_age_seconds' => $ytdlp_cache_age,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_age_seconds' => $ffmpeg_cache_age,
+            // Probe yt-dlp with a minimal known extractor to confirm it can reach
+            // external sites and parse responses. Cache result for 5 minutes to
+            // avoid adding latency to every health check under load.
+            'yt_dlp_probe' => $GLOBALS['__ytdlp_probe'] ?? null,
         ];
+
+        // Do a live probe only once per cache window (5 min) to avoid adding
+        // latency to every health check. The cache is per-process via $GLOBALS
+        // so multiple PHP-FPM workers each do at most one probe per window.
+        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
+        $probe_cached = null;
+        if ($probe_cache_file && is_readable($probe_cache_file)) {
+            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+            if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+                $response['yt_dlp_probe'] = $cached['result'] ?? null;
+            }
+        }
+        if (!isset($response['yt_dlp_probe'])) {
+            // Use a fast, stable YouTube video for the probe — short, public,
+            // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
+            $probe_out = $probe_err = '';
+            $probe_exit = -1;
+            $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+            $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
+                ? json_decode($probe_out, true)
+                : null;
+            $response['yt_dlp_probe'] = $probe_result
+                ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80)]
+                : ['ok' => false, 'error' => substr(trim($probe_err ?: $probe_out), 0, 120)];
+            if ($probe_cache_file) {
+                @file_put_contents($probe_cache_file, json_encode([
+                    'result' => $response['yt_dlp_probe'],
+                    'exp' => time() + 300, // 5 min TTL
+                ]));
+            }
+        }
 
         // System resource metrics (Linux-only, gracefully omitted on other platforms)
         if (function_exists('sys_getloadavg')) {
