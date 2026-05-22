@@ -619,7 +619,8 @@ switch ($action) {
             fwrite($daily_fp, json_encode($daily_data));
             fflush($daily_fp);
             flock($daily_fp, LOCK_UN);
-            fclose($daily_fp);
+            fclose($daily_fp);  // explicitly close to release lock without waiting for GC
+            $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips
             header('X-DailyLimit-Limit: ' . $daily_limit);
@@ -835,7 +836,8 @@ switch ($action) {
             fwrite($daily_fp, json_encode($daily_data));
             fflush($daily_fp);
             flock($daily_fp, LOCK_UN);
-            fclose($daily_fp);
+            fclose($daily_fp);  // explicitly close to release lock without waiting for GC
+            $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips
             header('X-DailyLimit-Limit: ' . $daily_limit);
