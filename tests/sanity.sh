@@ -83,6 +83,17 @@ else
 fi
 
 echo ""
+echo "==> Checking API key support in info action (unlimited-key bypass)..." 
+# The info case must read and honour the Bearer API key so that unlimited-key
+# holders do not have their daily quota burned before they even attempt a download.
+if sed -n "/case 'info':/,/case '/p" src/api.php | grep -q "HTTP_AUTHORIZATION" && sed -n "/case 'info':/,/case '/p" src/api.php | grep -q "Bearer"; then
+    echo "  ✓ info action reads Bearer API key"
+else
+    echo "  ✗ info action does not read Bearer API key — unlimited-key holders lose quota on info"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking download exit-code error handling..."
 if grep -q "actual_exit" src/api.php; then
     echo "  ✓ Download exit-code validation present"

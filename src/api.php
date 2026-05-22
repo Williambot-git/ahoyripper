@@ -554,6 +554,16 @@ switch ($action) {
             exit;
         }
 
+        // Read API key (Bearer header preferred; fallback to query param for compat).
+        // Set $unlimited so the daily-quota block below can skip for key holders.
+        $bearer = null;
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
+            $bearer = trim($m[1]);
+        }
+        $api_key = $bearer ?? ($_GET['key'] ?? $_POST['key'] ?? null);
+        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
+
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
         // Enforce on info action too — yt-dlp is equally expensive here.
         if (!$unlimited) {
