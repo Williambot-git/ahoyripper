@@ -521,16 +521,25 @@ $unlimited = false;
 // Rejecting wrong methods early gives a clear 405 instead of ambiguous behaviour.
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed. Use GET.', 'error_code' => 'METHOD_NOT_ALLOWED']);
+    echo json_encode([
+        'error' => 'Method not allowed. Use GET.',
+        'error_code' => 'METHOD_NOT_ALLOWED',
+        'request_id' => $request_id,
+    ]);
     exit;
 }
 
 // Verify the Accept header expects JSON — reject non-JSON requests
 // to prevent the API from returning HTML/error pages to API clients.
+// Allow */* (browsers/clients that accept anything) and application/json variants.
 $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-if ($accept && !preg_match('/application\/json/i', $accept) && !preg_match('/\*/i', $accept)) {
+if ($accept && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
-    echo json_encode(['error' => 'Not acceptable. API only returns application/json.', 'error_code' => 'NOT_ACCEPTABLE']);
+    echo json_encode([
+        'error' => 'Not acceptable. API only returns application/json.',
+        'error_code' => 'NOT_ACCEPTABLE',
+        'request_id' => $request_id,
+    ]);
     exit;
 }
 
