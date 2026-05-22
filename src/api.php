@@ -1084,18 +1084,24 @@ case 'progress':
             'yt_dlp_probe' => $GLOBALS['__ytdlp_probe'] ?? null,
         ];
 
-        // Do a live probe only once per cache window (5 min) to avoid adding
-        // latency to every health check. The cache is per-process via $GLOBALS
-        // so multiple PHP-FPM workers each do at most one probe per window.
+        // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
+        // Running a real YouTube probe adds ~1-3s of latency per uncached health check
+        // (proc_open + yt-dlp startup + network round-trip). The probe is useful when
+        // a client wants to verify end-to-end connectivity, but adds unnecessary overhead
+        // for routine load checks. The probe result is cached for 5 minutes regardless.
         $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
         $probe_cached = null;
+        $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
         if ($probe_cache_file && is_readable($probe_cache_file)) {
             $cached = @json_decode(@file_get_contents($probe_cache_file), true);
             if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
                 $response['yt_dlp_probe'] = $cached['result'] ?? null;
+            } elseif ($do_probe) {
+                // Cache expired AND probe explicitly requested — run live probe below
+                $response['yt_dlp_probe'] = null;
             }
         }
-        if (!isset($response['yt_dlp_probe'])) {
+        if ($do_probe && !isset($response['yt_dlp_probe'])) {
             // Use a fast, stable YouTube video for the probe — short, public,
             // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
             // --skip-download fetches metadata without downloading the full file,
@@ -1115,6 +1121,8 @@ case 'progress':
                     'exp' => time() + 300, // 5 min TTL
                 ]));
             }
+        } elseif (!isset($response['yt_dlp_probe'])) {
+            $response['yt_dlp_probe'] = null;
         }
 
         // System resource metrics (Linux-only, gracefully omitted on other platforms)
