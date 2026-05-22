@@ -743,7 +743,7 @@ switch ($action) {
             }
         }
 
-// Add download rate limit response headers
+        // Add download rate limit response headers
         $dl_reset = $dl_data['t'] + $dl_rate_window;
         header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
         header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
