@@ -335,7 +335,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
             if ($raw_error_out !== null) {
                 $raw_error_out = $err_msg;
             }
-            return ['error' => 'yt-dlp error: ' . $err_msg];
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
         }
         return null;
     }
