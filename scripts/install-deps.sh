@@ -69,9 +69,21 @@ else
     echo "  Installed: $(yt-dlp --version 2>&1 | head -1)"
 fi
 
-# Keep yt-dlp updated (--self-update is the correct flag; -U is deprecated)
+# Keep yt-dlp updated.
+# --self-update works for standalone binary installations but NOT pip-installed
+# yt-dlp (pip-installed yt-dlp ignores --self-update silently). Detect the install
+# method and use the right upgrade path accordingly.
 echo "==> Updating yt-dlp..."
-yt-dlp --self-update 2>&1 | tail -1
+if command -v yt-dlp &>/dev/null; then
+    YTDL_BIN=$(command -v yt-dlp)
+    if [[ "$YTDL_BIN" == *.py || "$YTDL_BIN" == */bin/yt-dlp ]] && grep -q 'site-packages\|dist-packages' "$YTDL_BIN" 2>/dev/null || pip show yt-dlp &>/dev/null; then
+        # pip-installed — use pip to upgrade
+        $PIP_BIN install -q --upgrade yt-dlp 2>&1 | tail -1
+    else
+        # standalone binary — use self-update
+        yt-dlp --self-update 2>&1 | tail -1
+    fi
+fi
 
 echo "==> Installing ffmpeg..."
 apt-get install -y ffmpeg > /dev/null 2>&1
