@@ -604,6 +604,8 @@ switch ($action) {
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
+        // The $timeout of 45s is the maximum time allowed for the info fetch.
+        // Without this, a stalled or unresponsive source could hang the worker indefinitely.
         runYtdlp("--dump-json --no-playlist --no-warnings -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
