@@ -1,17 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="og-title og-desc">
+  <title id="og-title">AhoyRipper - Free Online Media Ripper</title>
+  <desc id="og-desc">Download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. Free, no signup, no ads.</desc>
   <rect width="1200" height="630" fill="#0f0f0f"/>
-  <rect x="0" y="0" width="1200" height="630" fill="none"/>
-  <!-- Background accent gradient -->
-  <rect x="0" y="0" width="1200" height="630" fill="#111827"/>
-  <!-- Top accent bar -->
   <rect x="0" y="0" width="1200" height="6" fill="#3b82f6"/>
-  <!-- Logo circle -->
   <circle cx="600" cy="270" r="80" fill="#3b82f6"/>
   <text x="600" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="72" fill="white">R</text>
-  <!-- Title -->
   <text x="600" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="64" fill="#f5f5f0">AhoyRipper</text>
-  <!-- Subtitle -->
   <text x="600" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#8a8a8a">Rip any video, anywhere. Free.</text>
-  <!-- Footer -->
   <text x="600" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#3b82f6">ahoyripper.com</text>
 </svg>
