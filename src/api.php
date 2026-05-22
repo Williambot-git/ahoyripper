@@ -722,7 +722,8 @@ switch ($action) {
             exit;
         }
 
-        echo json_encode($parsed);
+        $parsed['request_id'] = $request_id;
+        echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
     }
