@@ -139,14 +139,17 @@ GET /src/api.php?action=info&url=<url>
 ### Download a format
 ```
 GET /src/api.php?action=download&url=<url>&format=<format_id>
-Authorization: Bearer <api_key>
+Authorization: Bearer <ahoyvpn_key>
 ```
 
-The `format_id` comes from the `id` field in the info response. The API streams the file directly.
+The `format_id` comes from the `id` field in the info response. The API reads the key from the `Authorization: Bearer` header (preferred — keeps the key out of URLs and server logs). A `key` query parameter is also accepted for backwards compatibility but is discouraged.
+
+> **Note:** The free tier allows 5 downloads/day. Unlimited-key holders have no daily cap.
 
 ### Health check
 ```
 GET /src/api.php?action=health
+GET /src/api.php?action=health&probe=1   # include live yt-dlp connectivity probe
 ```
 
 Returns:
