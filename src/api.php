@@ -1081,6 +1081,7 @@ case 'progress':
         $response = [
             'status' => 'ok',
             'server_time' => date('c'),
+            'request_id' => $request_id,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,

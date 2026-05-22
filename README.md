@@ -154,6 +154,7 @@ Returns:
 {
   "status": "ok",
   "server_time": "2026-05-21T16:00:00+00:00",
+  "request_id": "a3f1b2c9d4e5f678",
   "yt_dlp_version": "2024.x.x",
   "ffmpeg_version": "ffmpeg version 6.x",
   "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
