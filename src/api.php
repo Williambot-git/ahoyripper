@@ -678,6 +678,23 @@ switch ($action) {
     }
 
     case 'download': {
+        // ─── Validate required params first (before rate limiting or any I/O) ───
+        // Rejecting early avoids burning rate-limit slots or opening temp files on bad input.
+        $url = trim($_GET['url'] ?? '');
+        $format_id = trim($_GET['format'] ?? '');
+        if (!$url || !isValidUrl($url) || !$format_id) {
+            http_response_code(400);
+            logRequest('download', 400, ['reason' => 'missing_params']);
+            echo json_encode(['error' => 'Missing URL or format.']);
+            exit;
+        }
+        if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
+            http_response_code(400);
+            logRequest('download', 400, ['reason' => 'invalid_format_id']);
+            echo json_encode(['error' => 'Invalid format ID.']);
+            exit;
+        }
+
         // ─── Check for unlimited API key ───
         // Accept key from Authorization: Bearer header (preferred, keeps key out of URLs/logs)
         // Fall back to GET/POST query param for backwards compatibility.
@@ -801,27 +818,9 @@ switch ($action) {
             header('X-DailyLimit-Window: daily');
         }
 
-        // Serve a format for download
-        $url = trim($_GET['url'] ?? '');
-        $format_id = trim($_GET['format'] ?? '');
-        $download_filename = trim($_GET['filename'] ?? '');
-        if (!$url || !isValidUrl($url) || !$format_id) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'missing_params']);
-            echo json_encode(['error' => 'Missing URL or format.']);
-            exit;
-        }
-
-        // Validate format_id: alphanumeric + safe chars only, no shell injection
-        if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'invalid_format_id']);
-            echo json_encode(['error' => 'Invalid format ID.']);
-            exit;
-        }
-
-        // Sanitize optional derived filename: strip control chars, restrict length,
+        // ─── Sanitize derived filename ───
         // allow only safe chars; fall back to generic name if empty/too long.
+        $download_filename = trim($_GET['filename'] ?? '');
         if ($download_filename !== '') {
             $download_filename = preg_replace('/[^\w\s._-]/', '', $download_filename);
             $download_filename = preg_replace('/\s+/', '_', trim($download_filename));
