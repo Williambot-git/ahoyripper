@@ -136,6 +136,7 @@ function isValidUrl($url) {
 // Across requests a file-based cache keeps it efficient (avoids spawning a subprocess on every hit).
 $version_cache_file = '/tmp/ahoyrip_ytdlp_ver.cache';
 $GLOBALS['__ytdlp_version'] = null;
+$GLOBALS['__ytdlp_probe'] = null;
 if ($version_cache_file && is_readable($version_cache_file)) {
     $cached = @json_decode(@file_get_contents($version_cache_file), true);
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
@@ -1097,6 +1098,18 @@ case 'progress':
             }
         }
 
+        // Populate __ytdlp_probe from cache if available and probe is requested.
+        // This ensures cached probe results are available when the response array
+        // is built below without needing to run the probe again.
+        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
+        $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
+        if ($do_probe && $probe_cache_file && is_readable($probe_cache_file)) {
+            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+            if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+                $GLOBALS['__ytdlp_probe'] = $cached['result'] ?? null;
+            }
+        }
+
         $response = [
             'status' => 'ok',
             'server_time' => date('c'),
@@ -1118,19 +1131,7 @@ case 'progress':
         // (proc_open + yt-dlp startup + network round-trip). The probe is useful when
         // a client wants to verify end-to-end connectivity, but adds unnecessary overhead
         // for routine load checks. The probe result is cached for 5 minutes regardless.
-        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
-        $probe_cached = null;
-        $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
-        if ($probe_cache_file && is_readable($probe_cache_file)) {
-            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
-            if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
-                $response['yt_dlp_probe'] = $cached['result'] ?? null;
-            } elseif ($do_probe) {
-                // Cache expired AND probe explicitly requested — run live probe below
-                $response['yt_dlp_probe'] = null;
-            }
-        }
-        if ($do_probe && !isset($response['yt_dlp_probe'])) {
+        if ($do_probe && !isset($GLOBALS['__ytdlp_probe'])) {
             // Use a fast, stable YouTube video for the probe — short, public,
             // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
             // --skip-download fetches metadata without downloading the full file,
@@ -1141,17 +1142,19 @@ case 'progress':
             $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                 ? json_decode($probe_out, true)
                 : null;
-            $response['yt_dlp_probe'] = $probe_result
+            $GLOBALS['__ytdlp_probe'] = $probe_result
                 ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80)]
                 : ['ok' => false, 'error' => substr(trim($probe_err ?: $probe_out), 0, 120)];
             if ($probe_cache_file) {
                 @file_put_contents($probe_cache_file, json_encode([
-                    'result' => $response['yt_dlp_probe'],
+                    'result' => $GLOBALS['__ytdlp_probe'],
                     'exp' => time() + 300, // 5 min TTL
                 ]));
             }
-        } elseif (!isset($response['yt_dlp_probe'])) {
-            $response['yt_dlp_probe'] = null;
+        } elseif ($do_probe && isset($GLOBALS['__ytdlp_probe'])) {
+            // Already populated above — fall through to response below
+        } else {
+            $GLOBALS['__ytdlp_probe'] = null;
         }
 
         // System resource metrics (Linux-only, gracefully omitted on other platforms)
