@@ -397,16 +397,19 @@ $VERSION = '1.0.0';
         '<div class="format-meta">' + metaParts + '</div>' +
         '<div class="format-size">' + size + '</div>';
 
-      card.addEventListener('click', function(e) {
+card.addEventListener('click', function(e) {
         e.preventDefault();
         var dl = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
         var dlHeaders = {};
         if (dl.key) { dlHeaders['Authorization'] = 'Bearer ' + encodeURIComponent(dl.key); }
         card.classList.add('downloading');
         setLoading(true);
+
+        var navigateOnSuccess = true; // guard: only navigate when fetch itself succeeds
         fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
+              navigateOnSuccess = false;
               return resp.json().catch(function() {
                 return { error: 'Download failed. Try another format.' };
               }).then(function(err) {
@@ -414,9 +417,9 @@ $VERSION = '1.0.0';
                 setLoading(false);
                 card.classList.remove('downloading');
               });
-              return;
             }
-            // Navigate to download URL — server sets Content-Disposition with filename
+            // Only navigate on HTTP success — don't navigate on error JSON responses,
+            // which would otherwise cause the browser to download the error as a file.
             window.location.href = dl.url;
             setTimeout(function() {
               setLoading(false);
@@ -426,10 +429,13 @@ $VERSION = '1.0.0';
             }, 500);
           })
           .catch(function() {
+            navigateOnSuccess = false;
             showError('Download failed. Try another format.');
             setLoading(false);
             card.classList.remove('downloading');
           });
+
+      });
 
       return card;
     }
