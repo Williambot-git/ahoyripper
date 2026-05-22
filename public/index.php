@@ -302,10 +302,14 @@ $VERSION = '1.0.0';
   }
 
   function formatBytes(mb) {
-    if (mb >= 1000) return (mb / 1000).toFixed(mb % 1000 === 0 ? 0 : 1) + ' GB';
+    if (mb <= 0) return '0 B';
+    if (mb >= 1000) {
+      var gb = mb / 1000;
+      // Show 1 decimal only when there's a fractional GB; suppress decimals for whole GB.
+      return gb.toFixed(gb % 1 === 0 ? 0 : 1) + ' GB';
+    }
     if (mb >= 1) return mb.toFixed(1) + ' MB';
-    if (mb > 0) return '<1 MB';
-    return '0 B';
+    return '<1 MB';
   }
 
   function buildDownloadUrl(url, formatId, label, derivedFilename) {
