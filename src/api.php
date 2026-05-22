@@ -884,6 +884,7 @@ switch ($action) {
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
         if (!$proc) {
+            logRequest('download', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
             echo json_encode(['error' => 'Failed to start download process.']);
             exit;
@@ -905,6 +906,7 @@ switch ($action) {
                 // Use glob pattern — $out_file was never set in this scope.
                 // $out_base was set above and holds the safe base name.
                 foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+                logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
                 echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
                 exit;
