@@ -521,7 +521,7 @@ $VERSION = '1.0.0';
         var msg = err.error || 'Something went wrong. Try again.';
         if (err.error_code) {
           var errorHints = {
-'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
+            'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
             'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.com',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
@@ -530,7 +530,6 @@ $VERSION = '1.0.0';
             'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
             'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
-            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
             'INVALID_URL': 'That URL isn\'t supported or could not be fetched. Check the link and try again.',
             'PARSE_ERROR': 'Could not parse the video response. The site may be temporarily unavailable.',
