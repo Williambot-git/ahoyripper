@@ -776,7 +776,7 @@ switch ($action) {
             if ($daily_data['c'] >= $daily_limit) {
                 flock($daily_fp, LOCK_UN);
                 fclose($daily_fp);
-                logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
+                logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',

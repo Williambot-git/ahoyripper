@@ -92,6 +92,20 @@ else
 fi
 
 echo ""
+echo "==> Checking download action logRequest uses correct action name (not 'info')..."
+# The daily-limit block inside the 'download' case must log 'download', not 'info'.
+# Count occurrences: the 'info' case has 1 correct call; the 'download' case must NOT
+# have a 'logRequest.*info.*429.*daily_limit' — only 'download' case should log download.
+# Extract the download case's daily_limit block (between "case 'download'" and "case '")
+# and verify it calls logRequest with 'download', not 'info'.
+DOWNLOAD_CASE=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
+if echo "$DOWNLOAD_CASE" | grep -q "logRequest.*'info'.*429.*daily_limit"; then
+    echo "  ✗ download case incorrectly logs 'info' action for daily limit (should be 'download')"
+    exit 1
+fi
+echo "  ✓ download case logs 'download' action for daily limit"
+
+echo ""
 echo "==> Checking yt-dlp stderr capture in download..."
 if grep -q "proc_stderr" src/api.php; then
     echo "  ✓ Download stderr capture present"
