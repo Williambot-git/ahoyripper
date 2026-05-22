@@ -115,6 +115,17 @@ else
 fi
 
 echo ""
+echo "==> Checking RFC 5987 filename encoding in Content-Disposition... "
+# The download path should use filename*=utf-8'' for non-ASCII names (RFC 5987)
+# to ensure correct filename encoding across browsers.
+if grep -q "filename\*=UTF-8''" src/api.php; then
+    echo "  ✓ RFC 5987 filename encoding present"
+else
+    echo "  ✗ RFC 5987 filename encoding missing (Content-Disposition should use filename*=utf-8'' for non-ASCII)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking download connection header (prevents keep-alive cut-off)..."
 if grep -q "Connection: close" src/api.php; then
     echo "  ✓ Connection: close header present in download path"

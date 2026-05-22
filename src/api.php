@@ -983,7 +983,18 @@ switch ($action) {
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . $filesize);
-        header('Content-Disposition: attachment; filename="' . $download_name . '"');
+        // Send RFC 5987 filename encoding so non-ASCII characters in the derived
+        // filename are handled correctly across browsers (RFC 5987 = UTF-8 encoded
+        // filename*=utf-8''...). The ascii-check prevents double-encoding plain ASCII.
+        $dl_raw = $download_name;
+        $needs_encoding = preg_match('/[^\x00-\x7F]/', $dl_raw);
+        if ($needs_encoding) {
+            $encoded = rawurlencode($dl_raw);
+            $disposition = "attachment; filename*=UTF-8''{$encoded}; filename=\"{$dl_raw}\"";
+        } else {
+            $disposition = "attachment; filename=\"{$dl_raw}\"";
+        }
+        header('Content-Disposition: ' . $disposition);
         header('Cache-Control: no-cache');
         header('X-Content-Type-Options: nosniff');
         header('X-Download-Options: noopen');
