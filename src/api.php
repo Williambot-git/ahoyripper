@@ -434,7 +434,14 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
     // Sort: video+audio first, then by height/bitrate
     // Accepts: height (default), filesize, tbr
+    // Whitelist only — invalid values are normalised to 'height' rather than
+    // being passed to usort where they would trigger a comparison fatal or
+    // be silently ignored depending on PHP version and error_reporting level.
+    $allowed_sorts = ['height', 'filesize', 'tbr'];
     $sort = $_GET['sort'] ?? 'height';
+    if (!is_string($sort) || !in_array($sort, $allowed_sorts, true)) {
+        $sort = 'height';
+    }
     usort($formats, function($a, $b) use ($sort) {
         // Combined first
         if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
