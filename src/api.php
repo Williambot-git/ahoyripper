@@ -922,7 +922,6 @@ switch ($action) {
         // Capture it in a separate statement so it can't be mistaken for a void
         // discard. Pipe handles were already closed above.
         $actual_exit = proc_close($proc);
-        unset($exit);
         if ($actual_exit !== 0) {
             foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
             // Build a descriptive error from the captured stderr/stdout
