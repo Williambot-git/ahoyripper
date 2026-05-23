@@ -576,7 +576,10 @@ switch ($action) {
         if (!$url || !isValidUrl($url)) {
             http_response_code(400);
             logRequest('info', 400, ['reason' => 'invalid_url']);
-            echo json_encode(['error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.']);
+            echo json_encode([
+                'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+                'error_code' => 'INVALID_URL',
+            ]);
             exit;
         }
 
@@ -770,13 +773,19 @@ switch ($action) {
         if (!$url || !isValidUrl($url) || !$format_id) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'missing_params']);
-            echo json_encode(['error' => 'Missing URL or format.']);
+            echo json_encode([
+                'error' => 'Missing URL or format.',
+                'error_code' => 'MISSING_PARAMS',
+            ]);
             exit;
         }
         if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
-            echo json_encode(['error' => 'Invalid format ID.']);
+            echo json_encode([
+                'error' => 'Invalid format ID.',
+                'error_code' => 'INVALID_FORMAT_ID',
+            ]);
             exit;
         }
 
