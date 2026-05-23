@@ -627,11 +627,13 @@ switch ($action) {
                 fclose($daily_fp);
                 logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
+                $reset_timestamp = strtotime('tomorrow midnight UTC');
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
-                    'daily_limit' => $daily_limit
+                    'daily_limit' => $daily_limit,
+                    'retry_after' => $reset_timestamp,
                 ]);
                 exit;
             }
@@ -880,11 +882,13 @@ switch ($action) {
                 fclose($daily_fp);
                 logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
+                $reset_timestamp = strtotime('tomorrow midnight UTC');
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
-                    'daily_limit' => $daily_limit
+                    'daily_limit' => $daily_limit,
+                    'retry_after' => $reset_timestamp,
                 ]);
                 exit;
             }
