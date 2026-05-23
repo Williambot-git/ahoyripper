@@ -505,7 +505,6 @@ card.addEventListener('click', function(e) {
     formatGrid.style.display = 'flex';
     formatGrid.style.flexDirection = 'row';
     formatGrid.style.flexWrap = 'wrap';
-    formatGrid.style.gap = '0';
 
     var addedAnything = false;
     if (groups.combined.length > 0) {
