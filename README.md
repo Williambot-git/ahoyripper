@@ -62,19 +62,25 @@ docker compose up -d
 ```
 ahoyripper/
 ├── public/
-│   └── index.php          # Main page
+│   ├── index.php          # Main page
+│   └── robots.txt         # SEO + AI-crawler blocking
 ├── src/
 │   ├── style.css          # CSS (AhoyVPN brand)
 │   └── api.php            # yt-dlp API (info, download)
 ├── deploy/
-│   └── nginx.conf         # Nginx config
+│   ├── nginx.conf         # Nginx config (production)
+│   └── nginx-docker.conf  # Nginx config (Docker)
 ├── scripts/
 │   └── install-deps.sh    # Dependency installer
+├── tests/
+│   └── sanity.sh          # Sanity / regression checks
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
 └── LICENSE
 ```
+
+> **Note:** `robots.txt` lives in `public/` and is also served at the root by nginx — do not place a separate `robots.txt` at the project root.
 
 ---
 
