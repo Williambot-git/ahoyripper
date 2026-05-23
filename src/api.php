@@ -181,10 +181,11 @@ if (!$GLOBALS['__ffmpeg_version']) {
     }
 }
 
-// Run yt-dlp with timeout and capture output
-// $timeout = max seconds for the whole process; 0 = no limit
-// Uses array exec form so bypass_shell=true actually takes effect —
-// no shell is spawned, eliminating shell injection risk for URL args.
+// runYtdlp downloads or inspects media. $timeout = max seconds (0 = no limit).
+// $allow_ytdlp_privacy: when true, pass --referer "https://ahoyripper.com/" to yt-dlp
+// so the original video URL is not leaked as the HTTP Referer to the source site.
+// yt-dlp sends a referer to the source by default, which is normal but can expose
+// the user's video URL to third-party servers. The generic referer avoids this.
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     // Build the command as an array so bypass_shell works as intended.
     // Shell redirection ('2>&1') is unnecessary — we capture stderr via pipe.
@@ -942,12 +943,18 @@ switch ($action) {
         $out_template = $tmp_dir . '/' . $out_base . '.tmp';  // yt-dlp appends e.g. .mp4
         $out_file = $out_template; // reference used for cleanup
 
+        // Prevent the user's video URL from leaking as HTTP Referer to the source.
+        // yt-dlp sends the URL itself as referer by default; using the generic
+        // ahoyripper.com referer hides the actual video URL from third-party servers.
+        $referer = 'https://ahoyripper.com/';
+
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
             '--no-warnings',
+            '--referer', $referer,
             '--',
             $url,
         ];
