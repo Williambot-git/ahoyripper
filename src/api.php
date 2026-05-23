@@ -9,7 +9,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
 header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
