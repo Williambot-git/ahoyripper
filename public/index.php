@@ -142,6 +142,12 @@ $VERSION = '1.0.0';
       </p>
       <div class="rip-key-wrap">
         <input type="password" id="apiKey" class="rip-key-input" placeholder="AhoyVPN unlimited key (optional)" autocomplete="off">
+        <button type="button" id="toggleKey" class="rip-key-toggle" aria-label="Show API key" title="Show API key">
+          <svg id="toggleKeyIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -262,6 +268,26 @@ $VERSION = '1.0.0';
   var currentSort = localStorage.getItem('ahoyrip_sort') || 'height';
   if (sortSelect) {
     sortSelect.value = currentSort;
+  }
+
+  // Toggle API key visibility
+  var toggleBtn = document.getElementById('toggleKey');
+  var toggleIcon = document.getElementById('toggleKeyIcon');
+  var keyInput = document.getElementById('apiKey');
+  if (toggleBtn && keyInput) {
+    toggleBtn.addEventListener('click', function() {
+      if (keyInput.type === 'password') {
+        keyInput.type = 'text';
+        toggleIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        toggleBtn.setAttribute('aria-label', 'Hide API key');
+        toggleBtn.setAttribute('title', 'Hide API key');
+      } else {
+        keyInput.type = 'password';
+        toggleIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        toggleBtn.setAttribute('aria-label', 'Show API key');
+        toggleBtn.setAttribute('title', 'Show API key');
+      }
+    });
   }
 
   function setProgress(pct, text) {
