@@ -88,8 +88,13 @@ ahoyripper/
 
 ### Get video info + formats
 ```
-GET /src/api.php?action=info&url=<url>
+GET /src/api.php?action=info&url=<url>&sort=<height|filesize|tbr>
 ```
+
+The `sort` parameter (optional, default `height`) controls format sort order:
+- `height` — quality, highest resolution first (default)
+- `filesize` — estimated file size, largest first
+- `tbr` — bitrate, highest first
 
 **Success response:**
 ```json
@@ -184,7 +189,7 @@ Returns:
   "yt_dlp_version": "2024.x.x",
   "ffmpeg_version": "ffmpeg version 6.x",
   "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
-  "yt_dlp_cache_age_seconds": 542,
+  "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "ffmpeg_cache_age_seconds": 542,
   "load_avg": [0.15, 0.08, 0.05],
