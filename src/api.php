@@ -580,6 +580,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
                 'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
             ]);
             exit;
         }
@@ -779,6 +780,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
                 'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
             ]);
             exit;
         }
@@ -792,6 +794,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Invalid format ID.',
                 'error_code' => 'INVALID_FORMAT_ID',
+                'request_id' => $request_id,
             ]);
             exit;
         }
