@@ -1262,9 +1262,8 @@ case 'progress':
                     'exp' => time() + 300, // 5 min TTL
                 ]));
             }
-        } elseif ($do_probe && isset($GLOBALS['__ytdlp_probe'])) {
-            // Already populated above — fall through to response below
         } else {
+            // No probe requested and no cached result — explicitly null
             $GLOBALS['__ytdlp_probe'] = null;
         }
 
