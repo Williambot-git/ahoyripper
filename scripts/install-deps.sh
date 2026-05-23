@@ -56,9 +56,11 @@ else
     _install_yt_dlp --user yt-dlp || {
         echo "  ! ERROR: yt-dlp installation failed via pip. Trying standalone binary..."
         # Last resort: download the standalone binary directly
-        curl -L -o /usr/local/bin/yt-dlp \
+        if curl -L -o /usr/local/bin/yt-dlp \
             https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-            2>/dev/null && chmod +x /usr/local/bin/yt-dlp
+            2>/dev/null && [ -s /usr/local/bin/yt-dlp ]; then
+            chmod +x /usr/local/bin/yt-dlp
+        fi
     }
 
     if ! command -v yt-dlp &>/dev/null; then
