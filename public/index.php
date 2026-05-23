@@ -444,9 +444,13 @@ card.addEventListener('click', function(e) {
               setTimeout(function() { card.style.borderColor = ''; }, 1500);
             }, 500);
           })
-          .catch(function() {
+          .catch(function(e) {
             navigateOnSuccess = false;
-            showError('Download failed. Try another format.');
+            var msg = 'Download failed. Try another format.';
+            if (e.name === 'AbortError') {
+              msg = 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format.';
+            }
+            showError(msg);
             setLoading(false);
             card.classList.remove('downloading');
           });
