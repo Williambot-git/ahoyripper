@@ -631,6 +631,7 @@ switch ($action) {
                 logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = strtotime('tomorrow midnight UTC');
+                header('Retry-After: ' . ($reset_timestamp - time()));
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
@@ -893,6 +894,7 @@ switch ($action) {
                 logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = strtotime('tomorrow midnight UTC');
+                header('Retry-After: ' . ($reset_timestamp - time()));
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
