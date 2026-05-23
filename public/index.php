@@ -325,7 +325,12 @@ $VERSION = '1.0.0';
     var keyInput = document.getElementById('apiKey');
     var key = (keyInput && keyInput.value) ? keyInput.value : '';
     var fn = derivedFilename ? '&filename=' + encodeURIComponent(derivedFilename) : '';
-    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}` + fn, key };
+    // Include key as query param so the direct window.location.href navigation
+    // (which follows a successful fetch) carries it — the Authorization header
+    // is sent only for the check-fetch; the browser-navigation download needs
+    // the key in the URL since it bypasses fetch and can't send custom headers.
+    var keyParam = key ? '&key=' + encodeURIComponent(key) : '';
+    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}` + fn + keyParam, key };
   }
 
   function renderFormats(url, data) {
