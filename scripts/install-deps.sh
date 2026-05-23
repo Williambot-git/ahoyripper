@@ -6,7 +6,7 @@ set -e
 
 echo "==> Installing yt-dlp..."
 if command -v yt-dlp &>/dev/null; then
-    yt-dlp --version
+    yt-dlp -V 2>&1 | head -1
 fi
 
 # Detect available pip and install yt-dlp.
@@ -47,7 +47,7 @@ _install_yt_dlp() {
 }
 
 if command -v yt-dlp &>/dev/null; then
-    echo "  yt-dlp already present: $(yt-dlp --version 2>&1 | head -1)"
+    echo "  yt-dlp already present: $(yt-dlp -V 2>&1 | head -1)"
 else
     echo "  Installing yt-dlp via $PIP_BIN..."
     # Try pip install, then with --break-system-packages, then with --user
@@ -66,7 +66,7 @@ else
         echo "    Please install manually: pip install yt-dlp"
         exit 1
     fi
-    echo "  Installed: $(yt-dlp --version 2>&1 | head -1)"
+    echo "  Installed: $(yt-dlp -V 2>&1 | head -1)"
 fi
 
 # Keep yt-dlp updated.
