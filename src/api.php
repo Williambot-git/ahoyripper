@@ -96,11 +96,13 @@ if ($is_rate_limited) {
             flock($fp, LOCK_UN);
             fclose($fp);
             http_response_code(429);
-            header('Retry-After: 30');
+            $reset_timestamp = $data['t'] + $rate_window;
+            header('Retry-After: ' . max(1, $reset_timestamp - time()));
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => 'https://ahoyvpn.com',
+                'retry_after' => $reset_timestamp,
             ]); // @codingStandardsIgnoreLine
             exit;
         }
