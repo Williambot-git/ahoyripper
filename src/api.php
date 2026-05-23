@@ -704,6 +704,7 @@ switch ($action) {
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
                 'action' => 'info',
+                'request_id' => $request_id,
             ]);
             exit;
         }
