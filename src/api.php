@@ -775,10 +775,10 @@ switch ($action) {
         $format_id = trim($_GET['format'] ?? '');
         if (!$url || !isValidUrl($url) || !$format_id) {
             http_response_code(400);
-            logRequest('download', 400, ['reason' => 'missing_params']);
+            logRequest('download', 400, ['reason' => 'invalid_url']);
             echo json_encode([
-                'error' => 'Missing URL or format.',
-                'error_code' => 'MISSING_PARAMS',
+                'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+                'error_code' => 'INVALID_URL',
             ]);
             exit;
         }
