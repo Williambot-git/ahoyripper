@@ -754,6 +754,7 @@ switch ($action) {
         }
 
         $parsed['request_id'] = $request_id;
+        header('Cache-Control: no-cache');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
@@ -1242,6 +1243,7 @@ case 'progress':
             $response['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
         }
 
+        header('Cache-Control: no-cache');
         echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
