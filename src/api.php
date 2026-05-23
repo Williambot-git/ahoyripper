@@ -1041,6 +1041,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
+                    'request_id' => $request_id,
                 ]);
             } else {
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
