@@ -542,6 +542,19 @@ card.addEventListener('click', function(e) {
     const url = input.value.trim();
     if (!url) return;
 
+    // Reject non-HTTP(S) schemes client-side before wasting a server round-trip.
+    // The API's isValidUrl() will also catch these, but surfacing the error
+    // immediately gives faster feedback and avoids burning rate-limit slots.
+    try {
+      const parsed = new URL(url);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        showError('Only http:// and https:// URLs are supported. Please paste a valid web link.');
+        return;
+      }
+    } catch (_) {
+      // Not a valid URL — let the API give the canonical error message
+    }
+
     hideError();
     setLoading(true);
     showProgress(true);
