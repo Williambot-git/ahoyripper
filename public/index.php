@@ -309,7 +309,7 @@ $VERSION = '1.0.0';
 
   function setLoading(on) {
     btn.disabled = on;
-    btn.textContent = on ? 'Ripping...' : 'Rip It';
+    btn.textContent = on ? 'Downloading...' : 'Rip It';
   }
 
   function showProgress(on) {
@@ -637,6 +637,7 @@ card.addEventListener('click', function(e) {
             'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
             'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
             'YTDLP_ERROR': 'The download failed. Try another format or wait a moment.',
+            'DOWNLOAD_FAILED': 'The rip produced an empty or corrupt file. Try another format from the list.',
           };
           if (err.error_code && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];
