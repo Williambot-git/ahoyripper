@@ -138,7 +138,8 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        Supports most platforms &mdash; <span id="quotaDisplay">5</span> free rips/day
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">5</span> free rips/day &mdash;
+        <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
       </p>
       <div class="rip-key-wrap">
         <input type="password" id="apiKey" class="rip-key-input" placeholder="AhoyVPN unlimited key (optional)" autocomplete="off">
@@ -571,8 +572,27 @@ card.addEventListener('click', function(e) {
       var rem = resp.headers.get('X-DailyLimit-Remaining');
       var lim = resp.headers.get('X-DailyLimit-Limit');
       var el = document.getElementById('quotaDisplay');
+      var upgradeEl = document.getElementById('quotaUpgrade');
       if (el && rem !== null && lim !== null) {
         el.textContent = rem;
+        // Warn user when quota is nearly exhausted (1–2 left)
+        if (rem <= 2) {
+          el.classList.add('low');
+        } else {
+          el.classList.remove('low');
+        }
+        // When quota is exhausted, make the upgrade link more prominent
+        if (upgradeEl) {
+          if (rem === '0') {
+            upgradeEl.textContent = 'upgrade now';
+            upgradeEl.style.fontWeight = '700';
+            upgradeEl.style.color = 'var(--color-error)';
+          } else {
+            upgradeEl.textContent = 'get unlimited';
+            upgradeEl.style.fontWeight = '500';
+            upgradeEl.style.color = '';
+          }
+        }
       }
     }
 

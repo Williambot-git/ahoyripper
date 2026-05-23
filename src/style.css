@@ -137,6 +137,32 @@ body {
 .rip-hint a { color: var(--color-text-sec); }
 .rip-hint a:hover { color: var(--color-accent); }
 
+/* Quota hint with upgrade link */
+.quota-count {
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: default;
+  transition: color var(--transition);
+}
+.quota-count.low {
+  color: var(--color-error);
+  animation: quota-warn 2s ease-in-out infinite;
+}
+@keyframes quota-warn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.quota-upgrade-link {
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: var(--color-text-sec) !important;
+  transition: color var(--transition);
+}
+.quota-upgrade-link:hover {
+  color: var(--color-accent) !important;
+}
+
 /* API Key input */
 .rip-key-wrap {
   margin-top: 0.75rem;
