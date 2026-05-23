@@ -255,6 +255,16 @@ yt-dlp --no-playlist --dump-json "https://example.com/video"
 
 ---
 
+## Usage Tips
+
+- **Paste & go** — Paste any supported URL into the input field and the rip starts automatically. No need to press Enter or click a button.
+- **Pre-fill a URL via query param** — Append `?url=https://...` to the page URL to pre-load a video. Useful for sharing links directly (e.g. `https://ahoyripper.com/?url=https://www.youtube.com/watch?v=...`).
+- **Sort formats** — Use the Quality / Size / Bitrate dropdown above the format cards to reorder the list.
+- **Save your sort preference** — The sort choice is remembered in localStorage across visits.
+- **API key** — Enter your AhoyVPN unlimited key in the optional field to bypass the daily 5-rip limit.
+
+---
+
 ## Requirements
 
 - Ubuntu 22.04+ (or any Linux with apt)
