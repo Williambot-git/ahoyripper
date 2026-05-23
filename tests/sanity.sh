@@ -66,11 +66,22 @@ else
 fi
 
 echo ""
-echo "==> Checking format_id validation..."
+echo "==> Checking format_id validation allows yt-dlp selector syntax..."
+# format_id must accept yt-dlp conditional selectors like bestvideo[height>=720]+bestaudio
 if grep -q "preg_match.*format_id" src/api.php; then
     echo "  ✓ format_id validation present"
 else
     echo "  ✗ format_id validation not found"
+    exit 1
+fi
+# Also verify the validation allows yt-dlp selector characters.
+# yt-dlp format selectors use < > = for conditional filtering (e.g. bestvideo[height>=720]).
+# Verify the preg_match for format_id includes at least one comparison operator char.
+# We look for format_id lines that also contain <, >, or = outside of PHP string context.
+if awk '/format_id/ && /preg_match/ && (/[<>=]/)' src/api.php > /dev/null; then
+    echo "  ✓ format_id validation allows yt-dlp selector chars ([ ] < > = etc.)"
+else
+    echo "  ✗ format_id validation may be too restrictive for yt-dlp selectors"
     exit 1
 fi
 

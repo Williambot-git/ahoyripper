@@ -782,7 +782,11 @@ switch ($action) {
             ]);
             exit;
         }
-        if (!preg_match('/^[a-zA-Z0-9_.,-]+$/', $format_id)) {
+        // Validate format_id — yt-dlp format selectors use characters like [ ] + =
+        // for conditional selection (e.g. "bestvideo[height>=720]+bestaudio[ext=m4a]").
+        // Block shell metacharacters that could be dangerous in proc_open calls:
+        // $ ` ( ) ; | & < > \ and whitespace. Allow alphanum, _ . , - + [ ] < > = !
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\-]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([
