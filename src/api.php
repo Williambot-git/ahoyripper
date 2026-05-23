@@ -649,6 +649,7 @@ switch ($action) {
                 exit;
             }
             $daily_data['c']++;
+            $daily_remaining = max(0, $daily_limit - $daily_data['c']);
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
@@ -657,9 +658,11 @@ switch ($action) {
             fclose($daily_fp);  // explicitly close to release lock without waiting for GC
             $daily_fp = null;
 
-            // Surface daily quota state so the client can display remaining rips
+            // Surface daily quota state so the client can display remaining rips.
+            // Use the remaining count calculated BEFORE the increment so the value
+            // is correct even when this is the user's last free rip.
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
+            header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: daily');
         }
@@ -920,6 +923,7 @@ switch ($action) {
                 exit;
             }
             $daily_data['c']++;
+            $daily_remaining = max(0, $daily_limit - $daily_data['c']);
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
@@ -928,9 +932,11 @@ switch ($action) {
             fclose($daily_fp);  // explicitly close to release lock without waiting for GC
             $daily_fp = null;
 
-            // Surface daily quota state so the client can display remaining rips
+            // Surface daily quota state so the client can display remaining rips.
+            // Use the remaining count calculated BEFORE the increment so the value
+            // is correct even when this is the user's last free rip.
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
+            header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: daily');
         }
