@@ -230,20 +230,17 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 
 ## Supported Platforms
 
-AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/docs/supported_sites.md) under the hood. It supports **1800+ platforms** including:
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** including:
 
 **Video:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, and more
 
 **Audio:** SoundCloud, Bandcamp, Spotify (with auth), Apple Music, Deezer, Mixcloud, Audiomack, and more
 
-**To see the full and current list of supported sites:**
+**Full list:** See the [yt-dlp supported sites list](https://yt-dlp.github.io/yt-dlp/supportedsites.html) online — no installation needed.
+
+You can also check from the command line:
 ```bash
 yt-dlp --list-extractor
-```
-
-You can also test individual URLs directly:
-```bash
-yt-dlp --no-playlist --dump-json "https://example.com/video"
 ```
 
 ---
