@@ -152,7 +152,7 @@ $VERSION = '1.0.0';
     <!-- Results -->
     <div class="rip-results" id="resultsBox">
       <div class="results-meta" id="resultsMeta">
-        <img class="results-thumb" id="resultsThumb" src="" alt="Media thumbnail" hidden>
+        <img class="results-thumb" id="resultsThumb" src="" alt="Media thumbnail" loading="lazy" hidden>
         <div class="results-info">
           <p class="results-title">
             <span class="check">&#10003;</span>
