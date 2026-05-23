@@ -65,6 +65,7 @@ $VERSION = '1.0.0';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="preload" href="/src/style.css" as="style">
   <link rel="stylesheet" href="/src/style.css">
 
   <script type="application/ld+json">
