@@ -459,6 +459,10 @@ function parseFormats($json_str, &$raw_error_out = null) {
     // be silently ignored depending on PHP version and error_reporting level.
     $allowed_sorts = ['height', 'filesize', 'tbr'];
     $sort = $_GET['sort'] ?? 'height';
+    // DISALLOW_AUTHED is not set here (this is a public info API) so the sort param
+    // IS validated against the whitelist for all requests — good, since sort
+    // affects the format order and an attacker could use out-of-order formats
+    // to bypass client-side size/quality checks. Invalid values fall back to 'height'.
     if (!is_string($sort) || !in_array($sort, $allowed_sorts, true)) {
         $sort = 'height';
     }
@@ -482,6 +486,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         'uploader' => $uploader,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
+        'sort_applied' => $sort,
     ];
 }
 

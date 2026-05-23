@@ -103,6 +103,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
   "thumbnail": "https://...",
   "duration": 180,
   "uploader": "Channel Name",
+  "derived_filename": "Video_Title",
   "formats": [
     {
       "id": "22",
@@ -117,8 +118,12 @@ The `sort` parameter (optional, default `height`) controls format sort order:
       "format_type": "combined",
       "language": null
     }
-  ]
+  ],
+  "sort_applied": "height"
 }
+```
+
+`sort_applied` reflects the active sort key (`height`, `filesize`, or `tbr`) so clients can confirm which order the formats are in without re-sorting locally.
 ```
 
 **Error responses:**
