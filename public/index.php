@@ -596,7 +596,8 @@ card.addEventListener('click', function(e) {
     }
 
     try {
-      const key = document.getElementById('apiKey') && document.getElementById('apiKey').value;
+      const keyInput = document.getElementById('apiKey');
+      const key = keyInput ? keyInput.value : '';
       const headers = {};
       if (key) {
         headers['Authorization'] = 'Bearer ' + encodeURIComponent(key);
