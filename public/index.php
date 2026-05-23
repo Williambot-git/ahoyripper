@@ -413,10 +413,16 @@ $VERSION = '1.0.0';
     function renderFormatCard(f) {
       var card = document.createElement('a');
       card.className = 'format-card';
+      // Key is sent via Authorization header in the download fetch (keeps key out
+      // of server-side access logs). The key is also placed in the URL as a query
+      // param so that the window.location.href fallback works for direct navigation
+      // (browsers can't send custom headers on direct navigation).
       card.href = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
-      card.download = '';
-      card.target = '_blank';
-      card.rel = 'noopener noreferrer';
+      // Note: download and target attributes are intentionally omitted here.
+      // - download="" would be a no-op (empty string is ignored); the server's
+      //   Content-Disposition header controls the saved filename instead.
+      // - target="_blank" is unnecessary — the click handler calls e.preventDefault()
+      //   and navigates via window.location.href, so _blank has no effect.
 
       var badgeColor = 'var(--color-accent)';
       var badgeLabel = 'Video';
