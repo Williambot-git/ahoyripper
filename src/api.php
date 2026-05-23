@@ -663,7 +663,9 @@ switch ($action) {
         // when passed as a direct array element to proc_open (no shell involved).
         // The $timeout of 45s is the maximum time allowed for the info fetch.
         // Without this, a stalled or unresponsive source could hang the worker indefinitely.
-        runYtdlp("--dump-json --no-playlist --no-warnings -- " . $url, $out, $err, $exit, 45);
+        // --newline suppresses progress bars (which yt-dlp emits to stderr by default)
+        // so they don't pollute the stderr stream and confuse error parsing.
+        runYtdlp("--dump-json --no-playlist --no-warnings --newline -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // The fetch failed — undo the quota increment so failed attempts don't
@@ -961,6 +963,7 @@ switch ($action) {
             '-o', $out_template,
             '--no-playlist',
             '--no-warnings',
+            '--newline',
             '--referer', $referer,
             '--',
             $url,
