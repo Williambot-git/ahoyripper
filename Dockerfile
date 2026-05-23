@@ -7,9 +7,16 @@ RUN apt-get update && apt-get install -y \
     php-fpm \
     php-mbstring \
     php-curl \
+    && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir yt-dlp \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
+
+# Verify yt-dlp is intact and runs before declaring the image good.
+# A corrupt or incomplete pip install produces an empty/non-executable file;
+# catching it here fails the build fast rather than producing a broken container.
+RUN yt-dlp --version > /dev/null 2>&1 \
+    || { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
 
 WORKDIR /app
 
