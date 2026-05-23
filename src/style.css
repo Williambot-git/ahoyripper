@@ -56,7 +56,8 @@ body {
   font-size: 1.1rem;
   letter-spacing: 0.02em;
 }
-.ahoy-nav-logo img { height: 2.2em; width: auto; }
+.ahoy-nav-logo img, .ahoy-nav-icon { height: 2.2em; width: auto; }
+.ahoy-nav-logo svg { flex-shrink: 0; }
 .ahoy-nav-links { display: flex; gap: 1.5rem; }
 .ahoy-nav-links a {
   color: var(--color-text-sec);

@@ -98,7 +98,11 @@ $VERSION = '1.0.0';
 <!-- Navigation -->
 <nav class="ahoy-nav">
   <a href="/" class="ahoy-nav-logo">
-    <img src="/AhoyMonthly_transparent.png" alt="AhoyRipper logo" onerror="this.style.display='none'">
+    <svg class="ahoy-nav-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="28" height="28" rx="6" fill="#3b82f6"/>
+      <path d="M14 5L7 10v10l7 5 7-5V10L14 5z" stroke="white" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+      <path d="M14 10v8M10 14h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
     <span>AhoyRipper</span>
   </a>
   <div class="ahoy-nav-links">
