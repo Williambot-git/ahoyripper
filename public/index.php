@@ -27,13 +27,13 @@ $VERSION = '1.0.0';
   <meta name="apple-mobile-web-app-title" content="AhoyRipper">
   <link rel="manifest" href="/manifest.json">
 
-  <!-- Security headers -->
+  <!-- Security headers (X-Content-Type-Options, X-Frame-Options, etc.) are
+       set by nginx in deploy/nginx.conf. HTTP-equiv meta tags are NOT a
+       substitute — browsers ignore them for these headers. They exist here
+       only to avoid "unknown meta" warnings in validator tools. The real
+       enforcement is at the nginx layer. -->
+
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.twimg.com https://*.instagram.com https://*.fbcdn.net; frame-src 'none'; object-src 'none'; base-uri 'none'; connect-src 'self' https://ahoyripper.com;">
-  <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://ahoyripper.com">
