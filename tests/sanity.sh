@@ -175,4 +175,13 @@ done
 echo "  ✓ Docker CSP allows all required media thumbnail domains"
 
 echo ""
+echo "==> Checking API key input styling (rip-key-input class)..."
+if grep -q "rip-key-input" src/style.css; then
+    echo "  ✓ .rip-key-input styling present"
+else
+    echo "  ✗ .rip-key-input styling missing"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."
