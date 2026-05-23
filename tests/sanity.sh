@@ -83,6 +83,15 @@ else
 fi
 
 echo ""
+echo "==> Checking Permissions-Policy header in nginx.conf..."
+if grep -q "Permissions-Policy" deploy/nginx.conf; then
+    echo "  ✓ Permissions-Policy header present in nginx.conf"
+else
+    echo "  ✗ Permissions-Policy header missing in nginx.conf"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking API key support in info action (unlimited-key bypass)..."
 # The info case must read and honour the Bearer API key so that unlimited-key
 # holders do not have their daily quota burned before they even attempt a download.
