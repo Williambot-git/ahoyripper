@@ -1260,9 +1260,9 @@ switch ($action) {
 
 case 'progress':
     case 'health': {
-        // Lightweight ping to check yt-dlp is available — returns JSON
-        // Note: all security/rate-limit headers are already set at the top of the script
-        // Add informational rate-limit headers so clients can track status consistently
+        // Health/progress — lightweight endpoints, no daily quota or rate limiting.
+        // Note: all security headers are already set at the top of the script.
+        // Add informational rate-limit headers so clients can track status consistently.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');

@@ -180,10 +180,11 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `500` | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 
-### Health check
+### Health check / progress
 ```
 GET /src/api.php?action=health
 GET /src/api.php?action=health&probe=1   # include live yt-dlp connectivity probe
+GET /src/api.php?action=progress         # alias for health (legacy)
 ```
 
 Returns:
