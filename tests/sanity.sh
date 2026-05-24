@@ -94,11 +94,34 @@ else
 fi
 
 echo ""
-echo "==> Checking Permissions-Policy header in nginx.conf..."
-if grep -q "Permissions-Policy" deploy/nginx.conf; then
-    echo "  ✓ Permissions-Policy header present in nginx.conf"
+echo "==> Checking source-file access control in nginx-docker.conf..."
+# nginx-docker.conf must:
+# 1. Explicitly allow /src/api.php (used by the frontend JS).
+# 2. Use a dotfile catch-all (denies /src/.env, /.git/config, etc.).
+if grep -q "location = /src/api.php" deploy/nginx-docker.conf; then
+    echo "  ✓ /src/api.php explicitly allowed"
 else
-    echo "  ✗ Permissions-Policy header missing in nginx.conf"
+    echo "  ✗ /src/api.php access rule missing — will be blocked by dotfile catch-all"
+    exit 1
+fi
+if awk '/location ~ \/\. \{ deny/' deploy/nginx-docker.conf; then
+    echo "  ✓ Dotfile catch-all present"
+else
+    echo "  ✗ Dotfile catch-all missing"
+    exit 1
+fi
+# Redundant prefix rules (^/src/ etc.) are no longer needed — the dotfile
+# catch-all handles those paths. Warn if they are still present.
+if grep -q "location ~ \^/src/" deploy/nginx-docker.conf; then
+    echo "  ✗ Redundant ^/src/ prefix rule found (dotfile catch-all handles this)"
+    exit 1
+fi
+if grep -q "location ~ \^/includes/" deploy/nginx-docker.conf; then
+    echo "  ✗ Redundant ^/includes/ prefix rule found"
+    exit 1
+fi
+if grep -q "location ~ \^/scripts/" deploy/nginx-docker.conf; then
+    echo "  ✗ Redundant ^/scripts/ prefix rule found"
     exit 1
 fi
 
