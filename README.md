@@ -240,7 +240,7 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 
 You can also check from the command line:
 ```bash
-yt-dlp --list-extractor
+yt-dlp --list-extractors
 ```
 
 ---
