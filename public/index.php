@@ -33,6 +33,7 @@ $VERSION = '1.0.0';
        only to avoid "unknown meta" warnings in validator tools. The real
        enforcement is at the nginx layer. -->
 
+  <meta name="referrer" content="no-referrer">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
   <!-- Canonical URL -->
