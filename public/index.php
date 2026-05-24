@@ -123,7 +123,8 @@ $VERSION = '1.0.0';
     <div class="rip-box">
       <form class="rip-form" id="ripForm">
         <input
-          type="url"
+          type="text"
+          inputmode="url"
           class="rip-input"
           id="urlInput"
           placeholder="Paste a link here..."
@@ -132,7 +133,6 @@ $VERSION = '1.0.0';
           autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
-          required
         >
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
