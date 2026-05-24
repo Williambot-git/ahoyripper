@@ -1233,7 +1233,6 @@ case 'progress':
             'request_id' => $request_id,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
-            'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_age,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_age_seconds' => $ffmpeg_cache_age,
