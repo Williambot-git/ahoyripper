@@ -56,7 +56,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Build Docker image
         run: docker build -t ahoyripper-test .
+
       - name: List Docker layers
         run: docker history ahoyripper-test
+
+      - name: Validate container health
+        run: |
+          # Start the container in the background
+          docker run -d --name ahoyripper-health -p 8081:8080 ahoyripper-test
+          # Give services inside the container time to start (php-fpm + nginx)
+          sleep 5
+          # Hit the health endpoint to confirm the API responds
+          HEALTH_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/src/api.php?action=health || echo "000")
+          # Confirm nginx is serving the page (200 on index)
+          INDEX_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/ || echo "000")
+          # Check no container exited with an error
+          docker ps --filter "name=ahoyripper-health" --format "{{.Status}}"
+          docker logs ahoyripper-health 2>&1 | tail -5
+          # Teardown
+          docker kill ahoyripper-health 2>/dev/null || true
+          docker rm ahoyripper-health 2>/dev/null || true
+          # Fail the step if either endpoint did not respond with 2xx
+          if [ "$HEALTH_RESP" -ge 200 ] && [ "$HEALTH_RESP" -lt 300 ]; then
+            echo "  ✓ Health endpoint returned $HEALTH_RESP"
+          else
+            echo "  ✗ Health endpoint returned $HEALTH_RESP (expected 2xx)"
+            exit 1
+          fi
+          if [ "$INDEX_RESP" -ge 200 ] && [ "$INDEX_RESP" -lt 300 ]; then
+            echo "  ✓ Index page returned $INDEX_RESP"
+          else
+            echo "  ✗ Index page returned $INDEX_RESP (expected 2xx)"
+            exit 1
+          fi
