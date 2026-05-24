@@ -771,11 +771,16 @@ switch ($action) {
             }
             logRequest('info', 422, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code(422);
-            echo json_encode([
+            $resp = [
                 'error' => 'Could not parse video info. The site may not be supported.',
                 'error_code' => 'PARSE_ERROR',
                 'request_id' => $request_id,
-            ]);
+            ];
+            // Surface yt-dlp's raw stderr so the user sees the actual reason
+            if ($raw_err) {
+                $resp['raw_error'] = $raw_err;
+            }
+            echo json_encode($resp);
             exit;
         }
         if (isset($parsed['error'])) {
