@@ -641,8 +641,11 @@ card.addEventListener('click', function(e) {
           };
           if (err.error_code && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];
-          } else if (errorHints[resp.status]) {
-            msg = errorHints[resp.status];
+          } else {
+            var statusKey = String(resp.status);
+            if (errorHints[statusKey]) {
+              msg = errorHints[statusKey];
+            }
           }
         }
         showError(msg);
