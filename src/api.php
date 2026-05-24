@@ -474,11 +474,17 @@ function parseFormats($json_str, &$raw_error_out = null) {
         if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
         // Then by selected sort key
         if ($sort === 'filesize') {
-            return ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+            $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
-            return ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+        } else {
+            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
-        return ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        // Secondary: within same type group, sort by height descending for consistency
+        if ($cmp === 0) {
+            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        }
+        return $cmp;
     });
 
     return [
