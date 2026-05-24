@@ -1268,8 +1268,9 @@ case 'progress':
                     'exp' => time() + 300, // 5 min TTL
                 ]));
             }
-        } else {
-            // No probe requested and no cached result — explicitly null
+        } elseif (!$do_probe) {
+            // No probe requested — explicitly null so the response field is absent,
+            // not left stale from a previous request's cached result.
             $GLOBALS['__ytdlp_probe'] = null;
         }
 
