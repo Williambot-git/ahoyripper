@@ -130,6 +130,18 @@ else
 fi
 
 echo ""
+echo "==> Checking quota undo when parseFormats returns null..."
+# When parseFormats returns null (parse failure), quota should also be undone.
+# This prevents burning daily limit on content that can't be parsed at all.
+INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
+if echo "$INFO_CASE" | grep -A 30 "if (\!\$parsed)" | grep -q "ahoyrip_daily_.*md5.*ip"; then
+    echo "  ✓ Quota undo present for parseFormats null (parse failure)"
+else
+    echo "  ✗ Quota undo missing for parseFormats null — daily limit burned on unparseable content"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking download exit-code error handling..."
 if grep -q "actual_exit" src/api.php; then
     echo "  ✓ Download exit-code validation present"

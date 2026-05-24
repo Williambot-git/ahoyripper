@@ -746,11 +746,34 @@ switch ($action) {
 
         $parsed = parseFormats($out, $raw_err);
         if (!$parsed) {
+            // Undo the quota increment — parseFormats returned null means the content
+            // could not be parsed; we don't burn the user's daily limit for this.
+            if (!$unlimited) {
+                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                    $undo_raw = fread($undo_fp, 4096);
+                    $undo_data = ['t' => date('Y-m-d'), 'c' => 0];
+                    if ($undo_raw) {
+                        $decoded = json_decode($undo_raw, true);
+                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                    }
+                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] > 0) {
+                        $undo_data['c']--;
+                        ftruncate($undo_fp, 0);
+                        rewind($undo_fp);
+                        fwrite($undo_fp, json_encode($undo_data));
+                        fflush($undo_fp);
+                    }
+                    flock($undo_fp, LOCK_UN);
+                    fclose($undo_fp);
+                }
+            }
             logRequest('info', 422, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code(422);
             echo json_encode([
                 'error' => 'Could not parse video info. The site may not be supported.',
                 'error_code' => 'PARSE_ERROR',
+                'request_id' => $request_id,
             ]);
             exit;
         }
