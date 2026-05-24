@@ -1024,9 +1024,14 @@ switch ($action) {
         $download_filename = trim($_GET['filename'] ?? '');
         if ($download_filename !== '') {
             $download_filename = preg_replace('/[^\w\s._-]/', '', $download_filename);
-            $download_filename = preg_replace('/\s+/', '_', trim($download_filename));
-            if (strlen($download_filename) > 80 || $download_filename === '') {
+            $download_filename = preg_replace('/\s+/', '_', $download_filename);
+            // Validate trimmed result — a filename that trims to empty is invalid.
+            // Check this AFTER sanitization so inputs like "   " fall through to fallback.
+            $trimmed = trim($download_filename);
+            if (strlen($trimmed) === 0 || strlen($trimmed) > 80) {
                 $download_filename = 'ahoyrip';
+            } else {
+                $download_filename = $trimmed;
             }
         } else {
             $download_filename = 'ahoyrip';
