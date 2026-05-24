@@ -30,6 +30,10 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
   min-height: 100vh;
+  /* Pad for iOS safe areas (notch / home indicator) when viewport-fit=cover is used */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -44,6 +48,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
+  padding-top: calc(1rem + env(safe-area-inset-top));
   border-bottom: 1px solid var(--color-border);
 }
 .ahoy-nav-logo {
