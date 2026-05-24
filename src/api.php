@@ -616,14 +616,19 @@ switch ($action) {
             exit;
         }
 
-        // Read API key (Bearer header preferred; fallback to query param for compat).
-        // Set $unlimited so the daily-quota block below can skip for key holders.
-        $bearer = null;
+        // ─── Check for unlimited API key ───
+        // Prefer Authorization: Bearer header (keeps key out of URLs and server logs).
+        // Fall back to GET/POST query param only for legacy clients that can't send headers.
+        // Omit empty-string Bearer tokens — a misconfigured client sending
+        // "Authorization: Bearer " (trailing space, no token) should fall through to key= param.
+        $api_key = null;
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
-            $bearer = trim($m[1]);
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m) && trim($m[1]) !== '') {
+            $api_key = trim($m[1]);
         }
-        $api_key = $bearer ?? ($_GET['key'] ?? $_POST['key'] ?? null);
+        if ($api_key === null) {
+            $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
+        }
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
@@ -892,15 +897,19 @@ switch ($action) {
             exit;
         }
 
-        // ─── Check for unlimited API key ───
-        // Accept key from Authorization: Bearer header (preferred, keeps key out of URLs/logs)
-        // Fall back to GET/POST query param for backwards compatibility.
-        $bearer = null;
+// ─── Check for unlimited API key ───
+        // Prefer Authorization: Bearer header (keeps key out of URLs and server logs).
+        // Fall back to GET/POST query param only for legacy clients that can't send headers.
+        // Omit empty-string Bearer tokens — a misconfigured client sending
+        // "Authorization: Bearer " (trailing space, no token) should fall through to key= param.
+        $api_key = null;
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
-            $bearer = trim($m[1]);
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m) && trim($m[1]) !== '') {
+            $api_key = trim($m[1]);
         }
-        $api_key = $bearer ?? ($_GET['key'] ?? $_POST['key'] ?? null);
+        if ($api_key === null) {
+            $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
+        }
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Download rate limiting (atomic via flock) ───
