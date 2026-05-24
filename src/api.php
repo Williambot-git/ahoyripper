@@ -693,9 +693,10 @@ switch ($action) {
         }
         // The $timeout of 45s is the maximum time allowed for the info fetch.
         // Without this, a stalled or unresponsive source could hang the worker indefinitely.
-        // --newline suppresses progress bars (which yt-dlp emits to stderr by default)
-        // so they don't pollute the stderr stream and confuse error parsing.
-        runYtdlp("--dump-json --no-playlist --no-warnings --newline -- " . $url, $out, $err, $exit, 45);
+        // --skip-download fetches metadata without downloading the media file,
+        // saving bandwidth and reducing latency — parseFormats only reads JSON.
+        // --newline suppresses progress bars so they don't pollute stderr.
+        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // The fetch failed — undo the quota increment so failed attempts don't
