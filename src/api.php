@@ -234,9 +234,12 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
         if ($timeout > 0 && (time() - $start) > $timeout) {
             proc_terminate($proc, 9);
             $stderr .= "\nProcess timed out after {$timeout}s";
-            $exit = -1;
+            $exit = -1; // convention: -1 = timeout
+            // Do NOT call proc_close() after proc_terminate() — it can cause the
+            // PHP process to wait for the child (creating a zombie). Instead,
+            // explicitly close any open pipes and discard the exit code since the
+            // process was already killed.
             foreach ($pipes as $p) { if ($p) fclose($p); }
-            proc_close($proc);
             return false;
         }
         $read = [];
