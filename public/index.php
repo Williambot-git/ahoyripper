@@ -706,6 +706,7 @@ card.addEventListener('click', function(e) {
   input.addEventListener('paste', function() {
     setTimeout(function() {
       if (input.value && input.value.startsWith('http')) {
+        hideError();
         fetchInfo();
       }
     }, 100);
