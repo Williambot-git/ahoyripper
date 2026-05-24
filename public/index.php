@@ -233,16 +233,9 @@ $VERSION = '1.0.0';
     </div>
 
     <!-- VPN Banner -->
-    <div class="vpn-banner">
+    <div class="vpn-banner" style="margin-top:2.5rem;">
       <p><strong>Want unlimited, unrestricted access?</strong> Route through our VPN for total privacy and to bypass any restrictions.</p>
       <a href="https://ahoyvpn.com" class="vpn-btn">Get AhoyVPN &mdash; $5.99/mo</a>
-    </div>
-  
-    <!-- VPN Upsell -->
-    <div class="vpn-banner" style="margin-top:2rem; text-align:center; padding:2rem; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:12px; border:1px solid #3b82f6;">
-      <h2 style="color:#fff; margin-bottom:0.5rem; font-size:1.5rem;">Unlimited Rips with AhoyVPN</h2>
-      <p style="color:#ccc; margin-bottom:1.5rem;">10 free rips per day &mdash; or get unlimited access with our VPN plan for just $5.99/month. No logs, no tracking, cancel anytime.</p>
-      <a href="https://ahoyvpn.com" class="vpn-btn" style="font-size:1.1rem; padding:0.75rem 2rem;">Get AhoyVPN &mdash; $5.99/mo</a>
     </div>
 </section>
 </main>
