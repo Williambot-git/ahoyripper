@@ -138,7 +138,7 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">&ndash;</span> free rips/day &mdash;
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">5</span> free rips/day &mdash;
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
       </p>
       <div class="rip-key-wrap">
@@ -167,7 +167,7 @@ $VERSION = '1.0.0';
         <img class="results-thumb" id="resultsThumb" src="" alt="Media thumbnail" loading="lazy" hidden>
         <div class="results-info">
           <p class="results-title">
-            <span class="check">&#10003;</span>
+            <span class="check" role="img" aria-label="Success">&check;</span>
             <span id="resultsTitle">Ready to download</span>
           </p>
           <p class="results-sub" id="resultsSub"></p>
