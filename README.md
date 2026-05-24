@@ -145,6 +145,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
 | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests — try again shortly |
 | `SSL_ERROR` | Secure connection to the source failed |
 | `CONNECTION_FAILED` | Could not connect to the source |

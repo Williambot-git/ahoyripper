@@ -321,6 +321,9 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
         return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
     }
+    if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
+        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.'];
+    }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
     }
