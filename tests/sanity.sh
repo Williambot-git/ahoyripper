@@ -186,7 +186,7 @@ echo "==> Checking Docker nginx.conf CSP allows external media thumbnails..."
 # Docker nginx.conf CSP must allow thumbnails from the same CDN domains
 # as the production nginx.conf to prevent broken thumbnails in Docker deploys.
 DOCKER_CSP=$(grep "Content-Security-Policy" deploy/nginx-docker.conf | sed "s/.*Content-Security-Policy[ ]*//")
-for domain in "i.ytimg.com" "pbs.twimg.com" "sndcdn.com" "vimeocdn.com" "instagram.com" "fbcdn.net"; do
+for domain in "i.ytimg.com" "pbs.twimg.com" "sndcdn.com" "vimeocdn.com" "instagram.com" "fbcdn.net" "tiktokcdn.com" "tiktok.com"; do
     if ! echo "$DOCKER_CSP" | grep -q "$domain"; then
         echo "  ✗ Docker CSP missing thumbnail domain: $domain"
         exit 1
