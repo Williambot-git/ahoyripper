@@ -431,7 +431,9 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
         // Build human-readable description (used by frontend to show what format is)
         // Falls back to the label when no extra descriptive info is available.
-        $description = $format_description ?: $label;
+        // format_note is appended to the label already, so include it explicitly
+        // here as a fallback source (format_description is rarely set by yt-dlp).
+        $description = $format_description ?: ($format_note ? $format_note : $label);
 
         // Estimate filesize if not available
         if ($filesize === 0) {
