@@ -23,5 +23,8 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
+User-agent: Google-Extended
+Disallow: /
+
 User-agent: Omgilibot
 Disallow: /

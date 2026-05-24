@@ -197,11 +197,14 @@ Returns:
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "ffmpeg_cache_age_seconds": 542,
+  "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)" },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2
 }
 ```
+
+`yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes.
 
 `load_avg` requires Linux. `memory_available_pct` reads `/proc/meminfo`. `disk_free_gb` uses `disk_free_space()`. Cache fields reflect internal version-caching TTLs (1 hour).
 
