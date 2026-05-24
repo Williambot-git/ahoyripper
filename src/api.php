@@ -932,6 +932,9 @@ switch ($action) {
 
         if (time() - $dl_data['t'] < $dl_rate_window) {
             if ($dl_data['c'] >= $dl_rate_limit) {
+                $dl_reset_ts = $dl_data['t'] + $dl_rate_window;
+                header('X-DL-RateLimit-Remaining: 0');
+                header('X-DL-RateLimit-Reset: ' . $dl_reset_ts);
                 flock($dl_fp, LOCK_UN);
                 fclose($dl_fp);
                 http_response_code(429);
