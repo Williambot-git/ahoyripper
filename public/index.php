@@ -488,10 +488,10 @@ card.addEventListener('click', function(e) {
               setTimeout(function() { card.style.borderColor = ''; }, 1500);
             }, 500);
           })
-          .catch(function(e) {
+          .catch(function(dlErr) {
             navigateOnSuccess = false;
             var msg = 'Download failed. Try another format.';
-            if (e.name === 'AbortError') {
+            if (dlErr.name === 'AbortError') {
               msg = 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format.';
             }
             showError(msg);
