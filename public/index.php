@@ -613,9 +613,12 @@ card.addEventListener('click', function(e) {
       setProgress(80, 'Parsing...');
 
       if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ error: 'Unknown error' }));
+        var err = await resp.json().catch(() => ({ error: 'Unknown error' }));
         // Surface error_code for classified yt-dlp errors
         var msg = err.error || 'Something went wrong. Try again.';
+        // When the server surfaces raw yt-dlp output (e.g. "Video unavailable"),
+        // include it so the user sees the actual reason, not just our generic label.
+        var raw = err.raw_error;
         if (err.error_code) {
           var errorHints = {
             'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
@@ -651,6 +654,12 @@ card.addEventListener('click', function(e) {
             if (errorHints[statusKey]) {
               msg = errorHints[statusKey];
             }
+          }
+          // If the server sent raw yt-dlp output, append it for diagnostic value.
+          // This gives the user the actual error message yt-dlp produced (e.g.
+          // "Video unavailable. Try another source."), not just our generic label.
+          if (raw && typeof raw === 'string' && raw.length > 0 && raw.length < 400) {
+            msg += ': ' + raw;
           }
         }
         showError(msg);
