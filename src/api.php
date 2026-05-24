@@ -61,6 +61,11 @@ $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = 30; // requests per minute
 $rate_window = 60;
 
+// $data is declared here so headers can be set outside the if block below,
+// making rate-limit metadata available to all API responses (including
+// unlimited-key users who still pass through this gate).
+$data = ['t' => time(), 'c' => 0];
+
 if ($is_rate_limited) {
     $fp = fopen($rate_file, 'c+');
     if (!$fp) {
@@ -75,7 +80,6 @@ if ($is_rate_limited) {
         exit;
     }
 
-    $data = ['t' => time(), 'c' => 0];
     $raw = fread($fp, 4096);
     if ($raw) {
         $decoded = json_decode($raw, true);
@@ -84,19 +88,16 @@ if ($is_rate_limited) {
         }
     }
 
-    // Add rate limit response headers for client visibility
-    $reset = $data['t'] + $rate_window;
-    header('X-RateLimit-Limit: ' . $rate_limit);
-    header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
-    header('X-RateLimit-Reset: ' . $reset);
-    header('X-RateLimit-Window: ' . $rate_window);
-
     if (time() - $data['t'] < $rate_window) {
         if ($data['c'] >= $rate_limit) {
+            $reset_timestamp = $data['t'] + $rate_window;
             flock($fp, LOCK_UN);
             fclose($fp);
             http_response_code(429);
-            $reset_timestamp = $data['t'] + $rate_window;
+            header('X-RateLimit-Limit: ' . $rate_limit);
+            header('X-RateLimit-Remaining: 0');
+            header('X-RateLimit-Reset: ' . $reset_timestamp);
+            header('X-RateLimit-Window: ' . $rate_window);
             header('Retry-After: ' . max(1, $reset_timestamp - time()));
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
@@ -118,6 +119,16 @@ if ($is_rate_limited) {
     fflush($fp);
     flock($fp, LOCK_UN);
     fclose($fp);
+}
+
+// Set rate limit headers unconditionally so they are present on every response,
+// including unlimited-key requests that still pass through this gate.
+// This gives clients (monitoring tools, load balancers) consistent metadata.
+$reset = $data['t'] + $rate_window;
+header('X-RateLimit-Limit: ' . $rate_limit);
+header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+header('X-RateLimit-Reset: ' . $reset);
+header('X-RateLimit-Window: ' . $rate_window);
 
 // Periodic cleanup of stale rate files (1% chance per request)
 if (mt_rand(1, 100) === 1) {
@@ -136,7 +147,6 @@ if (mt_rand(1, 100) === 1) {
             @unlink($cache);
         }
     }
-}
 }
 
 // Only allow safe characters in URL
