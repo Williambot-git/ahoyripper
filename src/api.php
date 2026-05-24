@@ -677,6 +677,20 @@ switch ($action) {
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
+        // Enforce a max URL length to prevent pathologically long URLs from reaching
+        // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
+        // tracking parameters while stopping abuse.
+        $MAX_URL_LEN = 2048;
+        if (strlen($url) > $MAX_URL_LEN) {
+            http_response_code(400);
+            logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+            echo json_encode([
+                'error' => 'URL is too long. Please paste a shorter link.',
+                'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
         // The $timeout of 45s is the maximum time allowed for the info fetch.
         // Without this, a stalled or unresponsive source could hang the worker indefinitely.
         // --newline suppresses progress bars (which yt-dlp emits to stderr by default)
@@ -797,6 +811,20 @@ switch ($action) {
             logRequest('download', 400, ['reason' => 'invalid_url']);
             echo json_encode([
                 'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+                'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
+        // Enforce a max URL length to prevent pathologically long URLs from reaching
+        // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
+        // tracking parameters while stopping abuse.
+        $MAX_URL_LEN = 2048;
+        if (strlen($url) > $MAX_URL_LEN) {
+            http_response_code(400);
+            logRequest('download', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+            echo json_encode([
+                'error' => 'URL is too long. Please paste a shorter link.',
                 'error_code' => 'INVALID_URL',
                 'request_id' => $request_id,
             ]);
