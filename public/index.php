@@ -596,7 +596,9 @@ card.addEventListener('click', function(e) {
         }
         // Unlimited-key holders get -1 remaining — hide both the count and the
         // "free rips/day" label since the quota concept does not apply to them.
-        if (rem === -1 && labelEl) {
+        // Use Number() to normalise the header value (always a string) to an integer
+        // so the strict-equality check works regardless of type (e.g. "-1" vs -1).
+        if (Number(rem) === -1 && labelEl) {
           labelEl.style.display = 'none';
           el.style.display = 'none';
         }
