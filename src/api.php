@@ -308,7 +308,7 @@ function clean($s) {
 // Classify yt-dlp error messages into actionable error codes
 function classifyYtdlpError($raw_err) {
     $err_lower = strtolower($raw_err);
-    if (preg_match('/geo.*restriction|this video is available in/i', $err_lower)) {
+    if (preg_match('/geo.*restriction|this video is available in|geo restricted/i', $err_lower)) {
         return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.'];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
@@ -923,7 +923,7 @@ switch ($action) {
         // for conditional selection (e.g. "bestvideo[height>=720]+bestaudio[ext=m4a]").
         // Block shell metacharacters that could be dangerous in proc_open calls:
         // $ ` ( ) ; | & < > \ and whitespace. Allow alphanum, _ . , - + [ ] < > = !
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\-]+$/', $format_id)) {
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\\]+\\/-]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([
