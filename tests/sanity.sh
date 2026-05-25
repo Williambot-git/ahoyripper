@@ -200,6 +200,19 @@ else
 fi
 
 echo ""
+echo "==> Checking quota undo when download gets a classified yt-dlp error..."
+# When classifyYtdlpError returns a result (GEOBLOCKED, PRIVATE_VIDEO, etc.)
+# the download action should undo the daily quota increment so the user's
+# daily limit is not burned for unavailable content.
+# Extract the section from $err_classified handling to end of error block.
+if awk '/\$err_classified = classifyYtdlpError/,/^[[:space:]]*\}/' src/api.php | grep -q "ahoyrip_daily_.*md5.*ip"; then
+    echo "  ✓ Quota undo present for download classified errors"
+else
+    echo "  ✗ Quota undo missing for download classified errors — daily limit burned on unavailable content"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking download action logRequest uses correct action name (not 'info')..."
 # The daily-limit block inside the 'download' case must log 'download', not 'info'.
 # Count occurrences: the 'info' case has 1 correct call; the 'download' case must NOT

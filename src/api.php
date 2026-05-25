@@ -1185,6 +1185,31 @@ switch ($action) {
             if (strlen($proc_err) > 200) $proc_err = substr($proc_err, 0, 200) . '...';
             $err_classified = classifyYtdlpError($proc_err);
             if ($err_classified) {
+                // Undo the daily quota increment — classified errors (GEOBLOCKED,
+                // PRIVATE_VIDEO, LOGIN_REQUIRED, etc.) mean the content is
+                // unavailable, not that the user did anything wrong. We don't burn
+                // their daily limit for content that simply can't be ripped.
+                if (!$unlimited) {
+                    $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                    if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                        $undo_raw = fread($undo_fp, 4096);
+                        $undo_data = ['t' => date('Y-m-d'), 'c' => 0];
+                        if ($undo_raw) {
+                            $decoded = json_decode($undo_raw, true);
+                            if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                        }
+                        if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] > 0) {
+                            $undo_data['c']--;
+                            ftruncate($undo_fp, 0);
+                            rewind($undo_fp);
+                            fwrite($undo_fp, json_encode($undo_data));
+                            fflush($undo_fp);
+                        }
+                        flock($undo_fp, LOCK_UN);
+                        fclose($undo_fp);
+                    }
+                }
+                foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 logRequest('download', 422, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code(422);
                 echo json_encode([
@@ -1192,7 +1217,9 @@ switch ($action) {
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
                 ]);
+                exit;
             } else {
+                foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
                 echo json_encode([
@@ -1200,8 +1227,8 @@ switch ($action) {
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
                 ]);
+                exit;
             }
-            exit;
         }
 
         // Find the actual downloaded file — glob for the resolved extension
