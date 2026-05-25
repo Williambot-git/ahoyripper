@@ -459,7 +459,9 @@ card.addEventListener('click', function(e) {
         card.classList.add('downloading');
         setLoading(true);
 
-        var navigateOnSuccess = true; // guard: only navigate when fetch itself succeeds
+        // navigateOnSuccess guard: only call window.location.href (download redirect)
+        // when the fetch itself returns HTTP 200. Non-200/error JSON responses must
+        // NOT trigger navigation — the browser would download the JSON as a file.
         fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
