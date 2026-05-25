@@ -1330,6 +1330,9 @@ switch ($action) {
         header('Transfer-Encoding: identity');
         // Explicitly close connection after this response to prevent keep-alive
         // issues where long-running downloads cause premature client cut-off.
+        // This is set here (not earlier in the action) so that early-exit error
+        // responses (429, 504, 500) are not affected — those must leave the
+        // connection open so the client can read the full JSON error body.
         header('Connection: close');
 
         $fp = fopen($actual_file, 'rb');
