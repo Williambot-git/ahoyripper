@@ -589,8 +589,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // Verify the Accept header expects JSON — reject non-JSON requests
 // to prevent the API from returning HTML/error pages to API clients.
 // Allow */* (browsers/clients that accept anything) and application/json variants.
+// Download action is exempt — it always returns the file regardless of Accept.
 $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-if ($accept && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
+$json_actions = ['info', 'health', 'progress'];
+if (in_array($action, $json_actions, true) && $accept && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
     echo json_encode([
         'error' => 'Not acceptable. API only returns application/json.',
