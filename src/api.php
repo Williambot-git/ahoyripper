@@ -10,7 +10,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-header('Content-Security-Policy: default-src \'none\'; script-src \'none\'; style-src \'none\'; img-src \'none\'; connect-src \'none\'; font-src \'none\'; frame-src \'none\';');
+header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; connect-src \'self\'; font-src \'self\'; frame-src \'none\'; base-uri \'self\'; form-action \'self\';');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
 $request_id = bin2hex(random_bytes(8));
