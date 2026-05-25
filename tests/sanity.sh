@@ -188,6 +188,32 @@ fi
 echo "  ✓ download case logs 'download' action for daily limit"
 
 echo ""
+echo "==> Checking API CSP includes all required thumbnail CDN domains..."
+# The API CSP must allow thumbnails from media CDNs so the browser can load
+# them when rendering video info (YouTube, TikTok, Twitter/X, SoundCloud, etc.).
+REQUIRED_THUMB_DOMAINS=(
+    "i.ytimg.com"
+    "pbs.twimg.com"
+    "sndcdn.com"
+    "vimeocdn.com"
+    "instagram.com"
+    "fbcdn.net"
+    "tiktokcdn.com"
+    "tiktok.com"
+)
+API_CSP=$(grep "Content-Security-Policy" src/api.php | sed "s/.*Content-Security-Policy[ ]*//")
+missing=0
+for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
+    if ! echo "$API_CSP" | grep -q "$domain"; then
+        echo "  ✗ API CSP missing thumbnail domain: $domain"
+        missing=1
+    fi
+done
+if [ "$missing" -eq 0 ]; then
+    echo "  ✓ API CSP allows all required thumbnail CDN domains"
+fi
+
+echo ""
 echo "==> Checking yt-dlp stderr capture in download..."
 if grep -q "proc_stderr" src/api.php; then
     echo "  ✓ Download stderr capture present"
