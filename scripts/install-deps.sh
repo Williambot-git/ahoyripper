@@ -77,8 +77,24 @@ fi
 # method and use the right upgrade path accordingly.
 echo "==> Updating yt-dlp..."
 if command -v yt-dlp &>/dev/null; then
+    # Validate the existing installation is functional before updating.
+    # A broken/corrupted installation (e.g. pip-installed but python pkg broken)
+    # will cause self-update to silently skip. Detect this and force reinstall.
     YTDL_BIN=$(command -v yt-dlp)
-    if [[ "$YTDL_BIN" == *.py || "$YTDL_BIN" == */bin/yt-dlp ]] && grep -q 'site-packages\|dist-packages' "$YTDL_BIN" 2>/dev/null || pip show yt-dlp &>/dev/null; then
+    if ! yt-dlp --version &>/dev/null; then
+        echo "  ! Existing yt-dlp is broken (--version failed). Reinstalling..."
+        # Try pip reinstall first, falling back to standalone binary
+        if [ -n "$PIP_BIN" ]; then
+            $PIP_BIN install -q --force-reinstall yt-dlp 2>&1 | tail -2 || true
+        fi
+        # If pip reinstall didn't fix it, grab the standalone binary
+        if ! yt-dlp --version &>/dev/null; then
+            echo "  Installing standalone yt-dlp binary..."
+            curl -L -o /usr/local/bin/yt-dlp \
+                https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+                2>/dev/null && chmod +x /usr/local/bin/yt-dlp
+        fi
+    elif [[ "$YTDL_BIN" == *.py || "$YTDL_BIN" == */bin/yt-dlp ]] && grep -q 'site-packages\|dist-packages' "$YTDL_BIN" 2>/dev/null || pip show yt-dlp &>/dev/null; then
         # pip-installed — use pip to upgrade
         $PIP_BIN install -q --upgrade yt-dlp 2>&1 | tail -1
     else
