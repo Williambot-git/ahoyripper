@@ -1217,7 +1217,6 @@ switch ($action) {
             $mime = $detected;
         }
 
-        header('Content-Type: ' . $mime);
         header('Content-Length: ' . $filesize);
         // Send RFC 5987 filename encoding so non-ASCII characters in the derived
         // filename are handled correctly across browsers (RFC 5987 = UTF-8 encoded
@@ -1232,13 +1231,10 @@ switch ($action) {
         }
         header('Content-Disposition: ' . $disposition);
         header('Cache-Control: no-cache');
-        header('X-Content-Type-Options: nosniff');
-        header('X-Download-Options: noopen');
-        // Suppress PHP's automatic chunked transfer encoding for binary streams
-        header('Transfer-Encoding: identity');
-        // Explicitly close connection after this response to prevent keep-alive
-        // issues on long-running downloads that can cause premature client cuts.
-        header('Connection: close');
+        // Content-Type and X-Download-Options are set immediately before streaming
+        // so that error response paths above (empty-file, timeout, proc failure)
+        // return with the default Content-Type: application/json from the top of
+        // the script rather than application/octet-stream.
 
         ignore_user_abort(true);
         register_shutdown_function(function() use($glob_pattern) {
@@ -1246,6 +1242,19 @@ switch ($action) {
         });
 
         ini_set('memory_limit', '256M');
+
+        // Set download-specific headers just before streaming — ensures error
+        // responses above return JSON with default Content-Type, not binary.
+        header('Content-Type: ' . $mime);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Download-Options: noopen');
+        // Suppress PHP's automatic chunked transfer encoding for binary streams.
+        // PHP adds Transfer-Encoding: chunked for large responses; identity
+        // forces raw bytes so the Content-Length header is respected.
+        header('Transfer-Encoding: identity');
+        // Explicitly close connection after this response to prevent keep-alive
+        // issues where long-running downloads cause premature client cut-off.
+        header('Connection: close');
 
         $fp = fopen($actual_file, 'rb');
         if (!$fp) {
