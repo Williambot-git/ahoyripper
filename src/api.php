@@ -776,12 +776,16 @@ switch ($action) {
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
             logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => substr($err_msg, 0, 100)]);
             http_response_code(422);
-            echo json_encode([
+            $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
                 'action' => 'info',
                 'request_id' => $request_id,
-            ]);
+            ];
+            if ($raw_err) {
+                $resp['raw_error'] = $raw_err;
+            }
+            echo json_encode($resp);
             exit;
         }
 
