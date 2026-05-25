@@ -245,6 +245,7 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
             // Close any remaining open pipes first, then proc_close to harvest the
             // exit code and release the process handle (avoids zombie on PHP shutdown).
             foreach ($pipes as $p) { if ($p) fclose($p); }
+            $pipes = null;
             proc_close($proc);
             return false;
         }
@@ -291,6 +292,7 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     }
 
     foreach ($pipes as $p) { if ($p) fclose($p); }
+    $pipes = null;
     $exit = proc_close($proc);
     return true;
 }
