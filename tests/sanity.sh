@@ -282,6 +282,19 @@ else
 fi
 
 echo ""
+echo "==> Checking production nginx.conf CSP allows external media thumbnails..."
+# Production nginx.conf CSP must include all CDN thumbnail domains so that
+# thumbnails render correctly on the page regardless of which deploy method is used.
+PROD_CSP=$(grep "add_header Content-Security-Policy" deploy/nginx.conf | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
+for domain in "i.ytimg.com" "pbs.twimg.com" "sndcdn.com" "vimeocdn.com" "instagram.com" "fbcdn.net" "tiktokcdn.com" "tiktok.com" "vxtiktok.com" "mediaJx.com"; do
+    if ! echo "$PROD_CSP" | grep -q "$domain"; then
+        echo "  ✗ Production nginx.conf CSP missing thumbnail domain: $domain"
+        exit 1
+    fi
+done
+echo "  ✓ Production nginx.conf CSP allows all required media thumbnail domains"
+
+echo ""
 echo "==> Checking Docker nginx.conf CSP allows external media thumbnails..."
 # Docker nginx.conf CSP must allow thumbnails from the same CDN domains
 # as the production nginx.conf to prevent broken thumbnails in Docker deploys.
