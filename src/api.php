@@ -866,12 +866,32 @@ switch ($action) {
         // Rejecting early avoids burning rate-limit slots or opening temp files on bad input.
         $url = trim($_GET['url'] ?? '');
         $format_id = trim($_GET['format'] ?? '');
-        if (!$url || !isValidUrl($url) || !$format_id) {
+        if (!$url) {
+            http_response_code(400);
+            logRequest('download', 400, ['reason' => 'missing_url']);
+            echo json_encode([
+                'error' => 'A URL is required.',
+                'error_code' => 'MISSING_URL',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
+        if (!isValidUrl($url)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_url']);
             echo json_encode([
-                'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+                'error' => 'Invalid URL. Please paste a valid video link.',
                 'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
+        if (!$format_id) {
+            http_response_code(400);
+            logRequest('download', 400, ['reason' => 'missing_format']);
+            echo json_encode([
+                'error' => 'A format must be selected before downloading.',
+                'error_code' => 'MISSING_FORMAT',
                 'request_id' => $request_id,
             ]);
             exit;
