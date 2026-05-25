@@ -238,7 +238,7 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 
 **Audio:** SoundCloud, Bandcamp, Spotify (with auth), Apple Music, Deezer, Mixcloud, Audiomack, and more
 
-**Full list:** See the [yt-dlp supported sites list](https://yt-dlp.github.io/yt-dlp/supportedsites.html) online — no installation needed.
+**Full list:** See the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) online — no installation needed.
 
 You can also check from the command line:
 ```bash

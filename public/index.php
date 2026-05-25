@@ -657,6 +657,8 @@ card.addEventListener('click', function(e) {
             'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
             'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
             'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
+            'MISSING_URL': 'A URL is required. Paste a link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+            'MISSING_FORMAT': 'No format selected. Pick a resolution or quality option from the list above.',
             'INVALID_FORMAT_ID': 'Invalid format ID. Select a format from the list above.',
             'PRIVATE_VIDEO': 'This video is private and cannot be downloaded.',
             '504': 'The request timed out. The video might be too large or the site is slow. Try a smaller format.',
