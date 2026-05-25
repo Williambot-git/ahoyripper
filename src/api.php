@@ -1074,7 +1074,13 @@ switch ($action) {
         $tmp_dir = sys_get_temp_dir();
         $out_base = 'ahoyrip_' . bin2hex(random_bytes(8));
         $out_template = $tmp_dir . '/' . $out_base . '.tmp';  // yt-dlp appends e.g. .mp4
-        $out_file = $out_template; // reference used for cleanup
+
+        // Register shutdown handler to clean up any temp files on unexpected exit.
+        // Catches: fatal errors, connection aborts, timeout before normal cleanup.
+        // The glob pattern is captured by PHP's closure semantics.
+        register_shutdown_function(function() use($tmp_dir, $out_base) {
+            foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+        });
 
         // Prevent the user's video URL from leaking as HTTP Referer to the source.
         // yt-dlp sends the URL itself as referer by default; using the generic
@@ -1252,9 +1258,6 @@ switch ($action) {
         // the script rather than application/octet-stream.
 
         ignore_user_abort(true);
-        register_shutdown_function(function() use($glob_pattern) {
-            foreach (glob($glob_pattern) as $f) { @unlink($f); }
-        });
 
         ini_set('memory_limit', '256M');
 
