@@ -12,7 +12,7 @@ User-agent: FacebookBot
 User-agent: Google-Extended
 User-agent: GPTBot
 User-agent: ImagesiftBot
-User-agent:Omgilibot
+User-agent: Omgilibot
 User-agent: Omgili
 User-agent: Omgili Media Bot
 User-agent: PerplexityBot
