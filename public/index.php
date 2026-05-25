@@ -143,7 +143,8 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">5</span> free rips/day &mdash;
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">5</span>
+        <span id="quotaLabel"> free rips/day &mdash;</span>
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
       </p>
       <div class="rip-key-wrap">
@@ -564,11 +565,14 @@ card.addEventListener('click', function(e) {
     showProgress(true);
     setProgress(30, 'Fetching video info...');
 
-    // Read quota from last info response and update the display
+    // Read quota from last info response and update the display.
+    // Also hides the "free rips/day" label when X-DailyLimit-Remaining is -1
+    // (unlimited-key holder), since the quota concept does not apply.
     function updateQuotaFromHeaders(resp) {
       var rem = resp.headers.get('X-DailyLimit-Remaining');
       var lim = resp.headers.get('X-DailyLimit-Limit');
       var el = document.getElementById('quotaDisplay');
+      var labelEl = document.getElementById('quotaLabel');
       var upgradeEl = document.getElementById('quotaUpgrade');
       if (el && rem !== null && lim !== null) {
         el.textContent = rem;
@@ -589,6 +593,12 @@ card.addEventListener('click', function(e) {
             upgradeEl.style.fontWeight = '500';
             upgradeEl.style.color = '';
           }
+        }
+        // Unlimited-key holders get -1 remaining — hide both the count and the
+        // "free rips/day" label since the quota concept does not apply to them.
+        if (rem === -1 && labelEl) {
+          labelEl.style.display = 'none';
+          el.style.display = 'none';
         }
       }
     }

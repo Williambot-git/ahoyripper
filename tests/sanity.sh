@@ -239,6 +239,18 @@ else
 fi
 
 echo ""
+echo "==> Checking unlimited-key holders receive -1 daily-limit headers..."
+# When an unlimited key is used, the X-DailyLimit-Remaining should be -1
+# to signal the client that the quota label should be hidden.
+# The else block sets 'X-DailyLimit-Remaining: -1' only when $unlimited is true.
+if grep -q "X-DailyLimit-Remaining: -1" src/api.php; then
+    echo "  ✓ Unlimited-key holders receive X-DailyLimit-Remaining: -1"
+else
+    echo "  ✗ Unlimited-key holders do not receive X-DailyLimit-Remaining: -1"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking health action includes all required fields..."
 # The health action should return: status, server_time, request_id,
 # yt_dlp_version, ffmpeg_version, yt_dlp_cache_expires_at, yt_dlp_cache_ttl_seconds,

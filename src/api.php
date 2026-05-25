@@ -695,6 +695,13 @@ switch ($action) {
             header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: daily');
+        } else {
+            // Unlimited-key holder — quota does not apply, signal this to the
+            // client with -1 so it can hide the "N free rips/day" UI element.
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
         }
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
@@ -1033,6 +1040,13 @@ switch ($action) {
             header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: daily');
+        } else {
+            // Unlimited-key holder — quota does not apply, signal this to the
+            // client with -1 so it can hide the "N free rips/day" UI element.
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
         }
 
         // ─── Sanitize derived filename ───
