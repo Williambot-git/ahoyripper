@@ -3,7 +3,33 @@
 # Run: bash tests/sanity.sh
 
 set -e
+echo ""
+echo "==> Checking yt-dlp binary is installed and callable..."
+if ! command -v yt-dlp > /dev/null 2>&1; then
+    echo "  ⚠ yt-dlp not found in PATH (skipping — run on production server)"
+else
+    YTDLP_VER=$(yt-dlp --version 2>&1 | head -1 || true)
+    if [ -z "$YTDLP_VER" ]; then
+        echo "  ✗ yt-dlp found but --version returned empty"
+        exit 1
+    fi
+    echo "  ✓ yt-dlp installed: $YTDLP_VER"
+fi
 
+echo ""
+echo "==> Checking ffmpeg binary is installed..."
+if ! command -v ffmpeg > /dev/null 2>&1; then
+    echo "  ⚠ ffmpeg not found in PATH (skipping — run on production server)"
+else
+    FFMPEG_VER=$(ffmpeg -version 2>&1 | head -1 || true)
+    if [ -z "$FFMPEG_VER" ]; then
+        echo "  ✗ ffmpeg found but -version returned empty"
+        exit 1
+    fi
+    echo "  ✓ ffmpeg installed: $FFMPEG_VER"
+fi
+
+echo ""
 echo "==> Checking PHP syntax..."
 php -l src/api.php
 php -l public/index.php
