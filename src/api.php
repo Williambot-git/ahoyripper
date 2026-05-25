@@ -1424,10 +1424,6 @@ case 'progress':
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_age,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_age_seconds' => $ffmpeg_cache_age,
-            // Probe yt-dlp with a minimal known extractor to confirm it can reach
-            // external sites and parse responses. Cache result for 5 minutes to
-            // avoid adding latency to every health check under load.
-            'yt_dlp_probe' => $GLOBALS['__ytdlp_probe'] ?? null,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
@@ -1435,31 +1431,37 @@ case 'progress':
         // (proc_open + yt-dlp startup + network round-trip). The probe is useful when
         // a client wants to verify end-to-end connectivity, but adds unnecessary overhead
         // for routine load checks. The probe result is cached for 5 minutes regardless.
-        if ($do_probe && !isset($GLOBALS['__ytdlp_probe'])) {
-            // Use a fast, stable YouTube video for the probe — short, public,
-            // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
-            // --skip-download fetches metadata without downloading the full file,
-            // saving bandwidth and keeping the health check lightweight.
-            $probe_out = $probe_err = '';
-            $probe_exit = -1;
-            $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
-            $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
-                ? json_decode($probe_out, true)
-                : null;
-            $GLOBALS['__ytdlp_probe'] = $probe_result
-                ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80)]
-                : ['ok' => false, 'error' => substr(trim($probe_err ?: $probe_out), 0, 120)];
-            if ($probe_cache_file) {
-                @file_put_contents($probe_cache_file, json_encode([
-                    'result' => $GLOBALS['__ytdlp_probe'],
-                    'exp' => time() + 300, // 5 min TTL
-                ]));
+        if ($do_probe) {
+            // Only run the probe if the cache did not already populate __ytdlp_probe
+            // (the cache-read above set $GLOBALS['__ytdlp_probe'] when a cached result existed).
+            if (!isset($GLOBALS['__ytdlp_probe'])) {
+                // Use a fast, stable YouTube video for the probe — short, public,
+                // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
+                // --skip-download fetches metadata without downloading the full file,
+                // saving bandwidth and keeping the health check lightweight.
+                $probe_out = $probe_err = '';
+                $probe_exit = -1;
+                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
+                    ? json_decode($probe_out, true)
+                    : null;
+                $GLOBALS['__ytdlp_probe'] = $probe_result
+                    ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80)]
+                    : ['ok' => false, 'error' => substr(trim($probe_err ?: $probe_out), 0, 120)];
+                if ($probe_cache_file) {
+                    @file_put_contents($probe_cache_file, json_encode([
+                        'result' => $GLOBALS['__ytdlp_probe'],
+                        'exp' => time() + 300, // 5 min TTL
+                    ]));
+                }
             }
-        } elseif (!$do_probe) {
-            // No probe requested — explicitly null so the response field is absent,
-            // not left stale from a previous request's cached result.
-            $GLOBALS['__ytdlp_probe'] = null;
+            // Always include probe result in response when ?probe=1 is set,
+            // whether it came from cache or was just computed.
+            $response['yt_dlp_probe'] = $GLOBALS['__ytdlp_probe'];
         }
+        // When no probe is requested, the yt_dlp_probe field is intentionally
+        // omitted from the response (not null, absent) so the response shape
+        // is stable and clients can distinguish "probe disabled" from errors.
 
         // System resource metrics (Linux-only, gracefully omitted on other platforms)
         if (function_exists('sys_getloadavg')) {
