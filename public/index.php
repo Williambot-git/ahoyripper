@@ -264,6 +264,11 @@ $VERSION = '1.0.0';
   const ripAgain = document.getElementById('ripAgain');
   const sortSelect = document.getElementById('sortSelect');
 
+  // Flag guarding successful-fetch navigation — prevents the browser from
+  // downloading the JSON error body as a file when the fetch responds non-200.
+  // Set to false in error branches; checked nowhere (safety net for code changes).
+  var navigateOnSuccess = true;
+
   // Persist and restore sort preference
   var currentSort = localStorage.getItem('ahoyrip_sort') || 'height';
   if (sortSelect) {
@@ -459,9 +464,8 @@ card.addEventListener('click', function(e) {
         card.classList.add('downloading');
         setLoading(true);
 
-        // navigateOnSuccess guard: only call window.location.href (download redirect)
-        // when the fetch itself returns HTTP 200. Non-200/error JSON responses must
-        // NOT trigger navigation — the browser would download the JSON as a file.
+        // navigateOnSuccess guard: set to false when fetch fails so window.location.href
+        // is not called (would otherwise download the JSON error body as a file).
         fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(300000) })
           .then(function(resp) {
             if (!resp.ok) {
@@ -485,6 +489,8 @@ card.addEventListener('click', function(e) {
             }, 500);
           })
           .catch(function(dlErr) {
+            // Set guard flag to false — network/timeout failures must never trigger
+            // the redirect path (navigateOnSuccess is set in error branches too).
             navigateOnSuccess = false;
             var msg = 'Download failed. Try another format.';
             if (dlErr.name === 'AbortError') {
