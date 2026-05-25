@@ -73,6 +73,8 @@ jobs:
           HEALTH_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/src/api.php?action=health || echo "000")
           # Confirm nginx is serving the page (200 on index)
           INDEX_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/ || echo "000")
+          # Check custom 404 page is served for unknown routes
+          NOTFOUND_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/nonexistent-route || echo "000")
           # Check no container exited with an error
           docker ps --filter "name=ahoyripper-health" --format "{{.Status}}"
           docker logs ahoyripper-health 2>&1 | tail -5
@@ -90,5 +92,11 @@ jobs:
             echo "  ✓ Index page returned $INDEX_RESP"
           else
             echo "  ✗ Index page returned $INDEX_RESP (expected 2xx)"
+            exit 1
+          fi
+          if [ "$NOTFOUND_RESP" -eq 404 ]; then
+            echo "  ✓ Unknown routes return custom 404 ($NOTFOUND_RESP)"
+          else
+            echo "  ✗ Unknown routes returned $NOTFOUND_RESP (expected 404)"
             exit 1
           fi
