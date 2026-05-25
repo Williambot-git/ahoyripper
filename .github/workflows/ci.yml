@@ -48,7 +48,16 @@ jobs:
 
       - name: Check shell injection prevention
         run: |
-          grep -q "escapeshellarg" src/api.php
+          # Commands must use proc_open array syntax with bypass_shell to avoid shell injection.
+          # The correct pattern is: proc_open($cmd_array, ..., [], [], ['bypass_shell' => true])
+          # where $cmd_array has the binary as the first element and args as separate array items.
+          # We check for bypass_shell in proc_open calls as the primary indicator.
+          # Do NOT use escapeshellarg — it indicates shell-based execution which bypass_shell avoids.
+          if grep -q "escapeshellarg" src/api.php; then
+            echo "FAIL: escapeshellarg found — use proc_open array syntax with bypass_shell instead"
+            exit 1
+          fi
+          # Verify bypass_shell is used for the critical command execution
           grep -q "bypass_shell.*true" src/api.php
 
   docker-build:
