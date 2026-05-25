@@ -123,9 +123,6 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 }
 ```
 
-`sort_applied` reflects the active sort key (`height`, `filesize`, or `tbr`) so clients can confirm which order the formats are in without re-sorting locally.
-```
-
 **Error responses:**
 | Code | Meaning |
 |------|---------|
