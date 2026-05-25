@@ -1192,6 +1192,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
+                    'request_id' => $request_id,
                 ]);
             }
             exit;
