@@ -720,12 +720,12 @@ switch ($action) {
             ]);
             exit;
         }
-        // The $timeout of 45s is the maximum time allowed for the info fetch.
-        // Without this, a stalled or unresponsive source could hang the worker indefinitely.
-        // --skip-download fetches metadata without downloading the media file,
-        // saving bandwidth and reducing latency — parseFormats only reads JSON.
-        // --newline suppresses progress bars so they don't pollute stderr.
-        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download -- " . $url, $out, $err, $exit, 45);
+        // Prevent the user's video URL from leaking as HTTP Referer to the source.
+        // yt-dlp sends the URL itself as referer by default; using the generic
+        // ahoyripper.com referer hides the actual video URL from third-party servers.
+        // The info fetch is equally sensitive — without this, sources see the video URL
+        // even when only querying metadata (not downloading).
+        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download --referer https://ahoyripper.com/ -- " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // The fetch failed — undo the quota increment so failed attempts don't
