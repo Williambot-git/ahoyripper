@@ -1497,7 +1497,11 @@ case 'progress':
     }
     default: {
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.', 'error_code' => 'UNKNOWN_ACTION'], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode([
+            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.',
+            'error_code' => 'UNKNOWN_ACTION',
+            'request_id' => $request_id,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
 }
