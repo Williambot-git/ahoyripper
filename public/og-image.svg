@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="og-title og-desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-labelledby="og-title og-desc">
   <title id="og-title">AhoyRipper - Free Online Media Ripper</title>
-  <desc id="og-desc">Download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. Free, no signup, no ads.</desc>
+  <desc id="og-desc">Download video and audio from YouTube, TikTok, Twitter, SoundCloud, and 1800+ platforms. Free, no signup, no ads.</desc>
   <rect width="1200" height="630" fill="#0f0f0f"/>
   <rect x="0" y="0" width="1200" height="6" fill="#3b82f6"/>
   <circle cx="600" cy="270" r="80" fill="#3b82f6"/>
