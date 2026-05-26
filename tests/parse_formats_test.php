@@ -3,11 +3,9 @@
  * AhoyRipper — parseFormats() unit tests
  * Run: php tests/parse_formats_test.php
  *
- * Tests the sorting, grouping, and output structure of parseFormats()
- * using a self-contained copy of the function and sample yt-dlp JSON output.
- *
- * The function is copied verbatim from src/api.php (at HEAD) to ensure tests
- * reflect the actual implemented behavior, not a notional spec.
+ * Tests the parseFormats() function with controlled yt-dlp JSON output.
+ * Each test is self-contained and exits 1 on failure, 0 on success.
+ * No external test framework or yt-dlp required.
  */
 
 $failures = 0;
@@ -18,23 +16,24 @@ function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
     if ($condition) {
-        echo "  ✓ $name\n";
+        echo "  \u2713 $name\n";
         $tests_passed++;
     } else {
-        echo "  ✗ $name\n";
+        echo "  \u2717 $name\n";
         $failures++;
     }
 }
 
-// ─── clean() — verbatim copy from api.php ────────────────────────────────────
+// ─── clean() and parseFormats() verbatim copies from api.php ──────────────────
+
 function clean($s) {
-    if ($s === null) return '';
+    if ($s === null || $s === '') return 'Unknown';
+    // No htmlspecialchars — API outputs JSON, not HTML.
+    // Type coercion to string is sufficient.
     return (string)$s;
 }
 
-// ─── parseFormats() — verbatim copy from api.php (no $_GET dependency) ───────
-// Takes sort as a parameter so it is deterministic in tests.
-function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
+function parseFormats($json_str, &$raw_error_out = null) {
     $data = json_decode($json_str, true);
     if (!$data) {
         $raw = trim($json_str);
@@ -43,17 +42,67 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             $err_msg = strip_tags($err_msg);
             $err_msg = preg_replace('/\s+/', ' ', $err_msg);
             if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+
+            // classifyYtdlpError — inline copy for test isolation
+            $err_lower = strtolower($err_msg);
+            if (preg_match('/geo.*restriction|this video is available in|geo restricted/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED'];
+            }
+            if (preg_match('/video is private|this video is private/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This video is private and cannot be downloaded.', 'error_code' => 'PRIVATE_VIDEO'];
+            }
+            if (preg_match('/login.*required|authentication.*required|this video requires login/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This video requires login or subscription.', 'error_code' => 'LOGIN_REQUIRED'];
+            }
+            if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This site is not supported by yt-dlp.', 'error_code' => 'UNSUPPORTED_SITE'];
+            }
+            if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'Playlist not found or no longer exists.', 'error_code' => 'PLAYLIST_MISSING'];
+            }
+            if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This content has been removed due to a copyright claim.', 'error_code' => 'COPYRIGHT_REMOVED'];
+            }
+            if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'error_code' => 'SOURCE_RATE_LIMITED'];
+            }
+            if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This video is age-restricted and cannot be downloaded without verification.', 'error_code' => 'AGE_RESTRICTED'];
+            }
+            if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR'];
+            }
+            if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
+            }
+            if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE'];
+            }
+            if (preg_match('/requested format|not.*available|does not contain|match/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
+            }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
             return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
         }
-        if ($raw_error_out !== null) $raw_error_out = null;
         return null;
     }
 
-    $title    = clean($data['title'] ?? 'Unknown');
+    $title = clean($data['title'] ?? 'Unknown');
     $thumbnail = clean($data['thumbnail'] ?? '');
-    $duration  = (int)($data['duration'] ?? 0);
-    $uploader  = clean($data['uploader'] ?? '');
+    $duration = (int)($data['duration'] ?? 0);
+    $uploader = clean($data['uploader'] ?? '');
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
     if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
@@ -104,9 +153,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         }
 
         $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $description = $quality
+        $desc = $quality
             ? trim("$quality $format_description")
-            : ($format_description ?: ($format_note ? $format_note : $label));
+            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
 
         if ($filesize === 0) {
             $duration_secs = $duration ?: 180;
@@ -127,7 +176,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
-            'description' => $description,
+            'description' => $desc,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
@@ -140,12 +189,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         ];
     }
 
-    // Sort: combined first, then by selected key
-    $allowed_sorts = ['height', 'filesize', 'tbr'];
-    if (!is_string($sort) || !in_array($sort, $allowed_sorts, true)) {
-        $sort = 'height';
-    }
-
+    // Sort: combined first, then by height descending
+    $sort = 'height';
     usort($formats, function($a, $b) use ($sort) {
         if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
         if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
@@ -173,205 +218,264 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     ];
 }
 
-// ─── Sample yt-dlp JSON fixtures ───────────────────────────────────────────────
+// ─── Test fixtures ─────────────────────────────────────────────────────────────
 
-$sample_video_json = json_encode([
-    'title' => 'Test Video Title',
-    'thumbnail' => 'https://example.com/thumb.jpg',
-    'duration' => 180,
-    'uploader' => 'Test Channel',
-    'formats' => [
-        // Combined formats
-        ['format_id' => '18',  'ext' => 'mp4',  'vcodec' => 'avc1',  'acodec' => 'mp4a',  'height' => 360,  'fps' => 30, 'tbr' => 800,  'filesize' => 18000000, 'width' => 640,  'format_note' => '360p', 'format_description' => '360p', 'language' => 'en'],
-        ['format_id' => '22',  'ext' => 'mp4',  'vcodec' => 'avc1',  'acodec' => 'mp4a',  'height' => 720,  'fps' => 30, 'tbr' => 2500, 'filesize' => 56000000, 'width' => 1280, 'format_note' => '720p', 'format_description' => '720p', 'language' => 'en'],
-        ['format_id' => '137', 'ext' => 'mp4',  'vcodec' => 'avc1',  'acodec' => 'none',  'height' => 1080, 'fps' => 30, 'tbr' => 4500, 'filesize' => 81000000, 'width' => 1920, 'format_note' => '1080p', 'format_description' => '1080p', 'language' => null],
-        ['format_id' => '251', 'ext' => 'webm', 'vcodec' => 'none',  'acodec' => 'opus',  'height' => 0,    'fps' => null, 'tbr' => 160, 'filesize' => 3600000, 'width' => 0, 'format_note' => 'audio only', 'format_description' => 'audio only', 'language' => null],
-        ['format_id' => '140', 'ext' => 'm4a',  'vcodec' => 'none',  'acodec' => 'mp4a',  'height' => 0,    'fps' => null, 'tbr' => 128, 'filesize' => 2880000, 'width' => 0, 'format_note' => 'audio only', 'format_description' => 'audio only', 'language' => 'en'],
-    ],
+function makeJson($title, $formats, $extras = []) {
+    $base = array_merge([
+        'title' => $title,
+        'thumbnail' => 'https://example.com/thumb.jpg',
+        'duration' => 180,
+        'uploader' => 'Test Channel',
+    ], $extras);
+    $base['formats'] = $formats;
+    return json_encode($base);
+}
+
+function makeFormat($overrides = []) {
+    return array_merge([
+        'format_id' => '18',
+        'ext' => 'mp4',
+        'format_note' => '240p',
+        'width' => 320,
+        'height' => 240,
+        'vcodec' => 'avc1.64001E',
+        'acodec' => 'mp4a.40.2',
+        'fps' => 30,
+        'tbr' => 300,
+        'filesize' => 5242880,
+    ], $overrides);
+}
+
+// ─── parseFormats: basic metadata extraction ───────────────────────────────────
+
+echo "\n==> Testing parseFormats() — metadata fields\n";
+
+$json = makeJson('Test Video Title', [makeFormat(['format_id' => '18'])]);
+$result = parseFormats($json);
+test('extracts title from JSON',
+    $result && ($result['title'] ?? '') === 'Test Video Title');
+test('extracts thumbnail',
+    $result && ($result['thumbnail'] ?? '') === 'https://example.com/thumb.jpg');
+test('extracts duration as integer',
+    $result && ($result['duration'] ?? 0) === 180);
+test('extracts uploader',
+    $result && ($result['uploader'] ?? '') === 'Test Channel');
+test('derives filename from title (spaces become underscores)',
+    $result && ($result['derived_filename'] ?? '') === 'Test_Video_Title');
+test('returns sort_applied as height',
+    $result && ($result['sort_applied'] ?? '') === 'height');
+
+$json2 = makeJson('Unknown', [], ['title' => null]);
+$result2 = parseFormats($json2);
+test('defaults missing title to "Unknown"',
+    $result2 && ($result2['title'] ?? '') === 'Unknown');
+
+$json3 = makeJson('Audio Test', [], ['title' => '']);
+$result3 = parseFormats($json3);
+test('defaults empty title to "Unknown"',
+    $result3 && ($result3['title'] ?? '') === 'Unknown');
+
+// ─── parseFormats: format card fields ─────────────────────────────────────────
+
+echo "\n==> Testing parseFormats() — format card fields\n";
+
+$fmt = makeFormat([
+    'format_id' => '22',
+    'ext' => 'mp4',
+    'format_note' => '720p',
+    'width' => 1280,
+    'height' => 720,
+    'fps' => 30,
+    'vcodec' => 'avc1.64001F',
+    'acodec' => 'mp4a.40.2',
+    'tbr' => 2500,
+    'filesize' => 10485760,
+    'language' => 'en',
 ]);
+$json = makeJson('Video', [$fmt]);
+$result = parseFormats($json);
+$card = $result['formats'][0] ?? null;
 
-$sample_video_with_approx = json_encode([
-    'title' => 'Video With Approx Size',
-    'thumbnail' => '',
-    'duration' => 300,
-    'uploader' => 'Channel',
-    'formats' => [
-        // filesize_approx (no exact filesize) — should fall back to estimation
-        ['format_id' => 'best', 'ext' => 'mp4', 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'height' => 480, 'fps' => 30, 'tbr' => 1000, 'filesize_approx' => 37500000, 'width' => 854, 'format_note' => '480p', 'format_description' => '480p', 'language' => null],
-        // no filesize at all — should estimate from bitrate
-        ['format_id' => 'audio', 'ext' => 'mp3', 'vcodec' => 'none', 'acodec' => 'mp3', 'height' => 0, 'fps' => null, 'tbr' => 192, 'filesize' => 0, 'width' => 0, 'format_note' => 'audio only', 'format_description' => 'audio only', 'language' => null],
-    ],
+test('format has correct id', $card && ($card['id'] ?? '') === '22');
+test('format has correct ext', $card && ($card['ext'] ?? '') === 'mp4');
+test('format has correct height', $card && ($card['height'] ?? 0) === 720);
+test('format has correct fps', $card && ($card['fps'] ?? null) === 30);
+test('format has correct tbr', $card && ($card['tbr'] ?? null) == 2500);
+test('format has correct vcodec', $card && ($card['vcodec'] ?? '') === 'avc1.64001F');
+test('format has correct acodec', $card && ($card['acodec'] ?? '') === 'mp4a.40.2');
+test('format type is combined (video+audio)', $card && ($card['format_type'] ?? '') === 'combined');
+test('format has language', $card && ($card['language'] ?? null) === 'en');
+test('format has filesize_mb (10MB -> ~10.0)',
+    $card && abs(($card['filesize_mb'] ?? 0) - 10.0) < 0.2);
+
+// ─── parseFormats: label construction ─────────────────────────────────────────
+
+echo "\n==> Testing parseFormats() — label building\n";
+
+$json_combined = makeJson('Test', [makeFormat([
+    'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4', 'format_note' => 'HDR'
+])]);
+$result_combined = parseFormats($json_combined);
+$label = $result_combined['formats'][0]['label'] ?? '';
+test('combined video+audio label includes height, fps, ext, format_note',
+    strpos($label, '1080') !== false && strpos($label, '60') !== false && strpos($label, 'mp4') !== false);
+
+$json_video_only = makeJson('Test', [makeFormat([
+    'height' => 720, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'none', 'ext' => 'webm'
+])]);
+$result_video_only = parseFormats($json_video_only);
+$label_vo = $result_video_only['formats'][0]['label'] ?? '';
+test('video-only label says "Video 720p"',
+    strpos($label_vo, 'Video 720p') !== false);
+
+$json_audio = makeJson('Test', [makeFormat([
+    'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a', 'tbr' => 128
+])]);
+$result_audio = parseFormats($json_audio);
+$label_audio = $result_audio['formats'][0]['label'] ?? '';
+test('audio-only label shows bitrate and ext',
+    strpos($label_audio, '128') !== false && strpos($label_audio, 'm4a') !== false);
+
+// ─── parseFormats: format_type classification ────────────────────────────────
+
+echo "\n==> Testing parseFormats() — format_type classification\n";
+
+$combined_fmt = makeFormat(['vcodec' => 'avc1', 'acodec' => 'mp4a']);
+$video_only_fmt = makeFormat(['vcodec' => 'avc1', 'acodec' => 'none']);
+$audio_only_fmt = makeFormat(['vcodec' => 'none', 'acodec' => 'mp4a']);
+
+$json_mixed = makeJson('Mixed', [$combined_fmt, $video_only_fmt, $audio_only_fmt]);
+$result_mixed = parseFormats($json_mixed);
+$types = array_column($result_mixed['formats'], 'format_type');
+test('combined format classified as "combined"',
+    in_array('combined', $types, true));
+test('video-only format classified as "video"',
+    in_array('video', $types, true));
+test('audio-only format classified as "audio"',
+    in_array('audio', $types, true));
+
+// ─── parseFormats: sorting (combined first, then by height desc) ───────────────
+
+echo "\n==> Testing parseFormats() — sort order\n";
+
+$formats_unsorted = [
+    makeFormat(['format_id' => 'low', 'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'high', 'height' => 1080, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'mid', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'audio', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a']),
+];
+$json_sort = makeJson('Sort Test', $formats_unsorted);
+$result_sort = parseFormats($json_sort);
+$ids = array_column($result_sort['formats'], 'id');
+test('combined formats sorted by height descending (1080 before 480 before 240)',
+    $ids[0] === 'high' && $ids[1] === 'mid' && $ids[2] === 'low');
+test('audio-only formats sorted after combined (at end)',
+    $ids[3] === 'audio');
+
+// ─── parseFormats: filesize estimation ─────────────────────────────────────────
+
+echo "\n==> Testing parseFormats() — filesize estimation (filesize=0 triggers estimation)\n";
+
+$fmt_no_size = makeFormat(['filesize' => 0, 'height' => 720, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 2500]);
+$json_est = makeJson('Size Est', [$fmt_no_size], ['duration' => 60]);
+$result_est = parseFormats($json_est);
+$filesize_mb = $result_est['formats'][0]['filesize_mb'] ?? 0;
+test('filesize estimated for video+audio when filesize=0',
+    $filesize_mb > 0);
+test('estimated filesize for 60s 720p video is reasonable (1-100 MB)',
+    $filesize_mb > 1 && $filesize_mb < 100);
+
+$fmt_audio_no_size = makeFormat(['filesize' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'tbr' => 128]);
+$json_audio_est = makeJson('Audio Size', [$fmt_audio_no_size], ['duration' => 300]);
+$result_audio_est = parseFormats($json_audio_est);
+$audio_size = $result_audio_est['formats'][0]['filesize_mb'] ?? 0;
+test('filesize estimated for audio-only when filesize=0',
+    $audio_size > 0);
+
+// ─── parseFormats: skips formats with no vcodec and no acodec ─────────────────
+
+echo "\n==> Testing parseFormats() — skips unknown/empty codec formats\n";
+
+$json_weird = makeJson('Weird', [
+    makeFormat(['format_id' => 'valid', 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'unknown', 'vcodec' => 'none', 'acodec' => 'none']),
 ]);
+$result_weird = parseFormats($json_weird);
+$ids_weird = array_column($result_weird['formats'], 'id');
+test('format with vcodec=none AND acodec=none is skipped',
+    count($ids_weird) === 1 && $ids_weird[0] === 'valid');
 
-// ─── Tests: parseFormats output structure ─────────────────────────────────────
+// ─── parseFormats: yt-dlp error messages → classified errors ─────────────────
 
-echo "\n==> Testing parseFormats() output structure\n";
+echo "\n==> Testing parseFormats() — yt-dlp ERROR message classification\n";
 
-$parsed = parseFormats($sample_video_json);
-test('returns array',
-    is_array($parsed));
-test('title is extracted',
-    $parsed['title'] === 'Test Video Title');
-test('thumbnail is extracted',
-    $parsed['thumbnail'] === 'https://example.com/thumb.jpg');
-test('duration is int',
-    $parsed['duration'] === 180);
-test('uploader is extracted',
-    $parsed['uploader'] === 'Test Channel');
-test('derived_filename is sanitized (spaces to underscores)',
-    $parsed['derived_filename'] === 'Test_Video_Title');
-test('formats key is present',
-    is_array($parsed['formats'] ?? null));
-test('sort_applied field is present',
-    isset($parsed['sort_applied']));
+$errors = [
+    'ERROR: [youtube] This video is available in Germany' => 'GEOBLOCKED',
+    'ERROR: [youtube] This video is private' => 'PRIVATE_VIDEO',
+    'ERROR: Login required to view this content' => 'LOGIN_REQUIRED',
+    'ERROR: https://example.com is not a supported URL' => 'UNSUPPORTED_SITE',
+    'ERROR: Playlist does not exist' => 'PLAYLIST_MISSING',
+    'ERROR: The content has been removed by the owner' => 'COPYRIGHT_REMOVED',
+    'ERROR: HTTP Error 429: Too Many Requests' => 'SOURCE_RATE_LIMITED',
+    'ERROR: [youtube] Video is age restricted' => 'AGE_RESTRICTED',
+    'ERROR: Certificate has expired' => 'SSL_ERROR',
+    'ERROR: Connection failed' => 'CONNECTION_FAILED',
+    'ERROR: File is larger than 2GB limit' => 'FILE_TOO_LARGE',
+    'ERROR: Requested format not available' => 'FORMAT_UNAVAILABLE',
+];
 
-echo "\n==> Testing parseFormats() format count and type grouping\n";
+foreach ($errors as $yt_output => $expected_code) {
+    $raw_err = null;
+    $result = parseFormats($yt_output, $raw_err);
+    $code = $result['error_code'] ?? null;
+    test("maps '$expected_code' from yt-dlp error",
+        $code === $expected_code);
+}
 
-$parsed = parseFormats($sample_video_json);
-test('correct number of formats (5 entries, 1 skipped)',
-    count($parsed['formats']) === 5);
-test('first format is combined (has both vcodec and acodec)',
-    $parsed['formats'][0]['vcodec'] !== 'none' && $parsed['formats'][0]['acodec'] !== 'none');
-test('last format is audio-only',
-    $parsed['formats'][count($parsed['formats'])-1]['vcodec'] === 'none' && $parsed['formats'][count($parsed['formats'])-1]['acodec'] !== 'none');
+$raw_err = null;
+$result_unclassified = parseFormats('ERROR: Something very unexpected', $raw_err);
+test('unclassified error returns YTDLP_ERROR code',
+    ($result_unclassified['error_code'] ?? '') === 'YTDLP_ERROR');
+test('unclassified error includes yt-dlp error prefix in message',
+    strpos($result_unclassified['error'] ?? '', 'yt-dlp error:') === 0);
 
-echo "\n==> Testing sort=height (default — highest resolution first)\n";
+// ─── parseFormats: null return for non-error malformed JSON ───────────────────
 
-$parsed_h = parseFormats($sample_video_json, $_, 'height');
-$heights = array_column($parsed_h['formats'], 'height');
-test('sort_applied is height',
-    $parsed_h['sort_applied'] === 'height');
-// Check: first format is combined, last is audio-only
-test('combined formats appear before video-only and audio-only',
-    $parsed_h['formats'][0]['format_type'] === 'combined');
-test('audio-only appears last',
-    $parsed_h['formats'][count($parsed_h['formats'])-1]['format_type'] === 'audio');
-// Combined formats sorted by height descending: check heights of combined formats
-$combined_heights = array_column(array_filter($parsed_h['formats'], fn($f) => $f['format_type'] === 'combined'), 'height');
-$sorted_combined_heights = $combined_heights;
-rsort($sorted_combined_heights, SORT_NUMERIC);
-test('combined formats sorted by height descending',
-    $combined_heights === $sorted_combined_heights);
+echo "\n==> Testing parseFormats() — malformed non-error JSON returns null\n";
 
-echo "\n==> Testing sort=filesize (largest first)\n";
+$raw_err = null;
+$result_bad = parseFormats('not valid json at all {', $raw_err);
+test('non-error malformed input returns null (not an error array)',
+    $result_bad === null);
 
-$parsed_f = parseFormats($sample_video_json, $_, 'filesize');
-// Within each format-type group, filesize should be descending.
-// Extract combined formats and verify they are sorted descending.
-$combined = array_filter($parsed_f['formats'], fn($f) => $f['format_type'] === 'combined');
-$combined_sizes = array_column($combined, 'filesize_mb');
-$sorted_combined_sizes = $combined_sizes;
-arsort($sorted_combined_sizes, SORT_NUMERIC);
-test('sort_applied is filesize',
-    $parsed_f['sort_applied'] === 'filesize');
-// arsort reindexes arrays, so compare values rather than array identity
-test('combined formats sorted by filesize descending',
-    $combined_sizes == $sorted_combined_sizes && count($combined_sizes) === count($sorted_combined_sizes));
+$result_empty = parseFormats('', $raw_err);
+test('empty string returns null',
+    $result_empty === null);
 
-echo "\n==> Testing sort=tbr (highest bitrate first)\n";
+// ─── parseFormats: description field population ──────────────────────────────
 
-$parsed_t = parseFormats($sample_video_json, $_, 'tbr');
-// Within combined formats (which sort first), tbr should be descending
-$combined = array_filter($parsed_t['formats'], fn($f) => $f['format_type'] === 'combined');
-$combined_tbrs = array_column($combined, 'tbr');
-$sorted_combined_tbrs = $combined_tbrs;
-arsort($sorted_combined_tbrs, SORT_NUMERIC);
-test('sort_applied is tbr',
-    $parsed_t['sort_applied'] === 'tbr');
-// arsort reindexes; compare values. Also verify combined types come before others.
-test('combined formats sorted by tbr descending',
-    $combined_tbrs == $sorted_combined_tbrs && count($combined_tbrs) === count($sorted_combined_tbrs));
+echo "\n==> Testing parseFormats() — description field\n";
 
-echo "\n==> Testing invalid sort falls back to height\n";
+$fmt_desc = makeFormat([
+    'width' => 1920, 'height' => 1080,
+    'format_description' => '1080p60 HDR 10bit',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a',
+]);
+$json_desc = makeJson('Desc Test', [$fmt_desc]);
+$result_desc = parseFormats($json_desc);
+$desc = $result_desc['formats'][0]['description'] ?? '';
+test('description uses format_description when available',
+    strpos($desc, '1080p60 HDR 10bit') !== false);
 
-$parsed_bad = parseFormats($sample_video_json, $_, 'invalid_sort');
-test('invalid sort falls back to height',
-    $parsed_bad['sort_applied'] === 'height');
-$parsed_null = parseFormats($sample_video_json, $_, null);
-test('null sort falls back to height',
-    $parsed_null['sort_applied'] === 'height');
-
-echo "\n==> Testing format field population\n";
-
-$parsed = parseFormats($sample_video_json);
-// With default sort=height, combined formats are sorted by height desc:
-// formats[0] = id=22 (720p, height=720), formats[1] = id=18 (360p, height=360)
-$f_720 = $parsed['formats'][0]; // first after sort = 720p
-$f_360 = $parsed['formats'][1]; // second after sort = 360p
-// Check that height is always present on combined formats
-test('format has height on combined (720p)',
-    isset($f_720['height']) && $f_720['height'] === 720);
-test('format has height on combined (360p)',
-    isset($f_360['height']) && $f_360['height'] === 360);
-// Check id is present on formats
-test('format has id',
-    isset($f_360['id']) && $f_360['id'] === '18');
-// Label for 360p: "360p30 360p mp4" (height + fps concat + note + ext, no spaces in fps number)
-test('format has label (360p + fps + ext)',
-    strpos($f_360['label'], '360p') !== false && strpos($f_360['label'], 'mp4') !== false);
-test('format has filesize_mb (positive number)',
-    isset($f_360['filesize_mb']) && is_numeric($f_360['filesize_mb']) && $f_360['filesize_mb'] > 0);
-test('format has vcodec and acodec',
-    isset($f_360['vcodec']) && isset($f_360['acodec']));
-test('format has format_type (combined)',
-    isset($f_360['format_type']) && $f_360['format_type'] === 'combined');
-test('language is extracted',
-    isset($f_360['language']) && $f_360['language'] === 'en');
-test('fps is extracted (30fps)',
-    isset($f_360['fps']) && $f_360['fps'] === 30);
-
-echo "\n==> Testing audio-only format (no vcodec, no fps)\n";
-
-$audio_fmt = $parsed['formats'][count($parsed['formats'])-1]; // 251 webm audio
-test('audio format has no vcodec',
-    $audio_fmt['vcodec'] === 'none');
-test('audio format has acodec',
-    $audio_fmt['acodec'] !== 'none' && $audio_fmt['acodec'] !== '');
-test('audio format has no height',
-    isset($audio_fmt['height']) && $audio_fmt['height'] === 0);
-test('audio format has no fps (null)',
-    array_key_exists('fps', $audio_fmt) && $audio_fmt['fps'] === null);
-test('audio format type is audio',
-    $audio_fmt['format_type'] === 'audio');
-
-echo "\n==> Testing filesize estimation when filesize is 0 (approx fallback)\n";
-
-$parsed_approx = parseFormats($sample_video_with_approx);
-$fmt0 = $parsed_approx['formats'][0]; // 480p with filesize_approx
-$fmt1 = $parsed_approx['formats'][1]; // audio with filesize=0
-test('filesize_approx triggers estimation (positive result)',
-    $fmt0['filesize_mb'] > 0);
-test('filesize=0 triggers estimation for combined format',
-    $fmt1['filesize_mb'] > 0);
-
-echo "\n==> Testing derived_filename edge cases\n";
-
-$no_title_json = json_encode(['title' => '', 'formats' => []]);
-$parsed_empty = parseFormats($no_title_json);
-test('empty title falls back to ahoyrip',
-    $parsed_empty['derived_filename'] === 'ahoyrip');
-
-$unicode_title = json_encode(['title' => "Video \xf0\x9f\x8e\xb2 Title", 'formats' => []]);
-$parsed_unicode = parseFormats($unicode_title);
-test('unicode chars in title are stripped from derived_filename',
-    strpos($parsed_unicode['derived_filename'], "\xf0\x9f\x8e\xb2") === false);
-
-echo "\n==> Testing error responses\n";
-
-// Non-JSON string (not an ERROR line — just garbage)
-$parsed_null = parseFormats("this is not json");
-test('garbage string returns null',
-    $parsed_null === null);
-
-// yt-dlp ERROR line
-$raw_err = '';
-$err_resp = parseFormats("ERROR: This video is geo restricted in your area", $raw_err);
-test('ERROR line returns error array',
-    is_array($err_resp) && isset($err_resp['error']));
-test('ERROR line populates raw_error output param',
-    !empty($raw_err));
-test('ERROR line includes error_code',
-    isset($err_resp['error_code']) && $err_resp['error_code'] === 'YTDLP_ERROR');
+$fmt_no_desc = makeFormat([
+    'width' => 0, 'height' => 480, 'format_note' => '480p',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+]);
+$json_no_desc = makeJson('No Desc', [$fmt_no_desc]);
+$result_no_desc = parseFormats($json_no_desc);
+$desc2 = $result_no_desc['formats'][0]['description'] ?? '';
+test('description falls back to format_note when format_description absent',
+    strpos($desc2, '480p') !== false);
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

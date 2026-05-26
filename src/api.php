@@ -299,7 +299,7 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
 // Sanitize string for JSON output
 function clean($s) {
-    if ($s === null) return '';
+    if ($s === null || $s === '') return 'Unknown';
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;
@@ -438,17 +438,18 @@ function parseFormats($json_str, &$raw_error_out = null) {
         } else {
             continue; // skip unknown
         }
-
-        // Build human-readable description (used by frontend to show what format is)
-        // Uses the clearest available string: quality + format_description > format_note > label.
-        // The quality field (e.g. "1920x1080") supplements format_description when present.
+// Use description (human-readable yt-dlp description) when available, else label.
+        // description carries extra context like "720p60 HDR" or "audio only" that
+        // label doesn't always capture — particularly for audio and alternative formats.
         // format_description (e.g. "720p60 HDR 10bit") is the richest yt-dlp signal.
-        // format_note (e.g. "720p60") is a good fallback when description is absent.
+        // format_note (e.g. "480p" or "720p60") is a good fallback when description is absent.
         // label is the final fallback for audio formats and edge cases.
+        // empty() is used because format_description may be '' (not null) when absent,
+        // and '' ?: $format_note returns '' — we need null-coalesce semantics.
         $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $description = $quality
+        $desc = $quality
             ? trim("$quality $format_description")
-            : ($format_description ?: ($format_note ? $format_note : $label));
+            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
 
         // Estimate filesize if not available
         if ($filesize === 0) {
@@ -471,7 +472,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
-            'description' => $description,
+            'description' => $desc,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
