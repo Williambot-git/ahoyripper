@@ -269,6 +269,25 @@ yt-dlp --list-extractors
 
 ---
 
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key that grants unlimited daily quota. **Change in production.** Set to a long random string (e.g. `openssl rand -hex 32`) and pass to the container via `-e` or your orchestration layer. |
+
+Example:
+```bash
+# Generate a secure key
+openssl rand -hex 32
+
+# Run with custom key
+docker run -e AHOY_UNLIMITED_KEY=your-generated-key ahoyripper
+```
+
+The default key is only suitable for local development — never deploy with it in production.
+
+---
+
 ## Requirements
 
 - Ubuntu 22.04+ (or any Linux with apt)
