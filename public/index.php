@@ -140,7 +140,7 @@ $VERSION = '1.0.0';
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN">5</span>
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN"></span>
         <span id="quotaLabel"> free rips/day &mdash;</span>
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
       </p>
@@ -265,6 +265,36 @@ $VERSION = '1.0.0';
   // downloading the JSON error body as a file when the fetch responds non-200.
   // Set to false in error branches; checked nowhere (safety net for code changes).
   var navigateOnSuccess = true;
+
+  // Restore persisted quota from localStorage on page load.
+  // Falls back to showing nothing until the first API response arrives,
+  // avoiding the stale "5 free rips/day" on returning visitors.
+  (function restoreQuota() {
+    var el = document.getElementById('quotaDisplay');
+    var labelEl = document.getElementById('quotaLabel');
+    var upgradeEl = document.getElementById('quotaUpgrade');
+    if (!el) return;
+    var stored = localStorage.getItem('ahoyrip_quota_remaining');
+    if (stored !== null) {
+      var rem = parseInt(stored, 10);
+      if (!isNaN(rem) && rem >= 0) {
+        el.textContent = rem;
+        if (rem <= 2) {
+          el.classList.add('low');
+        }
+        if (rem === 0 && upgradeEl) {
+          upgradeEl.textContent = 'upgrade now';
+          upgradeEl.style.fontWeight = '700';
+          upgradeEl.style.color = 'var(--color-error)';
+        }
+      }
+    }
+    var storedUnlimited = localStorage.getItem('ahoyrip_quota_unlimited');
+    if (storedUnlimited === '1' && labelEl) {
+      labelEl.style.display = 'none';
+      el.style.display = 'none';
+    }
+  })();
 
   // Persist and restore sort preference
   var currentSort = localStorage.getItem('ahoyrip_sort') || 'height';
@@ -606,6 +636,19 @@ card.addEventListener('click', function(e) {
         if (Number(rem) === -1 && labelEl) {
           labelEl.style.display = 'none';
           el.style.display = 'none';
+        }
+        // Persist quota to localStorage so the correct value is shown on page reload.
+        // Only persist when the header is a real quota value (non-negative integer).
+        // -1 signals unlimited-key holders — persist a flag to suppress the quota UI.
+        if (Number(rem) === -1) {
+          localStorage.setItem('ahoyrip_quota_unlimited', '1');
+          localStorage.removeItem('ahoyrip_quota_remaining');
+        } else {
+          var remNum = parseInt(rem, 10);
+          if (!isNaN(remNum) && remNum >= 0) {
+            localStorage.setItem('ahoyrip_quota_remaining', remNum);
+            localStorage.removeItem('ahoyrip_quota_unlimited');
+          }
         }
       }
     }
