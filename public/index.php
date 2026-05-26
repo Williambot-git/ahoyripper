@@ -507,7 +507,9 @@ card.addEventListener('click', function(e) {
             }
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
-            window.location.href = dl.url;
+            if (navigateOnSuccess) {
+              window.location.href = dl.url;
+            }
             setTimeout(function() {
               setLoading(false);
               card.classList.remove('downloading');
