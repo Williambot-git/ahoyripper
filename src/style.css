@@ -127,16 +127,21 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   transition: border-color var(--transition);
+  /* pinch-zoom must be allowed — disabling it prevents two-finger
+     scroll/pinch-zoom on the input field itself and blocks scrolling
+     the page when the input is focused or when the user's scroll
+     gesture originates in the input area */
+  touch-action: manipulation;
 }
 .rip-input::placeholder { color: var(--color-text-ter); }
 .rip-input:focus { border-color: var(--color-accent); outline: none; }
-/* Unified focus ring — :focus-visible only triggers on keyboard navigation (not
-   mouse/touch), so this is safe to show on all devices. Gives the same ring
-   whether navigated via keyboard on desktop or mobile. */
+/* Unified focus ring — :focus-visible only triggers on keyboard navigation
+   (not mouse/touch), so this is safe to show on all interactive elements
+   without affecting pointer/touch users. */
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-:focus-visible.rip-input { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
-@media (max-width: 640px) {
-  .rip-input:focus { border-color: var(--color-accent); outline: none; }
+:focus-visible.rip-input {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 .rip-btn {
   background: var(--color-accent);
