@@ -5,7 +5,17 @@ services:
       - "8080:8080"
     environment:
       - TZ=UTC
+      - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-RIPPER2026DEV}
     restart: unless-stopped
-    # Increase memory for big rips
-    mem_limit: 2gb
-    cpus: 2
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M

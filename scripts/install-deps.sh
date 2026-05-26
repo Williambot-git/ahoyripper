@@ -50,10 +50,11 @@ if command -v yt-dlp &>/dev/null; then
     echo "  yt-dlp already present: $(yt-dlp -V 2>&1 | head -1)"
 else
     echo "  Installing yt-dlp via $PIP_BIN..."
-    # Try pip install, then with --break-system-packages, then with --user
-    _install_yt_dlp yt-dlp || \
+    # Try with --break-system-packages first (Ubuntu 22.04+ / PEP 668 compliance),
+    # then without, then --user — stop at the first that succeeds.
     _install_yt_dlp --break-system-packages yt-dlp || \
-    _install_yt_dlp --user yt-dlp || {
+    _install_yt_dlp yt-dlp || \
+    _install_yt_dlp --user yt-dlp || \
         echo "  ! ERROR: yt-dlp installation failed via pip. Trying standalone binary..."
         # Last resort: download the standalone binary directly
         if curl -L -o /usr/local/bin/yt-dlp \
