@@ -54,7 +54,7 @@ else
     # then without, then --user — stop at the first that succeeds.
     _install_yt_dlp --break-system-packages yt-dlp || \
     _install_yt_dlp yt-dlp || \
-    _install_yt_dlp --user yt-dlp || \
+    _install_yt_dlp --user yt-dlp || {
         echo "  ! ERROR: yt-dlp installation failed via pip. Trying standalone binary..."
         # Last resort: download the standalone binary directly
         if curl -L -o /usr/local/bin/yt-dlp \
