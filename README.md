@@ -128,6 +128,8 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 |------|---------|
 | `400` | Invalid URL or missing parameters |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
+| `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
+| `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
 | `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body |
 | `503` | Service temporarily unavailable |
