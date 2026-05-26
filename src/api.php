@@ -445,6 +445,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         // format_description (e.g. "720p60 HDR 10bit") is the richest yt-dlp signal.
         // format_note (e.g. "720p60") is a good fallback when description is absent.
         // label is the final fallback for audio formats and edge cases.
+        $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         $description = $quality
             ? trim("$quality $format_description")
             : ($format_description ?: ($format_note ? $format_note : $label));
