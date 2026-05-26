@@ -3,15 +3,22 @@ Allow: /
 
 # Block AI training crawlers that ignore robots.txt conventions.
 # These bots systematically scrape content for LLM / generative AI training.
+User-agent: AdsBot
+User-agent: AiBot
+User-agent: Amazonbot
+User-agent: Applebot
 User-agent: Bytespider
 User-agent: CCBot
 User-agent: ChatGPT-User
+User-agent: ClaudeBot
 User-agent: Claudebot
 User-agent: Diffbot
 User-agent: FacebookBot
 User-agent: Google-Extended
 User-agent: GPTBot
 User-agent: ImagesiftBot
+User-agent: Meta-ExternalAgent
+User-agent: Meta-ExternalFetcher
 User-agent: Omgilibot
 User-agent: Omgili
 User-agent: Omgili Media Bot
