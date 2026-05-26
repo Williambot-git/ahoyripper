@@ -164,13 +164,21 @@ function isValidUrl($url) {
 }
 
 // yt-dlp version cache (declared early so periodic cleanup can reference it)
+// Stores: ['ver' => string, 'hash' => string, 'exp' => int]
+// 'hash' is MD5 of the binary — if the binary is replaced (new yt-dlp installed),
+// the hash changes and the cached version is invalidated so we re-fetch the new version.
 $version_cache_file = '/tmp/ahoyrip_ytdlp_ver.cache';
 $GLOBALS['__ytdlp_version'] = null;
 $GLOBALS['__ytdlp_probe'] = null;
 if ($version_cache_file && is_readable($version_cache_file)) {
     $cached = @json_decode(@file_get_contents($version_cache_file), true);
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
-        $GLOBALS['__ytdlp_version'] = $cached['ver'] ?? null;
+        // Hash check: verify the binary hasn't been replaced since we cached it.
+        // If the hash doesn't match, the binary was upgraded — invalidate and re-fetch.
+        $current_hash = @md5_file('/usr/local/bin/yt-dlp');
+        if ($current_hash !== false && isset($cached['hash']) && $current_hash === $cached['hash']) {
+            $GLOBALS['__ytdlp_version'] = $cached['ver'] ?? null;
+        }
     }
 }
 if (!$GLOBALS['__ytdlp_version']) {
@@ -178,25 +186,30 @@ if (!$GLOBALS['__ytdlp_version']) {
     $ver = trim(shell_exec('/usr/local/bin/yt-dlp -V 2>/dev/null') ?: '');
     $GLOBALS['__ytdlp_version'] = $ver;
     if ($version_cache_file) {
-        @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'exp' => time() + 3600]));
+        $hash = @md5_file('/usr/local/bin/yt-dlp') ?: '';
+        @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
     }
 }
 
 // Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
-// is wasteful and adds latency under load.
+// is wasteful and adds latency under load. Tracks hash to invalidate on binary upgrade.
 $ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
-        $GLOBALS['__ffmpeg_version'] = $cached['ver'] ?? null;
+        $current_hash = @md5_file('/usr/bin/ffmpeg');
+        if ($current_hash !== false && isset($cached['hash']) && $current_hash === $cached['hash']) {
+            $GLOBALS['__ffmpeg_version'] = $cached['ver'] ?? null;
+        }
     }
 }
 if (!$GLOBALS['__ffmpeg_version']) {
     $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: '');
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
-        @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'exp' => time() + 3600]));
+        $hash = @md5_file('/usr/bin/ffmpeg') ?: '';
+        @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + 3600]));
     }
 }
 
