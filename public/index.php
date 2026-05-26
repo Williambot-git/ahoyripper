@@ -533,13 +533,10 @@ card.addEventListener('click', function(e) {
       return card;
     }
 
-    // Use flexbox instead of CSS grid — flex handles mixed children (cards + headers +
-    // separators) properly since all are direct children of the same flex container.
-    // CSS grid only applies to *direct* children, so using grid with ::before pseudo-
-    // elements and non-grid siblings causes alignment confusion; flex wrap is simpler.
-    formatGrid.style.display = 'flex';
-    formatGrid.style.flexDirection = 'row';
-    formatGrid.style.flexWrap = 'wrap';
+    // Layout and spacing are governed entirely by CSS (.format-grid rule).
+    // Do not override display/flexDirection/flexWrap here — removing the
+    // inline overrides lets CSS be the single source of truth and prevents
+    // JS/CSS responsibility confusion (e.g. gap being accidentally reset).
 
     var addedAnything = false;
     if (groups.combined.length > 0) {
