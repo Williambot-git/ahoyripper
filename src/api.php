@@ -159,6 +159,12 @@ if (mt_rand(1, 100) === 1) {
 
 // Only allow safe characters in URL
 function isValidUrl($url) {
+    // Reject non-strings early — filter_var accepts various types and may coerce
+    // them in unexpected ways (e.g. array → "Array", object → "object").
+    // URL validation only makes sense for string input.
+    if (!is_string($url)) {
+        return false;
+    }
     return filter_var($url, FILTER_VALIDATE_URL) !== false
         && preg_match('/^https?:\/\//', $url);
 }
