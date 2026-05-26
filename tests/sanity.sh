@@ -200,15 +200,15 @@ else
 fi
 
 echo ""
-echo "==> Checking quota undo when download gets a classified yt-dlp error..."
-# When classifyYtdlpError returns a result (GEOBLOCKED, PRIVATE_VIDEO, etc.)
-# the download action should undo the daily quota increment so the user's
-# daily limit is not burned for unavailable content.
-# Extract the section from $err_classified handling to end of error block.
-if awk '/\$err_classified = classifyYtdlpError/,/^[[:space:]]*\}/' src/api.php | grep -q "ahoyrip_daily_.*md5.*ip"; then
-    echo "  ✓ Quota undo present for download classified errors"
+echo "==> Checking quota undo for all download failures (classified and unclassified)..."
+# Refund daily quota for ANY download failure — classified (GEOBLOCKED, PRIVATE_VIDEO)
+# or unclassified (network glitch, source timeout, unexpected yt-dlp exit).
+# The user didn't successfully download anything, so the quota should not be burned.
+# The undo block appears before the $err_classified check so it covers both branches.
+if awk '/\$err_classified = classifyYtdlpError/,/^[[:space:]]*\}[[:space:]]*$/' src/api.php | grep -q "ahoyrip_daily_.*md5.*ip"; then
+    echo "  ✓ Quota undo present for all download failures"
 else
-    echo "  ✗ Quota undo missing for download classified errors — daily limit burned on unavailable content"
+    echo "  ✗ Quota undo missing for download failures — daily limit burned on failed downloads"
     exit 1
 fi
 
