@@ -230,6 +230,9 @@ echo ""
 echo "==> Checking API CSP includes all required thumbnail CDN domains..."
 # The API CSP must allow thumbnails from media CDNs so the browser can load
 # them when rendering video info (YouTube, TikTok, Twitter/X, SoundCloud, etc.).
+# In nginx-docker.conf the CSP is now set at server level (inherited by all locations).
+# In production nginx.conf it is set in the php location block.
+# Both locations must have the same CDN thumbnail allowances.
 REQUIRED_THUMB_DOMAINS=(
     "i.ytimg.com"
     "pbs.twimg.com"
@@ -240,6 +243,7 @@ REQUIRED_THUMB_DOMAINS=(
     "tiktokcdn.com"
     "tiktok.com"
 )
+# Check api.php CSP (PHP sets its own CSP header)
 API_CSP=$(grep "Content-Security-Policy" src/api.php | sed "s/.*Content-Security-Policy[ ]*//")
 missing=0
 for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
@@ -250,6 +254,30 @@ for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
 done
 if [ "$missing" -eq 0 ]; then
     echo "  ✓ API CSP allows all required thumbnail CDN domains"
+fi
+
+# Check nginx-docker.conf CSP (now at server level)
+DOCKER_CSP=$(grep "Content-Security-Policy" deploy/nginx-docker.conf | sed "s/.*Content-Security-Policy[ ]*//")
+missing=0
+for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
+    if ! echo "$DOCKER_CSP" | grep -q "$domain"; then
+        echo "  ✗ Docker nginx.conf CSP missing thumbnail domain: $domain"
+        missing=1
+    fi
+done
+if [ "$missing" -eq 0 ]; then
+    echo "  ✓ Docker nginx.conf CSP allows all required thumbnail CDN domains"
+fi
+
+echo ""
+echo "==> Checking CSP is at server level in nginx-docker.conf (no duplicate in location blocks)..."
+# After the fix, CSP should appear exactly once (at server level), not twice.
+CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
+if [ "$CSP_COUNT" -eq 1 ]; then
+    echo "  ✓ CSP appears exactly once in nginx-docker.conf (server level, no duplicate)"
+else
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 1 — duplicate CSP header)"
+    exit 1
 fi
 
 echo ""
@@ -293,19 +321,6 @@ for domain in "i.ytimg.com" "pbs.twimg.com" "sndcdn.com" "vimeocdn.com" "instagr
     fi
 done
 echo "  ✓ Production nginx.conf CSP allows all required media thumbnail domains"
-
-echo ""
-echo "==> Checking Docker nginx.conf CSP allows external media thumbnails..."
-# Docker nginx.conf CSP must allow thumbnails from the same CDN domains
-# as the production nginx.conf to prevent broken thumbnails in Docker deploys.
-DOCKER_CSP=$(grep "Content-Security-Policy" deploy/nginx-docker.conf | sed "s/.*Content-Security-Policy[ ]*//")
-for domain in "i.ytimg.com" "pbs.twimg.com" "sndcdn.com" "vimeocdn.com" "instagram.com" "fbcdn.net" "tiktokcdn.com" "tiktok.com" "vxtiktok.com" "mediaJx.com"; do
-    if ! echo "$DOCKER_CSP" | grep -q "$domain"; then
-        echo "  ✗ Docker CSP missing thumbnail domain: $domain"
-        exit 1
-    fi
-done
-echo "  ✓ Docker CSP allows all required media thumbnail domains"
 
 echo ""
 echo "==> Checking API key input styling (rip-key-input class)..."
