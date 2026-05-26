@@ -1502,6 +1502,14 @@ case 'progress':
         // is stable and clients can distinguish "probe disabled" from errors.
 
         // System resource metrics (Linux-only, gracefully omitted on other platforms)
+        // Uptime — first line of /proc/uptime is uptime in seconds (format: "X.Y Y")
+        $uptime_bytes = @file_get_contents('/proc/uptime');
+        if ($uptime_bytes !== false) {
+            $parts = preg_split('/\s+/', trim($uptime_bytes));
+            if (isset($parts[0]) && is_numeric($parts[0])) {
+                $response['server_uptime_seconds'] = (int)floor((float)$parts[0]);
+            }
+        }
         if (function_exists('sys_getloadavg')) {
             $load = sys_getloadavg();
             if ($load !== false) {

@@ -190,7 +190,7 @@ GET /src/api.php?action=progress         # alias for health (legacy)
 ```
 
 Returns:
-```json
+```
 {
   "status": "ok",
   "server_time": "2026-05-21T16:00:00+00:00",
@@ -201,12 +201,15 @@ Returns:
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "ffmpeg_cache_age_seconds": 542,
+  "server_uptime_seconds": 86400,
   "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)" },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2
 }
 ```
+
+`server_uptime_seconds` is Linux-only — available on servers, omitted in Docker containers or non-Linux environments.
 
 `yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes.
 
