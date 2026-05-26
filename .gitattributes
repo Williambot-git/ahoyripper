@@ -1,0 +1,22 @@
+# Normalize line endings to LF for all text files.
+# PHP files must have LF on all platforms — PHP treats CR (\r) as
+# whitespace which can cause "parse error: unexpected ')'" on macOS
+# when a file committed from Windows has trailing CR characters.
+*               text=auto
+
+# Explicitly normalize text files that are commonly edited
+*.php            text eol=lf
+*.js             text eol=lf
+*.css            text eol=lf
+*.sh             text eol=lf
+*.md             text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+*.conf           text eol=lf
+*.html           text eol=lf
+*.json           text eol=lf
+*.xml            text eol=lf
+
+# Binary files — preserve exactly as-is
+*.ico            binary
+*.svg            binary
