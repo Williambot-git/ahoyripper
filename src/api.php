@@ -1418,25 +1418,25 @@ case 'progress':
         $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?: 'not installed';
 
-        $ytdlp_cache_age = null;
+        $ytdlp_cache_ttl = null;
         $ytdlp_cache_expires_at = null;
         if ($version_cache_file && is_readable($version_cache_file)) {
             $cached = @json_decode(@file_get_contents($version_cache_file), true);
             if ($cached && is_array($cached)) {
                 $exp = $cached['exp'] ?? 0;
                 $ytdlp_cache_expires_at = date('c', $exp);
-                $ytdlp_cache_age = max(0, $exp - time());
+                $ytdlp_cache_ttl = max(0, $exp - time());
             }
         }
 
-        $ffmpeg_cache_age = null;
+        $ffmpeg_cache_ttl = null;
         $ffmpeg_cache_expires_at = null;
         if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
             $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
             if ($cached && is_array($cached)) {
                 $exp = $cached['exp'] ?? 0;
                 $ffmpeg_cache_expires_at = date('c', $exp);
-                $ffmpeg_cache_age = max(0, $exp - time());
+                $ffmpeg_cache_ttl = max(0, $exp - time());
             }
         }
 
@@ -1459,9 +1459,9 @@ case 'progress':
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
-            'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_age,
+            'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
-            'ffmpeg_cache_age_seconds' => $ffmpeg_cache_age,
+            'ffmpeg_cache_ttl_seconds' => $ffmpeg_cache_ttl,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).

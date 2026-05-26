@@ -200,7 +200,7 @@ Returns:
   "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
-  "ffmpeg_cache_age_seconds": 542,
+  "ffmpeg_cache_ttl_seconds": 542,
   "server_uptime_seconds": 86400,
   "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)" },
   "load_avg": [0.15, 0.08, 0.05],

@@ -347,9 +347,9 @@ echo ""
 echo "==> Checking health action includes all required fields..."
 # The health action should return: status, server_time, request_id,
 # yt_dlp_version, ffmpeg_version, yt_dlp_cache_expires_at, yt_dlp_cache_ttl_seconds,
-# ffmpeg_cache_expires_at, ffmpeg_cache_age_seconds.
+# ffmpeg_cache_expires_at, ffmpeg_cache_ttl_seconds.
 HEALTH_RESPONSE=$(sed -n "/'status' =>/,/\];/p" src/api.php | head -20)
-for field in "'status'" "'server_time'" "'request_id'" "'yt_dlp_version'" "'ffmpeg_version'" "'yt_dlp_cache_expires_at'" "'yt_dlp_cache_ttl_seconds'" "'ffmpeg_cache_expires_at'" "'ffmpeg_cache_age_seconds'"; do
+for field in "'status'" "'server_time'" "'request_id'" "'yt_dlp_version'" "'ffmpeg_version'" "'yt_dlp_cache_expires_at'" "'yt_dlp_cache_ttl_seconds'" "'ffmpeg_cache_expires_at'" "'ffmpeg_cache_ttl_seconds'"; do
     if ! echo "$HEALTH_RESPONSE" | grep -q "$field"; then
         echo "  ✗ Health response missing field: $field"
         exit 1
