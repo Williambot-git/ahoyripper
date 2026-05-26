@@ -404,7 +404,6 @@ function parseFormats($json_str, &$raw_error_out = null) {
         $acodec = clean($f['acodec'] ?? 'none');
         $fps = isset($f['fps']) ? (int)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
-        $quality = clean($f['quality'] ?? '');
         $format_description = clean($f['format_description'] ?? '');
 
         // Build label
@@ -441,10 +440,14 @@ function parseFormats($json_str, &$raw_error_out = null) {
         }
 
         // Build human-readable description (used by frontend to show what format is)
-        // Falls back to the label when no extra descriptive info is available.
-        // format_note is appended to the label already, so include it explicitly
-        // here as a fallback source (format_description is rarely set by yt-dlp).
-        $description = $format_description ?: ($format_note ? $format_note : $label);
+        // Uses the clearest available string: quality + format_description > format_note > label.
+        // The quality field (e.g. "1920x1080") supplements format_description when present.
+        // format_description (e.g. "720p60 HDR 10bit") is the richest yt-dlp signal.
+        // format_note (e.g. "720p60") is a good fallback when description is absent.
+        // label is the final fallback for audio formats and edge cases.
+        $description = $quality
+            ? trim("$quality $format_description")
+            : ($format_description ?: ($format_note ? $format_note : $label));
 
         // Estimate filesize if not available
         if ($filesize === 0) {
