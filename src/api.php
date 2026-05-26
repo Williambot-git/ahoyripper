@@ -775,7 +775,9 @@ switch ($action) {
         // ahoyripper.com referer hides the actual video URL from third-party servers.
         // The info fetch is equally sensitive — without this, sources see the video URL
         // even when only querying metadata (not downloading).
-        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download --referer https://ahoyripper.com/ -- " . $url, $out, $err, $exit, 45);
+        // Note: --referer must come BEFORE the yt-dlp separator (--) so yt-dlp parses
+        // it as an option, not a positional URL argument.
+        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download --referer https://ahoyripper.com/ " . $url, $out, $err, $exit, 45);
 
         if ($exit !== 0 || !$out) {
             // The fetch failed — undo the quota increment so failed attempts don't
