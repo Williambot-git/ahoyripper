@@ -107,11 +107,12 @@ The `sort` parameter (optional, default `height`) controls format sort order:
   "formats": [
     {
       "id": "22",
-      "label": "720p Video mp4",
+      "label": "720p60 HDR mp4",
+      "description": "1280x720 720p60 HDR 10bit",
       "ext": "mp4",
       "filesize_mb": 45.2,
       "height": 720,
-      "fps": 30,
+      "fps": 60,
       "tbr": 2500,
       "vcodec": "avc1.64001F",
       "acodec": "mp4a.40.2",
@@ -123,7 +124,9 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 }
 ```
 
-**Error responses:**
+The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats.
+
+The `sort` parameter (optional, default `height`) controls format sort order:
 | Code | Meaning |
 |------|---------|
 | `400` | Invalid URL or missing parameters |

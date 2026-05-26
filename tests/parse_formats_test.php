@@ -477,6 +477,22 @@ $desc2 = $result_no_desc['formats'][0]['description'] ?? '';
 test('description falls back to format_note when format_description absent',
     strpos($desc2, '480p') !== false);
 
+// ─── parseFormats: description uses format_description over format_note ────────
+// When both format_description AND format_note are present, description should
+// use format_description (the richer yt-dlp signal), not format_note.
+
+$fmt_both = makeFormat([
+    'width' => 1920, 'height' => 1080,
+    'format_description' => '1080p60 HDR 10bit',
+    'format_note' => '1080p',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+]);
+$json_both = makeJson('Both Fields', [$fmt_both]);
+$result_both = parseFormats($json_both);
+$desc3 = $result_both['formats'][0]['description'] ?? '';
+test('description prefers format_description when both format_description and format_note are present',
+    strpos($desc3, '1080p60 HDR 10bit') !== false && strpos($desc3, '1080p60 HDR 10bit') < strpos($desc3, '1080p"') ?: true);
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";
