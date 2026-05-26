@@ -116,6 +116,6 @@ apt-get install -y nginx > /dev/null 2>&1
 nginx -v
 
 echo "==> All deps installed."
-echo "  - yt-dlp: $(yt-dlp --version)"
+echo "  - yt-dlp: $(yt-dlp -V 2>&1 | head -1)"
 echo "  - ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
 echo "  - PHP: $(php -v | head -1)"
