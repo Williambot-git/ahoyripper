@@ -547,7 +547,9 @@ function logRequest($action, $status, $extra = []) {
         'req_id' => $GLOBALS['__request_id'] ?? '',
         'action' => $action,
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-        'uri' => $_SERVER['REQUEST_URI'] ?? '',
+        // Strip query string from REQUEST_URI to prevent video URL and API key
+        // from appearing in logs. The action alone is sufficient for monitoring.
+        'uri' => preg_replace('/\?.*/', '', $_SERVER['REQUEST_URI'] ?? ''),
         'ua' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
         'status' => $status,
     ];
