@@ -1303,7 +1303,7 @@ switch ($action) {
                     'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
-                ]);
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
         }
