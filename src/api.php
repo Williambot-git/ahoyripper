@@ -621,6 +621,22 @@ switch ($action) {
     case 'info': {
         // Get video info + formats
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+
+        // Check URL length first — reject pathologically long strings before
+        // doing expensive URL format validation. This fails fast on abuse and
+        // avoids burning a daily quota increment on obviously invalid requests.
+        // The 2048-char limit covers all normal video URLs with tracking params.
+        if (strlen($url) > 2048) {
+            http_response_code(400);
+            logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+            echo json_encode([
+                'error' => 'URL is too long. Please paste a shorter link.',
+                'error_code' => 'INVALID_URL',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
+
         if (!$url || !isValidUrl($url)) {
             http_response_code(400);
             logRequest('info', 400, ['reason' => 'invalid_url']);
