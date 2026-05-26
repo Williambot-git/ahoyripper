@@ -261,9 +261,11 @@ $VERSION = '1.0.0';
   const ripAgain = document.getElementById('ripAgain');
   const sortSelect = document.getElementById('sortSelect');
 
-  // Flag guarding successful-fetch navigation — prevents the browser from
-  // downloading the JSON error body as a file when the fetch responds non-200.
-  // Set to false in error branches; checked nowhere (safety net for code changes).
+  // Flag to prevent browser downloading JSON error body as a file on non-200 fetch.
+  // Set to false in error branches so callers know the fetch failed without
+  // needing to inspect the response object. Currently unused (navigation is
+  // always direct on success), but keeping the flag avoids breaking any future
+  // code that checks it before navigating.
   var navigateOnSuccess = true;
 
   // Restore persisted quota from localStorage on page load.

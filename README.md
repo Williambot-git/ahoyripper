@@ -128,9 +128,13 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 |------|---------|
 | `400` | Invalid URL or missing parameters |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
+| `404` | Endpoint not found — use `info`, `download`, or `health` |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
 | `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body |
+| `500` | Internal server error — the rip failed unexpectedly |
+| `502` | Bad gateway — the source server returned an invalid response |
 | `503` | Service temporarily unavailable |
+| `504` | Gateway timeout — the source site is slow or unavailable. Try again or use a smaller format |
 
 **Classified error codes** (surfaced in the `error_code` field of 422 responses):
 
