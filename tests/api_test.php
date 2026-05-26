@@ -424,9 +424,14 @@ function sort_formats($formats, $sort = 'height') {
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
-        // Secondary: within same type group, sort by height descending for consistency
+        // Secondary: within same type group, sort by height descending for consistency.
+        // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
+        // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        }
+        if ($cmp === 0) {
+            $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
         }
         return $cmp;
     });
@@ -465,6 +470,21 @@ test('combined sorted by height descending (1080 before 720 before 480)',
     $ids_mixed[0] === 'video_best' && $ids_mixed[1] === 'video_720' && $ids_mixed[2] === 'video_480');
 test('audio-only at end of sorted list',
     $ids_mixed[3] === 'audio_low');
+
+// ─── FPS tiebreaker within same resolution tier ──────────────────────────────
+// When two combined formats have the same height, the one with higher fps
+// should come first (60fps > 30fps > 24fps) so smoother variants are surfaced.
+
+$formats_same_height_diff_fps = [
+    ['id' => 'a', 'height' => 1080, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize_mb' => 25, 'tbr' => 5000],
+    ['id' => 'b', 'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize_mb' => 40, 'tbr' => 8000],
+    ['id' => 'c', 'height' => 1080, 'fps' => null, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize_mb' => 20, 'tbr' => 4000],
+    ['id' => 'd', 'height' => 1080, 'fps' => 24, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize_mb' => 15, 'tbr' => 3000],
+];
+$sorted_fps = sort_formats($formats_same_height_diff_fps, 'height');
+$ids_fps = array_column($sorted_fps, 'id');
+test('same height — 60fps before 30fps before 24fps before null fps',
+    $ids_fps[0] === 'b' && $ids_fps[1] === 'a' && $ids_fps[2] === 'd' && $ids_fps[3] === 'c');
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

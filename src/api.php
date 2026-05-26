@@ -533,9 +533,14 @@ function parseFormats($json_str, &$raw_error_out = null) {
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
-        // Secondary: within same type group, sort by height descending for consistency
+        // Secondary: within same type group, sort by height descending for consistency.
+        // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
+        // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        }
+        if ($cmp === 0) {
+            $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
         }
         return $cmp;
     });
