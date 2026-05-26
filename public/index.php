@@ -691,6 +691,7 @@ card.addEventListener('click', function(e) {
             'UNSUPPORTED_SITE': 'This site is not supported. Check the list at yt-dlp.github.io/supported-sites.',
             'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
             'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
+            'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
             'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
             'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',

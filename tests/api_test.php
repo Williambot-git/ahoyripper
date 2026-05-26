@@ -92,6 +92,9 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
         return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.'];
     }
+    if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
+        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.'];
+    }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
         return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
     }
@@ -194,7 +197,27 @@ $result = classifyYtdlpError('ERROR: Requested format not available');
 test('detects FORMAT_UNAVAILABLE — "requested format not available"',
     $result !== null && ($result['code'] ?? '') === 'FORMAT_UNAVAILABLE');
 
-$result = classifyYtdlpError('ERROR: Something completely unexpected happened');
+$result = classifyYtdlpError('ERROR: This video has been removed');
+test('detects VIDEO_UNAVAILABLE — "This video has been removed"',
+    $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: Video unavailable');
+test('detects VIDEO_UNAVAILABLE — "Video unavailable"',
+    $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: This video is no longer available');
+test('detects VIDEO_UNAVAILABLE — "This video is no longer available"',
+    $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: Video has been delisted');
+test('detects VIDEO_UNAVAILABLE — "Video has been delisted"',
+    $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: Video has been deleted');
+test('detects VIDEO_UNAVAILABLE — "Video has been deleted"',
+    $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: [youtube] Something completely unexpected happened');
 test('returns null for unknown errors',
     $result === null);
 

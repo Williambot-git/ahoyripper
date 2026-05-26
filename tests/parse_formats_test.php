@@ -69,6 +69,10 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This content has been removed due to a copyright claim.', 'error_code' => 'COPYRIGHT_REMOVED'];
             }
+            if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This video is no longer available or has been removed.', 'error_code' => 'VIDEO_UNAVAILABLE'];
+            }
             if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'error_code' => 'SOURCE_RATE_LIMITED'];
@@ -416,6 +420,11 @@ $errors = [
     'ERROR: https://example.com is not a supported URL' => 'UNSUPPORTED_SITE',
     'ERROR: Playlist does not exist' => 'PLAYLIST_MISSING',
     'ERROR: The content has been removed by the owner' => 'COPYRIGHT_REMOVED',
+    'ERROR: This video has been removed' => 'VIDEO_UNAVAILABLE',
+    'ERROR: Video unavailable' => 'VIDEO_UNAVAILABLE',
+    'ERROR: This video is no longer available' => 'VIDEO_UNAVAILABLE',
+    'ERROR: Video has been delisted' => 'VIDEO_UNAVAILABLE',
+    'ERROR: Video has been deleted' => 'VIDEO_UNAVAILABLE',
     'ERROR: HTTP Error 429: Too Many Requests' => 'SOURCE_RATE_LIMITED',
     'ERROR: [youtube] Video is age restricted' => 'AGE_RESTRICTED',
     'ERROR: Certificate has expired' => 'SSL_ERROR',
