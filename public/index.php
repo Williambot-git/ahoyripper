@@ -578,9 +578,14 @@ card.addEventListener('click', function(e) {
     });
   }
 
+  var isFetching = false; // guard against duplicate concurrent fetches (e.g. paste + Enter/Go)
+
   async function fetchInfo() {
     const url = input.value.trim();
     if (!url) return;
+
+    if (isFetching) return;
+    isFetching = true;
 
     // Reject non-HTTP(S) schemes client-side before wasting a server round-trip.
     // The API's isValidUrl() will also catch these, but surfacing the error
@@ -741,6 +746,7 @@ card.addEventListener('click', function(e) {
       }
       showError(msg);
     } finally {
+      isFetching = false;
       setLoading(false);
       showProgress(false);
     }
