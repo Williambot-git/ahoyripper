@@ -110,7 +110,7 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
     }
-    if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out/i', $err_lower)) {
+    if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out|timed out/i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
     }
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
@@ -196,6 +196,14 @@ test('detects CONNECTION_FAILED — "connection failed"',
 
 $result = classifyYtdlpError('ERROR: Connection timed out');
 test('detects CONNECTION_FAILED — "connection timed out"',
+    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
+
+$result = classifyYtdlpError('ERROR: Request timed out');
+test('detects CONNECTION_FAILED — "request timed out" (standalone timed out)',
+    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
+
+$result = classifyYtdlpError('ERROR: Unable to resolve IP address (timed out after 30s)');
+test('detects CONNECTION_FAILED — "(timed out after 30s)" (standalone timed out)',
     $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
 
 $result = classifyYtdlpError('ERROR: File is larger than 2GB limit');

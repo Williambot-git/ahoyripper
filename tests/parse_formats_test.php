@@ -85,7 +85,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR'];
             }
-            if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out/i', $err_lower)) {
+            if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out|timed out/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
             }
@@ -465,6 +465,7 @@ $errors = [
     'ERROR: [youtube] Video is age restricted' => 'AGE_RESTRICTED',
     'ERROR: Certificate has expired' => 'SSL_ERROR',
     'ERROR: Connection failed' => 'CONNECTION_FAILED',
+    'ERROR: Request timed out' => 'CONNECTION_FAILED',
     'ERROR: File is larger than 2GB limit' => 'FILE_TOO_LARGE',
     'ERROR: Requested format not available' => 'FORMAT_UNAVAILABLE',
 ];
