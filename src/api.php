@@ -1530,12 +1530,17 @@ case 'progress':
             }
         }
 
+        $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
+        $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
+
         $response = [
-            'status' => 'ok',
+            'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
             'request_id' => $request_id,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
+            'yt_dlp_ok' => $yt_dlp_ok,
+            'ffmpeg_ok' => $ffmpeg_ok,
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
@@ -1573,7 +1578,7 @@ case 'progress':
             }
             // Always include probe result in response when ?probe=1 is set,
             // whether it came from cache or was just computed.
-            $response['yt_dlp_probe'] = $GLOBALS['__ytdlp_probe'];
+            $out['yt_dlp_probe'] = $GLOBALS['__ytdlp_probe'];
         }
         // When no probe is requested, the yt_dlp_probe field is intentionally
         // omitted from the response (not null, absent) so the response shape
@@ -1585,13 +1590,13 @@ case 'progress':
         if ($uptime_bytes !== false) {
             $parts = preg_split('/\s+/', trim($uptime_bytes));
             if (isset($parts[0]) && is_numeric($parts[0])) {
-                $response['server_uptime_seconds'] = (int)floor((float)$parts[0]);
+                $out['server_uptime_seconds'] = (int)floor((float)$parts[0]);
             }
         }
         if (function_exists('sys_getloadavg')) {
             $load = sys_getloadavg();
             if ($load !== false) {
-                $response['load_avg'] = array_map(fn($v) => round($v, 2), $load);
+                $out['load_avg'] = array_map(fn($v) => round($v, 2), $load);
             }
         }
 
@@ -1600,17 +1605,17 @@ case 'progress':
             // Match "MemAvailable:" (available since kernel 3.14) or fall back to MemFree
             if (preg_match('/MemAvailable:\s+(\d+)\s+kB/', $meminfo, $avail_m) &&
                 preg_match('/MemTotal:\s+(\d+)\s+kB/', $meminfo, $total_m)) {
-                $response['memory_available_pct'] = round(($avail_m[1] / $total_m[1]) * 100, 1);
+                $out['memory_available_pct'] = round(($avail_m[1] / $total_m[1]) * 100, 1);
             }
         }
 
         $free = @disk_free_space('/');
         if ($free !== false) {
-            $response['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
+            $out['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
         }
 
         header('Cache-Control: no-cache');
-        echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
     default: {
