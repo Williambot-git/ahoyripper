@@ -787,20 +787,6 @@ switch ($action) {
 
         // URL is already validated by isValidUrl(); no shell metacharacters possible
         // when passed as a direct array element to proc_open (no shell involved).
-        // Enforce a max URL length to prevent pathologically long URLs from reaching
-        // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
-        // tracking parameters while stopping abuse.
-        $MAX_URL_LEN = 2048;
-        if (strlen($url) > $MAX_URL_LEN) {
-            http_response_code(400);
-            logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-            echo json_encode([
-                'error' => 'URL is too long. Please paste a shorter link.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
-            exit;
-        }
         // Build yt-dlp args as an array — the download action already does this.
         // We call proc_open directly here (not via runYtdlp) so the URL is passed
         // as a single array element and cannot be split by preg_split whitespace
