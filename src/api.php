@@ -1533,7 +1533,7 @@ case 'progress':
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
 
-        $response = [
+        $out = [
             'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
             'request_id' => $request_id,
