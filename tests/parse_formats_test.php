@@ -162,7 +162,9 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
         $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         $desc = $quality
-            ? trim("$quality $format_description")
+            ? (empty($format_description) || $format_description === 'Unknown'
+                ? ($format_note ?: $label)
+                : trim("{$quality} {$format_description}"))
             : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
 
         if ($filesize === 0) {
@@ -524,6 +526,29 @@ test('description falls back to format_note when format_description absent',
 // When both format_description AND format_note are present, description should
 // use format_description (the richer yt-dlp signal), not format_note.
 
+$fmt_desc = makeFormat([
+    'width' => 1920, 'height' => 1080,
+    'format_description' => '1080p60 HDR 10bit',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a',
+]);
+$json_desc = makeJson('Desc Test', [$fmt_desc]);
+$result_desc = parseFormats($json_desc);
+$desc = $result_desc['formats'][0]['description'] ?? '';
+test('description uses format_description when available',
+    strpos($desc, '1080p60 HDR 10bit') !== false);
+
+$fmt_no_desc = makeFormat([
+    'width' => 0, 'height' => 480, 'format_note' => '480p',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+]);
+$json_no_desc = makeJson('No Desc', [$fmt_no_desc]);
+$result_no_desc = parseFormats($json_no_desc);
+$desc2 = $result_no_desc['formats'][0]['description'] ?? '';
+test('description falls back to format_note when format_description absent',
+    strpos($desc2, '480p') !== false);
+
+// When both format_description AND format_note are present, description should
+// use format_description (the richer yt-dlp signal), not format_note.
 $fmt_both = makeFormat([
     'width' => 1920, 'height' => 1080,
     'format_description' => '1080p60 HDR 10bit',
@@ -533,8 +558,44 @@ $fmt_both = makeFormat([
 $json_both = makeJson('Both Fields', [$fmt_both]);
 $result_both = parseFormats($json_both);
 $desc3 = $result_both['formats'][0]['description'] ?? '';
-test('description prefers format_description when both format_description and format_note are present',
-    strpos($desc3, '1080p60 HDR 10bit') !== false && strpos($desc3, '1080p60 HDR 10bit') < strpos($desc3, '1080p"') ?: true);
+test('description prefers format_description when both it and format_note are present',
+    strpos($desc3, '1080p60 HDR 10bit') !== false);
+
+// description should include resolution (width x height) as a prefix when width and height are set
+$fmt_res = makeFormat([
+    'width' => 1920, 'height' => 1080,
+    'format_description' => '1080p60 HDR',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+]);
+$json_res = makeJson('Res Test', [$fmt_res]);
+$result_res = parseFormats($json_res);
+$desc4 = $result_res['formats'][0]['description'] ?? '';
+test('description prefixes resolution (1920x1080) when width and height are set',
+    strpos($desc4, '1920x1080') !== false);
+
+// When width/height are absent/zero, description should NOT prepend a resolution prefix
+$fmt_no_res = makeFormat([
+    'width' => 0, 'height' => 0,
+    'format_description' => '720p60',
+    'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a',
+]);
+$json_no_res = makeJson('No Res Test', [$fmt_no_res]);
+$result_no_res = parseFormats($json_no_res);
+$desc5 = $result_no_res['formats'][0]['description'] ?? '';
+test('description has no width x height prefix when both width and height are 0',
+    !preg_match('/^[0-9]+x[0-9]+\s/', $desc5));
+
+// Empty/null format_description falls back to format_note, not label
+$fmt_note_only = makeFormat([
+    'format_note' => '720p60 HDR',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+    'width' => 1280, 'height' => 720,
+]);
+$json_note = makeJson('Note Only', [$fmt_note_only]);
+$result_note = parseFormats($json_note);
+$note_desc = $result_note['formats'][0]['description'] ?? '';
+test('description falls back to format_note when format_description is null/empty',
+    strpos($note_desc, '720p60 HDR') !== false);
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

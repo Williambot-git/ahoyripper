@@ -488,7 +488,9 @@ function parseFormats($json_str, &$raw_error_out = null) {
         //   format_note (e.g. "720p60") first, then the compact label as last resort.
         $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         $desc = $quality
-            ? trim("$quality $format_description")
+            ? (empty($format_description) || $format_description === 'Unknown'
+                ? ($format_note ?: $label)
+                : trim("{$quality} {$format_description}"))
             : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
 
         // Estimate filesize if not available
