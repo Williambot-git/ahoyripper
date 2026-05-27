@@ -369,4 +369,24 @@ fi
 echo "  ✓ JS does not hard-code gap=0 on formatGrid"
 
 echo ""
+echo "==> Running PHP unit tests..."
+php tests/api_test.php
+PHP_RESULT=$?
+if [ $PHP_RESULT -ne 0 ]; then
+    echo "  ✗ PHP unit tests failed"
+    exit 1
+fi
+echo "  ✓ All PHP unit tests passed"
+
+echo ""
+echo "==> Running parseFormats unit tests..."
+php tests/parse_formats_test.php
+PARSE_RESULT=$?
+if [ $PARSE_RESULT -ne 0 ]; then
+    echo "  ✗ parseFormats unit tests failed"
+    exit 1
+fi
+echo "  ✓ All parseFormats unit tests passed"
+
+echo ""
 echo "All sanity checks passed."

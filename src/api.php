@@ -1274,7 +1274,12 @@ switch ($action) {
 
         while (true) {
             if ($timeout > 0 && (time() - $start) > $timeout) {
+                // Clean up process handle before exit to avoid zombie processes.
+                // proc_terminate sends SIGKILL; proc_close waits for exit and releases
+                // the resource. Do both even though proc_terminate already killed it —
+                // proc_close is necessary to avoid leaving a zombie.
                 proc_terminate($proc, 9);
+                proc_close($proc);
                 $proc_killed = true;
                 // Use glob pattern — $out_file was never set in this scope.
                 // $out_base was set above and holds the safe base name.
@@ -1441,7 +1446,10 @@ switch ($action) {
 
         ignore_user_abort(true);
 
-        ini_set('memory_limit', '256M');
+        $mem_set = ini_set('memory_limit', '256M');
+        if ($mem_set === false) {
+            error_log("AhoyRipper: ini_set('memory_limit', '256M') failed — check disable_functions or open_basedir restrictions");
+        }
 
         // Set download-specific headers just before streaming — ensures error
         // responses above return JSON with default Content-Type, not binary.
