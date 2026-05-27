@@ -453,7 +453,11 @@ $VERSION = '1.0.0';
       // of server-side access logs). The key is also placed in the URL as a query
       // param so that the window.location.href fallback works for direct navigation
       // (browsers can't send custom headers on direct navigation).
-      card.href = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
+      card.href = '#download-' + f.id;
+      card.setAttribute('data-url', url);
+      card.setAttribute('data-id', f.id);
+      card.setAttribute('data-label', f.label || f.ext);
+      card.setAttribute('data-filename', data.derived_filename || '');
       // Note: download and target attributes are intentionally omitted here.
       // - download="" would be a no-op (empty string is ignored); the server's
       //   Content-Disposition header controls the saved filename instead.
