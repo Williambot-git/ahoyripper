@@ -126,7 +126,8 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 
 The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats.
 
-The `sort` parameter (optional, default `height`) controls format sort order:
+**Error codes:**
+
 | Code | Meaning |
 |------|---------|
 | `400` | Invalid URL or missing parameters |
