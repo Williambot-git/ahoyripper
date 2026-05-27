@@ -1289,7 +1289,12 @@ switch ($action) {
                 foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
-                echo json_encode(['error' => 'Download timed out. Try a smaller format.']);
+                echo json_encode([
+                    'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
+                    'error_code' => 'DOWNLOAD_TIMEOUT',
+                    'retry_after' => $timeout,
+                    'request_id' => $request_id,
+                ]);
                 exit;
             }
 

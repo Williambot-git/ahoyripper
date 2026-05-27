@@ -702,6 +702,7 @@ card.addEventListener('click', function(e) {
             'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
             'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
             'YTDLP_ERROR': 'The download failed. Try another format or wait a moment.',
+            'DOWNLOAD_TIMEOUT': 'Download timed out. The file may be too large or the source is slow. Try a smaller format.',
             'DOWNLOAD_FAILED': 'The rip produced an empty or corrupt file. Try a lower resolution or audio-only format instead.',
             'INVALID_FORMAT_ID': 'That format is no longer available. Refresh the page and pick another format.',
             'PARSE_ERROR': 'Could not parse the video response. The site may be temporarily unavailable.',
