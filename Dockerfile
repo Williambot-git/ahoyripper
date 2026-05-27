@@ -17,8 +17,9 @@ RUN apt-get update && apt-get install -y \
 # A corrupt or incomplete pip install produces an empty/non-executable file;
 # catching it here fails the build fast rather than producing a broken container.
 # Capture and expose the version for build-time debugging and image inspection.
-RUN echo "yt-dlp version: $(yt-dlp -V)" \
-    && yt-dlp -V > /dev/null 2>&1 \
+# --version (not -V) is the stable/canonical flag per yt-dlp conventions.
+RUN echo "yt-dlp version: $(yt-dlp --version)" \
+    && yt-dlp --version > /dev/null 2>&1 \
     || { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
 
 WORKDIR /app
