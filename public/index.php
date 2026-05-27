@@ -483,7 +483,12 @@ $VERSION = '1.0.0';
         '<div class="format-meta">' + metaParts + langBadge + '</div>' +
         '<div class="format-size">' + size + '</div>';
 
-card.addEventListener('click', function(e) {
+      // Reset the guard at the start of each card click so a failed click
+      // (e.g. timeout on card A) does not suppress navigation on a subsequent
+      // successful click (card B), which is a consequence of the flag being
+      // a module-level variable shared across all card click handlers.
+      navigateOnSuccess = true;
+      card.addEventListener('click', function(e) {
         e.preventDefault();
         var dl = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
         var dlHeaders = {};
