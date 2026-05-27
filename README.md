@@ -266,13 +266,50 @@ yt-dlp --list-extractors
 
 ## Troubleshooting
 
-**"Could not fetch that URL"** — The site may not be supported by yt-dlp, or the video is geo-restricted/private/unavailable.
+**"Could not fetch that URL"** — The site may not be supported by yt-dlp, or the video is geo-restricted/private/unavailable. Check the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites). If the site is supported, the video may be age-restricted, region-locked, or removed.
 
-**Rate limited (429)** — Wait 30 seconds. Limits reset every 60 seconds.
+**Rate limited (429)** — Wait before retrying. Check the `Retry-After` header for the number of seconds to wait. Limits reset every 60 seconds (rate limit) or at midnight UTC (daily quota).
 
-**Download times out** — Try an audio-only format or a lower resolution. Large 4K rips can exceed the 5-minute timeout.
+**Download times out** — Large 4K/8K rips can exceed the 5-minute server timeout. Try an audio-only format (MP3/AAC) or a lower resolution (480p/720p). The source may also be slow or unresponsive.
 
-**Empty download** — The format may not be available in that combination. Try another format from the list.
+**Empty download / corrupt file** — The selected format may not be available in that combination. Try another format from the list, or fall back to `best` which lets yt-dlp pick the most reliable option.
+
+**Quota exhausted (5/5 rips used)** — The free tier allows 5 total API calls per day (midnight UTC reset). Each call to `info` or `download` counts as one rip. Enter an AhoyVPN unlimited key in the optional field to bypass the daily cap.
+
+**503 Service unavailable** — The server is temporarily overloaded or the rate-limit gate could not open a file. Retry after a few seconds. If the issue persists, it may indicate a server-side resource problem.
+
+**Geo-blocked / region restricted** — The video is not available in your server's geographic location. Using AhoyVPN can route the request through a different region.
+
+### Diagnosing with the health probe
+
+Add `&probe=1` to the health endpoint to run a live connectivity check:
+
+```
+GET /src/api.php?action=health&probe=1
+```
+
+This fetches metadata from a known-stable YouTube video to verify end-to-end connectivity. The result is cached for 5 minutes, so repeated probes within that window return the cached result without calling yt-dlp again.
+
+A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — check `yt_dlp_version` and `ffmpeg_version` in the health response to confirm both are installed and callable.
+
+### Interpreting error codes
+
+| error_code | Cause | Action |
+|------------|-------|--------|
+| `GEOBLOCKED` | Video is region-locked | Use a VPN to route through an allowed region |
+| `PRIVATE_VIDEO` | Video is private or unlisted | Cannot be downloaded |
+| `LOGIN_REQUIRED` | Video requires platform login | Sign in to the platform first |
+| `UNSUPPORTED_SITE` | Site not in yt-dlp extractor list | Check [supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) |
+| `COPYRIGHT_REMOVED` | Content removed by copyright holder | No workaround |
+| `VIDEO_UNAVAILABLE` | Video deleted or delisted | No workaround |
+| `AGE_RESTRICTED` | Video requires age verification on source | Sign in to the platform |
+| `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait 30–60 seconds and retry |
+| `SSL_ERROR` | TLS/certificate error with source | Retry — usually transient |
+| `CONNECTION_FAILED` | Network error reaching source | Check your server's network and retry |
+| `FILE_TOO_LARGE` | File exceeds server limit | Try audio-only or lower resolution |
+| `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
+| `DOWNLOAD_TIMEOUT` | Exceeded 5-minute server timeout | Try a smaller format or lower resolution |
+| `DOWNLOAD_FAILED` | Empty or corrupt output file | Try another format or wait and retry |
 
 ---
 
