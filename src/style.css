@@ -409,8 +409,13 @@ body {
   color: var(--color-text);
 }
 .format-card:active { transform: translateY(0); }
-/* Improve touch target size on mobile for format cards */
-@media (hover: none) {
+/* Improve touch target size on mobile for format cards.
+   Use pointer:coarse (finger on touchscreen) rather than hover:none
+   (which can match e-readers and other non-touch devices that happen
+   to lack a hover-capable primary input). coarse explicitly excludes
+   devices with fine pointers (mouse/trackpad), which is the right
+   signal for "this device is primarily touch-controlled". */
+@media (pointer: coarse) {
   .format-card {
     min-height: 88px;
   }

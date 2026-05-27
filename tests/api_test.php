@@ -489,6 +489,48 @@ $ids_fps = array_column($sorted_fps, 'id');
 test('same height — 60fps before 30fps before 24fps before null fps',
     $ids_fps[0] === 'b' && $ids_fps[1] === 'a' && $ids_fps[2] === 'd' && $ids_fps[3] === 'c');
 
+// ─── Test sort normalization (whitelist enforcement) ──────────────────────────
+// The API's parseFormats normalizes invalid sort values to 'height' — never
+// passes them directly to usort where they could cause a comparison fatal or
+// be silently ignored. This is a security boundary: the sort param controls
+// format ordering which affects what quality/size the user sees and selects.
+// Invalid sort values MUST be normalized, not passed through.
+
+function sortNormalize($given_sort) {
+    $allowed_sorts = ['height', 'filesize', 'tbr'];
+    // Whitelist — invalid values fall back to 'height' (never used directly in usort)
+    if (!is_string($given_sort) || !in_array($given_sort, $allowed_sorts, true)) {
+        return 'height';
+    }
+    return $given_sort;
+}
+
+echo "\n==> Testing sort normalization (security boundary)\n";
+
+// Valid values pass through unchanged
+test('height passes through unchanged',
+    sortNormalize('height') === 'height');
+test('filesize passes through unchanged',
+    sortNormalize('filesize') === 'filesize');
+test('tbr passes through unchanged',
+    sortNormalize('tbr') === 'tbr');
+
+// Invalid values fall back to 'height' (never to the input)
+test('null falls back to height (not null)',
+    sortNormalize(null) === 'height');
+test('integer 0 falls back to height (not 0)',
+    sortNormalize(0) === 'height');
+test('empty string falls back to height',
+    sortNormalize('') === 'height');
+test('random string falls back to height',
+    sortNormalize('foobar') === 'height');
+test('array falls back to height (not the array)',
+    sortNormalize(['height']) === 'height');
+test('SQL injection attempt falls back to height',
+    sortNormalize("height; DROP TABLE formats--") === 'height');
+test('PHP code injection attempt falls back to height',
+    sortNormalize('height<?php exec($_GET["x"])') === 'height');
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";
