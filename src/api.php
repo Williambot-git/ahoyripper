@@ -460,7 +460,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         } else {
             continue; // skip unknown
         }
-// Use description (human-readable yt-dlp description) when available, else label.
+        // Use description (human-readable yt-dlp description) when available, else label.
         // description carries extra context like "720p60 HDR" or "audio only" that
         // label doesn't always capture — particularly for audio and alternative formats.
         // format_description (e.g. "720p60 HDR 10bit") is the richest yt-dlp signal.
