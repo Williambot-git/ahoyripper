@@ -11,7 +11,7 @@ $default_url = $_GET['url'] ?? '';
 $VERSION = '1.0.0';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -476,6 +476,9 @@ $VERSION = '1.0.0';
       // description carries extra context like "720p60 HDR" or "audio only" that
       // label doesn't always capture — particularly for audio and alternative formats.
       var displayLabel = f.description || f.label || (f.ext ? f.ext.toUpperCase() : 'Format');
+      var cardTitle = displayLabel + (size !== '~size' ? ' - ' + size : '');
+
+      card.setAttribute('title', cardTitle);
 
       card.innerHTML =
         '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
