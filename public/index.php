@@ -687,7 +687,7 @@ card.addEventListener('click', function(e) {
         if (err.error_code) {
           var errorHints = {
             'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
-            'GEOBLOCKED': 'This video is geo-restricted. Using a VPN like AhoyVPN may help: https://ahoyvpn.com',
+            'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
             'UNSUPPORTED_SITE': 'This site is not supported. Check the list at yt-dlp.github.io/supported-sites.',
