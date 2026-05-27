@@ -781,14 +781,76 @@ switch ($action) {
             ]);
             exit;
         }
-        // Prevent the user's video URL from leaking as HTTP Referer to the source.
-        // yt-dlp sends the URL itself as referer by default; using the generic
-        // ahoyripper.com referer hides the actual video URL from third-party servers.
-        // The info fetch is equally sensitive — without this, sources see the video URL
-        // even when only querying metadata (not downloading).
-        // Note: --referer must come BEFORE the yt-dlp separator (--) so yt-dlp parses
-        // it as an option, not a positional URL argument.
-        runYtdlp("--dump-json --no-playlist --no-warnings --skip-download --referer https://ahoyripper.com/ " . $url, $out, $err, $exit, 45);
+        // Build yt-dlp args as an array — the download action already does this.
+        // We call proc_open directly here (not via runYtdlp) so the URL is passed
+        // as a single array element and cannot be split by preg_split whitespace
+        // tokenization (which breaks URLs that contain spaces or option-like text).
+        // With bypass_shell=true, proc_open parses the array into argv without a shell,
+        // so no shell escaping is needed.
+        $ytdlp_cmd = [
+            '/usr/local/bin/yt-dlp',
+            '--dump-json',
+            '--no-playlist',
+            '--no-warnings',
+            '--skip-download',
+            '--referer', 'https://ahoyripper.com/',
+            '--',
+            $url,
+        ];
+        $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+        $pipes = null;
+        $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
+        if (!$proc) {
+            $exit = -1;
+            $out = $err = '';
+        } else {
+            fclose($pipes[0]);
+            unset($pipes[0]);
+            stream_set_timeout($pipes[1], 45);
+            stream_set_timeout($pipes[2], 45);
+            $out = $err = '';
+            $start = time();
+            while (!feof($pipes[1]) || !feof($pipes[2])) {
+                if ((time() - $start) > 45) {
+                    proc_terminate($proc, 9);
+                    $err .= "\nProcess timed out after 45s";
+                    $exit = -1;
+                    foreach ($pipes as $p) { if ($p) fclose($p); }
+                    $pipes = null;
+                    proc_close($proc);
+                    $out = '';
+                    break;
+                }
+                $read = [];
+                if (!feof($pipes[1])) $read[] = $pipes[1];
+                if (!feof($pipes[2])) $read[] = $pipes[2];
+                if (empty($read)) break;
+                $w = $e = null;
+                $changed = @stream_select($read, $w, $e, 1, 0);
+                if ($changed === false || $changed === 0) { usleep(100000); continue; }
+                foreach ($read as $p) {
+                    if ($p === $pipes[1]) {
+                        $s = @fread($p, 8192);
+                        if ($s === false || $s === '') { if (feof($pipes[1])) { fclose($pipes[1]); $pipes[1] = null; } continue; }
+                        $out .= $s;
+                    } elseif ($p === $pipes[2]) {
+                        $s = @fread($p, 8192);
+                        if ($s === false || $s === '') { if (feof($pipes[2])) { fclose($pipes[2]); $pipes[2] = null; } continue; }
+                        $err .= $s;
+                    }
+                }
+                if ($pipes[1] === null && $pipes[2] === null) break;
+            }
+            if ($pipes[1] === null && $pipes[2] === null) {
+                foreach ($pipes as $p) { if ($p) fclose($p); }
+                $pipes = null;
+                $exit = proc_close($proc);
+            } else {
+                foreach ($pipes as $p) { if ($p) fclose($p); }
+                $pipes = null;
+                $exit = proc_close($proc);
+            }
+        }
 
         if ($exit !== 0 || !$out) {
             // The fetch failed — undo the quota increment so failed attempts don't
