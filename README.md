@@ -155,6 +155,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `CONNECTION_FAILED` | Could not connect to the source |
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video |
+| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) |
 
 ### Download a format
@@ -181,6 +182,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `CONNECTION_FAILED` | Could not connect to the source |
 | `422` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
+| `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `500` | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 

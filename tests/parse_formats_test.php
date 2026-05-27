@@ -97,6 +97,10 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
             }
+            if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'This content is not available due to a terms of service violation.', 'error_code' => 'DISALLOWED_CONTENT'];
+            }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
             return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
         }

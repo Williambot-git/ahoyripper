@@ -366,6 +366,9 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/requested format|not.*available|does not contain|match/i', $err_lower)) {
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
     }
+    if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.'];
+    }
     return null;
 }
 

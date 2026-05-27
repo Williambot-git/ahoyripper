@@ -700,6 +700,7 @@ card.addEventListener('click', function(e) {
             'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
             'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
             'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
+            'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
             'YTDLP_ERROR': 'The download failed. Try another format or wait a moment.',
             'DOWNLOAD_FAILED': 'The rip produced an empty or corrupt file. Try a lower resolution or audio-only format instead.',
             'INVALID_FORMAT_ID': 'That format is no longer available. Refresh the page and pick another format.',
