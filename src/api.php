@@ -1360,8 +1360,9 @@ switch ($action) {
             // Whether the error is GEOBLOCKED (content unavailable) or an unexpected
             // yt-dlp exit (e.g. network glitch, source timeout), the user didn't
             // successfully download anything, so the quota should not be burned.
-            // Skip refund only for successful exits (shouldn't reach here) and only
-            // when the user is on the free tier ($unlimited is false).
+            // Skip refund only for successful exits and when the user is on the
+            // free tier ($unlimited is false) — unlimited-key holders never had
+            // their quota incremented in the first place.
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if ($undo_fp && flock($undo_fp, LOCK_EX)) {
@@ -1503,16 +1504,6 @@ case 'progress':
     case 'health': {
         // Health/progress — lightweight endpoints, no daily quota or rate limiting.
         // Note: all security headers are already set at the top of the script.
-        // Add informational rate-limit headers so clients can track status consistently.
-        header('X-RateLimit-Limit: -1');
-        header('X-RateLimit-Remaining: -1');
-        header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: -1');
-        // Mirror download-specific rate headers for consistency
-        header('X-DL-RateLimit-Limit: -1');
-        header('X-DL-RateLimit-Remaining: -1');
-        header('X-DL-RateLimit-Reset: -1');
-        header('X-DL-RateLimit-Window: -1');
 
         $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?: 'not installed';
