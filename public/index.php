@@ -93,7 +93,7 @@ $VERSION = '1.0.0';
   }
   </script>
 
-<meta name="keywords" content="media ripper, video downloader, audio ripper, download video, download audio, free media converter, ripper tool, online ripper">
+<meta name="keywords" content="media ripper, video downloader, audio downloader, video converter, audio converter, download video, download audio, free media converter, ripper tool, online ripper, web ripper, YouTube downloader, TikTok downloader, Twitter video downloader, SoundCloud downloader, Instagram downloader, Facebook video downloader, Vimeo downloader, mp4 downloader, mp3 downloader, FLAC downloader, OGG downloader, M4A downloader, WEBM downloader, video to mp3, extract audio">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 </head>
 <body>
