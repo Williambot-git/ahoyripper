@@ -1195,6 +1195,10 @@ switch ($action) {
                 http_response_code(429);
                 $reset_timestamp = strtotime('tomorrow midnight UTC');
                 header('Retry-After: ' . ($reset_timestamp - time()));
+                header('X-DailyLimit-Limit: ' . $daily_limit);
+                header('X-DailyLimit-Remaining: 0');
+                header('X-DailyLimit-Reset: ' . $reset_timestamp);
+                header('X-DailyLimit-Window: daily');
                 echo json_encode([
                     'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
                     'error_code' => 'DAILY_LIMIT',
