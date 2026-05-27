@@ -3,10 +3,57 @@
   <title id="og-title">AhoyRipper - Free Online Media Ripper</title>
   <desc id="og-desc">Download video and audio from YouTube, TikTok, Twitter, SoundCloud, and 1800+ platforms. Free, no signup, no ads.</desc>
   <rect width="1200" height="630" fill="#0f0f0f"/>
+  <!-- Top accent bar -->
   <rect x="0" y="0" width="1200" height="6" fill="#3b82f6"/>
-  <circle cx="600" cy="270" r="80" fill="#3b82f6"/>
-  <text x="600" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="72" fill="white">R</text>
-  <text x="600" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="64" fill="#f5f5f0">AhoyRipper</text>
-  <text x="600" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#8a8a8a">Rip any video, anywhere. Free.</text>
-  <text x="600" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#3b82f6">ahoyripper.com</text>
+  <!-- Hexagon logo mark — matches the navigation bar icon -->
+  <g transform="translate(600, 240)">
+    <!-- Outer hexagon ring -->
+    <polygon
+      points="0,-100 87,-50 87,50 0,100 -87,50 -87,-50"
+      fill="none"
+      stroke="#3b82f6"
+      stroke-width="6"
+    />
+    <!-- Inner filled hexagon -->
+    <polygon
+      points="0,-72 63,-36 63,36 0,72 -63,36 -63,-36"
+      fill="#3b82f6"
+    />
+    <!-- Cross/anchor lines inside hexagon -->
+    <line x1="0" y1="-36" x2="0" y2="36" stroke="white" stroke-width="6" stroke-linecap="round"/>
+    <line x1="-63" y1="0" x2="63" y2="0" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <!-- Brand name -->
+  <text x="600" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="72" fill="#f5f5f0">AhoyRipper</text>
+  <!-- Tagline -->
+  <text x="600" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#8a8a8a">Rip any video, anywhere. Free, no signup, no ads.</text>
+  <!-- Platform icons row -->
+  <g transform="translate(600, 545)" fill="#555">
+    <!-- YouTube -->
+    <g transform="translate(-180, 0)">
+      <rect x="-14" y="-10" width="28" height="20" rx="4" fill="none" stroke="#555" stroke-width="2"/>
+      <polygon points="-6,-4 10,-4 4,6 -4,6" fill="#555"/>
+    </g>
+    <!-- TikTok -->
+    <g transform="translate(-90, 0)">
+      <path d="M0,-14 L0,14 M0,-14 C8,-14 14,-8 14,0 C14,8 8,14 0,14" fill="none" stroke="#555" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="-8" cy="0" r="4" fill="#555"/>
+    </g>
+    <!-- Twitter/X -->
+    <g transform="translate(0, 0)">
+      <path d="M-12,-10 L2,-10 L12,10 L-2,10 L-12,-4 Z M-12,4 L-2,-10 L12,-10 L2,4 Z" fill="#555"/>
+    </g>
+    <!-- SoundCloud -->
+    <g transform="translate(90, 0)">
+      <rect x="-16" y="-8" width="32" height="16" rx="8" fill="none" stroke="#555" stroke-width="2"/>
+      <circle cx="-8" cy="0" r="3" fill="#555"/>
+      <circle cx="4" cy="0" r="5" fill="#555"/>
+    </g>
+    <!-- +1800 -->
+    <g transform="translate(180, 0)">
+      <text x="0" y="6" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#666">+1800</text>
+    </g>
+  </g>
+  <!-- Domain -->
+  <text x="1160" y="620" text-anchor="end" font-family="Arial, sans-serif" font-size="22" fill="#3b82f6">ahoyripper.com</text>
 </svg>
