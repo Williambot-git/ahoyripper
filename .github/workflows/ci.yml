@@ -18,6 +18,11 @@ jobs:
           php -l src/api.php
           php -l public/index.php
 
+      - name: Run PHP unit tests
+        run: |
+          php tests/api_test.php
+          php tests/parse_formats_test.php
+
       - name: Check required files
         run: |
           for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do

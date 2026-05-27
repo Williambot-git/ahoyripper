@@ -73,7 +73,9 @@ ahoyripper/
 ├── scripts/
 │   └── install-deps.sh    # Dependency installer
 ├── tests/
-│   └── sanity.sh          # Sanity / regression checks
+│   ├── sanity.sh             # Shell-based sanity / regression checks
+│   ├── parse_formats_test.php # Unit tests for parseFormats() — no dependencies
+│   └── api_test.php           # Integration tests for the API endpoints
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
