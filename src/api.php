@@ -188,8 +188,8 @@ if ($version_cache_file && is_readable($version_cache_file)) {
     }
 }
 if (!$GLOBALS['__ytdlp_version']) {
-    // Note: yt-dlp uses -V (not --version) for version output
-    $ver = trim(shell_exec('/usr/local/bin/yt-dlp -V 2>/dev/null') ?: '');
+    // Note: yt-dlp uses both -V and --version; --version is stable/canonical.
+    $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
     $GLOBALS['__ytdlp_version'] = $ver;
     if ($version_cache_file) {
         $hash = @md5_file('/usr/local/bin/yt-dlp') ?: '';
