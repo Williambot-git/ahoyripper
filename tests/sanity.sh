@@ -281,6 +281,17 @@ else
 fi
 
 echo ""
+echo "==> Checking COOP/CORP headers appear once (server level, no duplicate in location blocks)..."
+COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
+CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
+if [ "$COOP_COUNT" -eq 1 ] && [ "$CORP_COUNT" -eq 1 ]; then
+    echo "  ✓ COOP appears once ($COOP_COUNT) and CORP appears once ($CORP_COUNT) — server-level only"
+else
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 1), CORP appears $CORP_COUNT times (expected 1)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking yt-dlp stderr capture in download..."
 if grep -q "proc_stderr" src/api.php; then
     echo "  ✓ Download stderr capture present"
