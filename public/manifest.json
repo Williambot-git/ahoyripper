@@ -6,6 +6,7 @@
   "start_url": "/?utm_source=homescreen",
   "scope": "/",
   "display": "standalone",
+  "prefer_related_applications": false,
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "orientation": "any",
