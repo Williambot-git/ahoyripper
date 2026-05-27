@@ -181,9 +181,15 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
         $filesize_mb = round($filesize / 1048576, 1);
 
+        $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
+        $quality_label = $quality
+            ? trim("$quality $format_description")
+            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
+
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
+            'quality_label' => $quality_label,
             'description' => $desc,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
@@ -535,6 +541,34 @@ $result_both = parseFormats($json_both);
 $desc3 = $result_both['formats'][0]['description'] ?? '';
 test('description prefers format_description when both format_description and format_note are present',
     strpos($desc3, '1080p60 HDR 10bit') !== false && strpos($desc3, '1080p60 HDR 10bit') < strpos($desc3, '1080p"') ?: true);
+
+// ─── parseFormats: quality_label field ────────────────────────────────────────
+// quality_label is always-populated and uses format_description when available,
+// falling back to format_note, then to label as last resort.
+
+echo "\n==> Testing parseFormats() — quality_label field\n";
+
+$fmt_ql = makeFormat([
+    'width' => 1920, 'height' => 1080,
+    'format_description' => '1080p60 HDR 10bit',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+]);
+$json_ql = makeJson('QL Test', [$fmt_ql]);
+$result_ql = parseFormats($json_ql);
+$ql = $result_ql['formats'][0]['quality_label'] ?? '';
+test('quality_label includes resolution from format_description',
+    strpos($ql, '1080p60 HDR 10bit') !== false);
+
+$fmt_ql2 = makeFormat([
+    'width' => 0, 'height' => 0,
+    'format_note' => 'Audio MP4',
+    'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a',
+]);
+$json_ql2 = makeJson('Audio QL', [$fmt_ql2]);
+$result_ql2 = parseFormats($json_ql2);
+$ql2 = $result_ql2['formats'][0]['quality_label'] ?? '';
+test('quality_label falls back to format_note for audio-only without resolution',
+    strpos($ql2, 'Audio MP4') !== false);
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

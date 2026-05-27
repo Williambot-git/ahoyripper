@@ -494,9 +494,20 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
         $filesize_mb = round($filesize / 1048576, 1);
 
+        // quality_label is the definitive, always-populated display label for this format.
+        // It is the best available human-readable description of quality/resolution,
+        // derived from format_description (richest yt-dlp signal), falling back to format_note,
+        // and finally to the compact label. This gives the frontend a single authoritative
+        // field to display without needing to reconstruct the fallback chain itself.
+        $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
+        $quality_label = $quality
+            ? trim("$quality $format_description")
+            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
+
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
+            'quality_label' => $quality_label,
             'description' => $desc,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
