@@ -1110,7 +1110,7 @@ switch ($action) {
                 flock($dl_fp, LOCK_UN);
                 fclose($dl_fp);
                 http_response_code(429);
-                header('Retry-After: 30');
+                header('Retry-After: ' . max(1, $dl_reset_ts - time()));
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
