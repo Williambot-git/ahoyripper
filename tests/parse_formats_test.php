@@ -193,7 +193,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
         ];
     }
 
-    // Sort: combined first, then by height descending
+    // Sort: combined first, then by selected sort key
     $sort = 'height';
     usort($formats, function($a, $b) use ($sort) {
         if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
@@ -205,8 +205,14 @@ function parseFormats($json_str, &$raw_error_out = null) {
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
+        // Secondary: within same type group, sort by height descending for consistency.
+        // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
+        // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        }
+        if ($cmp === 0) {
+            $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
         }
         return $cmp;
     });
@@ -375,6 +381,30 @@ test('combined formats sorted by height descending (1080 before 480 before 240)'
     $ids[0] === 'high' && $ids[1] === 'mid' && $ids[2] === 'low');
 test('audio-only formats sorted after combined (at end)',
     $ids[3] === 'audio');
+
+// ─── parseFormats: fps tiebreaker within same resolution tier ──────────────────
+
+$formats_same_height_diff_fps = [
+    makeFormat(['format_id' => 'a', 'height' => 1080, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 5000]),
+    makeFormat(['format_id' => 'b', 'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 8000]),
+    makeFormat(['format_id' => 'c', 'height' => 1080, 'fps' => null, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 4000]),
+    makeFormat(['format_id' => 'd', 'height' => 1080, 'fps' => 24, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 3000]),
+];
+$json_fps = makeJson('FPS Sort', $formats_same_height_diff_fps);
+$result_fps = parseFormats($json_fps);
+$ids_fps = array_column($result_fps['formats'], 'id');
+// Within same height, 60fps should sort before 30fps before 24fps before null
+// (the secondary height/tiebreak step runs after the primary sort — since
+// all have the same height it falls through to the fps tiebreaker, but the
+// primary sort doesn't re-run the secondary. The secondary only applies when
+// the secondary sort key itself is a tiebreak. For same-height formats that
+// have already been sorted by the secondary-height tiebreak (a no-op since
+// heights are equal), the fps sort finally differentiates them.)
+// Note: PHP usort is NOT guaranteed stable — two elements with equal
+// comparison must not swap (here fps=60 vs fps=30 at same height).
+// Expected order by fps desc: 60 > 30 > 24 > null.
+test('same height — 60fps before 30fps before 24fps before null fps',
+    $ids_fps[0] === 'b' && $ids_fps[1] === 'a' && $ids_fps[2] === 'd' && $ids_fps[3] === 'c');
 
 // ─── parseFormats: filesize estimation ─────────────────────────────────────────
 
