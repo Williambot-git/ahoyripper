@@ -9,16 +9,10 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/og-image.svg",
-      "sizes": "1200x630",
+      "src": "/favicon.svg",
+      "sizes": "32x32",
       "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/og-image.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["utilities", "multimedia"],
