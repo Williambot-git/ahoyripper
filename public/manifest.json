@@ -1,23 +1,27 @@
 {
   "name": "AhoyRipper",
   "short_name": "AhoyRipper",
-  "description": "Rip any video, anywhere. Free online media ripper for YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms.",
-  "id": "ahoyripper",
-  "start_url": "/?utm_source=homescreen",
-  "scope": "/",
+  "description": "Free online media ripper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. No signup, no ads.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
-  "orientation": "any",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/og-image.svg",
-      "sizes": "any",
+      "sizes": "1200x630",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/og-image.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["utilities", "entertainment", "multimedia"],
-  "lang": "en",
+  "categories": ["utilities", "multimedia"],
+  "lang": "en-US",
   "dir": "ltr"
 }
