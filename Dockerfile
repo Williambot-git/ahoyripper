@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
+    curl \
     ffmpeg \
     nginx \
     php \
@@ -15,7 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Verify yt-dlp is intact and runs before declaring the image good.
 # A corrupt or incomplete pip install produces an empty/non-executable file;
 # catching it here fails the build fast rather than producing a broken container.
-RUN yt-dlp --version > /dev/null 2>&1 \
+# Capture and expose the version for build-time debugging and image inspection.
+RUN echo "yt-dlp version: $(yt-dlp --version)" \
+    && yt-dlp --version > /dev/null 2>&1 \
     || { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
 
 WORKDIR /app
