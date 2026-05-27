@@ -204,7 +204,7 @@ Returns:
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "ffmpeg_cache_ttl_seconds": 542,
   "server_uptime_seconds": 86400,
-  "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)" },
+  "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)", "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2

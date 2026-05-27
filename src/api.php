@@ -1562,8 +1562,8 @@ case 'progress':
                     ? json_decode($probe_out, true)
                     : null;
                 $GLOBALS['__ytdlp_probe'] = $probe_result
-                    ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80)]
-                    : ['ok' => false, 'error' => substr(trim($probe_err ?: $probe_out), 0, 120)];
+                    ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80), 'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']
+                    : ['ok' => false, 'error' => trim($probe_err ?: $probe_out), 'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'];
                 if ($probe_cache_file) {
                     @file_put_contents($probe_cache_file, json_encode([
                         'result' => $GLOBALS['__ytdlp_probe'],
