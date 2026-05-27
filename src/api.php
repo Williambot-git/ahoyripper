@@ -225,6 +225,14 @@ if (!$GLOBALS['__ffmpeg_version']) {
 // yt-dlp sends a referer to the source by default, which is normal but can expose
 // the user's video URL to third-party servers. The generic referer avoids this.
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
+    // Defensive cap: even if a caller passes an unbounded timeout, cap it at 5 minutes
+    // to prevent runaway processes. yt-dlp downloads are bounded by the format
+    // selection; a 5-minute metadata-only operation covers all reasonable cases.
+    static $MAX_YTDLP_TIMEOUT = 300;
+    if ($timeout <= 0 || $timeout > $MAX_YTDLP_TIMEOUT) {
+        $timeout = $MAX_YTDLP_TIMEOUT;
+    }
+
     // Build the command as an array so bypass_shell works as intended.
     // Shell redirection ('2>&1') is unnecessary — we capture stderr via pipe.
     $ytdlp_bin = '/usr/local/bin/yt-dlp';
