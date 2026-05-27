@@ -82,14 +82,14 @@ if command -v yt-dlp &>/dev/null; then
     # A broken/corrupted installation (e.g. pip-installed but python pkg broken)
     # will cause self-update to silently skip. Detect this and force reinstall.
     YTDL_BIN=$(command -v yt-dlp)
-    if ! yt-dlp --version &>/dev/null; then
-        echo "  ! Existing yt-dlp is broken (--version failed). Reinstalling..."
+    if ! yt-dlp -V &>/dev/null; then
+        echo "  ! Existing yt-dlp is broken (-V failed). Reinstalling..."
         # Try pip reinstall first, falling back to standalone binary
         if [ -n "$PIP_BIN" ]; then
             $PIP_BIN install -q --force-reinstall yt-dlp 2>&1 | tail -2 || true
         fi
         # If pip reinstall didn't fix it, grab the standalone binary
-        if ! yt-dlp --version &>/dev/null; then
+        if ! yt-dlp -V &>/dev/null; then
             echo "  Installing standalone yt-dlp binary..."
             curl -L -o /usr/local/bin/yt-dlp \
                 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
@@ -119,4 +119,4 @@ nginx -v
 echo "==> All deps installed."
 echo "  - yt-dlp: $(yt-dlp -V 2>&1 | head -1)"
 echo "  - ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
-echo "  - PHP: $(php -v | head -1)"
+echo "  - PHP: $(php -v 2>&1 | head -1)"

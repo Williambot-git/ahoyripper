@@ -184,6 +184,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
+| `422` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `500` | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 
 ### Health check / progress

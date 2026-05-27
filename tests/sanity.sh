@@ -8,7 +8,7 @@ echo "==> Checking yt-dlp binary is installed and callable..."
 if ! command -v yt-dlp > /dev/null 2>&1; then
     echo "  ⚠ yt-dlp not found in PATH (skipping — run on production server)"
 else
-    YTDLP_VER=$(yt-dlp --version 2>&1 | head -1 || true)
+    YTDLP_VER=$(yt-dlp -V 2>&1 | head -1 || true)
     if [ -z "$YTDLP_VER" ]; then
         echo "  ✗ yt-dlp found but --version returned empty"
         exit 1
