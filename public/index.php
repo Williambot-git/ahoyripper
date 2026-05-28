@@ -26,7 +26,7 @@ $VERSION = '1.0.0';
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AhoyRipper">
   <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon-180.png">
   <!-- Security headers (X-Content-Type-Options, X-Frame-Options, etc.) are
        set by nginx in deploy/nginx.conf. HTTP-equiv meta tags are NOT a
        substitute — browsers ignore them for these headers. They exist here
@@ -62,7 +62,10 @@ $VERSION = '1.0.0';
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="apple-touch-icon" href="/favicon.svg">
+  <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
+       iOS crops square icons to a rounded shape; SVG source produces blurry
+       results at the sizes iOS applies. A 180x180 PNG is optimal for iPhone. -->
+  <link rel="apple-touch-icon" href="/favicon-180.png">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
