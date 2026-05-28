@@ -349,7 +349,10 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
         return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.'];
     }
-    if (preg_match('/login.*required|authentication.*required|this video requires login/i', $err_lower)) {
+    // "authentication required" must be checked separately because the merged pattern
+    // "authentication.*required" requires the word "required" to appear twice —
+    // yt-dlp only says it once ("authentication required"), so we match it directly.
+    if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
         return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.'];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {

@@ -148,10 +148,16 @@ $result = classifyYtdlpError('ERROR: Video Is Private');
 test('detects PRIVATE_VIDEO — case insensitive',
     $result !== null && ($result['code'] ?? '') === 'PRIVATE_VIDEO');
 
-// Note: pattern requires "login required" or "this video requires login" specifically.
-// "authentication required" does NOT match (different phrase pattern in this implementation).
+// Note: "authentication required" is matched by the merged pattern
+// 'authentication required|login.*required|this video requires login'.
+// "authentication required" on its own would NOT match 'login.*required'
+// (no occurrence of the word "login") — the merged pattern handles both.
 $result = classifyYtdlpError('ERROR: This video requires login');
 test('detects LOGIN_REQUIRED — "this video requires login"',
+    $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
+
+$result = classifyYtdlpError('ERROR: Authentication required for this content');
+test('detects LOGIN_REQUIRED — "authentication required"',
     $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
 
 $result = classifyYtdlpError('ERROR: Login required to view this content');

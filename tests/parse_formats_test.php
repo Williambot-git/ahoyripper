@@ -53,7 +53,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video is private and cannot be downloaded.', 'error_code' => 'PRIVATE_VIDEO'];
             }
-            if (preg_match('/login.*required|authentication.*required|this video requires login/i', $err_lower)) {
+            if (preg_match('/login.*required|authentication required|this video requires login/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video requires login or subscription.', 'error_code' => 'LOGIN_REQUIRED'];
             }
