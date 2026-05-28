@@ -110,7 +110,7 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
     }
-    if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out|timed out/i', $err_lower)) {
+    if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
     }
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
@@ -412,8 +412,8 @@ test('returns null for error phrase with no pattern match',
     classifyYtdlpError('ERROR: permission denied') === null);
 test('returns null for "invalid input" (no matching pattern)',
     classifyYtdlpError('ERROR: invalid input provided') === null);
-test('returns null for connection error with unrelated phrasing',
-    classifyYtdlpError('ERROR: Connection reset by peer') === null);
+test('classifies CONNECTION_FAILED for "Connection reset by peer"',
+    (classifyYtdlpError('ERROR: Connection reset by peer') ?? [])['code'] === 'CONNECTION_FAILED');
 test('returns null for generic timeout without connection keyword',
     classifyYtdlpError('ERROR: Request timeout') === null);
 

@@ -85,7 +85,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR'];
             }
-            if (preg_match('/connection.*fail|dns.*fail|could not connect|i\/o timeout|connection timed out|timed out/i', $err_lower)) {
+            if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
             }
