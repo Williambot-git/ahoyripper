@@ -24,10 +24,24 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // from CDNs) which are common in media rippers. Omit unless you use SharedArrayBuffer
 // or other COEP-locked features.
 
-// Anti-hotlinking: validate origin for API requests
-// Accept requests with no referer (direct) or from the same origin
+// Anti-hotlinking: validate origin for API requests.
+// All legitimate traffic arrives as a browser navigation to the AhoyRipper page
+// (which then calls the API via fetch from JS) — such calls always carry a referer.
+// Cross-site resource loads (IMG embeds, iframes) won't have a referer set by the
+// browser. Requests with no referer cannot be from the legitimate single-page app
+// flow, so they are blocked. This also blocks direct API calls (curl, Postman, etc.)
+// that lack a browser-context referer.
+//
+// Security note: if the fix ever needs to allow direct-API callers (non-browser clients),
+// switch to validating the Origin header instead of Referer — Origin is always set by
+// browsers on same-site fetch requests and CORS preflight requests.
+//
+// Allowed origins for browser-based API calls (SPA fetches land here with proper referer).
 $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
+$blocked = false;
+$block_reason = '';
+
 if ($referer) {
     $ref_parts = @parse_url($referer);
     // Guard against malformed URLs that cause parse_url to return false/null
@@ -36,13 +50,22 @@ if ($referer) {
     }
     $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
     if (!in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
-        // Log and block suspicious cross-site requests
-        logRequest('cors_block', 403, ['reason' => 'invalid_origin', 'referer' => $referer]);
-        error_log("AhoyRipper: blocked cross-site request from referer: $referer");
-        http_response_code(403);
-        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
-        exit;
+        $blocked = true;
+        $block_reason = 'invalid_origin';
     }
+} else {
+    // No referer — request did not originate from the AhoyRipper page.
+    // This blocks direct API calls (curl, tools) and cross-site embeds.
+    $blocked = true;
+    $block_reason = 'missing_referer';
+}
+
+if ($blocked) {
+    logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
+    error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
+    http_response_code(403);
+    echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
+    exit;
 }
 
 // Rate limiting applies to expensive actions only (info, download).
