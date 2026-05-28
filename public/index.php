@@ -483,10 +483,13 @@ $VERSION = '1.0.0';
       var langMeta = f.language ? f.language.toUpperCase() : '';
       var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
       var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
-      // Use description (human-readable yt-dlp description) when available, else label.
+      // Prefer description (human-readable yt-dlp description) when available, else label.
       // description carries extra context like "720p60 HDR" or "audio only" that
       // label doesn't always capture — particularly for audio and alternative formats.
-      var displayLabel = f.description || f.label || (f.ext ? f.ext.toUpperCase() : 'Format');
+      // Filter out "Unknown" sentinel from description: the API returns "Unknown"
+      // when format_description/f.format_note were not available, which is not
+      // a useful display string. Fall through to label in that case.
+      var displayLabel = (f.description && f.description !== 'Unknown') ? f.description : (f.label || (f.ext ? f.ext.toUpperCase() : 'Format'));
       var cardTitle = displayLabel + (size !== '~size' ? ' - ' + size : '');
 
       card.setAttribute('title', cardTitle);
