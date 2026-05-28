@@ -526,12 +526,10 @@ $VERSION = '1.0.0';
             if (navigateOnSuccess) {
               window.location.href = dl.url;
             }
-            setTimeout(function() {
-              setLoading(false);
-              card.classList.remove('downloading');
-              card.style.borderColor = 'var(--color-success)';
-              setTimeout(function() { card.style.borderColor = ''; }, 1500);
-            }, 500);
+            setLoading(false);
+            card.classList.remove('downloading');
+            card.style.borderColor = 'var(--color-success)';
+            setTimeout(function() { card.style.borderColor = ''; }, 1500);
           })
           .catch(function(dlErr) {
             // Set guard flag to false — network/timeout failures must never trigger
