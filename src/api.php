@@ -40,7 +40,7 @@ if ($referer) {
         logRequest('cors_block', 403, ['reason' => 'invalid_origin', 'referer' => $referer]);
         error_log("AhoyRipper: blocked cross-site request from referer: $referer");
         http_response_code(403);
-        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN']);
+        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
         exit;
     }
 }
@@ -1301,7 +1301,7 @@ switch ($action) {
         if (!$proc) {
             logRequest('download', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to start download process.']);
+            echo json_encode(['error' => 'Failed to start download process.', 'request_id' => $request_id]);
             exit;
         }
 
@@ -1518,7 +1518,7 @@ switch ($action) {
         $fp = fopen($actual_file, 'rb');
         if (!$fp) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to read downloaded file.']); // @codingStandardsIgnoreLine
+            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
             exit;
         }
         while (!feof($fp) && !connection_aborted()) {
