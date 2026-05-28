@@ -56,8 +56,8 @@ $VERSION = '1.0.0';
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Rip any video or audio from 1800+ platforms. Free, fast, no signup needed.">
-<meta name="twitter:image" content="https://ahoyripper.com/og-image.svg">
-  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
+  <meta name="twitter:image" content="https://ahoyripper.com/og-image.svg">
+  <meta name="twitter:image:alt" content="AhoyRipper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
 
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
