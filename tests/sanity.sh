@@ -270,6 +270,15 @@ if [ "$missing" -eq 0 ]; then
 fi
 
 echo ""
+echo "==> Checking Docker nginx.conf CSP includes upgrade-insecure-requests... "
+if grep "Content-Security-Policy" deploy/nginx-docker.conf | grep -q "upgrade-insecure-requests"; then
+    echo "  ✓ Docker nginx.conf CSP includes upgrade-insecure-requests"
+else
+    echo "  ✗ Docker nginx.conf CSP missing upgrade-insecure-requests"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP is at server level in nginx-docker.conf (no duplicate in location blocks)..."
 # After the fix, CSP should appear exactly once (at server level), not twice.
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
