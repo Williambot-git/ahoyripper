@@ -45,7 +45,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
 
             // classifyYtdlpError — inline copy for test isolation
             $err_lower = strtolower($err_msg);
-            if (preg_match('/geo.*restriction|this video is available in|geo restricted/i', $err_lower)) {
+            if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED'];
             }
@@ -93,7 +93,7 @@ function parseFormats($json_str, &$raw_error_out = null) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE'];
             }
-            if (preg_match('/requested format|not.*available|does not contain|match/i', $err_lower)) {
+            if (preg_match('/requested format(?!s)|format.*not.*available|requested.*not.*available|does not contain|does not match/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
             }
@@ -467,7 +467,16 @@ $errors = [
     'ERROR: Connection failed' => 'CONNECTION_FAILED',
     'ERROR: Request timed out' => 'CONNECTION_FAILED',
     'ERROR: File is larger than 2GB limit' => 'FILE_TOO_LARGE',
+    // Covers: singular "requested format" (API), "format not available" (common),
+    // "requested format not available" (merged pattern), "does not contain" (JSON parse),
+    // "does not match" (format filter).
     'ERROR: Requested format not available' => 'FORMAT_UNAVAILABLE',
+    'ERROR: Requested format' => 'FORMAT_UNAVAILABLE',
+    'ERROR: Format not available' => 'FORMAT_UNAVAILABLE',
+    'ERROR: Video does not contain any requested formats' => 'FORMAT_UNAVAILABLE',
+    'ERROR: format does not match' => 'FORMAT_UNAVAILABLE',
+    'ERROR: Requested format not available' => 'FORMAT_UNAVAILABLE',
+    'ERROR: Video format not available' => 'FORMAT_UNAVAILABLE',
 ];
 
 foreach ($errors as $yt_output => $expected_code) {
