@@ -200,7 +200,6 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     }
 
     // Sort: combined first, then by selected sort key
-    $sort = 'height';
     usort($formats, function($a, $b) use ($sort) {
         if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
         if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
