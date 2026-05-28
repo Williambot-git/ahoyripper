@@ -56,13 +56,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Rip any video or audio from 1800+ platforms. Free, fast, no signup needed.">
-<!-- twitter:image: SVG is valid as a data URI for twitter:image — Twitter's
-       crawler handles SVG data URIs. The og-image.svg is embedded directly so
-       no separate raster asset or server-side fetch is needed by the crawler.
-       Note: the raw SVG file URL (https://ahoyripper.com/og-image.svg) also
-       works for og:image since og:image is fetched by Facebook/LinkedIn scrapers
-       that handle SVG natively. For maximum compatibility we use a data URI. -->
-  <meta name="twitter:image" content="data:image/svg+xml;base64,<?= base64_encode(file_get_contents(__DIR__.'/og-image.svg')) ?>">
+<meta name="twitter:image" content="https://ahoyripper.com/og-image.svg">
   <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
 
   <!-- Favicon -->
