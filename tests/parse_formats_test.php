@@ -33,7 +33,7 @@ function clean($s) {
     return (string)$s;
 }
 
-function parseFormats($json_str, &$raw_error_out = null) {
+function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
         $raw = trim($json_str);

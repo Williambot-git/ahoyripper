@@ -435,7 +435,8 @@ function classifyYtdlpError($raw_err) {
 }
 
 // Parse yt-dlp output to extract formats
-function parseFormats($json_str, &$raw_error_out = null) {
+// $sort: one of 'height' (default), 'filesize', 'tbr' — validated by caller
+function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
         // Differentiate yt-dlp errors from actual parsing failures
@@ -595,20 +596,9 @@ function parseFormats($json_str, &$raw_error_out = null) {
         ];
     }
 
-    // Sort: video+audio first, then by height/bitrate
-    // Accepts: height (default), filesize, tbr
-    // Whitelist only — invalid values are normalised to 'height' rather than
-    // being passed to usort where they would trigger a comparison fatal or
-    // be silently ignored depending on PHP version and error_reporting level.
-    $allowed_sorts = ['height', 'filesize', 'tbr'];
-    $sort = $_GET['sort'] ?? 'height';
-    // DISALLOW_AUTHED is not set here (this is a public info API) so the sort param
-    // IS validated against the whitelist for all requests — good, since sort
-    // affects the format order and an attacker could use out-of-order formats
-    // to bypass client-side size/quality checks. Invalid values fall back to 'height'.
-    if (!is_string($sort) || !in_array($sort, $allowed_sorts, true)) {
-        $sort = 'height';
-    }
+    // Sort: combined formats first, then by the caller's selected sort key.
+    // $sort is one of 'height' (default), 'filesize', 'tbr' — validated by the
+    // caller before being passed in, so no additional validation is needed here.
     usort($formats, function($a, $b) use ($sort) {
         // Combined first
         if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
@@ -1021,7 +1011,7 @@ switch ($action) {
             exit;
         }
 
-        $parsed = parseFormats($out, $raw_err);
+        $parsed = parseFormats($out, $raw_err, $sort);
         if (!$parsed) {
             // Undo the quota increment — parseFormats returned null means the content
             // could not be parsed; we don't burn the user's daily limit for this.
