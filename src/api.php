@@ -457,6 +457,22 @@ function parseFormats($json_str, &$raw_error_out = null) {
         return null;
     }
 
+    // JSON parsed successfully but has no formats key — this is a distinct
+    // failure mode from a true JSON parse failure. yt-dlp always includes
+    // a formats array in its output; an absent formats key indicates the
+    // extractor returned a partial/empty response (e.g. unsupported site
+    // with no fallback, or a site that returned non-standard JSON).
+    // Return a classified PARSE_ERROR so the client shows a specific message.
+    if (!array_key_exists('formats', $data)) {
+        if ($raw_error_out !== null) {
+            $raw_error_out = 'No formats returned — site may be unsupported or returned non-standard metadata.';
+        }
+        return [
+            'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
+            'error_code' => 'PARSE_ERROR',
+        ];
+    }
+
     $title = clean($data['title'] ?? 'Unknown');
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
