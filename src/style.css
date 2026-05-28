@@ -165,6 +165,16 @@ body {
   color: var(--color-text-ter);
   margin-top: 0.75rem;
   text-align: left;
+  /* Keep hint text readable on small screens without wrapping to 3+ lines.
+     Below 400px the horizontal space is too constrained for the full
+     "N free rips/day — get unlimited" string — trim it to a compact form. */
+  white-space: nowrap;
+}
+@media (max-width: 400px) {
+  .rip-hint {
+    white-space: normal;
+    font-size: 0.75rem;
+  }
 }
 .rip-hint a { color: var(--color-text-sec); }
 .rip-hint a:hover { color: var(--color-accent); }
@@ -365,6 +375,18 @@ body {
   align-items: center;
   gap: 0.4rem;
   margin-left: auto;
+}
+/* On narrow screens, allow the sort control to wrap below the title
+   instead of being squashed into an unreadable single line. */
+@media (max-width: 480px) {
+  .results-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .results-sort {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
 }
 .sort-label {
   font-size: 0.75rem;
