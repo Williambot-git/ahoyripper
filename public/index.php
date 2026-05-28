@@ -704,7 +704,7 @@ $VERSION = '1.0.0';
             'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
-            'UNSUPPORTED_SITE': 'This site is not supported. Check the list at yt-dlp.github.io/supported-sites.',
+            'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
             'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
             'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
             'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
