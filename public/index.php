@@ -131,6 +131,7 @@ $VERSION = '1.0.0';
           inputmode="url"
           class="rip-input"
           id="urlInput"
+          aria-label="Video or audio URL to download"
           placeholder="Paste a link here..."
           value="<?= htmlspecialchars($default_url, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>"
           autocomplete="off"
