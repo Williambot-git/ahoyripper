@@ -202,22 +202,23 @@ body {
 }
 .rip-key-input {
   width: 100%;
-  background: var(--color-surface-el);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 0.8rem 2.75rem 0.8rem 1rem;
   font-size: 0.875rem;
   font-family: var(--font-sans);
-  color: var(--color-text);
-  transition: border-color var(--transition);
-  /* Slightly muted to visually distinguish from the primary URL input */
-  opacity: 0.85;
+  color: var(--color-text-sec);
+  transition: border-color var(--transition), color var(--transition);
+  /* Use color instead of opacity — opacity affects placeholder text legibility
+     on mobile where the viewport is small. A muted color (color-text-sec) achieves
+     the visual de-emphasis without sacrificing readability. */
 }
 .rip-key-input::placeholder { color: var(--color-text-ter); }
 .rip-key-input:focus {
   border-color: var(--color-accent);
   outline: none;
-  opacity: 1;
+  color: var(--color-text);
 }
 /* Toggle visibility button for the API key input */
 .rip-key-toggle {
@@ -571,6 +572,8 @@ footer a:hover { color: var(--color-accent); }
   .rip-form { flex-direction: column; }
   .rip-input { max-width: 100%; font-size: 0.9rem; }
   .rip-btn { width: 100%; padding: 0.85rem; font-size: 1rem; }
+  .rip-key-wrap { margin-top: 0.5rem; }
+  .rip-key-input { font-size: 0.8rem; /* Slightly smaller on mobile to prevent overflow */ }
   .ahoy-nav { padding: 1rem; }
   .ahoy-nav-links { gap: 1rem; }
   .hero { padding: 2rem 1rem 1.5rem; }
