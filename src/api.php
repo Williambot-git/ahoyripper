@@ -1243,6 +1243,10 @@ switch ($action) {
             }
             $daily_data['c']++;
             $daily_remaining = max(0, $daily_limit - $daily_data['c']);
+            // Refund guard: if proc_open fails below, we decrement here to reverse
+            // the increment. This is the pre-refund baseline — must stay in sync
+            // with the refund block that runs on download failure.
+            $dl_quota_before_refund = $daily_data['c'];
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
@@ -1323,6 +1327,30 @@ switch ($action) {
 
         if (!$proc) {
             logRequest('download', 500, ['reason' => 'proc_open_failed']);
+            // Refund daily quota since no download attempt was possible.
+            // Only refund when the baseline was set (proc_open was attempted after
+            // quota increment). Unlimited-key holders ($unlimited=true) skip
+            // increment so no refund needed.
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                    $undo_raw = fread($undo_fp, 4096);
+                    $undo_data = ['t' => date('Y-m-d'), 'c' => 0];
+                    if ($undo_raw) {
+                        $decoded = json_decode($undo_raw, true);
+                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                    }
+                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                        $undo_data['c']--;
+                        ftruncate($undo_fp, 0);
+                        rewind($undo_fp);
+                        fwrite($undo_fp, json_encode($undo_data));
+                        fflush($undo_fp);
+                    }
+                    flock($undo_fp, LOCK_UN);
+                    fclose($undo_fp);
+                }
+            }
             http_response_code(500);
             echo json_encode(['error' => 'Failed to start download process.', 'request_id' => $request_id]);
             exit;
@@ -1420,6 +1448,9 @@ switch ($action) {
             // Skip refund only for successful exits and when the user is on the
             // free tier ($unlimited is false) — unlimited-key holders never had
             // their quota incremented in the first place.
+            // Uses pre-read file approach to handle proc_open failure gracefully:
+            // if proc_open failed it decremented before us, so we skip our decrement
+            // to avoid double-refunding. This is the baseline for the at-most-once refund.
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if ($undo_fp && flock($undo_fp, LOCK_EX)) {
@@ -1429,7 +1460,10 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] > 0) {
+                    // Only decrement if the stored count is at or above our baseline
+                    // (meaning proc_open hasn't already decremented). If proc_open
+                    // failed and decremented first, our count is already lower — skip.
+                    if ($undo_data['t'] === date('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
