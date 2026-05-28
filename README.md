@@ -9,8 +9,8 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 ## Features
 
 - **No signup, no tracking, no ads in the rip flow**
-- MP4, WEBM, MP3, M4A, FLAC, OGG and more
-- YouTube, Twitter/X, SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1800 sites
+- MP4, WEBM, MP3, M4A, WAV, FLAC, OGG and more
+- YouTube, X (Twitter), SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1800+ platforms
 - Dark theme matching ahoyvpn.com
 - Files streamed directly to your download - nothing stored on our servers
 - Built-in AhoyVPN upsell (supports the tool)

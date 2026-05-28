@@ -484,7 +484,11 @@ $VERSION = '1.0.0';
       // when format_description/f.format_note were not available, which is not
       // a useful display string. Fall through to label in that case.
       var displayLabel = (f.description && f.description !== 'Unknown') ? f.description : (f.label || (f.ext ? f.ext.toUpperCase() : 'Format'));
-      var cardTitle = displayLabel + (size !== '~size' ? ' - ' + size : '');
+      // title attribute — use ≈ prefix for estimated sizes so the tooltip
+      // clearly distinguishes \"known\" (from yt-dlp metadata) from \"approximate\"
+      // (estimated from bitrate × duration) without requiring the user to hover.
+      var sizeHint = f.filesize_mb > 0 ? size : '≈' + size;
+      var cardTitle = displayLabel + (size !== '~size' ? ' - ' + sizeHint : '');
 
       card.setAttribute('title', cardTitle);
 
