@@ -872,12 +872,10 @@ switch ($action) {
             ]);
             exit;
         }
-        // Build yt-dlp args as an array — the download action already does this.
-        // We call proc_open directly here (not via runYtdlp) so the URL is passed
-        // as a single array element and cannot be split by preg_split whitespace
-        // tokenization (which breaks URLs that contain spaces or option-like text).
-        // With bypass_shell=true, proc_open parses the array into argv without a shell,
-        // so no shell escaping is needed.
+        // Pass URL as a direct array element (no shell involvement) so URLs
+        // containing whitespace or special characters in query params are
+        // handled correctly. With bypass_shell=true, proc_open parses the
+        // array into argv without a shell, so no shell escaping is needed.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
