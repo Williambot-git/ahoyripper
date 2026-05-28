@@ -373,54 +373,63 @@ function clean($s) {
     return (string)$s;
 }
 
-// Classify yt-dlp error messages into actionable error codes
+// Classify yt-dlp error messages into actionable error codes.
+// Each entry includes an HTTP status code appropriate to the error category:
+//   451 — Unavailable For Legal Reasons (geo-restricted, copyright, TOS)
+//   410 — Gone (video removed/deleted)
+//   429 — Too Many Requests (source-side rate limiting)
+//   403 — Forbidden (private, age-restricted, login required)
+//   404 — Not Found (playlist missing, unsupported site)
+//   502 — Bad Gateway (connection/SSL failures)
+//   413 — Payload Too Large (file exceeds server limit)
+//   422 — Unprocessable Entity (format unavailable — client chose invalid option)
 function classifyYtdlpError($raw_err) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.'];
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
-        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.'];
+        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
     }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
     if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
-        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.'];
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
-        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.'];
+        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'status' => 404];
     }
     if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
-        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.'];
+        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'status' => 404];
     }
     if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
-        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.'];
+        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'status' => 451];
     }
     if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
-        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.'];
+        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'status' => 410];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
-        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
     }
     if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
-        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.'];
+        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'status' => 403];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
-        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
+        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
 
     if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
-        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.'];
+        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
     }
     if (preg_match('/requested format(?!s)|format.*not.*available|requested.*not.*available|does not contain|does not match/i', $err_lower)) {
-        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
     }
     if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.'];
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.', 'status' => 451];
     }
     return null;
 }
@@ -1053,7 +1062,20 @@ switch ($action) {
         if (isset($parsed['error'])) {
             // parseFormats surfaced a yt-dlp error message — pass it through with 422
             $err_code = $parsed['error_code'] ?? 'PARSE_ERROR';
-            logRequest('info', 422, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
+            // Map error codes to HTTP status for proper client signaling.
+            // Default to 422 if code is unknown.
+            $err_status_map = [
+                'GEOBLOCKED' => 451, 'COPYRIGHT_REMOVED' => 451, 'DISALLOWED_CONTENT' => 451,
+                'VIDEO_UNAVAILABLE' => 410,
+                'SOURCE_RATE_LIMITED' => 429,
+                'PRIVATE_VIDEO' => 403, 'AGE_RESTRICTED' => 403, 'LOGIN_REQUIRED' => 401,
+                'UNSUPPORTED_SITE' => 404, 'PLAYLIST_MISSING' => 404,
+                'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
+                'FILE_TOO_LARGE' => 413,
+                'FORMAT_UNAVAILABLE' => 422,
+            ];
+            $err_status = $err_status_map[$parsed['error_code']] ?? 422;
+            logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
             // Undo the quota increment — parseFormats succeeded (returned a classified error
             // like GEOBLOCKED/PRIVATE_VIDEO) but the content is not downloadable. We don't
             // burn the user's daily limit for content that simply can't be ripped.
@@ -1077,7 +1099,7 @@ switch ($action) {
                     fclose($undo_fp);
                 }
             }
-            http_response_code(422);
+            http_response_code($err_status);
             $resp = ['error' => $parsed['error']];
             if (!empty($parsed['error_code'])) {
                 $resp['error_code'] = $parsed['error_code'];
@@ -1502,8 +1524,9 @@ switch ($action) {
             }
 
             if ($err_classified) {
-                logRequest('download', 422, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
-                http_response_code(422);
+                $status = $err_classified['status'] ?? 422;
+                logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
+                http_response_code($status);
                 echo json_encode([
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
