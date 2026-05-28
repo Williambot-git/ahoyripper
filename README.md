@@ -276,6 +276,8 @@ yt-dlp --list-extractors
 
 **Quota exhausted (5/5 rips used)** — The free tier allows 5 total API calls per day (midnight UTC reset). Each call to `info` or `download` counts as one rip. Enter an AhoyVPN unlimited key in the optional field to bypass the daily cap.
 
+**Sort change triggers a new API call** — Switching the Quality / Size / Bitrate dropdown re-fetches the format list from the server (costs 1 quota hit). This is intentional — it lets yt-dlp sort formats differently on the server side for accurate results.
+
 **503 Service unavailable** — The server is temporarily overloaded or the rate-limit gate could not open a file. Retry after a few seconds. If the issue persists, it may indicate a server-side resource problem.
 
 **Geo-blocked / region restricted** — The video is not available in your server's geographic location. Using AhoyVPN can route the request through a different region.
