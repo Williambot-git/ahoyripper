@@ -694,14 +694,8 @@ switch ($action) {
             exit;
         }
 
-        if (!$url || !isValidUrl($url)) {
-            http_response_code(400);
-            logRequest('info', 400, ['reason' => 'invalid_url']);
-            echo json_encode([
-                'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
+        $url = $validation('info');
+        if ($url === false) {
             exit;
         }
 
@@ -1020,43 +1014,58 @@ switch ($action) {
     case 'download': {
         // ─── Validate required params first (before rate limiting or any I/O) ───
         // Rejecting early avoids burning rate-limit slots or opening temp files on bad input.
-        $url = trim($_GET['url'] ?? '');
-        $format_id = trim($_GET['format'] ?? '');
-        if (!$url) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'missing_url']);
-            echo json_encode([
-                'error' => 'A URL is required.',
-                'error_code' => 'MISSING_URL',
-                'request_id' => $request_id,
-            ]);
-            exit;
-        }
-        if (!isValidUrl($url)) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'invalid_url']);
-            echo json_encode([
-                'error' => 'Invalid URL. Please paste a valid video link.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
-            exit;
-        }
-        if (!$format_id) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'missing_format']);
-            echo json_encode([
-                'error' => 'A format must be selected before downloading.',
-                'error_code' => 'MISSING_FORMAT',
-                'request_id' => $request_id,
-            ]);
+        // DRY helper — both info and download validate the same three conditions
+        // (missing url, invalid url, format missing) in the same order with the
+        // same error codes and log messages. Extracted to a shared helper so
+        // changes to validation order/codes/messages propagate to both actions.
+        $validation = function(string $action) use($request_id) {
+            $url = trim($_GET['url'] ?? '');
+            if (!$url) {
+                http_response_code(400);
+                logRequest($action, 400, ['reason' => 'missing_url']);
+                echo json_encode([
+                    'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+                    'error_code' => 'INVALID_URL',
+                    'request_id' => $request_id,
+                ]);
+                return false;
+            }
+            if (!isValidUrl($url)) {
+                http_response_code(400);
+                logRequest($action, 400, ['reason' => 'invalid_url']);
+                echo json_encode([
+                    'error' => 'Invalid URL. Please paste a valid video link.',
+                    'error_code' => 'INVALID_URL',
+                    'request_id' => $request_id,
+                ]);
+                return false;
+            }
+            // Download-only: a format must be selected before downloading.
+            // Info action does not require a format parameter.
+            if ($action === 'download') {
+                $format_id = trim($_GET['format'] ?? '');
+                if (!$format_id) {
+                    http_response_code(400);
+                    logRequest($action, 400, ['reason' => 'missing_format']);
+                    echo json_encode([
+                        'error' => 'A format must be selected before downloading.',
+                        'error_code' => 'MISSING_FORMAT',
+                        'request_id' => $request_id,
+                    ]);
+                    return false;
+                }
+            }
+            return $url;
+        };
+
+        $url = $validation('download');
+        if ($url === false) {
             exit;
         }
         // Enforce a max URL length to prevent pathologically long URLs from reaching
         // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
         // tracking parameters while stopping abuse.
-        $MAX_URL_LEN = 2048;
-        if (strlen($url) > $MAX_URL_LEN) {
+        if (strlen($url) > 2048) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
             echo json_encode([
