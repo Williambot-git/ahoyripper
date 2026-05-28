@@ -629,6 +629,50 @@ function logRequest($action, $status, $extra = []) {
     }
 }
 
+// ─── Shared validation helper ─────────────────────────────────────────
+// DRY helper for URL and format validation. Used by both info and download
+// actions to ensure consistent error codes and log messages.
+// Keep outside the switch so both case blocks can reference it.
+$validation = function(string $action) use($request_id) {
+    $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+    if (!$url) {
+        http_response_code(400);
+        logRequest($action, 400, ['reason' => 'missing_url']);
+        echo json_encode([
+            'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+            'error_code' => 'INVALID_URL',
+            'request_id' => $request_id,
+        ]);
+        return false;
+    }
+    if (!isValidUrl($url)) {
+        http_response_code(400);
+        logRequest($action, 400, ['reason' => 'invalid_url']);
+        echo json_encode([
+            'error' => 'Invalid URL. Please paste a valid video link.',
+            'error_code' => 'INVALID_URL',
+            'request_id' => $request_id,
+        ]);
+        return false;
+    }
+    // Download-only: a format must be selected before downloading.
+    // Info action does not require a format parameter.
+    if ($action === 'download') {
+        $format_id = trim($_GET['format'] ?? '');
+        if (!$format_id) {
+            http_response_code(400);
+            logRequest($action, 400, ['reason' => 'missing_format']);
+            echo json_encode([
+                'error' => 'A format must be selected before downloading.',
+                'error_code' => 'MISSING_FORMAT',
+                'request_id' => $request_id,
+            ]);
+            return false;
+        }
+    }
+    return $url;
+};
+
 // ─── CONSTANTS ──────────────────────────────────────────────
 // Unlimited API key — read from environment variable in production.
 // The env var takes precedence; falling back to a compile-time default
@@ -1014,50 +1058,9 @@ switch ($action) {
     case 'download': {
         // ─── Validate required params first (before rate limiting or any I/O) ───
         // Rejecting early avoids burning rate-limit slots or opening temp files on bad input.
-        // DRY helper — both info and download validate the same three conditions
-        // (missing url, invalid url, format missing) in the same order with the
-        // same error codes and log messages. Extracted to a shared helper so
-        // changes to validation order/codes/messages propagate to both actions.
-        $validation = function(string $action) use($request_id) {
-            $url = trim($_GET['url'] ?? '');
-            if (!$url) {
-                http_response_code(400);
-                logRequest($action, 400, ['reason' => 'missing_url']);
-                echo json_encode([
-                    'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
-                    'error_code' => 'INVALID_URL',
-                    'request_id' => $request_id,
-                ]);
-                return false;
-            }
-            if (!isValidUrl($url)) {
-                http_response_code(400);
-                logRequest($action, 400, ['reason' => 'invalid_url']);
-                echo json_encode([
-                    'error' => 'Invalid URL. Please paste a valid video link.',
-                    'error_code' => 'INVALID_URL',
-                    'request_id' => $request_id,
-                ]);
-                return false;
-            }
-            // Download-only: a format must be selected before downloading.
-            // Info action does not require a format parameter.
-            if ($action === 'download') {
-                $format_id = trim($_GET['format'] ?? '');
-                if (!$format_id) {
-                    http_response_code(400);
-                    logRequest($action, 400, ['reason' => 'missing_format']);
-                    echo json_encode([
-                        'error' => 'A format must be selected before downloading.',
-                        'error_code' => 'MISSING_FORMAT',
-                        'request_id' => $request_id,
-                    ]);
-                    return false;
-                }
-            }
-            return $url;
-        };
-
+        // The shared $validation helper is defined before the switch and handles
+        // URL validation (missing, invalid) for both info and download actions.
+        // The format parameter check is only enforced for download (checked inside helper).
         $url = $validation('download');
         if ($url === false) {
             exit;
