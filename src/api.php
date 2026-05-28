@@ -219,11 +219,9 @@ if (!$GLOBALS['__ffmpeg_version']) {
     }
 }
 
-// runYtdlp downloads or inspects media. $timeout = max seconds (0 = no limit).
-// $allow_ytdlp_privacy: when true, pass --referer "https://ahoyripper.com/" to yt-dlp
-// so the original video URL is not leaked as the HTTP Referer to the source site.
-// yt-dlp sends a referer to the source by default, which is normal but can expose
-// the user's video URL to third-party servers. The generic referer avoids this.
+// runYtdlp runs yt-dlp with the given arguments and captures stdout/stderr.
+// $timeout = max seconds (0 = no limit). The referer is always set to
+// ahoyripper.com to avoid leaking the user's video URL to source sites.
 function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     // Defensive cap: even if a caller passes an unbounded timeout, cap it at 5 minutes
     // to prevent runaway processes. yt-dlp downloads are bounded by the format
@@ -858,7 +856,7 @@ switch ($action) {
             '/usr/local/bin/yt-dlp',
             '--dump-json',
             '--no-playlist',
-            '--no-warnings',
+            '-q',
             '--skip-download',
             '--referer', 'https://ahoyripper.com/',
             '--',
@@ -1113,12 +1111,10 @@ switch ($action) {
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Download rate limiting (atomic via flock) ───
-        $dl_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $dl_rate_file = '/tmp/ahoyrip_dl_' . md5($dl_ip);
         $dl_rate_limit = 10; // download requests per minute
         $dl_rate_window = 60;
 
-        $dl_fp = fopen($dl_rate_file, 'c+');
+        $dl_fp = fopen($rate_file, 'c+');
         if (!$dl_fp) {
             http_response_code(503);
             echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
@@ -1294,7 +1290,7 @@ switch ($action) {
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
-            '--no-warnings',
+            '-q',
             '--newline',
             '--referer', $referer,
             '--',
@@ -1615,7 +1611,7 @@ case 'progress':
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist -q --skip-download -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
