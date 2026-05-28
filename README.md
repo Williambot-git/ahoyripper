@@ -101,6 +101,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 **Success response:**
 ```json
 {
+  "request_id": "a3f1b2c9d4e5f678",
   "title": "Video Title",
   "thumbnail": "https://...",
   "duration": 180,
@@ -171,6 +172,26 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 The `filename` param (optional) sets the downloaded file's name. Only alphanumeric, spaces, dots, underscores, and hyphens are allowed; everything else is stripped. Falls back to `ahoyrip.<ext>` if omitted or empty.
 
 > **Note:** The free tier allows 5 total rips per day (each call to the info or download API counts as one rip). Unlimited-key holders have no daily cap.
+
+**Download error response (422 with classified error):**
+```json
+{
+  "error": "This video is geo-restricted in your region.",
+  "error_code": "GEOBLOCKED",
+  "request_id": "a3f1b2c9d4e5f678",
+  "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
+}
+```
+
+**Download error response (500 with generic error):**
+```json
+{
+  "error": "Download failed: Unable to download (exit code 1).",
+  "error_code": "YTDLP_ERROR",
+  "request_id": "a3f1b2c9d4e5f678",
+  "raw_error": "ERROR: [youtube] NGeR...:requested format not available"
+}
+```
 
 **Download error responses** (any of these may be returned when the rip itself fails):
 
