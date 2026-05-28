@@ -69,9 +69,8 @@ if ($blocked) {
 }
 
 // Rate limiting applies to expensive actions only (info, download).
-// Lightweight endpoints (health, progress) are exempt to allow frequent monitoring
-// without burning the user's rate budget.
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+// Lightweight endpoints (health, progress, check) are exempt to allow frequent
+// monitoring without burning the user's rate budget.
 $rate_limited_actions = ['info', 'download'];
 $is_rate_limited = in_array($action, $rate_limited_actions, true);
 
@@ -180,11 +179,22 @@ if (mt_rand(1, 100) === 1) {
     }
 }
 
+// ─── Lightweight internal check (no auth, no rate-limit, no referer check) ───
+// Dedicated endpoint for Docker healthchecks and load-balancer probes.
+// Unlike health (which may run yt-dlp, syscalls, reads /proc), this is a pure
+// JSON ping that adds zero server load — safe to call every 10 seconds.
+// Placed BEFORE the referer gate so it exits before that check runs.
+$internal_actions = ['health', 'progress', 'check'];
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+if (in_array($action, $internal_actions, true)) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Request-ID: ' . $request_id);
+    echo json_encode(['status' => 'ok', 'server_time' => date('c'), 'request_id' => $request_id]);
+    exit;
+}
+
 // Only allow safe characters in URL
 function isValidUrl($url) {
-    // Reject non-strings early — filter_var accepts various types and may coerce
-    // them in unexpected ways (e.g. array → "Array", object → "object").
-    // URL validation only makes sense for string input.
     if (!is_string($url)) {
         return false;
     }
