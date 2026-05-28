@@ -645,7 +645,7 @@ $VERSION = '1.0.0';
         }
         // When quota is exhausted, make the upgrade link more prominent
         if (upgradeEl) {
-          if (rem === '0') {
+          if (Number(rem) <= 0) {
             upgradeEl.textContent = 'upgrade now';
             upgradeEl.style.fontWeight = '700';
             upgradeEl.style.color = 'var(--color-error)';
