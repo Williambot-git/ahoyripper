@@ -751,7 +751,18 @@ switch ($action) {
         // doing expensive URL format validation. This fails fast on abuse and
         // avoids burning a daily quota increment on obviously invalid requests.
         // The 2048-char limit covers all normal video URLs with tracking params.
-        if (strlen($url) > 2048) {
+        // Uses MAX_URL_LEN (same constant as the yt-dlp gate below) so the
+        // error_code is INVALID_URL, matching the frontend error hint map.
+        $MAX_URL_LEN = 2048;
+
+        $url = $validation('info');
+        if ($url === false) {
+            exit;
+        }
+
+        // Enforce max URL length after validation to ensure consistent error codes.
+        // The 2048-char limit covers all reasonable video URLs with tracking params.
+        if (strlen($url) > $MAX_URL_LEN) {
             http_response_code(400);
             logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
             echo json_encode([
@@ -759,11 +770,6 @@ switch ($action) {
                 'error_code' => 'INVALID_URL',
                 'request_id' => $request_id,
             ]);
-            exit;
-        }
-
-        $url = $validation('info');
-        if ($url === false) {
             exit;
         }
 
@@ -856,22 +862,10 @@ switch ($action) {
             header('X-DailyLimit-Window: unlimited');
         }
 
-        // URL is already validated by isValidUrl(); no shell metacharacters possible
-        // when passed as a direct array element to proc_open (no shell involved).
-        // Enforce a max URL length to prevent pathologically long URLs from reaching
-        // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
-        // tracking parameters while stopping abuse.
-        $MAX_URL_LEN = 2048;
-        if (strlen($url) > $MAX_URL_LEN) {
-            http_response_code(400);
-            logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-            echo json_encode([
-                'error' => 'URL is too long. Please paste a shorter link.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
-            exit;
-        }
+        // URL is already validated by isValidUrl() and the length-check above.
+        // No shell metacharacters possible when passed as a direct array element
+        // to proc_open (no shell involved). $MAX_URL_LEN is declared at the top
+        // of this action and shared between the length check and yt-dlp call.
         // Pass URL as a direct array element (no shell involvement) so URLs
         // containing whitespace or special characters in query params are
         // handled correctly. With bypass_shell=true, proc_open parses the
@@ -1087,10 +1081,12 @@ switch ($action) {
         if ($url === false) {
             exit;
         }
+        // Max URL length — uses same constant as info action for consistency.
+        $MAX_URL_LEN = 2048;
         // Enforce a max URL length to prevent pathologically long URLs from reaching
         // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
         // tracking parameters while stopping abuse.
-        if (strlen($url) > 2048) {
+        if (strlen($url) > $MAX_URL_LEN) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
             echo json_encode([
