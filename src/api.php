@@ -1536,11 +1536,15 @@ switch ($action) {
             } else {
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
-                echo json_encode([
+                $resp = [
                     'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
-                ], JSON_INVALID_UTF8_SUBSTITUTE);
+                ];
+                if ($proc_err) {
+                    $resp['raw_error'] = $proc_err;
+                }
+                echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
         }
