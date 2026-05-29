@@ -274,6 +274,8 @@ GET /src/api.php?action=progress         # alias for health (legacy)
 
 `yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes.
 
+The `source_url` field in the probe result shows the URL that was used for the connectivity check (`https://www.youtube.com/watch?v=dQw4w9WgXcQ`). When `ok` is `true`, `title` contains the video title (truncated to 80 characters). When `ok` is `false`, `error` contains the yt-dlp error message and `source_url` still shows which URL failed.
+
 `load_avg` requires Linux. `memory_available_pct` reads `/proc/meminfo`. `disk_free_gb` uses `disk_free_space()`. Cache fields reflect internal version-caching TTLs (1 hour).
 
 ### Rate Limits
