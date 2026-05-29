@@ -395,7 +395,7 @@ function classifyYtdlpError($raw_err) {
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
     if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
-        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 403];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
         return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'status' => 404];
