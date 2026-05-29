@@ -8,16 +8,19 @@ RUN apt-get update && apt-get install -y \
     php-fpm \
     php-mbstring \
     php-curl \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir yt-dlp \
     && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && apt-get clean \
+    # Install yt-dlp as a standalone binary (no Python dependency needed).
+    # The binary is the recommended installation method per yt-dlp docs and
+    # avoids pip installation complexity, reduces image size, and is faster.
+    && curl -L -o /usr/local/bin/yt-dlp \
+        https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    && chmod +x /usr/local/bin/yt-dlp
 
 # Verify yt-dlp is intact and runs before declaring the image good.
-# A corrupt or incomplete pip install produces an empty/non-executable file;
+# A corrupt or incomplete download produces a non-executable file;
 # catching it here fails the build fast rather than producing a broken container.
 # Capture and expose the version for build-time debugging and image inspection.
-# --version (not -V) is the stable/canonical flag per yt-dlp conventions.
 RUN echo "yt-dlp version: $(yt-dlp --version)" \
     && yt-dlp --version > /dev/null 2>&1 \
     || { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
