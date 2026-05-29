@@ -1088,6 +1088,12 @@ switch ($action) {
             // Undo the quota increment — parseFormats succeeded (returned a classified error
             // like GEOBLOCKED/PRIVATE_VIDEO) but the content is not downloadable. We don't
             // burn the user's daily limit for content that simply can't be ripped.
+            // Refund guard: if parseFormats returned a classified error (GEOBLOCKED,
+            // PRIVATE_VIDEO, etc.), the user burned a quota hit but got no usable
+            // content. Undo the increment so it doesn't count against their daily cap.
+            // Use the same >= guard as the download action to prevent double-refund
+            // if proc_open ever fails without decrementing first.
+            $info_quota_before_refund = $daily_data['c'];
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if ($undo_fp && flock($undo_fp, LOCK_EX)) {
@@ -1097,7 +1103,7 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
