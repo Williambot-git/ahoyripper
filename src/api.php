@@ -1355,6 +1355,7 @@ switch ($action) {
             '--no-playlist',
             '-q',
             '--newline',
+            '--geo-bypass',
             '--referer', $referer,
             '--',
             $url,
