@@ -297,18 +297,35 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 
 ## Supported Platforms
 
-AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** including:
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** including all major video, audio, and social media sites.
 
-**Video:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, and more
+### Platform Categories
 
-**Audio:** SoundCloud, Bandcamp, Spotify (with auth), Apple Music, Deezer, Mixcloud, Audiomack, and more
+**Video platforms:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, Netflix, Disney+, Paramount+, Peacock, HBO Max/Max, Amazon Prime Video, Hulu, and more.
 
-**Full list:** See the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) online — no installation needed.
+**Audio platforms:** SoundCloud, Bandcamp, Spotify (requires auth), Apple Music, Deezer, Mixcloud, Audiomack, and more.
 
-You can also check from the command line:
-```bash
-yt-dlp --list-extractors
-```
+**Social media:** All platforms above, plus: VK, Douyin, Kuaishou, Weibo, Tumblr, Reddit (video/audio), and more.
+
+**Full extractor list:** Run `yt-dlp --list-extractors` locally, or see the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) online. Every extractor that works with yt-dlp works with AhoyRipper.
+
+### Platforms requiring authentication
+
+Some platforms require you to be logged in to access certain content. If you encounter a `LOGIN_REQUIRED` error:
+
+1. **On YouTube:** Age-restricted videos require authentication. You can pass cookies to yt-dlp by adding a `cookies` option to the command in `src/api.php` — see [yt-dlp cookies guide](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#how-do-i-pass-cookies-to-yt-dlp).
+2. **On other platforms:** Content behind login walls (Instagram private posts, Patreon, etc.) cannot be downloaded without valid credentials.
+
+### Platforms with known limitations
+
+| Platform | Limitation |
+|----------|-------------|
+| YouTube | Age-restricted videos require authentication/cookies |
+| TikTok | Some videos may be geo-restricted or require login |
+| Spotify | Requires `--cookies-from-browser` or `--cookies` for full access |
+| Netflix + streaming sites | DRM-protected content cannot be ripped |
+
+---
 
 ---
 
@@ -321,6 +338,8 @@ yt-dlp --list-extractors
 **Download times out** — Large 4K/8K rips can exceed the 5-minute server timeout. Try an audio-only format (MP3/AAC) or a lower resolution (480p/720p). The source may also be slow or unresponsive.
 
 **Empty download / corrupt file** — The selected format may not be available in that combination. Try another format from the list, or fall back to `best` which lets yt-dlp pick the most reliable option.
+
+**"No formats found"** — If the info API returns an empty or near-empty format list, yt-dlp could not extract any playable streams from the URL. This usually means: the video is on an unsupported platform, geo-restricted, requires login, or has been removed. Try running `yt-dlp --list-formats <URL>` directly on your server to see what yt-dlp itself reports.
 
 **Quota exhausted (5/5 rips used)** — The free tier allows 5 total API calls per day (midnight UTC reset). Each call to `info` or `download` counts as one rip. Enter an AhoyVPN unlimited key in the optional field to bypass the daily cap.
 
