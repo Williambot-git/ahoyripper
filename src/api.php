@@ -92,13 +92,13 @@ if ($is_rate_limited) {
     $fp = fopen($rate_file, 'c+');
     if (!$fp) {
         http_response_code(503);
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
         exit;
     }
     if (!flock($fp, LOCK_EX)) {
         fclose($fp);
         http_response_code(503);
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
         exit;
     }
 
@@ -126,7 +126,7 @@ if ($is_rate_limited) {
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => 'https://ahoyvpn.com',
                 'retry_after' => $reset_timestamp,
-            ]); // @codingStandardsIgnoreLine
+            ]);
             exit;
         }
         $data['c']++;
@@ -841,13 +841,13 @@ switch ($action) {
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
                 http_response_code(503);
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             $daily_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
@@ -1200,13 +1200,13 @@ switch ($action) {
         $dl_fp = fopen($rate_file, 'c+');
         if (!$dl_fp) {
             http_response_code(503);
-            echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+            echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
             exit;
         }
         if (!flock($dl_fp, LOCK_EX)) {
             fclose($dl_fp);
             http_response_code(503);
-            echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+            echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
             exit;
         }
 
@@ -1239,7 +1239,7 @@ switch ($action) {
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
                     'upgrade_url' => 'https://ahoyvpn.com',
-                ]); // @codingStandardsIgnoreLine
+                ]);
                 exit;
             }
             $dl_data['c']++;
@@ -1263,13 +1263,13 @@ switch ($action) {
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
                 http_response_code(503);
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             $daily_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
@@ -1645,7 +1645,7 @@ switch ($action) {
         $fp = fopen($actual_file, 'rb');
         if (!$fp) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id]); // @codingStandardsIgnoreLine
+            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id]);
             exit;
         }
         while (!feof($fp) && !connection_aborted()) {
