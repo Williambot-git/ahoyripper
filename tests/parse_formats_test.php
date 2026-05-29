@@ -130,6 +130,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $fps = isset($f['fps']) ? (int)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
         $format_description = clean($f['format_description'] ?? '');
+        $abr = isset($f['abr']) ? (int)$f['abr'] : null;
 
         $label = '';
         if ($vcodec !== 'none' && $acodec !== 'none') {
@@ -192,6 +193,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'height' => $height,
             'fps' => $fps,
             'tbr' => $tbr,
+            'abr' => $abr,
             'vcodec' => $vcodec,
             'acodec' => $acodec,
             'format_type' => ($vcodec !== 'none' && $acodec !== 'none') ? 'combined' : ($vcodec !== 'none' ? 'video' : 'audio'),
@@ -316,6 +318,24 @@ test('format has correct ext', $card && ($card['ext'] ?? '') === 'mp4');
 test('format has correct height', $card && ($card['height'] ?? 0) === 720);
 test('format has correct fps', $card && ($card['fps'] ?? null) === 30);
 test('format has correct tbr', $card && ($card['tbr'] ?? null) == 2500);
+test('format has null abr when not set', $card && ($card['abr'] ?? null) === null);
+
+// ─── parseFormats: abr field for audio formats ───────────────────────────────────
+
+$fmt_audio = makeFormat([
+    'format_id' => '140',
+    'ext' => 'm4a',
+    'vcodec' => 'none',
+    'acodec' => 'mp4a.40.2',
+    'abr' => 128,
+    'filesize' => 2097152,
+]);
+$json_audio = makeJson('Audio Test', [$fmt_audio]);
+$result_audio = parseFormats($json_audio);
+$card_audio = $result_audio['formats'][0] ?? null;
+test('audio format has abr field', $card_audio && array_key_exists('abr', $card_audio));
+test('audio format abr value is correct (128)', $card_audio && ($card_audio['abr'] ?? null) === 128);
+test('audio format without abr has null abr', $result && ($result['formats'][0]['abr'] ?? null) === null);
 test('format has correct vcodec', $card && ($card['vcodec'] ?? '') === 'avc1.64001F');
 test('format has correct acodec', $card && ($card['acodec'] ?? '') === 'mp4a.40.2');
 test('format type is combined (video+audio)', $card && ($card['format_type'] ?? '') === 'combined');

@@ -139,6 +139,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
       "height": 720,
       "fps": 60,
       "tbr": 2500,
+      "abr": null,
       "vcodec": "avc1.64001F",
       "acodec": "mp4a.40.2",
       "format_type": "combined",

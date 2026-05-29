@@ -514,6 +514,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $fps = isset($f['fps']) ? (int)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
         $format_description = clean($f['format_description'] ?? '');
+        $abr = isset($f['abr']) ? (int)$f['abr'] : null;
 
         // Build label
         $label = '';
@@ -594,6 +595,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'height' => $height,
             'fps' => $fps,
             'tbr' => $tbr,
+            'abr' => $abr,
             'vcodec' => $vcodec,
             'acodec' => $acodec,
             'format_type' => ($vcodec !== 'none' && $acodec !== 'none') ? 'combined' : ($vcodec !== 'none' ? 'video' : 'audio'),
