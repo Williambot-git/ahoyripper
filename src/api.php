@@ -68,9 +68,19 @@ if ($blocked) {
     exit;
 }
 
+// ─── Early action routing ────────────────────────────────────────────────
+// Declare $action as early as possible so it is available for the rate-limit
+// gate below (line 75). Without this, $is_rate_limited is always false because
+// $action is undeclared at the time the in_array check runs.
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// ─── Rate limiting gate ───────────────────────────────────────────────────
 // Rate limiting applies to expensive actions only (info, download).
 // Lightweight endpoints (health, progress, check) are exempt to allow frequent
 // monitoring without burning the user's rate budget.
+// NOTE: this gate only runs when $action is set BEFORE this point (moved from
+// line 743). The internal_actions check below exits before this block for
+// lightweight actions, so rate limiting still applies to info/download.
 $rate_limited_actions = ['info', 'download'];
 $is_rate_limited = in_array($action, $rate_limited_actions, true);
 
@@ -185,7 +195,7 @@ if (mt_rand(1, 100) === 1) {
 // JSON ping that adds zero server load — safe to call every 10 seconds.
 // Placed BEFORE the referer gate so it exits before that check runs.
 $internal_actions = ['health', 'progress', 'check'];
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+// NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
     header('Content-Type: application/json; charset=utf-8');
     header('X-Request-ID: ' . $request_id);
@@ -739,8 +749,6 @@ $validation = function(string $action) use($request_id) {
 define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 
 // ─── ROUTING ────────────────────────────────────────────────
-
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // $unlimited is set in the download case below after reading the API key.
 // Default to false here so the info-action daily-quota check (which runs
