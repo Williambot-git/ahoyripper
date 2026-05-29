@@ -46,6 +46,18 @@ fi
 echo "  ✓ No deprecated yt-dlp flags"
 
 echo ""
+echo "==> Checking yt-dlp --geo-bypass flag for info action..."
+# --geo-bypass enables yt-dlp's built-in geo-restriction bypass (HTTP header
+# manipulation) so content that is merely geo-restricted (not unavailable) can
+# be retrieved even when the server is in a restricted region.
+if grep -q -- '--geo-bypass' src/api.php; then
+    echo "  ✓ --geo-bypass flag present in yt-dlp info command"
+else
+    echo "  ✗ --geo-bypass flag missing in yt-dlp info command"
+    exit 1
+fi
+
+echo ""
 echo "==> Verifying required files exist..."
 for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do
     if [ ! -f "$f" ]; then
@@ -368,7 +380,9 @@ echo "==> Checking health action includes all required fields..."
 # The health action should return: status, server_time, request_id,
 # yt_dlp_version, ffmpeg_version, yt_dlp_cache_expires_at, yt_dlp_cache_ttl_seconds,
 # ffmpeg_cache_expires_at, ffmpeg_cache_ttl_seconds.
-HEALTH_RESPONSE=$(sed -n "/'status' =>/,/\];/p" src/api.php | head -20)
+# The root guard also has a 'status' => ... echo, so we must isolate the
+# case 'health': block specifically to get the real health response array.
+HEALTH_RESPONSE=$(awk "/case 'health':/,/\\];/" src/api.php | sed -n "/'status' =>/,/\\];/p")
 for field in "'status'" "'server_time'" "'request_id'" "'yt_dlp_version'" "'ffmpeg_version'" "'yt_dlp_cache_expires_at'" "'yt_dlp_cache_ttl_seconds'" "'ffmpeg_cache_expires_at'" "'ffmpeg_cache_ttl_seconds'"; do
     if ! echo "$HEALTH_RESPONSE" | grep -q "$field"; then
         echo "  ✗ Health response missing field: $field"

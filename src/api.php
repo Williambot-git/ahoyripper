@@ -901,6 +901,7 @@ switch ($action) {
             '--no-playlist',
             '-q',
             '--skip-download',
+            '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
             '--',
             $url,
