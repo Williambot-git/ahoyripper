@@ -62,10 +62,6 @@ $VERSION = '1.0.0';
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
-       iOS crops square icons to a rounded shape; SVG source produces blurry
-       results at the sizes iOS applies. A 180x180 PNG is optimal for iPhone. -->
-  <link rel="apple-touch-icon" href="/favicon-180.png">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
