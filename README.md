@@ -195,7 +195,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 
 The `filename` param (optional) sets the downloaded file's name. Only alphanumeric, spaces, dots, underscores, and hyphens are allowed; everything else is stripped. Falls back to `ahoyrip.<ext>` if omitted or empty.
 
-> **Note:** The free tier allows 5 total rips per day (each call to the info or download API counts as one rip). Unlimited-key holders have no daily cap.
+> **Note:** The free tier allows 5 total rips per day (each call to the info or download API counts as one rip). Switching the sort order re-fetches the format list and counts as an additional rip. Unlimited-key holders have no daily cap.
 
 **Download error response (422 with classified error):**
 ```json
