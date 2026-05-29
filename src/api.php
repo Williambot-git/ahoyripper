@@ -785,6 +785,13 @@ switch ($action) {
             exit;
         }
 
+        // Read and validate sort parameter — must be declared before parseFormats
+        // is called (line ~1015). Controls format ordering: height (default),
+        // filesize, or tbr. Invalid values fall back to 'height'.
+        $raw_sort = $_GET['sort'] ?? 'height';
+        $allowed_sorts = ['height', 'filesize', 'tbr'];
+        $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
+
         // Enforce max URL length after validation to ensure consistent error codes.
         // The 2048-char limit covers all reasonable video URLs with tracking params.
         if (strlen($url) > $MAX_URL_LEN) {
