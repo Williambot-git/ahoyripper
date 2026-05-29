@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Development artifacts — not needed in the final image
+tests/
+scripts/
+deploy/
+
+# Documentation — not needed in the image
+README.md
+LICENSE
+
+# Docker files — only docker-compose.yml is needed at runtime (for env var reference).
+# Dockerfile, .dockerignore are build-time only and should not be copied into the image.
+Dockerfile
+.dockerignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Hidden files (catch-all for any remaining dotdirs)
+.*/
