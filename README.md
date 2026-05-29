@@ -112,12 +112,13 @@ ahoyripper/
 
 ### Get video info + formats
 ```
-GET /src/api.php?action=info&url=<url>&sort=<height|filesize|tbr>
+GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr>
 ```
 
 The `sort` parameter (optional, default `height`) controls format sort order:
 - `height` — quality, highest resolution first (default)
 - `filesize` — estimated file size, largest first
+- `filesize_asc` — estimated file size, smallest first
 - `tbr` — bitrate, highest first
 
 **Success response:**
