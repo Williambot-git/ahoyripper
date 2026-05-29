@@ -183,7 +183,8 @@ $VERSION = '1.0.0';
           <label for="sortSelect" class="sort-label">Sort:</label>
           <select id="sortSelect" class="sort-select">
             <option value="height">Quality</option>
-            <option value="filesize">Size</option>
+            <option value="filesize">Size (largest)</option>
+            <option value="filesize_asc">Size (smallest)</option>
             <option value="tbr">Bitrate</option>
           </select>
         </div>

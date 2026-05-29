@@ -435,7 +435,7 @@ function classifyYtdlpError($raw_err) {
 }
 
 // Parse yt-dlp output to extract formats
-// $sort: one of 'height' (default), 'filesize', 'tbr' — validated by caller
+// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr' — validated by caller
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
@@ -604,7 +604,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     }
 
     // Sort: combined formats first, then by the caller's selected sort key.
-    // $sort is one of 'height' (default), 'filesize', 'tbr' — validated by the
+    // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr' — validated by the
     // caller before being passed in, so no additional validation is needed here.
     usort($formats, function($a, $b) use ($sort) {
         // Combined first
@@ -613,6 +613,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // Then by selected sort key
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+        } elseif ($sort === 'filesize_asc') {
+            $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } else {
@@ -794,9 +796,10 @@ switch ($action) {
 
         // Read and validate sort parameter — must be declared before parseFormats
         // is called (line ~1015). Controls format ordering: height (default),
-        // filesize, or tbr. Invalid values fall back to 'height'.
+        // filesize (largest first), filesize_asc (smallest first), or tbr.
+        // Invalid values fall back to 'height'.
         $raw_sort = $_GET['sort'] ?? 'height';
-        $allowed_sorts = ['height', 'filesize', 'tbr'];
+        $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr'];
         $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
 
         // Enforce max URL length after validation to ensure consistent error codes.
