@@ -34,7 +34,6 @@ $VERSION = '1.0.0';
        enforcement is at the nginx layer. -->
 
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://ahoyripper.com">
