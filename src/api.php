@@ -1054,8 +1054,9 @@ switch ($action) {
                     fclose($undo_fp);
                 }
             }
-            logRequest('info', 422, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
-            http_response_code(422);
+            $err_status = 422;
+            logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
+            http_response_code($err_status);
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported.',
                 'error_code' => 'PARSE_ERROR',
@@ -1069,7 +1070,8 @@ switch ($action) {
             exit;
         }
         if (isset($parsed['error'])) {
-            // parseFormats surfaced a yt-dlp error message — pass it through with 422
+            // parseFormats surfaced a yt-dlp error message — pass it through with
+            // the HTTP status appropriate to the error category.
             $err_code = $parsed['error_code'] ?? 'PARSE_ERROR';
             // Map error codes to HTTP status for proper client signaling.
             // Default to 422 if code is unknown.
