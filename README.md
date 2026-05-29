@@ -171,6 +171,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform |
+| `PARSE_ERROR` | The site returned a non-standard or unparseable response — it may not be supported |
 | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
 | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
