@@ -1546,11 +1546,19 @@ switch ($action) {
                 $status = $err_classified['status'] ?? 422;
                 logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code($status);
-                echo json_encode([
+                $resp = [
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
-                ]);
+                ];
+                // Surface the raw yt-dlp output for classified errors too — gives
+                // users diagnostic context (e.g. "Video unavailable: The video does not exist")
+                // alongside our friendly message. Unclassified errors already include
+                // raw_error; classified errors should be consistent.
+                if ($proc_err) {
+                    $resp['raw_error'] = $proc_err;
+                }
+                echo json_encode($resp);
                 exit;
             } else {
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
