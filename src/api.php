@@ -872,6 +872,7 @@ switch ($action) {
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
                     'retry_after' => $reset_timestamp,
+                    'request_id' => $request_id,
                 ]);
                 exit;
             }
