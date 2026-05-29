@@ -156,12 +156,12 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 
 | Code | Meaning |
 |------|---------|
-| `400` | Invalid URL or missing parameters |
+| `400` | Invalid URL, missing format on download, or malformed request (`MISSING_FORMAT`, `INVALID_URL`, `INVALID_FORMAT_ID`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
-| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body |
+| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body (`RATE_LIMIT_EXCEEDED`, `DAILY_LIMIT`) |
 | `503` | Service temporarily unavailable |
 
 **Classified error codes** (surfaced in the `error_code` field of 422 responses):
@@ -187,6 +187,8 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh the page and pick another format. |
+| `MISSING_FORMAT` | No format was selected on a download request — a format ID is required. |
+| `UNKNOWN_ACTION` | The requested action is not recognized — use `info`, `download`, `health`, or `progress`. |
 
 ### Download a format
 ```
@@ -386,6 +388,8 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `DOWNLOAD_TIMEOUT` | Exceeded 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_FAILED` | Empty or corrupt output file | Try another format or wait and retry |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh the page and pick another format |
+| `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
+| `UNKNOWN_ACTION` | Unrecognized action parameter | Use `info`, `download`, `health`, or `progress` |
 
 ---
 
