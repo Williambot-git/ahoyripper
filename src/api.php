@@ -1792,7 +1792,10 @@ case 'progress':
         break;
     }
     default: {
-        http_response_code(400);
+        // Return 404 Not Found — the action/endpoint is not recognized.
+        // 400 Bad Request would imply a malformed request syntax, which is
+        // inaccurate when the server simply doesn't know that action name.
+        http_response_code(404);
         echo json_encode([
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.',
             'error_code' => 'UNKNOWN_ACTION',
