@@ -507,6 +507,9 @@ $VERSION = '1.0.0';
       navigateOnSuccess = true;
       card.addEventListener('click', function(e) {
         e.preventDefault();
+        // Re-reset here so any on-page re-render that re-attaches listeners
+        // starts with a clean guard state too.
+        navigateOnSuccess = true;
         var dl = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
         var dlHeaders = {};
         if (dl.key) { dlHeaders['Authorization'] = 'Bearer ' + encodeURIComponent(dl.key); }
