@@ -42,9 +42,31 @@ sudo chown -R www-data:www-data /var/www/ahoyripper
 ## Docker
 
 ```bash
+# Clone and configure
+git clone https://github.com/Williambot-git/ahoyripper.git /var/www/ahoyripper
+cd /var/www/ahoyripper
+
+# Set a secure API key — the default key is only for local dev
+# Generate one with: openssl rand -hex 32
+echo "AHOY_UNLIMITED_KEY=your-generated-key" > .env
+
+# Start the app (app runs at http://localhost:8080)
 docker compose up -d
-# App runs at http://localhost:8080
 ```
+
+### Environment Variables (Docker)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key granting unlimited daily quota. **Change this in production** — generate a secure value with `openssl rand -hex 32`. |
+
+All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
+
+```bash
+docker compose down && docker compose up -d
+```
+
+> **Security note:** The default key `RIPPER2026DEV` is only suitable for local development. Never deploy with it in production — anyone who knows it gets unlimited quota.
 
 ---
 
