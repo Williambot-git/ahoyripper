@@ -111,6 +111,7 @@ $VERSION = '1.0.0';
     <span>AhoyRipper</span>
   </a>
   <div class="ahoy-nav-links">
+    <a href="https://ahoyripper.com">AhoyRipper</a>
     <a href="https://ahoyvpn.com">AhoyVPN</a>
   </div>
 </nav>
