@@ -9,41 +9,46 @@
 set -euo pipefail
 
 BASE_URL="${1:-http://localhost:8080}"
+API="${BASE_URL}/src/api.php"
 
 echo "=== AhoyRipper Health Check ==="
 echo "Base URL: $BASE_URL"
 echo ""
 
-# 1. HTTP response
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health" 2>/dev/null || echo "000")
+# 1. HTTP response for health endpoint
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${API}?action=check" 2>/dev/null || echo "000")
 echo "[1/4] Health endpoint HTTP status: $HTTP_STATUS"
 if [[ "$HTTP_STATUS" != "200" ]]; then
-  echo "FAIL — health endpoint returned $HTTP_STATUS (expected 200)"
+  echo "FAIL — check endpoint returned $HTTP_STATUS (expected 200)"
   exit 1
 fi
+echo "[1/4] ✓ Health endpoint reachable"
 
 # 2. Health response fields
-HEALTH_JSON=$(curl -s "$BASE_URL/api/health" 2>/dev/null || echo "{}")
-REQUIRED_FIELDS="status uptime version"
-for field in $REQUIRED_FIELDS; do
+HEALTH_JSON=$(curl -s "${API}?action=health" 2>/dev/null || echo "{}")
+for field in status server_time request_id yt_dlp_version ffmpeg_version; do
   if ! echo "$HEALTH_JSON" | grep -q "\"$field\""; then
     echo "FAIL — health response missing field: $field"
     exit 1
   fi
 done
-echo "[2/4] Health response fields: OK"
+echo "[2/4] ✓ Health response contains all required fields"
 
-# 3. yt-dlp binary (via info action)
-YTDLP_VERSION=$(curl -s "$BASE_URL/api/info?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ" \
-  -H "X-Api-Key: RIPPER2026DEV" 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('version','?'))" 2>/dev/null || echo "?")
-echo "[3/4] yt-dlp version (via /api/info): $YTDLP_VERSION"
+# 3. yt-dlp binary check via health probe
+PROBE_JSON=$(curl -s "${API}?action=health&probe=1" \
+  -H "Referer: https://ahoyripper.com/" 2>/dev/null || echo "{}")
+if echo "$PROBE_JSON" | grep -q '"yt_dlp_probe"'; then
+  echo "[3/4] ✓ yt-dlp probe endpoint available"
+else
+  echo "[3/4] ⚠ yt-dlp probe not tested (network may be restricted)"
+fi
 
 # 4. ffmpeg binary
 if command -v ffmpeg >/dev/null 2>&1; then
   FFMPEG_VERSION=$(ffmpeg -version 2>&1 | head -1)
-  echo "[4/4] ffmpeg: $FFMPEG_VERSION"
+  echo "[4/4] ✓ ffmpeg: $FFMPEG_VERSION"
 else
-  echo "[4/4] ffmpeg: not found in PATH"
+  echo "[4/4] ⚠ ffmpeg: not found in PATH"
 fi
 
 echo ""
