@@ -1389,7 +1389,7 @@ switch ($action) {
             '-o', $out_template,
             '--no-playlist',
             '--no-warnings',
-            '--newline',
+            '--progress',
             '--geo-bypass',
             '--referer', $referer,
             '--',
