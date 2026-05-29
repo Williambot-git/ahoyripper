@@ -1347,12 +1347,13 @@ switch ($action) {
         }
 
         // Build output template — use exec array to bypass shell entirely.
-        // yt-dlp resolves the output path *before* downloading, so we use a
-        // directory template with a known prefix so we can find the real file
-        // after download (yt-dlp appends the real extension to the base name).
+        // yt-dlp appends the file extension to the output path automatically,
+        // so the template must NOT contain a literal extension — pass the
+        // base path only. Using a .tmp suffix would result in yt-dlp naming
+        // the file "ahoyrip_<hash>.tmp.mp4" (wrong extension placement).
         $tmp_dir = sys_get_temp_dir();
         $out_base = 'ahoyrip_' . bin2hex(random_bytes(8));
-        $out_template = $tmp_dir . '/' . $out_base . '.tmp';  // yt-dlp appends e.g. .mp4
+        $out_template = $tmp_dir . '/' . $out_base;  // yt-dlp auto-appends e.g. .mp4
 
         // Register shutdown handler to clean up any temp files on unexpected exit.
         // Catches: fatal errors, connection aborts, timeout before normal cleanup.
