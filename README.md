@@ -184,6 +184,9 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `FORMAT_UNAVAILABLE` | That format is not available for this video |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
+| `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
+| `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh the page and pick another format. |
 
 ### Download a format
 ```
@@ -232,6 +235,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `422` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
+| `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh and pick another format. |
 | `500` | `DOWNLOAD_FAILED` | The rip produced an empty or corrupt file. Try another format from the list. |
 
 ### Health check / progress
@@ -379,6 +383,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
 | `DOWNLOAD_TIMEOUT` | Exceeded 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_FAILED` | Empty or corrupt output file | Try another format or wait and retry |
+| `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh the page and pick another format |
 
 ---
 
