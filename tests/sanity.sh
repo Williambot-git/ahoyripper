@@ -58,6 +58,16 @@ else
 fi
 
 echo ""
+echo "==> Checking yt-dlp --geo-bypass flag for download action..."
+# The download action should also use --geo-bypass for the same reason.
+if sed -n "/case 'download':/,/case '/p" src/api.php | grep -q -- '--geo-bypass'; then
+    echo "  ✓ --geo-bypass flag present in yt-dlp download command"
+else
+    echo "  ✗ --geo-bypass flag missing in yt-dlp download command"
+    exit 1
+fi
+
+echo ""
 echo "==> Verifying required files exist..."
 for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do
     if [ ! -f "$f" ]; then
