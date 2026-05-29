@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AhoyRipper">
+  <!-- Background: dark rounded square matching PWA theme -->
+  <rect width="512" height="512" rx="96" fill="#0f0f0f"/>
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="512" height="64" fill="#3b82f6"/>
+  <!-- Outer hexagon outline -->
+  <polygon points="256,64 448,160 448,352 256,448 64,352 64,160" fill="none" stroke="#3b82f6" stroke-width="28"/>
+  <!-- Inner filled hexagon -->
+  <polygon points="256,140 380,200 380,312 256,372 132,312 132,200" fill="#3b82f6"/>
+  <!-- Compass crosshairs -->
+  <line x1="256" y1="200" x2="256" y2="312" stroke="white" stroke-width="28" stroke-linecap="round"/>
+  <line x1="132" y1="256" x2="380" y2="256" stroke="white" stroke-width="28" stroke-linecap="round"/>
+</svg>
