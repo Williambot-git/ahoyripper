@@ -8,7 +8,7 @@ services:
       - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-RIPPER2026DEV}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=health"]
       interval: 30s
       timeout: 10s
       retries: 3
