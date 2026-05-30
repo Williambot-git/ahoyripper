@@ -1465,8 +1465,8 @@ switch ($action) {
         $proc_stdout = '';
         $proc_stderr = '';
 
-        stream_set_timeout($pipes[1], 5);
-        stream_set_timeout($pipes[2], 5);
+        stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > $timeout is authoritative
+        stream_set_timeout($pipes[2], 0);  // Timeout fires only when child process stalls; feof() stays false until proc closes pipe
 
         while (true) {
             if ($timeout > 0 && (time() - $start) > $timeout) {
