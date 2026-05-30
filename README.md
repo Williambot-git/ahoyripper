@@ -252,12 +252,16 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 ### Health check / progress
 ```
 GET /src/api.php?action=check   # lightweight internal ping (Docker healthcheck-safe)
-GET /src/api.php?action=health   # full system status with resource metrics
-GET /src/api.php?action=health&probe=1   # include live yt-dlp connectivity probe
-GET /src/api.php?action=progress         # alias for health (legacy)
+GET /src/api.php?action=health  # full system status with resource metrics
+GET /src/api.php?action=health&probe=1  # include live yt-dlp connectivity probe
+GET /src/api.php?action=progress        # alias for health (legacy)
 ```
 
-`action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes.
+`action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
+
+```json
+{ "status": "ok", "server_time": "2026-05-21T16:00:00+00:00", "request_id": "a3f1b2c9d4e5f678" }
+```
 
 `action=health` returns full system status:
 ```
