@@ -146,7 +146,7 @@ if ($is_rate_limited) {
         }
         $data['c']++;
     } else {
-        $data = ['t' => time(), 'c' => 1];
+        $data = ['t' => time(), 'c' => 0]; // Fresh window — current request will be counted after the write
     }
 
     // Write back atomically
