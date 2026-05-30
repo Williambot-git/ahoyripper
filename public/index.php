@@ -29,11 +29,6 @@ $VERSION = '1.0.0';
        iOS crops square icons to a rounded shape; SVG source produces blurry
        results at the sizes iOS applies. A 180x180 PNG is optimal for iPhone. -->
   <link rel="apple-touch-icon" href="/favicon-180.png">
-       set by nginx in deploy/nginx.conf. HTTP-equiv meta tags are NOT a
-       substitute — browsers ignore them for these headers. They exist here
-       only to avoid "unknown meta" warnings in validator tools. The real
-       enforcement is at the nginx layer. -->
-
   <meta name="referrer" content="no-referrer">
 
   <!-- Canonical URL -->
@@ -711,6 +706,7 @@ $VERSION = '1.0.0';
             'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
             'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
             'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
+            'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
             'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
             'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
             'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',

@@ -836,6 +836,20 @@ switch ($action) {
         if ($api_key === null) {
             $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
         }
+
+        // Reject invalid (non-null, non-matching) keys early so they don't burn
+        // a daily quota hit. Null keys and empty-string tokens fall through and
+        // are treated as unauthenticated (quota applies normally).
+        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+            logRequest('info', 401, ['reason' => 'invalid_api_key']);
+            http_response_code(401);
+            echo json_encode([
+                'error' => 'Invalid API key.',
+                'error_code' => 'INVALID_KEY',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
@@ -1189,10 +1203,10 @@ switch ($action) {
         }
 
 // ─── Check for unlimited API key ───
-        // Prefer Authorization: Bearer header (keeps key out of URLs and server logs).
+        // Prefer Authorization: Bearer *** (keeps key out of URLs and server logs).
         // Fall back to GET/POST query param only for legacy clients that can't send headers.
         // Omit empty-string Bearer tokens — a misconfigured client sending
-        // "Authorization: Bearer " (trailing space, no token) should fall through to key= param.
+        // "Authorization: Bearer *** (trailing space, no token) should fall through to key= param.
         $api_key = null;
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m) && trim($m[1]) !== '') {
@@ -1200,6 +1214,20 @@ switch ($action) {
         }
         if ($api_key === null) {
             $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
+        }
+
+        // Reject invalid (non-null, non-matching) keys early so they don't burn
+        // a daily quota hit. Null keys and empty-string tokens fall through and
+        // are treated as unauthenticated (quota applies normally).
+        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+            logRequest('download', 401, ['reason' => 'invalid_api_key']);
+            http_response_code(401);
+            echo json_encode([
+                'error' => 'Invalid API key.',
+                'error_code' => 'INVALID_KEY',
+                'request_id' => $request_id,
+            ]);
+            exit;
         }
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 

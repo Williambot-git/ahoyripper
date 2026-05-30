@@ -158,6 +158,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | Code | Meaning |
 |------|---------|
 | `400` | Invalid URL, missing format on download, or malformed request (`MISSING_FORMAT`, `INVALID_URL`, `INVALID_FORMAT_ID`) |
+| `401` | Invalid API key (`INVALID_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
