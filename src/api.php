@@ -994,8 +994,8 @@ switch ($action) {
         } else {
             fclose($pipes[0]);
             unset($pipes[0]);
-            stream_set_timeout($pipes[1], 45);
-            stream_set_timeout($pipes[2], 45);
+            stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > 45 is authoritative
+            stream_set_timeout($pipes[2], 0);  // Timeout fires only when child process stalls; feof() stays false until proc closes pipe
             $out = $err = '';
             $start = time();
             while (!feof($pipes[1]) || !feof($pipes[2])) {
