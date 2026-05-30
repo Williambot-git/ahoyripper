@@ -214,13 +214,13 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 }
 ```
 
-**Download error response (500 with generic error):**
+**Download error response (422 with unclassified yt-dlp error):**
 ```json
 {
-  "error": "Download failed: Unable to download (exit code 1).",
+  "error": "Download failed: requested format not available.",
   "error_code": "YTDLP_ERROR",
   "request_id": "a3f1b2c9d4e5f678",
-  "raw_error": "ERROR: [youtube] NGeR...:requested format not available"
+  "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
 
@@ -228,6 +228,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 
 | Code | `error_code` | Meaning |
 |------|--------------|---------|
+| `422` | `MISSING_URL` | No URL was provided on the download request. |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `422` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `422` | `LOGIN_REQUIRED` | Video requires login or subscription |
