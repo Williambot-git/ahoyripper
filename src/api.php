@@ -941,6 +941,7 @@ switch ($action) {
             '--no-playlist',
             '--no-warnings',
             '--skip-download',
+            '--newline',
             '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
             '--',
