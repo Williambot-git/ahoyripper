@@ -1452,6 +1452,7 @@ switch ($action) {
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
+            '--quiet',
             '--no-playlist',
             '--no-warnings',
             '--progress',
