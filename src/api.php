@@ -162,29 +162,29 @@ header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
 header('X-RateLimit-Reset: ' . $reset);
 header('X-RateLimit-Window: ' . $rate_window);
 
-// Periodic cleanup of stale rate files (1% chance per request)
-if (mt_rand(1, 100) === 1) {
-    $cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
-    foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
-        $d = @json_decode(@file_get_contents($f), true);
-        if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
-            @unlink($f);
-        }
+// Periodic cleanup of stale rate files and cache entries (every 100 requests).
+// Proactively removes expired entries from /tmp to prevent indefinite accumulation
+// on servers that run for months without restart.
+$cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
+foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
+    $d = @json_decode(@file_get_contents($f), true);
+    if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
+        @unlink($f);
     }
-    // Clean up stale version cache files (yt-dlp and ffmpeg) — they expire after 1 hour
-    // but the files themselves accumulate on long-running servers if not removed.
-    // When the cache is cleared, also clear the in-memory global so the next request
-    // fetches a fresh version rather than holding a stale entry across requests.
-    foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
-        $d = @json_decode(@file_get_contents($cache), true);
-        if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
-            @unlink($cache);
-            if ($cache === '/tmp/ahoyrip_ytdlp_ver.cache') {
-                $GLOBALS['__ytdlp_version'] = null;
-            }
-            if ($cache === '/tmp/ahoyrip_ffmpeg_ver.cache') {
-                $GLOBALS['__ffmpeg_version'] = null;
-            }
+}
+// Clean up stale version cache files (yt-dlp and ffmpeg) — they expire after 1 hour
+// but the files themselves accumulate on long-running servers if not removed.
+// When the cache is cleared, also clear the in-memory global so the next request
+// fetches a fresh version rather than holding a stale entry across requests.
+foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
+    $d = @json_decode(@file_get_contents($cache), true);
+    if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
+        @unlink($cache);
+        if ($cache === '/tmp/ahoyrip_ytdlp_ver.cache') {
+            $GLOBALS['__ytdlp_version'] = null;
+        }
+        if ($cache === '/tmp/ahoyrip_ffmpeg_ver.cache') {
+            $GLOBALS['__ffmpeg_version'] = null;
         }
     }
 }
