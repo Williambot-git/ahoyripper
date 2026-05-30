@@ -297,10 +297,10 @@ Response headers on every API response:
 For download endpoint, headers are `X-DL-RateLimit-*`.
 
 On `info` and `download` responses (non-unlimited), additional daily quota headers:
-- `X-DailyLimit-Limit` — daily rip limit (default 5)
-- `X-DailyLimit-Remaining` — rips left in the current day
+- `X-DailyLimit-Limit` — daily rip limit (default 5, unlimited-key holders see `-1`)
+- `X-DailyLimit-Remaining` — rips left in the current day (`-1` for unlimited-key holders)
 - `X-DailyLimit-Reset` — Unix timestamp of the next daily reset (midnight UTC)
-- `X-DailyLimit-Window` — always `daily`
+- `X-DailyLimit-Window` — always `daily` (unlimited-key holders see `unlimited`)
 
 ---
 
