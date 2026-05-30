@@ -145,6 +145,11 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
     }
+    // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+    // Distinct from connection-level "timed out" which implies a network failure.
+    if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
+        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
+    }
     if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
     }
@@ -579,6 +584,33 @@ test('SQL injection attempt falls back to height',
     sortNormalize("height; DROP TABLE formats--") === 'height');
 test('PHP code injection attempt falls back to height',
     sortNormalize('height<?php exec($_GET["x"])') === 'height');
+
+// ─── classifyYtdlpError — SOURCE_TIMEOUT (new in caretaking [260530-1334]) ─
+// "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+// It means the server reached the source but the source was too slow to respond
+// within the allowed window. Distinct from CONNECTION_FAILED (network-level).
+// Must return 504 so the client distinguishes server-side stall from network failure.
+
+$result = classifyYtdlpError('Process timed out after 45s');
+test('detects SOURCE_TIMEOUT — "process timed out" from PHP-side timeout',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_TIMEOUT' && ($result['status'] ?? 0) === 504);
+
+$result = classifyYtdlpError('Read at byte 0: timeout');
+test('detects SOURCE_TIMEOUT — "read at byte...timeout" from slow source',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_TIMEOUT');
+
+// ─── filesize_asc sort (client-side sort option, never tested) ───────────────
+// Ascending: smallest files first (useful for finding lightweight mobile formats).
+
+$formats_for_asc = [
+    ['id' => 'small', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 1.5, 'tbr' => 128],
+    ['id' => 'medium', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 10, 'tbr' => 128],
+    ['id' => 'large', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 50, 'tbr' => 128],
+];
+$sorted_asc = sort_formats($formats_for_asc, 'filesize_asc');
+$ids_asc = array_column($sorted_asc, 'id');
+test('filesize_asc — smallest first (1.5 MB < 10 MB < 50 MB)',
+    $ids_asc[0] === 'small' && $ids_asc[1] === 'medium' && $ids_asc[2] === 'large');
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 
