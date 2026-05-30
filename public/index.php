@@ -267,6 +267,11 @@ $VERSION = '1.0.0';
   // Set to false in error branches; checked nowhere (safety net for code changes).
   var navigateOnSuccess = true;
 
+  // ─── Clear stale error state on page load / new interaction ─────────────────
+  // Any error displayed from a previous session (e.g. network failure on a prior
+  // rip) must be dismissed so it doesn't persist and confuse the user.
+  hideError();
+
   // Restore persisted quota from localStorage on page load.
   // Falls back to showing nothing until the first API response arrives,
   // avoiding the stale "5 free rips/day" on returning visitors.
