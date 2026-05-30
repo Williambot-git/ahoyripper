@@ -1005,7 +1005,7 @@ switch ($action) {
                     $exit = -1;
                     foreach ($pipes as $p) { if ($p) fclose($p); }
                     $pipes = null;
-                    proc_close($proc);
+                    $proc = null;  // sentinel: prevents double proc_close() below
                     $out = '';
                     break;
                 }
@@ -1029,11 +1029,9 @@ switch ($action) {
                 }
                 if ($pipes[1] === null && $pipes[2] === null) break;
             }
-            if ($pipes[1] === null && $pipes[2] === null) {
-                foreach ($pipes as $p) { if ($p) fclose($p); }
-                $pipes = null;
-                $exit = proc_close($proc);
-            } else {
+            // Only call proc_close if $proc is still open (null sentinel means timeout
+            // handler already closed it to avoid double-close).
+            if ($proc !== null) {
                 foreach ($pipes as $p) { if ($p) fclose($p); }
                 $pipes = null;
                 $exit = proc_close($proc);
@@ -1511,11 +1509,11 @@ switch ($action) {
         while (true) {
             if ($timeout > 0 && (time() - $start) > $timeout) {
                 // Clean up process handle before exit to avoid zombie processes.
-                // proc_terminate sends SIGKILL; proc_close waits for exit and releases
-                // the resource. Do both even though proc_terminate already killed it —
-                // proc_close is necessary to avoid leaving a zombie.
+                // proc_terminate sends SIGKILL; setting $proc = null is the sentinel
+                // that prevents the post-loop proc_close() from running on an
+                // already-closed handle (avoids double-close).
                 proc_terminate($proc, 9);
-                proc_close($proc);
+                $proc = null;  // sentinel: post-loop proc_close() skips this
                 $proc_killed = true;
                 // Use glob pattern — $out_file was never set in this scope.
                 // $out_base was set above and holds the safe base name.
@@ -1567,10 +1565,10 @@ switch ($action) {
         if ($pipes[1] !== null) fclose($pipes[1]);
         if ($pipes[2] !== null) fclose($pipes[2]);
 
-        // proc_close() returns the exit code — call it here to capture the status.
-        // Capture it in a separate statement so it can't be mistaken for a void
-        // discard. Pipe handles were already closed above.
-        $actual_exit = proc_close($proc);
+        // proc_close() returns the exit code — only call if $proc is still open.
+        // $proc = null is set by the timeout handler to prevent double-close.
+        // When $proc is null the process was already terminated and closed there.
+        $actual_exit = ($proc !== null) ? proc_close($proc) : -1;
         if ($actual_exit !== 0) {
             foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
             // Build a descriptive error from the captured stderr/stdout

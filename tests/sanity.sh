@@ -259,6 +259,33 @@ fi
 echo "  ✓ download case logs 'download' action for daily limit"
 
 echo ""
+echo "==> Checking timeout handlers do not call proc_close() directly (double-close guard)..."
+# Timeout blocks must set $proc = null instead of calling proc_close($proc) directly,
+# so the post-loop proc_close() can detect the already-closed handle via the null sentinel.
+# The wrong pattern is: proc_terminate($proc, 9); proc_close($proc);  // double-close risk
+# The correct pattern is: proc_terminate($proc, 9); $proc = null;
+# We detect the bad pattern by finding proc_close($proc) appearing on a line that
+# comes AFTER proc_terminate($proc, 9) within a timeout block (within 3 lines).
+# We use grep -n to get line numbers and check proximity.
+bad=0
+while IFS=: read -r linenum line; do
+    # For each proc_close($proc) line, check if a proc_terminate($proc, 9) appeared
+    # within 3 lines before it inside a timeout block.
+    start_line=$((linenum - 3))
+    [ $start_line -lt 1 ] && start_line=1
+    context=$(sed -n "${start_line},${linenum}p" src/api.php)
+    if echo "$context" | grep -q "proc_terminate.*\$proc"; then
+        echo "  ✗ Line $linenum: proc_close(\$proc) found after proc_terminate — double-close risk"
+        bad=1
+    fi
+done < <(grep -n "proc_close(\$proc)" src/api.php)
+if [ $bad -eq 1 ]; then
+    echo "  Fix: use '\$proc = null' instead of 'proc_close(\$proc)' inside timeout blocks."
+    exit 1
+fi
+echo "  ✓ Timeout blocks use \$proc = null sentinel instead of proc_close()"
+
+echo ""
 echo "==> Checking API CSP includes all required thumbnail CDN domains..."
 # The API CSP must allow thumbnails from media CDNs so the browser can load
 # them when rendering video info (YouTube, TikTok, Twitter/X, SoundCloud, etc.).
