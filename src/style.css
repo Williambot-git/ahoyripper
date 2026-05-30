@@ -576,6 +576,7 @@ body {
   font-weight: 600;
   margin-bottom: 0.4rem;
   color: var(--color-text);
+  text-align: center;
 }
 .feature-card p { font-size: 0.85rem; color: var(--color-text-sec); line-height: 1.6; }
 
