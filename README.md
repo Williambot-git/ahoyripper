@@ -35,6 +35,9 @@ sudo systemctl reload nginx
 
 # 4. Set permissions
 sudo chown -R www-data:www-data /var/www/ahoyripper
+
+# 5. Run tests (optional but recommended after updates)
+bash tests/run.sh
 ```
 
 ---
@@ -95,9 +98,10 @@ ahoyripper/
 ├── scripts/
 │   └── install-deps.sh    # Dependency installer
 ├── tests/
+│   ├── run.sh                 # Unified test runner (runs all suites)
 │   ├── sanity.sh             # Shell-based sanity / regression checks
-│   ├── parse_formats_test.php # Unit tests for parseFormats() — no dependencies
-│   └── api_test.php           # Integration tests for the API endpoints
+│   ├── api_test.php          # Unit tests for standalone API functions
+│   └── parse_formats_test.php # Unit tests for parseFormats()
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
