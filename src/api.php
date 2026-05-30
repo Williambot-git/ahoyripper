@@ -13,6 +13,11 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests;');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
+// Prevent AI / crawler indexing and training on API responses.
+// Search engines (Google, Bing) and AI training crawlers (CCBot, GPTBot, etc.)
+// all respect X-Robots-Tag. This complements robots.txt which only covers the
+// public page — the API endpoint (which returns JSON) needs its own directive.
+header('X-Robots-Tag: noindex, noai, noimage, noydir');
 $request_id = bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
 

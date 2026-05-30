@@ -85,6 +85,7 @@ REQUIRED_HEADERS=(
     "Strict-Transport-Security"
     "Content-Security-Policy"
     "X-Download-Options"
+    "X-Robots-Tag"
 )
 for header in "${REQUIRED_HEADERS[@]}"; do
     if grep -q "$header" src/api.php; then
