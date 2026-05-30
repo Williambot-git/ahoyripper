@@ -252,8 +252,9 @@ echo ""
 echo "==> Checking API CSP includes all required thumbnail CDN domains..."
 # The API CSP must allow thumbnails from media CDNs so the browser can load
 # them when rendering video info (YouTube, TikTok, Twitter/X, SoundCloud, etc.).
-# In nginx-docker.conf the CSP is now set at server level (inherited by all locations).
-# In production nginx.conf it is set in the php location block.
+# In nginx-docker.conf the CSP is set at server level (inherited by all locations).
+# In production nginx.conf it is set at server level too (PHP sets its own CSP for
+# API responses, so there is no duplication).
 # Both locations must have the same CDN thumbnail allowances.
 REQUIRED_THUMB_DOMAINS=(
     "i.ytimg.com"
@@ -278,7 +279,7 @@ if [ "$missing" -eq 0 ]; then
     echo "  ✓ API CSP allows all required thumbnail CDN domains"
 fi
 
-# Check nginx-docker.conf CSP (now at server level)
+# Check nginx-docker.conf CSP (server level)
 DOCKER_CSP=$(grep "Content-Security-Policy" deploy/nginx-docker.conf | sed "s/.*Content-Security-Policy[ ]*//")
 missing=0
 for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
@@ -308,6 +309,19 @@ if [ "$CSP_COUNT" -eq 1 ]; then
     echo "  ✓ CSP appears exactly once in nginx-docker.conf (server level, no duplicate)"
 else
     echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 1 — duplicate CSP header)"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking production nginx.conf CSP has 'always' parameter..."
+# The production nginx.conf CSP must use 'always' so it is sent on error pages (404, 500, etc.)
+# too, not just on 200 responses. Without 'always', nginx error pages served by the static
+# location have no CSP — a security regression vs Docker deployments.
+PROD_CSP_LINE=$(grep "Content-Security-Policy" deploy/nginx.conf || true)
+if echo "$PROD_CSP_LINE" | grep -q "always"; then
+    echo "  ✓ Production nginx.conf CSP uses 'always' — covers error pages"
+else
+    echo "  ✗ Production nginx.conf CSP missing 'always' — error pages have no CSP"
     exit 1
 fi
 
