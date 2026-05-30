@@ -888,8 +888,11 @@ switch ($action) {
         // "Authorization: Bearer " (trailing space, no token) should fall through to key= param.
         $api_key = null;
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m) && trim($m[1]) !== '') {
-            $api_key = trim($m[1]);
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
+            $bearer_token = trim($m[1]);
+            if ($bearer_token !== '') {
+                $api_key = $bearer_token;
+            }
         }
         if ($api_key === null) {
             $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
@@ -1272,11 +1275,16 @@ switch ($action) {
         // Prefer Authorization: Bearer *** (keeps key out of URLs and server logs).
         // Fall back to GET/POST query param only for legacy clients that can't send headers.
         // Omit empty-string Bearer tokens — a misconfigured client sending
-        // "Authorization: Bearer *** (trailing space, no token) should fall through to key= param.
+        // Authorization: Bearer header — trim whitespace from captured token.
+        // An empty token ("Authorization: Bearer " with trailing space but no value)
+        // means a misconfigured client; skip it and fall through to key= param.
         $api_key = null;
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m) && trim($m[1]) !== '') {
-            $api_key = trim($m[1]);
+        if (preg_match('/^Bearer\s+(.+)$/i', $auth_header, $m)) {
+            $bearer_token = trim($m[1]);
+            if ($bearer_token !== '') {
+                $api_key = $bearer_token;
+            }
         }
         if ($api_key === null) {
             $api_key = $_GET['key'] ?? $_POST['key'] ?? null;
