@@ -960,6 +960,9 @@ switch ($action) {
         // containing whitespace or special characters in query params are
         // handled correctly. With bypass_shell=true, proc_open parses the
         // array into argv without a shell, so no shell escaping is needed.
+        // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
+        // by anti-bot measures that detect the default python-requests User-Agent.
+        // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
@@ -969,6 +972,7 @@ switch ($action) {
             '--newline',
             '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
+            '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             '--',
             $url,
         ];
@@ -1446,6 +1450,7 @@ switch ($action) {
             '--progress',
             '--geo-bypass',
             '--referer', $referer,
+            '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             '--',
             $url,
         ];

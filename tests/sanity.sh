@@ -59,11 +59,21 @@ fi
 
 echo ""
 echo "==> Checking yt-dlp --geo-bypass flag for download action..."
-# The download action should also use --geo-bypass for the same reason.
 if sed -n "/case 'download':/,/case '/p" src/api.php | grep -q -- '--geo-bypass'; then
     echo "  ✓ --geo-bypass flag present in yt-dlp download command"
 else
     echo "  ✗ --geo-bypass flag missing in yt-dlp download command"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking yt-dlp --user-agent flag for anti-bot protection..."
+# yt-dlp defaults to "python-requests/X.Y.Z" which anti-bot systems detect and block.
+# A realistic browser User-Agent reduces source-site blocking.
+if grep -q -- '--user-agent' src/api.php; then
+    echo "  ✓ --user-agent flag present in yt-dlp commands"
+else
+    echo "  ✗ --user-agent flag missing (yt-dlp defaults to python-requests User-Agent, trivially blocked by anti-bot)"
     exit 1
 fi
 
