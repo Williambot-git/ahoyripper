@@ -1775,9 +1775,10 @@ switch ($action) {
         exit;
     }
 
-case 'progress':
+case 'check':
+    case 'progress':
     case 'health': {
-        // Health/progress — lightweight endpoints, no daily quota or rate limiting.
+        // Health/progress/check — lightweight endpoints, no daily quota or rate limiting.
         // Note: all security headers are already set at the top of the script.
 
         $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
@@ -1909,6 +1910,7 @@ case 'progress':
         // Return 404 Not Found — the action/endpoint is not recognized.
         // 400 Bad Request would imply a malformed request syntax, which is
         // inaccurate when the server simply doesn't know that action name.
+        logRequest($action ?: 'unknown', 404, ['reason' => 'unknown_action']);
         http_response_code(404);
         echo json_encode([
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.',
