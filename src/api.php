@@ -515,6 +515,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         return [
             'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
             'error_code' => 'PARSE_ERROR',
+            'raw_error' => $raw_error_out,
         ];
     }
 
