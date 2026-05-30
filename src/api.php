@@ -194,7 +194,7 @@ foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp
 // Unlike health (which may run yt-dlp, syscalls, reads /proc), this is a pure
 // JSON ping that adds zero server load — safe to call every 10 seconds.
 // Placed BEFORE the referer gate so it exits before that check runs.
-$internal_actions = ['health', 'progress', 'check'];
+$internal_actions = ['check', 'health', 'progress'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
     header('Content-Type: application/json; charset=utf-8');
