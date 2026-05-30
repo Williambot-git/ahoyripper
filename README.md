@@ -184,6 +184,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests — try again shortly |
+| `SOURCE_TIMEOUT` | The source site took too long to respond. Try a smaller format (audio-only is fastest). |
 | `SSL_ERROR` | Secure connection to the source failed |
 | `CONNECTION_FAILED` | Could not connect to the source |
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
@@ -238,6 +239,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `LOGIN_REQUIRED` | Video requires login or subscription |
 | `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
 | `422` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
+| `422` | `SOURCE_TIMEOUT` | The source site timed out. Try a smaller format or audio-only. |
 | `422` | `CONNECTION_FAILED` | Could not connect to the source |
 | `422` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
