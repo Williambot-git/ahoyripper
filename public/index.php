@@ -740,7 +740,9 @@ $VERSION = '1.0.0';
             '502': 'The server encountered an error. Please try again in a moment.',
             '503': 'Service temporarily unavailable. Please try again shortly.',
           };
-          if (err.error_code && errorHints[err.error_code]) {
+          // Use !== undefined (not truthy) so the check catches the string "0"
+          // which would be falsy but is a valid error code.
+          if (err.error_code !== undefined && errorHints[err.error_code]) {
             msg = errorHints[err.error_code];
           } else {
             var statusKey = String(resp.status);
