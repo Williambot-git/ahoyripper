@@ -242,7 +242,7 @@ $VERSION = '1.0.0';
 
 <footer>
   <p>For personal use only. Respect copyright. &nbsp;|&nbsp; <a href="https://ahoyvpn.com">AhoyVPN</a> &nbsp;|&nbsp; <a href="mailto:dmca@ahoyvpn.com">DMCA</a></p>
-  <p style="margin-top:0.5rem">&copy; <?= date('Y') ?> AhoyRipper. All rights reserved.</p>
+  <p style="margin-top:0.5rem">&copy; <?= date('Y') ?> AhoyRipper. All rights reserved. &nbsp;|&nbsp; <a href="https://github.com/Williambot-git/ahoyripper" rel="noopener">v<?= htmlspecialchars($VERSION) ?></a></p>
 </footer>
 
 <script>

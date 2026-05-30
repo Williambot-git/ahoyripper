@@ -306,17 +306,64 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 
 ## Supported Platforms
 
-AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** including all major video, audio, and social media sites.
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
 
-### Platform Categories
+### Quick-reference table
+
+| Platform | Type | Notes |
+|----------|------|-------|
+| [YouTube](https://youtube.com) | Video + Audio | Largest platform |
+| [X/Twitter](https://x.com) | Video | |
+| [TikTok](https://tiktok.com) | Video + Audio | |
+| [SoundCloud](https://soundcloud.com) | Audio | |
+| [Instagram](https://instagram.com) | Video + Audio | Reels, stories, posts |
+| [Facebook](https://facebook.com) | Video | |
+| [Vimeo](https://vimeo.com) | Video | |
+| [Reddit](https://reddit.com) | Video + Audio | |
+| [VK](https://vk.com) | Video + Audio | |
+| [Pornhub](https://pornhub.com) | Video + Audio | Adult content |
+| [xHamster](https://xhamster.com) | Video + Audio | Adult content |
+| [Xnxx](https://xnxx.com) | Video + Audio | Adult content |
+| [xvideos](https://xvideos.com) | Video + Audio | Adult content |
+| [Dailymotion](https://dailymotion.com) | Video | |
+| [Twitch](https://twitch.tv) | Video + Audio | VODs, clips |
+| [Kick](https://kick.com) | Video + Audio | |
+| [Rumble](https://rumble.com) | Video | |
+| [Bilibili](https://bilibili.com) | Video + Audio | Chinese platform |
+| [Niconico](https://nicovideo.jp) | Video + Audio | Japanese platform |
+| [Bandcamp](https://bandcamp.com) | Audio | |
+| [Mixcloud](https://mixcloud.com) | Audio | |
+| [Spotify](https://spotify.com) | Audio | Requires cookies for full access |
+| [Netflix](https://netflix.com) | Video | Non-DRM only |
+| [Disney+](https://disneyplus.com) | Video | Non-DRM only |
+| [Amazon Prime Video](https://amazon.com/prime-video) | Video | Non-DRM only |
+| [Hulu](https://hulu.com) | Video | Non-DRM only |
+| [Paramount+](https://paramountplus.com) | Video | Non-DRM only |
+| [Peacock](https://peacocktv.com) | Video | Non-DRM only |
+| [Max/HBO](https://max.com) | Video | Non-DRM only |
+| [Pinterest](https://pinterest.com) | Images + Video | |
+| [Tumblr](https://tumblr.com) | Video + Audio | |
+| [Douyin](https://douyin.com) | Video + Audio | Chinese TikTok |
+| [Kuaishou](https://kuaishou.com) | Video + Audio | Chinese platform |
+| [Weibo](https://weibo.com) | Video + Audio | Chinese platform |
+| [Snapchat](https://snapchat.com) | Video | Stories, spotlight |
+| [Telegram](https://telegram.org) | Video + Audio | Public channels |
+
+> **DRM note:** Netflix, Disney+, Amazon Prime Video, Hulu, Paramount+, Peacock, and Max content with digital rights management (DRM) cannot be ripped. Only non-DRM content from these platforms will work.
+
+### Full extractor list
+
+Run `yt-dlp --list-extractors` locally, or see the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) online. Every extractor that works with yt-dlp works with AhoyRipper.
+
+### Platform categories
 
 **Video platforms:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, Netflix, Disney+, Paramount+, Peacock, HBO Max/Max, Amazon Prime Video, Hulu, and more.
 
 **Audio platforms:** SoundCloud, Bandcamp, Spotify (requires auth), Apple Music, Deezer, Mixcloud, Audiomack, and more.
 
-**Social media:** All platforms above, plus: VK, Douyin, Kuaishou, Weibo, Tumblr, Reddit (video/audio), and more.
+**Social media:** All platforms above, plus: VK, Douyin, Kuaishou, Weibo, Tumblr, Reddit (video/audio), Pinterest, Snapchat, Telegram, and more.
 
-**Full extractor list:** Run `yt-dlp --list-extractors` locally, or see the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) online. Every extractor that works with yt-dlp works with AhoyRipper.
+**Adult content:** Pornhub, xHamster, XNXX, XVideos, and more (all yt-dlp extractors).
 
 ### Platforms requiring authentication
 

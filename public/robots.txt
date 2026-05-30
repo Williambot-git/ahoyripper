@@ -26,6 +26,8 @@ User-agent: PerplexityBot
 User-agent: PetalBot
 User-agent: SemrushBot-Crawler
 User-agent: YouBot
+User-agent: PinterestBot
+User-agent: AhoyBot
 Disallow: /
 
 # Sitemap
