@@ -1166,6 +1166,7 @@ switch ($action) {
                 'GEOBLOCKED' => 451, 'COPYRIGHT_REMOVED' => 451, 'DISALLOWED_CONTENT' => 451,
                 'VIDEO_UNAVAILABLE' => 410,
                 'SOURCE_RATE_LIMITED' => 429,
+                'SOURCE_TIMEOUT' => 504,
                 'PRIVATE_VIDEO' => 403, 'AGE_RESTRICTED' => 403, 'LOGIN_REQUIRED' => 401,
                 'UNSUPPORTED_SITE' => 404, 'PLAYLIST_MISSING' => 404,
                 'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
