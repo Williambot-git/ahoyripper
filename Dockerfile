@@ -1,13 +1,13 @@
-FROM python:3.12-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
-    curl \
-    ffmpeg \
-    nginx \
-    php \
-    php-fpm \
-    php-mbstring \
-    php-curl \
+        curl \
+        ffmpeg \
+        nginx \
+        php \
+        php-fpm \
+        php-mbstring \
+        php-curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     # Install yt-dlp as a standalone binary (no Python dependency needed).
