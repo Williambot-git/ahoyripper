@@ -748,6 +748,29 @@ $validation = function(string $action) use($request_id) {
         ]);
         return false;
     }
+    // Age-restriction bypass for YouTube: rewrite watch/shorts/youtu.be URLs to
+    // the embed endpoint. The embed player does not enforce age-gating so yt-dlp
+    // can extract formats without cookies. Only applies to youtube.com hostnames.
+    // Embed URLs were already playable directly so no rewrite needed for those.
+    $yt_parsed = parse_url($url, PHP_URL_HOST);
+    $yt_host = $yt_parsed !== false && $yt_parsed !== null ? strtolower($yt_parsed) : '';
+    if (in_array($yt_host, ['www.youtube.com', 'youtube.com', 'youtu.be'], true)) {
+        $yt_path = parse_url($url, PHP_URL_PATH);
+        $yt_id = null;
+        if ($yt_path === '/watch') {
+            // Video ID is in the query string: /watch?v=ID[&...]
+            parse_str(parse_url($url, PHP_URL_QUERY) ?: '', $yt_qs);
+            $yt_id = $yt_qs['v'] ?? null;
+        } elseif (preg_match('#^/(?:shorts|v)/([a-zA-Z0-9_-]{11})#', $yt_path, $m)) {
+            $yt_id = $m[1];
+        } elseif ($yt_host === 'youtu.be' && preg_match('#^/([a-zA-Z0-9_-]{11})$#', $yt_path, $m)) {
+            $yt_id = $m[1];
+        }
+        if ($yt_id && $yt_path !== '/embed/' . $yt_id) {
+            // Only rewrite if not already an embed URL
+            $url = 'https://www.youtube.com/embed/' . $yt_id;
+        }
+    }
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
     if ($action === 'download') {
