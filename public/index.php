@@ -803,6 +803,15 @@ $VERSION = '1.0.0';
       }
     }, 100);
   });
+
+  // Dismiss error message when clicking anywhere outside the error box itself.
+  // This gives the user an easy way to clear a persistent error without
+  // having to reload the page or manually delete the message text.
+  document.addEventListener('click', function(e) {
+    if (!errorBox.contains(e.target) && errorBox.classList.contains('active')) {
+      hideError();
+    }
+  });
 </script>
 
 </body>
