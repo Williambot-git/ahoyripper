@@ -203,13 +203,33 @@ if (in_array($action, $internal_actions, true)) {
     exit;
 }
 
-// Only allow safe characters in URL
+// Only allow HTTPS URLs and block private IP ranges to prevent SSRF attacks.
+// yt-dlp accepts file:// URLs directly, so we restrict to HTTP(S) and reject
+// private ranges (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x) and IPv6 loopback.
 function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
     }
-    return filter_var($url, FILTER_VALIDATE_URL) !== false
-        && preg_match('/^https?:\/\//', $url);
+    if (!preg_match('/^https:\/\//', $url)) {
+        return false; // Only HTTPS — reject http:// and other schemes
+    }
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+    // Block private and reserved IP ranges in the host portion
+    $parsed = parse_url($url, PHP_URL_HOST);
+    if ($parsed === false || $parsed === null) {
+        return false;
+    }
+    // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1)
+    $host = trim($parsed, '[]');
+    // If the host is an IP address, validate it is not private/reserved
+    if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // yt-dlp version cache (declared early so periodic cleanup can reference it)

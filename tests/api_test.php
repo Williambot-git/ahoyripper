@@ -35,15 +35,33 @@ function test($name, $condition) {
 
 // ─── isValidUrl (verbatim copy from api.php) ────────────────────────────────
 
+// Only allow HTTPS URLs and block private IP ranges to prevent SSRF attacks.
+// yt-dlp accepts file:// URLs directly, so we restrict to HTTP(S) and reject
+// private ranges (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x) and IPv6 loopback.
 function isValidUrl($url) {
-    // Reject non-strings early — filter_var accepts various types and may coerce
-    // them in unexpected ways (e.g. array → "Array", object → "object").
-    // URL validation only makes sense for string input.
     if (!is_string($url)) {
         return false;
     }
-    return filter_var($url, FILTER_VALIDATE_URL) !== false
-        && preg_match('/^https?:\/\//', $url);
+    if (!preg_match('/^https:\/\//', $url)) {
+        return false; // Only HTTPS — reject http:// and other schemes
+    }
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+    // Block private and reserved IP ranges in the host portion
+    $parsed = parse_url($url, PHP_URL_HOST);
+    if ($parsed === false || $parsed === null) {
+        return false;
+    }
+    // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1)
+    $host = trim($parsed, '[]');
+    // If the host is an IP address, validate it is not private/reserved
+    if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+    }
+    return true;
 }
 
 echo "\n==> Testing isValidUrl()\n";
@@ -56,8 +74,22 @@ test('accepts https with port',
     isValidUrl('https://example.com:8080/path') !== false);
 test('accepts https with query string',
     isValidUrl('https://example.com/watch?v=abc&list=xyz') !== false);
-test('accepts http:// (allowed — proc_open uses array form, no shell injection risk)',
-    isValidUrl('http://example.com') !== false);
+test('rejects http:// (only HTTPS allowed — blocks SSRF to private IPs)',
+    isValidUrl('http://example.com') === false);
+test('rejects private IP 127.0.0.1',
+    isValidUrl('https://127.0.0.1/secret') === false);
+test('rejects private IP 10.x',
+    isValidUrl('https://10.0.0.1/internal') === false);
+test('rejects private IP 172.16.x',
+    isValidUrl('https://172.16.0.1/internal') === false);
+test('rejects private IP 192.168.x',
+    isValidUrl('https://192.168.1.1/router') === false);
+test('rejects link-local 169.254.x (AWS metadata)',
+    isValidUrl('https://169.254.169.254/latest/meta-data') === false);
+test('rejects IPv6 loopback ::1',
+    isValidUrl('https://[::1]/internal') === false);
+test('rejects IPv6 link-local fe80::',
+    isValidUrl('https://[fe80::1]/internal') === false);
 test('rejects ftp scheme',
     isValidUrl('ftp://example.com/file.mp4') === false);
 test('rejects javascript: scheme',
