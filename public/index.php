@@ -39,7 +39,9 @@ $VERSION = '1.0.0';
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
   <meta property="og:description" content="Download video & audio from YouTube, TikTok, Twitter, SoundCloud & 1800+ sites. Free, no signup, no ads.">
   <meta property="og:site_name" content="AhoyRipper">
-  <meta property="og:image" content="https://ahoyripper.com/og-image.svg">
+  <meta property="og:image" content="https://ahoyripper.com/og-image.png">
+  <meta property="og:image:secure_url" content="https://ahoyripper.com/og-image.png">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
@@ -51,7 +53,9 @@ $VERSION = '1.0.0';
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Rip any video or audio from 1800+ platforms. Free, fast, no signup needed.">
-  <meta name="twitter:image" content="https://ahoyripper.com/og-image.svg">
+  <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
+  <meta name="twitter:image:width" content="1200">
+  <meta name="twitter:image:height" content="630">
   <meta name="twitter:image:alt" content="AhoyRipper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
 
   <!-- Favicon -->
