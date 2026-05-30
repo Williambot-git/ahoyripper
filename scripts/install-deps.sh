@@ -95,12 +95,18 @@ if command -v yt-dlp &>/dev/null; then
                 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
                 2>/dev/null && chmod +x /usr/local/bin/yt-dlp
         fi
-    elif [[ "$YTDL_BIN" == *.py || "$YTDL_BIN" == */bin/yt-dlp ]] && grep -q 'site-packages\|dist-packages' "$YTDL_BIN" 2>/dev/null || pip show yt-dlp &>/dev/null; then
-        # pip-installed — use pip to upgrade
+    elif pip show yt-dlp &>/dev/null; then
+        # pip-installed — use pip to upgrade (pip-installed yt-dlp ignores --self-update)
         $PIP_BIN install -q --upgrade yt-dlp 2>&1 | tail -1
     else
-        # standalone binary — use self-update
-        yt-dlp --self-update 2>&1 | tail -1
+        # standalone binary — download the latest release directly from GitHub
+        # (--self-update is unreliable for standalone binaries as it may skip the
+        # update if the current build is considered "pinned" or is a dev version)
+        echo "  Updating standalone yt-dlp binary..."
+        curl -L -o /usr/local/bin/yt-dlp \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+            2>/dev/null && chmod +x /usr/local/bin/yt-dlp
+        echo "  Updated to: $(yt-dlp --version 2>&1 | head -1)"
     fi
 fi
 
