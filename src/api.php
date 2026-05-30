@@ -13,6 +13,11 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests;');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header('X-Download-Options: noopen');
+// Prevent AI / crawler indexing and training on API responses.
+// Search engines (Google, Bing) and AI training crawlers (CCBot, GPTBot, etc.)
+// all respect X-Robots-Tag. This complements robots.txt which only covers the
+// public page — the API endpoint (which returns JSON) needs its own directive.
+header('X-Robots-Tag: noindex, noai, noimage, noydir');
 $request_id = bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
 
@@ -141,7 +146,7 @@ if ($is_rate_limited) {
         }
         $data['c']++;
     } else {
-        $data = ['t' => time(), 'c' => 1];
+        $data = ['t' => time(), 'c' => 0]; // Fresh window — current request will be counted after the write
     }
 
     // Write back atomically
@@ -752,6 +757,29 @@ $validation = function(string $action) use($request_id) {
             'request_id' => $request_id,
         ]);
         return false;
+    }
+    // Age-restriction bypass for YouTube: rewrite watch/shorts/youtu.be URLs to
+    // the embed endpoint. The embed player does not enforce age-gating so yt-dlp
+    // can extract formats without cookies. Only applies to youtube.com hostnames.
+    // Embed URLs were already playable directly so no rewrite needed for those.
+    $yt_parsed = parse_url($url, PHP_URL_HOST);
+    $yt_host = $yt_parsed !== false && $yt_parsed !== null ? strtolower($yt_parsed) : '';
+    if (in_array($yt_host, ['www.youtube.com', 'youtube.com', 'youtu.be'], true)) {
+        $yt_path = parse_url($url, PHP_URL_PATH);
+        $yt_id = null;
+        if ($yt_path === '/watch') {
+            // Video ID is in the query string: /watch?v=ID[&...]
+            parse_str(parse_url($url, PHP_URL_QUERY) ?: '', $yt_qs);
+            $yt_id = $yt_qs['v'] ?? null;
+        } elseif (preg_match('#^/(?:shorts|v)/([a-zA-Z0-9_-]{11})#', $yt_path, $m)) {
+            $yt_id = $m[1];
+        } elseif ($yt_host === 'youtu.be' && preg_match('#^/([a-zA-Z0-9_-]{11})$#', $yt_path, $m)) {
+            $yt_id = $m[1];
+        }
+        if ($yt_id && $yt_path !== '/embed/' . $yt_id) {
+            // Only rewrite if not already an embed URL
+            $url = 'https://www.youtube.com/embed/' . $yt_id;
+        }
     }
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
