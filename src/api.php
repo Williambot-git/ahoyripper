@@ -449,6 +449,15 @@ function classifyYtdlpError($raw_err) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
 
+    // Internal PHP-side process timeout ("Process timed out after 45s") — distinct
+    // from a connection-level "timed out" (which implies network-level failure).
+    // This means the server reached the source but the source was too slow to respond
+    // within the allowed window. Return 504 so the client distinguishes it from
+    // CONNECTION_FAILED (502) which implies a network or DNS issue on our end.
+    if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
+        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
+    }
+
     if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }

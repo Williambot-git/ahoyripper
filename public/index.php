@@ -718,6 +718,7 @@ $VERSION = '1.0.0';
             'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
             'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
             'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
+            'SOURCE_TIMEOUT': 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
             'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
             'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
             'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
