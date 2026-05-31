@@ -1055,7 +1055,6 @@ switch ($action) {
             '--no-playlist',
             '--no-warnings',
             '--skip-download',
-            '--newline',
             '--geo-bypass-country', 'US',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
@@ -1745,7 +1744,7 @@ switch ($action) {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Download failed. The format may not be available. Try another format from the list.',
-                'error_code' => 'DOWNLOAD_FAILED',
+                'error_code' => 'DOWNLOAD_EMPTY',
                 'request_id' => $request_id,
             ]);
             exit;
