@@ -6,8 +6,13 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ahoyripper.com/api.php?action=health</loc>
+    <loc>https://ahoyripper.com/src/api.php?action=check</loc>
     <changefreq>daily</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://ahoyripper.com/src/api.php?action=health</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.2</priority>
   </url>
 </urlset>
