@@ -174,32 +174,32 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 
 **Classified error codes** (surfaced in the `error_code` field of 422 responses):
 
-| error_code | Meaning |
-|------------|---------|
+| error_code | Meaning | User action |
+|------------|---------|-------------|
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
-| `GEOBLOCKED` | Video is geo-restricted in your region |
-| `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
-| `LOGIN_REQUIRED` | Video requires login or subscription on the source platform |
-| `PARSE_ERROR` | The site returned a non-standard or unparseable response — it may not be supported |
-| `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
-| `PLAYLIST_MISSING` | Playlist not found or no longer exists |
-| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
-| `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
-| `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
-| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests — try again shortly |
-| `SOURCE_TIMEOUT` | The source site took too long to respond. Try a smaller format (audio-only is fastest). |
-| `SSL_ERROR` | Secure connection to the source failed |
-| `CONNECTION_FAILED` | Could not connect to the source |
-| `FILE_TOO_LARGE` | File exceeds the server's maximum size |
-| `FORMAT_UNAVAILABLE` | That format is not available for this video |
-| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
-| `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
-| `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
-| `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh the page and pick another format. |
-| `MISSING_FORMAT` | No format was selected on a download request — a format ID is required. |
-| `UNKNOWN_ACTION` | The requested action is not recognized — use `info`, `download`, `health`, or `progress`. |
+| `GEOBLOCKED` | Video is geo-restricted in your region | Download speeds or quality may be limited |
+| `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
+| `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Try downloading while signed in to the platform |
+| `PARSE_ERROR` | The site returned a non-standard or unparseable response | The site may be temporarily unavailable or not supported |
+| `UNSUPPORTED_SITE` | The site is not supported by yt-dlp | Check the supported sites list at github.com/yt-dlp/yt-dlp |
+| `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
+| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim | This content cannot be redistributed |
+| `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available | Try another video |
+| `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
+| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes |
+| `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
+| `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
+| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
+| `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
+| `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
+| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
+| `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format — audio-only is usually fastest |
+| `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
+| `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh the page and pick another format |
+| `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
+| `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
 ### Download a format
 ```
