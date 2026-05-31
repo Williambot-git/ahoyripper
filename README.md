@@ -168,12 +168,16 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
 | `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body (`RATE_LIMIT_EXCEEDED`, `DAILY_LIMIT`) |
+| `502` | Bad gateway — source site or proxy failed (`CONNECTION_FAILED`, `SSL_ERROR`) |
 | `503` | Service temporarily unavailable |
+| `504` | Gateway timeout — source site did not respond in time (`SOURCE_TIMEOUT`) |
 
 **Classified error codes** (surfaced in the `error_code` field of 422 responses):
 
 | error_code | Meaning |
 |------------|---------|
+| `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
+| `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform |
