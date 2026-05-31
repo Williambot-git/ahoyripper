@@ -1,6 +1,6 @@
 # AhoyRipper
 
-**Rip any video, anywhere.** A free, no-signup media converter that pulls video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo, and 1800+ other platforms.
+| **Rip any video, anywhere.** A free, no-signup media converter that pulls video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo, and 1872+ other platforms. |
 
 Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN brand.
 
@@ -10,7 +10,7 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 - **No signup, no tracking, no ads in the rip flow**
 - MP4, WEBM, MP3, M4A, WAV, FLAC, OGG and more
-- YouTube, X (Twitter), SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1800+ platforms
+- YouTube, X (Twitter), SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1872+ platforms
 - Dark theme matching ahoyvpn.com
 - Files streamed directly to your download - nothing stored on our servers
 - Built-in AhoyVPN upsell (supports the tool)
@@ -318,7 +318,7 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 
 ## Supported Platforms
 
-AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1800+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1872+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
 
 ### Quick-reference table
 

@@ -16,7 +16,7 @@ $VERSION = '1.0.0';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
-  <meta name="description" content="Free online media ripper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ other platforms. No signup, no ads.">
+  <meta name="description" content="Free online media ripper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ other platforms. No signup, no ads.">
   <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
@@ -37,14 +37,14 @@ $VERSION = '1.0.0';
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
-  <meta property="og:description" content="Download video & audio from YouTube, TikTok, Twitter, SoundCloud & 1800+ sites. Free, no signup, no ads.">
+  <meta property="og:description" content="Download video & audio from YouTube, TikTok, Twitter, SoundCloud & 1872+ sites. Free, no signup, no ads.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="https://ahoyripper.com/og-image.png">
   <meta property="og:image:secure_url" content="https://ahoyripper.com/og-image.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1800+ platforms">
+  <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://ahoyripper.com">
 
@@ -52,7 +52,7 @@ $VERSION = '1.0.0';
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
-  <meta name="twitter:description" content="Rip any video or audio from 1800+ platforms. Free, fast, no signup needed.">
+  <meta name="twitter:description" content="Rip any video or audio from 1872+ platforms. Free, fast, no signup needed.">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
