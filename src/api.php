@@ -1048,9 +1048,8 @@ switch ($action) {
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
-            '--quiet',
-            '--no-playlist',
             '--no-warnings',
+            '--no-playlist',
             '--skip-download',
             '--geo-bypass',
             '--extractor-args', 'youtube:player_client=web',
@@ -1533,7 +1532,6 @@ switch ($action) {
             '--quiet',
             '--no-playlist',
             '--no-warnings',
-            '--progress',
             '--geo-bypass',
             '--extractor-args', 'youtube:player_client=web',
             '--referer', $referer,
