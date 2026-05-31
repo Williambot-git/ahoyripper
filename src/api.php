@@ -631,11 +631,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         //   When format_description is '', the concat naturally has no trailing space.
         // - When format_description is absent (empty or "Unknown"), fall back to
         //   format_note (e.g. "720p60") first, then the compact label as last resort.
-        $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $desc = $quality
+        $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
+        $desc = $resolution
             ? (empty($format_description) || $format_description === 'Unknown'
                 ? ($format_note ?: $label)
-                : trim("{$quality} {$format_description}"))
+                : trim("{$resolution} {$format_description}"))
             : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
 
         // Estimate filesize if not available
