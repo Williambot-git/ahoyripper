@@ -748,7 +748,6 @@ $VERSION = '1.0.0';
             'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
             'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
             'DOWNLOAD_TIMEOUT': 'The download timed out after 5 minutes. Try a smaller format — audio-only is usually fastest.',
-            'DOWNLOAD_FAILED': 'The rip produced an empty or corrupt file. Try a lower resolution or audio-only format.',
             'DOWNLOAD_EMPTY': 'The downloaded file was empty or invalid. Try a different format.',
             'INVALID_FORMAT_ID': 'That format is not available. Pick another format from the list above.',
             'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',

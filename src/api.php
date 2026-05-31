@@ -1823,7 +1823,7 @@ switch ($action) {
         exit;
     }
 
-case 'check':
+    case 'check':
     case 'progress':
     case 'health': {
         // Health/progress/check — lightweight endpoints, no daily quota or rate limiting.
