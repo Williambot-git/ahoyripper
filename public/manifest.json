@@ -1,7 +1,7 @@
 {
-  "name": "AhoyRipper",
+  "name": "AhoyRipper — Free Online Media Ripper",
   "short_name": "AhoyRipper",
-  "description": "Free online media ripper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ other platforms. No signup, no ads.",
+  "description": "Download video and audio from YouTube, TikTok, Twitter, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. No signup, no ads, no limits. Just paste a link and rip.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
