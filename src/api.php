@@ -816,13 +816,6 @@ $validation = function(string $action) use($request_id) {
         ]);
         return false;
     }
-        // Age-restriction bypass for YouTube: use yt-dlp's --extractor-args to
-        // request the web player client, which handles many age-restricted videos
-        // without requiring cookies or embed-URL rewriting. This is applied uniformly
-        // to all YouTube URLs (watch, shorts, youtu.be, embed) by yt-dlp itself,
-        // making it more robust and comprehensive than the previous URL-rewrite
-        // approach which only handled a subset of URL patterns. The extractor-args
-        // approach also works for content that has no clean embed equivalent.
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
     if ($action === 'download') {
