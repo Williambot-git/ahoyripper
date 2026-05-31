@@ -111,6 +111,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
     $uploader = clean($data['uploader'] ?? '');
+    $platform = clean($data['extractor_key'] ?? '');
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
     if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
@@ -249,6 +250,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         'thumbnail' => $thumbnail,
         'duration' => $duration,
         'uploader' => $uploader,
+        'platform' => $platform,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
         'sort_applied' => $sort,
@@ -311,6 +313,28 @@ $json3 = makeJson('Audio Test', [], ['title' => '']);
 $result3 = parseFormats($json3);
 test('defaults empty title to "Unknown"',
     $result3 && ($result3['title'] ?? '') === 'Unknown');
+
+// ─── parseFormats: platform field (extractor_key) ──────────────────────────────
+
+$json_platform = makeJson('Test', [makeFormat()], ['extractor_key' => 'YouTube']);
+$result_platform = parseFormats($json_platform);
+test('extracts platform from extractor_key (YouTube)',
+    $result_platform && ($result_platform['platform'] ?? '') === 'YouTube');
+
+$json_platform_tiktok = makeJson('Test', [makeFormat()], ['extractor_key' => 'TikTok']);
+$result_platform_tiktok = parseFormats($json_platform_tiktok);
+test('extracts platform from extractor_key (TikTok)',
+    $result_platform_tiktok && ($result_platform_tiktok['platform'] ?? '') === 'TikTok');
+
+$json_no_platform = makeJson('Test', [makeFormat()]);
+$result_no_platform = parseFormats($json_no_platform);
+test('defaults missing extractor_key to "Unknown"',
+    $result_no_platform && ($result_no_platform['platform'] ?? '') === 'Unknown');
+
+$json_empty_platform = makeJson('Test', [makeFormat()], ['extractor_key' => '']);
+$result_empty_platform = parseFormats($json_empty_platform);
+test('defaults empty extractor_key to "Unknown"',
+    $result_empty_platform && ($result_empty_platform['platform'] ?? '') === 'Unknown');
 
 // ─── parseFormats: format card fields ─────────────────────────────────────────
 

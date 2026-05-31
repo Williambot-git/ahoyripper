@@ -558,6 +558,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
     $uploader = clean($data['uploader'] ?? '');
+    // extractor_key is the platform name yt-dlp uses (e.g. "YouTube", "Twitter", "TikTok").
+    // Surface it in the info response so the UI can display "From: YouTube" to confirm
+    // the URL was parsed by the correct extractor.
+    $platform = clean($data['extractor_key'] ?? '');
     // Sanitize a derived filename from the title for use in Content-Disposition.
     // yt-dlp would name the file this way; we use it so the browser saves a
     // meaningful name instead of the generic "ahoyrip.mp4".
@@ -728,6 +732,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         'thumbnail' => $thumbnail,
         'duration' => $duration,
         'uploader' => $uploader,
+        'platform' => $platform,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
         'sort_applied' => $sort,
