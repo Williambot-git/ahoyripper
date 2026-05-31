@@ -1049,9 +1049,19 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
+        // --quiet: suppress yt-dlp stderr output (progress bars, download stats).
+        // Preferred over the deprecated --no-warnings flag in modern yt-dlp.
+        // --no-warnings was removed in yt-dlp 2024.04; --quiet is the canonical
+        // replacement and is already used in the download action for consistency.
+        // --no-playlist: extract single video, not playlist.
+        // --no-warnings: suppress extraction warnings (deprecated, aliased to --quiet).
+        // --skip-download: fetch metadata only (don't download the full file).
+        // --geo-bypass: work around geographic restrictions.
+        // --referer: prevent video URL leaking as referer to the source site.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
+            '--quiet',
             '--no-playlist',
             '--no-warnings',
             '--skip-download',
