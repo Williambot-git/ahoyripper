@@ -1055,7 +1055,7 @@ switch ($action) {
             '--no-playlist',
             '--no-warnings',
             '--skip-download',
-            '--geo-bypass-country', 'US',
+            '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             '--',
@@ -1536,7 +1536,7 @@ switch ($action) {
             '--no-playlist',
             '--no-warnings',
             '--progress',
-            '--geo-bypass-country', 'US',
+            '--geo-bypass',
             '--referer', $referer,
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             '--',
@@ -1906,7 +1906,7 @@ case 'check':
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download --geo-bypass -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
