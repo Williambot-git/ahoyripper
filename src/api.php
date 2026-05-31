@@ -199,9 +199,30 @@ foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp
 // Unlike health (which may run yt-dlp, syscalls, reads /proc), this is a pure
 // JSON ping that adds zero server load — safe to call every 10 seconds.
 // Placed BEFORE the referer gate so it exits before that check runs.
-$internal_actions = ['check', 'health', 'progress'];
+$internal_actions = ['check', 'health', 'progress', 'csp-report'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
+    // csp-report: receive and log browser CSP violation reports (nginx POSTs
+    // violation details here per the report-uri directive in CSP-Report-Only).
+    // This endpoint intentionally exits before the GET-method and Accept-header
+    // gates since violation reports are always POST with no Accept header.
+    if ($action === 'csp-report') {
+        // Always return 200 so the browser doesn't retry failed reports.
+        // Log the report body for security monitoring (stripped of sensitive data).
+        $body = file_get_contents('php://input');
+        $report = json_decode($body, true);
+        // Log to error_log with a identifiable prefix for log scanning.
+        // Omit document-uri and referrer which may contain video URLs.
+        $safe = [
+            'blocked-uri' => $report['csp-report']['blocked-uri'] ?? null,
+            'violated-directive' => $report['csp-report']['violated-directive'] ?? null,
+            'original-policy' => $report['csp-report']['original-policy'] ?? null,
+        ];
+        error_log('AhoyRipper CSP-VIOLATION: ' . json_encode($safe));
+        header('X-Request-ID: ' . $request_id);
+        echo json_encode(['status' => 'ok']);
+        exit;
+    }
     header('Content-Type: application/json; charset=utf-8');
     header('X-Request-ID: ' . $request_id);
     echo json_encode(['status' => 'ok', 'server_time' => date('c'), 'request_id' => $request_id]);

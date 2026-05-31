@@ -251,10 +251,11 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 
 ### Health check / progress
 ```
-GET /src/api.php?action=check   # lightweight internal ping (Docker healthcheck-safe)
-GET /src/api.php?action=health  # full system status with resource metrics
-GET /src/api.php?action=health&probe=1  # include live yt-dlp connectivity probe
-GET /src/api.php?action=progress        # alias for health (legacy)
+GET /src/api.php?action=check          # lightweight internal ping (Docker healthcheck-safe)
+GET /src/api.php?action=health         # full system status with resource metrics
+GET /src/api.php?action=health&probe=1 # include live yt-dlp connectivity probe
+GET /src/api.php?action=progress       # alias for health (legacy)
+POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)
 ```
 
 `action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
@@ -292,6 +293,8 @@ GET /src/api.php?action=progress        # alias for health (legacy)
 The `source_url` field in the probe result shows the URL that was used for the connectivity check (`https://www.youtube.com/watch?v=dQw4w9WgXcQ`). When `ok` is `true`, `title` contains the video title (truncated to 80 characters). When `ok` is `false`, `error` contains the yt-dlp error message and `source_url` still shows which URL failed.
 
 `load_avg` requires Linux. `memory_available_pct` reads `/proc/meminfo`. `disk_free_gb` uses `disk_free_space()`. Cache fields reflect internal version-caching TTLs (1 hour).
+
+`action=csp-report` receives [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) violation reports from browsers. Nginx is configured with a `report-uri /src/api.php?action=csp-report` directive in the CSP-Report-Only header, so violations (e.g., mixed content, inline script attempts) are logged to `error_log` rather than silently ignored. The report body is sanitized before logging — video URLs and referrers are omitted. This endpoint returns `200 OK` to all POST requests so browsers do not retry.
 
 ### Rate Limits
 
