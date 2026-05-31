@@ -7,6 +7,9 @@
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "orientation": "any",
+  "categories": ["utilities", "music", "video"],
+  "lang": "en-US",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/favicon-180.png",
