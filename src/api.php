@@ -809,29 +809,13 @@ $validation = function(string $action) use($request_id) {
         ]);
         return false;
     }
-    // Age-restriction bypass for YouTube: rewrite watch/shorts/youtu.be URLs to
-    // the embed endpoint. The embed player does not enforce age-gating so yt-dlp
-    // can extract formats without cookies. Only applies to youtube.com hostnames.
-    // Embed URLs were already playable directly so no rewrite needed for those.
-    $yt_parsed = parse_url($url, PHP_URL_HOST);
-    $yt_host = $yt_parsed !== false && $yt_parsed !== null ? strtolower($yt_parsed) : '';
-    if (in_array($yt_host, ['www.youtube.com', 'youtube.com', 'youtu.be'], true)) {
-        $yt_path = parse_url($url, PHP_URL_PATH);
-        $yt_id = null;
-        if ($yt_path === '/watch') {
-            // Video ID is in the query string: /watch?v=ID[&...]
-            parse_str(parse_url($url, PHP_URL_QUERY) ?: '', $yt_qs);
-            $yt_id = $yt_qs['v'] ?? null;
-        } elseif (preg_match('#^/(?:shorts|v)/([a-zA-Z0-9_-]{11})#', $yt_path, $m)) {
-            $yt_id = $m[1];
-        } elseif ($yt_host === 'youtu.be' && preg_match('#^/([a-zA-Z0-9_-]{11})$#', $yt_path, $m)) {
-            $yt_id = $m[1];
-        }
-        if ($yt_id && $yt_path !== '/embed/' . $yt_id) {
-            // Only rewrite if not already an embed URL
-            $url = 'https://www.youtube.com/embed/' . $yt_id;
-        }
-    }
+        // Age-restriction bypass for YouTube: use yt-dlp's --extractor-args to
+        // request the web player client, which handles many age-restricted videos
+        // without requiring cookies or embed-URL rewriting. This is applied uniformly
+        // to all YouTube URLs (watch, shorts, youtu.be, embed) by yt-dlp itself,
+        // making it more robust and comprehensive than the previous URL-rewrite
+        // approach which only handled a subset of URL patterns. The extractor-args
+        // approach also works for content that has no clean embed equivalent.
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
     if ($action === 'download') {
@@ -1069,6 +1053,7 @@ switch ($action) {
             '--no-warnings',
             '--skip-download',
             '--geo-bypass',
+            '--extractor-args', 'youtube:player_client=web',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
             '--',
@@ -1550,6 +1535,7 @@ switch ($action) {
             '--no-warnings',
             '--progress',
             '--geo-bypass',
+            '--extractor-args', 'youtube:player_client=web',
             '--referer', $referer,
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
             '--',

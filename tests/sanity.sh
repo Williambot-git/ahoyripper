@@ -46,6 +46,29 @@ fi
 echo "  ✓ No deprecated yt-dlp flags"
 
 echo ""
+echo "==> Checking old YouTube URL-rewrite age-bypass is NOT present..."
+# The URL-rewrite approach (converting watch/shorts URLs to /embed/...) was
+# replaced by --extractor-args youtube:player_client=web. The old approach
+# is incomplete (missed many URL patterns) and less robust.
+if grep -q 'youtube.com/embed' src/api.php; then
+    echo "  ✗ Old YouTube URL-rewrite approach still present (should use --extractor-args)"
+    exit 1
+fi
+echo "  ✓ Old URL-rewrite approach removed (now using --extractor-args)"
+
+echo ""
+echo "==> Checking yt-dlp --extractor-args for YouTube age-restriction bypass..."
+# --extractor-args youtube:player_client=web tells yt-dlp to use the web player
+# client, which handles most age-restricted videos without cookies or embedding.
+# Present in both info and download yt-dlp invocations.
+if grep -q -- '--extractor-args.*youtube:player_client=web' src/api.php; then
+    echo "  ✓ --extractor-args youtube:player_client=web present"
+else
+    echo "  ✗ --extractor-args youtube:player_client=web missing (age-restricted YouTube videos will fail)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking yt-dlp --geo-bypass flag for info action..."
 # --geo-bypass enables yt-dlp's built-in geo-restriction bypass (HTTP header
 # manipulation) so content that is merely geo-restricted (not unavailable) can
