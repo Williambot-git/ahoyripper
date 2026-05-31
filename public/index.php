@@ -23,6 +23,7 @@ $VERSION = '1.0.0';
   <!-- apple-mobile-web-app-status-bar-style is the only iOS-supported mechanism
        for dark status bar theme. Unlike theme-color meta (which iOS ignores when
        paired with media="" attributes), this tag is respected by Safari on iOS. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
   <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
