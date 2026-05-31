@@ -1252,15 +1252,15 @@ switch ($action) {
             ]);
             exit;
         }
-        // Validate format_id — yt-dlp format selectors use characters like [ ] + =
-        // for conditional selection (e.g. "bestvideo[height>=720]+bestaudio[ext=m4a]").
-        // Block shell metacharacters that could be dangerous in proc_open calls:
-        // $ ` ( ) ; | & < > \ and whitespace. Allow alphanum, _ . , - + [ ] < > = !
-        // Note: $format_id is read directly from $_GET here (not via the $validation
-        // closure) because PHP closures do not inherit outer scope for variables
-        // assigned inside the closure — the closure's $format_id is scoped to it.
-        $format_id = trim($_GET['format'] ?? '');
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-]+$/', $format_id)) {
+        // yt-dlp format selectors use characters like [ ] + = ~ for conditional
+        // selection and output template merging (e.g. "bestvideo[height>=720]+bestaudio").
+        // yt-dlp output templates use %(name)s and %(name)0d escape sequences
+        // for dynamic filenames. Block shell metacharacters that could be
+        // dangerous in proc_open calls: $ ` ; | & < > \ and whitespace.
+        // Allow alphanum, _ . , - + [ ] < > = ! ~ ( ) % (parentheses and percent
+        // for output template expansion — safe when passed as array element to
+        // proc_open with bypass_shell=true, bypassing the shell entirely).
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([

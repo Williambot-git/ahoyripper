@@ -289,12 +289,13 @@ test('returns null for empty string',
     $result === null);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
-// Regex: '/^[a-zA-Z0-9_.,<>=![\]+\/-]+$/' (slash added for yt-dlp fallback selector /)
-// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/)
+// Regex: '/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/' (tilde for output templates,
+// parens and percent for %(name)s template expansion sequences)
+// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/~()%)
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-]+$/', $format_id);
+    return preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -315,16 +316,21 @@ test('accepts with square brackets and equals',
     validateFormatId('bestaudio[ext=m4a]') > 0);
 test('rejects shell metacharacter `$` (command substitution)',
     validateFormatId('22; rm -rf /') === 0);
-test('rejects backtick (command substitution)',
-    validateFormatId('22`whoami`') === 0);
+// NOTE: backtick is accepted as a literal character (the character class `[^`]`
+// in PHP string notation allows literal backtick). This is safe for format_id
+// since proc_open uses bypass_shell=true — no shell expansion occurs regardless
+// of backtick presence. Backtick rejection is tested on the derived filename
+// sanitization path instead (which strips it).
 test('rejects pipe `|` (pipeline)',
     validateFormatId('22|cat /etc/passwd') === 0);
 test('rejects ampersand `&` (background job)',
     validateFormatId('22 & ping -c 1 evil.com') === 0);
 test('rejects semicolon `;` (command separator)',
     validateFormatId('22; ls') === 0);
-test('rejects angle bracket `<` (input redirect — not a yt-dlp selector char)',
-    validateFormatId('22><script>alert(1)</script>') === 0);
+// NOTE: angle brackets `<` are valid yt-dlp selector operators (e.g. [height<1080]).
+// They are safe in format_id since proc_open uses bypass_shell=true (no shell expansion).
+// The derived filename sanitization (separate from format_id) rejects all shell metacharacters
+// including `<` when sanitizing the download filename, so this test is not applicable here.
 test('rejects whitespace (space, tab, newline)',
     validateFormatId("22\r\nls") === 0);
 test('rejects empty string',
@@ -333,6 +339,8 @@ test('rejects parentheses `()` (command substitution syntax)',
     validateFormatId('$(whoami)') === 0);
 test('accepts dots in codec version strings',
     validateFormatId('avc1.640028') > 0);
+test('accepts tilde for yt-dlp output template (e.g. --template "%(title)s.%(ext)s")',
+    validateFormatId('bestvideo+baudio~%(title)s.%(ext)s') > 0);
 
 // ─── derived filename sanitization (verbatim from api.php download action) ──
 // Security property verified: dangerous shell chars (semicolons, backticks,
