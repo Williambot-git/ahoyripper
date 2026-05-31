@@ -33,6 +33,13 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // report-uri (legacy) is still used alongside report-to for backwards compatibility
 // with older browsers. The browser prefers report-to when both are present.
 header('Report-To: {"endpoint":"csp-report","max_age":86400}');
+// Reporting-Endpoints (modern CSP violation reporting — supersedes legacy report-uri).
+// Required for Chromium 84+ (released May 2021) which sends reports exclusively via
+// the Reporting API when this header is present, regardless of the report-uri directive.
+// Both headers are set so that older browsers (Firefox < 79, Safari) still receive reports
+// via the legacy report-uri path while Chromium uses the modern endpoints API.
+// The csp-report endpoint is defined in nginx.conf via report-uri /csp-report.
+header('Reporting-Endpoints: csp-report="/csp-report"');
 
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
