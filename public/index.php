@@ -83,11 +83,6 @@ $VERSION = '1.0.0';
       "price": "0",
       "priceCurrency": "USD"
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "12450"
-    },
     "browserRequirements": "Requires JavaScript and a modern web browser."
   }
   </script>
