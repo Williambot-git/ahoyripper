@@ -175,6 +175,7 @@ $VERSION = '1.0.0';
             <span id="resultsTitle">Ready to download</span>
           </p>
           <p class="results-sub" id="resultsSub"></p>
+          <p class="results-platform" id="resultsPlatform" hidden></p>
         </div>
         <div class="results-sort">
           <label for="sortSelect" class="sort-label">Sort:</label>
@@ -420,6 +421,21 @@ $VERSION = '1.0.0';
       if (data.uploader) parts.push(data.uploader);
       if (data.duration) parts.push(formatDuration(data.duration));
       sub.textContent = parts.join(' \u00b7 ');
+    }
+
+    // Populate platform badge — derived from yt-dlp's extractor_key.
+    // Only show when platform is known (not "Unknown") and differs from the
+    // uploader, so it adds useful information rather than redundancy.
+    var plat = document.getElementById('resultsPlatform');
+    if (plat) {
+      var p = data.platform;
+      if (p && p !== 'Unknown' && p !== data.uploader) {
+        plat.textContent = p;
+        plat.hidden = false;
+      } else {
+        plat.textContent = '';
+        plat.hidden = true;
+      }
     }
 
     var formats = data.formats || [];
@@ -800,8 +816,10 @@ $VERSION = '1.0.0';
     hideError();
     var thumb = document.getElementById('resultsThumb');
     var sub = document.getElementById('resultsSub');
+    var plat = document.getElementById('resultsPlatform');
     if (thumb) { thumb.src = ''; thumb.hidden = true; }
     if (sub) sub.textContent = '';
+    if (plat) plat.hidden = true;
     input.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
