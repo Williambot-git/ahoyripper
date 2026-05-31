@@ -109,7 +109,7 @@ $VERSION = '1.0.0';
   </a>
   <div class="ahoy-nav-links">
     <a href="https://ahoyripper.com">AhoyRipper</a>
-    <a href="https://ahoyvpn.com">AhoyVPN</a>
+    <a href="https://ahoyvpn.com" target="_blank" rel="noopener">AhoyVPN</a>
   </div>
 </nav>
 
@@ -236,7 +236,7 @@ $VERSION = '1.0.0';
     <!-- VPN Banner -->
     <div class="vpn-banner" style="margin-top:2.5rem;">
       <p><strong>Want unlimited, unrestricted access?</strong> Route through our VPN for total privacy and to bypass any restrictions.</p>
-      <a href="https://ahoyvpn.com" class="vpn-btn">Get AhoyVPN &mdash; $5.99/mo</a>
+<a href="https://ahoyvpn.com" class="vpn-btn" target="_blank" rel="noopener">Get AhoyVPN &mdash; $5.99/mo</a>
     </div>
 </section>
 </main>
