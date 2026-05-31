@@ -29,6 +29,11 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // from CDNs) which are common in media rippers. Omit unless you use SharedArrayBuffer
 // or other COEP-locked features.
 
+// Report-To endpoint group for CSP violation reporting.
+// report-uri (legacy) is still used alongside report-to for backwards compatibility
+// with older browsers. The browser prefers report-to when both are present.
+header('Report-To: {"endpoint":"csp-report","max_age":86400}');
+
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
 // (which then calls the API via fetch from JS) — such calls always carry a referer.
