@@ -508,6 +508,35 @@ fi
 echo "  ✓ JS does not hard-code gap=0 on formatGrid"
 
 echo ""
+echo "==> Checking 503 responses include Retry-After header (rate limit gate)..."
+if grep -q "header('Retry-After: 5')" src/api.php; then
+    echo "  ✓ Retry-After: 5 present on rate-limit 503 responses"
+else
+    echo "  ✗ Retry-After header missing on 503 rate-limit responses"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking 503 responses include Retry-After header (daily quota gate)..."
+# Both info and download daily-quota 503 paths should include Retry-After
+COUNT=$(grep -c "http_response_code(503)" src/api.php)
+# All 503 blocks in the file should have Retry-After; verify the pattern
+# by checking all occurrences have the header within 3 lines after.
+bad=0
+while IFS=: read -r linenum _; do
+    context=$(sed -n "${linenum},$((linenum+3))p" src/api.php)
+    if ! echo "$context" | grep -q "Retry-After"; then
+        echo "  ✗ Line $linenum: 503 without Retry-After header"
+        bad=1
+    fi
+done < <(grep -n "http_response_code(503)" src/api.php)
+if [ "$bad" -eq 1 ]; then
+    echo "  Fix: add header('Retry-After: 5') before each 503 json_encode response."
+    exit 1
+fi
+echo "  ✓ All 503 error responses include Retry-After header"
+
+echo ""
 echo "==> Running PHP unit tests..."
 php tests/api_test.php
 PHP_RESULT=$?

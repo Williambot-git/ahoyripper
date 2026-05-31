@@ -107,12 +107,14 @@ if ($is_rate_limited) {
     $fp = fopen($rate_file, 'c+');
     if (!$fp) {
         http_response_code(503);
+        header('Retry-After: 5');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
         exit;
     }
     if (!flock($fp, LOCK_EX)) {
         fclose($fp);
         http_response_code(503);
+        header('Retry-After: 5');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
         exit;
     }
@@ -959,12 +961,14 @@ switch ($action) {
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
+                header('Retry-After: 5');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
                 http_response_code(503);
+                header('Retry-After: 5');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
@@ -1354,12 +1358,14 @@ switch ($action) {
         $dl_fp = fopen($rate_file, 'c+');
         if (!$dl_fp) {
             http_response_code(503);
+            header('Retry-After: 5');
             echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
             exit;
         }
         if (!flock($dl_fp, LOCK_EX)) {
             fclose($dl_fp);
             http_response_code(503);
+            header('Retry-After: 5');
             echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
             exit;
         }
@@ -1415,12 +1421,14 @@ switch ($action) {
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
+                header('Retry-After: 5');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
                 http_response_code(503);
+                header('Retry-After: 5');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
                 exit;
             }
