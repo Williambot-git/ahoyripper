@@ -184,6 +184,23 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
 
         $filesize_mb = round($filesize / 1048576, 1);
 
+        // quality: numeric quality tier — height for video, audio bitrate tier for audio-only
+        $quality = null;
+        if ($vcodec !== 'none') {
+            $quality = $height;
+        } elseif ($acodec !== 'none') {
+            $br = $tbr ?? $abr;
+            if ($br !== null) {
+                if ($br >= 320) $quality = 320;
+                elseif ($br >= 256) $quality = 256;
+                elseif ($br >= 192) $quality = 192;
+                elseif ($br >= 128) $quality = 128;
+                elseif ($br >= 96) $quality = 96;
+                elseif ($br >= 64) $quality = 64;
+                else $quality = 48;
+            }
+        }
+
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
@@ -191,6 +208,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
+            'quality' => $quality,
             'fps' => $fps,
             'tbr' => $tbr,
             'abr' => $abr,
@@ -344,6 +362,53 @@ test('format type is combined (video+audio)', $card && ($card['format_type'] ?? 
 test('format has language', $card && ($card['language'] ?? null) === 'en');
 test('format has filesize_mb (10MB -> ~10.0)',
     $card && abs(($card['filesize_mb'] ?? 0) - 10.0) < 0.2);
+
+// ─── parseFormats: quality field ───────────────────────────────────────────
+
+echo "\n==> Testing parseFormats() — quality field\n";
+
+$json_video_combined = makeJson('Test', [makeFormat([
+    'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4'
+])]);
+$result_vc = parseFormats($json_video_combined);
+test('combined video quality equals height (1080)', $result_vc && ($result_vc['formats'][0]['quality'] ?? null) === 1080);
+
+$json_video_only = makeJson('Test', [makeFormat([
+    'height' => 720, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'none', 'ext' => 'webm'
+])]);
+$result_vo = parseFormats($json_video_only);
+test('video-only quality equals height (720)', $result_vo && ($result_vo['formats'][0]['quality'] ?? null) === 720);
+
+// Audio bitrate tier tests — must null out tbr so abr override is the sole bitrate source
+$audio_br_tests = [
+    ['abr' => 320, 'expected' => 320, 'label' => '320kbps audio maps to quality 320'],
+    ['abr' => 256, 'expected' => 256, 'label' => '256kbps audio maps to quality 256'],
+    ['abr' => 192, 'expected' => 192, 'label' => '192kbps audio maps to quality 192'],
+    ['abr' => 128, 'expected' => 128, 'label' => '128kbps audio maps to quality 128'],
+    ['abr' => 96,  'expected' => 96,  'label' => '96kbps audio maps to quality 96'],
+    ['abr' => 64,  'expected' => 64,  'label' => '64kbps audio maps to quality 64'],
+    ['abr' => 48,  'expected' => 48,  'label' => '48kbps audio maps to quality 48'],
+];
+foreach ($audio_br_tests as $t) {
+    $json_audio = makeJson('Test', [makeFormat([
+        'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a', 'abr' => $t['abr'], 'tbr' => null
+    ])]);
+    $result_audio = parseFormats($json_audio);
+    test($t['label'], $result_audio && ($result_audio['formats'][0]['quality'] ?? null) === $t['expected']);
+}
+
+// tbr used when abr is absent (yt-dlp sometimes reports total bitrate in tbr)
+$json_audio_tbr = makeJson('Test', [makeFormat([
+    'vcodec' => 'none', 'acodec' => 'opus', 'ext' => 'ogg', 'tbr' => 160, 'abr' => null
+])]);
+$result_tbr = parseFormats($json_audio_tbr);
+test('audio quality uses tbr when abr is absent (160kbps -> 128 tier)', $result_tbr && ($result_tbr['formats'][0]['quality'] ?? null) === 128);
+
+$json_audio_no_br = makeJson('Test', [makeFormat([
+    'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a', 'tbr' => null, 'abr' => null
+])]);
+$result_no_br = parseFormats($json_audio_no_br);
+test('audio with no tbr or abr has null quality', $result_no_br && ($result_no_br['formats'][0]['quality'] ?? null) === null);
 
 // ─── parseFormats: label construction ─────────────────────────────────────────
 

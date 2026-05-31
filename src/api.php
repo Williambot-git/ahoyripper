@@ -652,6 +652,30 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
 
         $filesize_mb = round($filesize / 1048576, 1);
 
+        // quality: numeric quality tier for sorting/filtering without parsing description strings.
+        // - Video/combined formats: pixel height (e.g. 1080, 720, 480) — same as height.
+        // - Audio-only formats: approximate bitrate tier (320, 256, 192, 128, 96, 64, 48).
+        //   Audio quality is subjective; tier numbers map loosely to kbps so API consumers
+        //   can sort audio by quality without needing to know codec specifics.
+        // - null for unknown/unparseable formats.
+        $quality = null;
+        if ($vcodec !== 'none') {
+            $quality = $height;
+        } elseif ($acodec !== 'none') {
+            // Map common audio bitrates to tier numbers for consistent sorting.
+            // yt-dlp reports abr in kbps; use it when available.
+            $br = $tbr ?? $abr;
+            if ($br !== null) {
+                if ($br >= 320) $quality = 320;
+                elseif ($br >= 256) $quality = 256;
+                elseif ($br >= 192) $quality = 192;
+                elseif ($br >= 128) $quality = 128;
+                elseif ($br >= 96) $quality = 96;
+                elseif ($br >= 64) $quality = 64;
+                else $quality = 48;
+            }
+        }
+
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
@@ -659,6 +683,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
+            'quality' => $quality,
             'fps' => $fps,
             'tbr' => $tbr,
             'abr' => $abr,
