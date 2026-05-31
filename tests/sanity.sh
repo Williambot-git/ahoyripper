@@ -341,12 +341,14 @@ fi
 
 echo ""
 echo "==> Checking CSP is at server level in nginx-docker.conf (no duplicate in location blocks)..."
-# After the fix, CSP should appear exactly once (at server level), not twice.
+# After the fix, CSP should appear exactly twice (enforcement + report-only at server level).
+# Count all Content-Security-Policy occurrences — report-only is a distinct header and both
+# are intentionally present at server level (not in location blocks) for defense-in-depth.
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
-if [ "$CSP_COUNT" -eq 1 ]; then
-    echo "  ✓ CSP appears exactly once in nginx-docker.conf (server level, no duplicate)"
+if [ "$CSP_COUNT" -eq 2 ]; then
+    echo "  ✓ CSP appears exactly twice in nginx-docker.conf (enforcement + report-only, server level)"
 else
-    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 1 — duplicate CSP header)"
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 2 — enforcement + report-only)"
     exit 1
 fi
 

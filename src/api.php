@@ -1841,6 +1841,10 @@ case 'check':
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_ttl_seconds' => $ffmpeg_cache_ttl,
+            'server_uptime_seconds' => null,
+            'load_avg' => null,
+            'memory_available_pct' => null,
+            'disk_free_gb' => null,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
