@@ -389,6 +389,24 @@ else
 fi
 
 echo ""
+echo "==> Checking CSP report-uri location is configured in nginx-docker.conf..."
+if grep -q "location = /csp-report" deploy/nginx-docker.conf; then
+    echo "  ✓ /csp-report location configured in nginx-docker.conf"
+else
+    echo "  ✗ /csp-report location missing in nginx-docker.conf (report-uri /csp-report won't resolve)"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking CSP report-uri location is configured in production nginx.conf..."
+if grep -q "location = /csp-report" deploy/nginx.conf; then
+    echo "  ✓ /csp-report location configured in nginx.conf"
+else
+    echo "  ✗ /csp-report location missing in nginx.conf (report-uri /csp-report won't resolve)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking COOP/CORP headers appear once (server level, no duplicate in location blocks)..."
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
