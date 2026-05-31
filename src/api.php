@@ -1879,6 +1879,7 @@ case 'check':
             'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
             'request_id' => $request_id,
+            'os' => PHP_OS,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
             'yt_dlp_ok' => $yt_dlp_ok,
