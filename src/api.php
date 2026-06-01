@@ -1875,10 +1875,22 @@ switch ($action) {
         exit;
     }
 
-    case 'check':
+    case 'check': {
+        // Minimal ping — zero dependency on yt-dlp, ffmpeg, or /proc/sys calls.
+        // Intentionally omit: server_uptime, load_avg, memory, disk_free, versions.
+        // Docker healthchecks and load-balancer probes should use this, not health.
+        header('Cache-Control: no-cache');
+        header('Connection: close');
+        echo json_encode([
+            'status' => 'ok',
+            'server_time' => date('c'),
+            'request_id' => $request_id,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
+        break;
+    }
     case 'progress':
     case 'health': {
-        // Health/progress/check — lightweight endpoints, no daily quota or rate limiting.
+        // Health/progress — full system status with resource metrics.
         // Note: all security headers are already set at the top of the script.
 
         $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
