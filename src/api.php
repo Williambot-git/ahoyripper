@@ -34,7 +34,9 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // with older browsers. The browser prefers report-to when both are present.
 // Value must be an array of group objects — a bare object is non-conformant and
 // causes Chromium to ignore the header (browsers require RFC 6750 compliance).
-header('Report-To: [{"endpoint":"csp-report","max_age":86400}]');
+// The csp-report endpoint is also registered via the modern Reporting-Endpoints header
+// (defined below), which is the preferred mechanism in Chromium 84+ (May 2021).
+header('Report-To: [{"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}]');
 // Reporting-Endpoints (modern CSP violation reporting — supersedes legacy report-uri).
 // Required for Chromium 84+ (released May 2021) which sends reports exclusively via
 // the Reporting API when this header is present, regardless of the report-uri directive.
