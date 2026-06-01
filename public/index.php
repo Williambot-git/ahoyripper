@@ -797,6 +797,11 @@ $VERSION = '1.0.0';
 
       showProgress(false);
       showResults(true);
+      // Sync sort dropdown with what the server actually applied (sort_applied
+      // may differ from the requested sort if the requested sort was invalid).
+      if (sortSelect && data.sort_applied) {
+        sortSelect.value = data.sort_applied;
+      }
       renderFormats(url, data);
 
     } catch (e) {
