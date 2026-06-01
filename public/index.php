@@ -461,60 +461,62 @@ $VERSION = '1.0.0';
       return sep;
     }
 
-    function renderFormatCard(f) {
-      var card = document.createElement('a');
-      card.className = 'format-card';
-      // Key is sent via Authorization header in the download fetch (keeps key out
-      // of server-side access logs). The key is also placed in the URL as a query
-      // param so that the window.location.href fallback works for direct navigation
-      // (browsers can't send custom headers on direct navigation).
-      card.href = '#download-' + f.id;
-      card.setAttribute('data-url', url);
-      card.setAttribute('data-id', f.id);
-      card.setAttribute('data-label', f.label || f.ext);
-      card.setAttribute('data-filename', data.derived_filename || '');
-      // Note: download and target attributes are intentionally omitted here.
-      // - download="" would be a no-op (empty string is ignored); the server's
-      //   Content-Disposition header controls the saved filename instead.
-      // - target="_blank" is unnecessary — the click handler calls e.preventDefault()
-      //   and navigates via window.location.href, so _blank has no effect.
+function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
-      var badgeColor = 'var(--color-accent)';
-      var badgeLabel = 'Video';
-      if (f.vcodec === 'none') {
-        badgeColor = 'var(--color-success)';
-        badgeLabel = 'Audio';
-      } else if (f.acodec === 'none') {
-        badgeColor = '#a855f7';
-        badgeLabel = 'Video Only';
-      }
+  function renderFormatCard(f) {
+    var card = document.createElement('a');
+    card.className = 'format-card';
+    // Key is sent via Authorization header in the download fetch (keeps key out
+    // of server-side access logs). The key is also placed in the URL as a query
+    // param so that the window.location.href fallback works for direct navigation
+    // (browsers can't send custom headers on direct navigation).
+    card.href = '#download-' + f.id;
+    card.setAttribute('data-url', escapeHtml(url));
+    card.setAttribute('data-id', escapeHtml(f.id));
+    card.setAttribute('data-label', escapeHtml(f.label || f.ext));
+    card.setAttribute('data-filename', escapeHtml(data.derived_filename || ''));
 
-      var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
-      var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
-      var extMeta = f.ext ? f.ext.toUpperCase() : '';
-      var langMeta = f.language ? f.language.toUpperCase() : '';
-      var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
-      var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
-      // Prefer description (human-readable yt-dlp description) when available, else label.
-      // description carries extra context like "720p60 HDR" or "audio only" that
-      // label doesn't always capture — particularly for audio and alternative formats.
-      // Filter out "Unknown" sentinel from description: the API returns "Unknown"
-      // when format_description/f.format_note were not available, which is not
-      // a useful display string. Fall through to label in that case.
-      var displayLabel = (f.description && f.description !== 'Unknown') ? f.description : (f.label || (f.ext ? f.ext.toUpperCase() : 'Format'));
-      // title attribute — use ≈ prefix for estimated sizes so the tooltip
-      // clearly distinguishes \"known\" (from yt-dlp metadata) from \"approximate\"
-      // (estimated from bitrate × duration) without requiring the user to hover.
-      var sizeHint = f.filesize_mb > 0 ? size : '≈' + size;
-      var cardTitle = displayLabel + (size !== '~size' ? ' - ' + sizeHint : '');
+    var badgeColor = 'var(--color-accent)';
+    var badgeLabel = 'Video';
+    if (f.vcodec === 'none') {
+      badgeColor = 'var(--color-success)';
+      badgeLabel = 'Audio';
+    } else if (f.acodec === 'none') {
+      badgeColor = '#a855f7';
+      badgeLabel = 'Video Only';
+    }
 
-      card.setAttribute('title', cardTitle);
+    var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
+    var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
+    var extMeta = f.ext ? f.ext.toUpperCase() : '';
+    var langMeta = f.language ? f.language.toUpperCase() : '';
+    var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
+    var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
+    // Prefer description (human-readable yt-dlp description) when available, else label.
+    // description carries extra context like "720p60 HDR" or "audio only" that
+    // label doesn't always capture — particularly for audio and alternative formats.
+    // Filter out "Unknown" sentinel from description: the API returns "Unknown"
+    // when format_description/f.format_note were not available, which is not
+    // a useful display string. Fall through to label in that case.
+    // description and label come from yt-dlp (user-controlled metadata) and are
+    // HTML-escaped before use to prevent stored XSS via innerHTML injection.
+    var rawDisplayLabel = (f.description && f.description !== 'Unknown') ? f.description : (f.label || (f.ext ? f.ext.toUpperCase() : 'Format'));
+    var displayLabel = escapeHtml(rawDisplayLabel);
+    // title attribute — use ≈ prefix for estimated sizes so the tooltip
+    // clearly distinguishes "known" (from yt-dlp metadata) from "approximate"
+    // (estimated from bitrate × duration) without requiring the user to hover.
+    var sizeHint = f.filesize_mb > 0 ? size : '≈' + size;
+    var cardTitle = escapeHtml(rawDisplayLabel) + (size !== '~size' ? ' - ' + sizeHint : '');
 
-      card.innerHTML =
-        '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
-        '<div class="format-label">' + displayLabel + '</div>' +
-        '<div class="format-meta">' + metaParts + langBadge + '</div>' +
-        '<div class="format-size">' + size + '</div>';
+    card.setAttribute('title', cardTitle);
+
+    card.innerHTML =
+      '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
+      '<div class="format-label">' + displayLabel + '</div>' +
+      '<div class="format-meta">' + metaParts + langBadge + '</div>' +
+      '<div class="format-size">' + size + '</div>';
 
       // Reset the guard at the start of each card click so a failed click
       // (e.g. timeout on card A) does not suppress navigation on a subsequent
