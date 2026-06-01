@@ -754,7 +754,6 @@ $VERSION = '1.0.0';
               'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
               'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
               'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
-              'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
               '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
               '502': 'The server encountered an error. Please try again in a moment.',
               '503': 'Service temporarily unavailable. Please try again shortly.',

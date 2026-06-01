@@ -1576,13 +1576,14 @@ switch ($action) {
         // ahoyripper.com referer hides the actual video URL from third-party servers.
         $referer = 'https://ahoyripper.com/';
 
+        // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
+        // Preferred over the deprecated --quiet flag in modern yt-dlp (2024.04+).
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
-            '--quiet',
-            '--no-playlist',
             '--no-warnings',
+            '--no-playlist',
             '--geo-bypass',
             '--referer', $referer,
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
