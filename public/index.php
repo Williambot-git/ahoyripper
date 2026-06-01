@@ -747,6 +747,7 @@ $VERSION = '1.0.0';
               'INVALID_FORMAT_ID': 'That format is not available. Pick another format from the list above.',
               'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
               'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
+              'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
               'UNKNOWN_ACTION': 'Unknown API action. Use ?action=info, ?action=download, ?action=health, or ?action=progress.',
               'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
               'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
