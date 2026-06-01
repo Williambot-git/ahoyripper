@@ -260,6 +260,10 @@ $result = classifyYtdlpError('ERROR: Requested format not available');
 test('detects FORMAT_UNAVAILABLE — "requested format not available"',
     $result !== null && ($result['code'] ?? '') === 'FORMAT_UNAVAILABLE');
 
+$result = classifyYtdlpError('ERROR: Requested formats not available');
+test('detects FORMAT_UNAVAILABLE — "requested formats not available" (plural)',
+    $result !== null && ($result['code'] ?? '') === 'FORMAT_UNAVAILABLE');
+
 $result = classifyYtdlpError('ERROR: This video has been removed');
 test('detects VIDEO_UNAVAILABLE — "This video has been removed"',
     $result !== null && ($result['code'] ?? '') === 'VIDEO_UNAVAILABLE');
