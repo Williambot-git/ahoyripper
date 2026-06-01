@@ -314,7 +314,7 @@ Response headers on every API response:
 - `X-RateLimit-Reset` — Unix timestamp when window resets
 - `X-RateLimit-Window` — window size in seconds
 
-For download endpoint, headers are `X-DL-RateLimit-*`.
+Download endpoint rate-limit headers use the `X-DL-RateLimit-*` prefix (e.g., `X-DL-RateLimit-Limit: 10`). Both `info` and `download` endpoints return daily quota headers (`X-DailyLimit-*`) for non-unlimited users.
 
 On `info` and `download` responses (non-unlimited), additional daily quota headers:
 - `X-DailyLimit-Limit` — daily rip limit (default 5, unlimited-key holders see `-1`)
