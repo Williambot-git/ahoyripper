@@ -1789,7 +1789,7 @@ switch ($action) {
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
             echo json_encode([
-                'error' => 'Download failed. The format may not be available. Try another format from the list.',
+                'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'request_id' => $request_id,
             ]);
