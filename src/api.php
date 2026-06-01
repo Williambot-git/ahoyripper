@@ -237,10 +237,17 @@ if (in_array($action, $internal_actions, true)) {
             'original-policy' => $report['csp-report']['original-policy'] ?? null,
         ];
         error_log('AhoyRipper CSP-VIOLATION: ' . json_encode($safe));
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
         header('X-Request-ID: ' . $request_id);
         echo json_encode(['status' => 'ok']);
         exit;
     }
+
+    // All other internal_actions (check, health, progress)
+    // receive X-Robots-Tag via the nginx add_header in deploy/nginx.conf
+    // when served through the = /src/api.php location block (line ~98).
+    // api.php also sets this header at the top of the script (line 20)
+    // for all non-download responses.
     header('Content-Type: application/json; charset=utf-8');
     header('X-Request-ID: ' . $request_id);
     echo json_encode(['status' => 'ok', 'server_time' => date('c'), 'request_id' => $request_id]);
