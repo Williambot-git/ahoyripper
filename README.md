@@ -134,6 +134,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
   "thumbnail": "https://...",
   "duration": 180,
   "uploader": "Channel Name",
+  "platform": "YouTube",
   "derived_filename": "Video_Title",
   "formats": [
     {
@@ -156,7 +157,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 }
 ```
 
-The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats.
+The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
 **Error codes:**
 
