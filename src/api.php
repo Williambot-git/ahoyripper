@@ -1255,7 +1255,11 @@ switch ($action) {
                 'UNSUPPORTED_SITE' => 404, 'PLAYLIST_MISSING' => 404,
                 'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
                 'FILE_TOO_LARGE' => 413,
+                'DOWNLOAD_EMPTY' => 500,
+                'DOWNLOAD_TIMEOUT' => 504,
                 'FORMAT_UNAVAILABLE' => 422,
+                'SOURCE_TIMEOUT' => 504,
+                'SOURCE_RATE_LIMITED' => 429,
             ];
             $err_status = $err_status_map[$parsed['error_code']] ?? 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
@@ -1756,16 +1760,14 @@ switch ($action) {
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
                 ];
-                // Surface the raw yt-dlp output for classified errors too — gives
-                // users diagnostic context (e.g. "Video unavailable: The video does not exist")
-                // alongside our friendly message. Unclassified errors already include
-                // raw_error; classified errors should be consistent.
+                // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
                 }
                 echo json_encode($resp);
                 exit;
             } else {
+                // Unclassified error — $err_classified is null; use 422 as safe default.
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
                 $resp = [
