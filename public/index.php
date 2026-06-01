@@ -717,64 +717,76 @@ $VERSION = '1.0.0';
       setProgress(80, 'Parsing...');
 
       if (!resp.ok) {
-        var err = await resp.json().catch(() => ({ error: 'Unknown error' }));
-        // Surface error_code for classified yt-dlp errors
-        var msg = err.error || 'Something went wrong. Try again.';
-        // When the server surfaces raw yt-dlp output (e.g. "Video unavailable"),
-        // include it so the user sees the actual reason, not just our generic label.
-        var raw = err.raw_error;
-        if (err.error_code) {
+        var msg = 'Something went wrong. Try again.';
+        var raw = null;
+        try {
+          var err = await resp.json();
+          msg = err.error || msg;
+          if (err.error_code) {
+            var errorHints = {
+              'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
+              'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
+              'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
+              'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
+              'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
+              'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
+              'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
+              'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
+              'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
+              'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
+              'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
+              'SOURCE_TIMEOUT': 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
+              'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
+              'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
+              'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
+              'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
+              'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
+              'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
+              'DOWNLOAD_TIMEOUT': 'The download timed out after 5 minutes. Try a smaller format — audio-only is usually fastest.',
+              'DOWNLOAD_EMPTY': 'The downloaded file was empty or invalid. Try a different format.',
+              'INVALID_FORMAT_ID': 'That format is not available. Pick another format from the list above.',
+              'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
+              'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
+              'UNKNOWN_ACTION': 'Unknown API action. Use ?action=info, ?action=download, ?action=health, or ?action=progress.',
+              'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
+              'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
+              'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
+              'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
+              'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
+              'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
+              '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
+              '502': 'The server encountered an error. Please try again in a moment.',
+              '503': 'Service temporarily unavailable. Please try again shortly.',
+            };
+            if (errorHints[err.error_code]) {
+              msg = errorHints[err.error_code];
+            } else {
+              var statusKey = String(resp.status);
+              if (errorHints[statusKey]) {
+                msg = errorHints[statusKey];
+              }
+            }
+          }
+          // Surface raw yt-dlp diagnostic output when available.
+          if (typeof err.raw_error === 'string' && err.raw_error.length > 0 && err.raw_error.length < 400) {
+            raw = err.raw_error;
+          }
+        } catch (_jsonErr) {
+          // resp.json() failed — response was not valid JSON (e.g. nginx error page).
+          // Fall through with the generic msg. Check resp.status for error-page hint.
+          var statusKey = String(resp.status);
           var errorHints = {
-            'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
-            'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
-            'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
-            'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
-            'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
-            'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
-            'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
-            'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
-            'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
-            'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
-            'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
-            'SOURCE_TIMEOUT': 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
-            'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
-            'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
-            'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
-            'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
-            'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
-            'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
-            'DOWNLOAD_TIMEOUT': 'The download timed out after 5 minutes. Try a smaller format — audio-only is usually fastest.',
-            'DOWNLOAD_EMPTY': 'The downloaded file was empty or invalid. Try a different format.',
-            'INVALID_FORMAT_ID': 'That format is not available. Pick another format from the list above.',
-            'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
-            'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
-            'UNKNOWN_ACTION': 'Unknown API action. Use ?action=info, ?action=download, ?action=health, or ?action=progress.',
-            'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
-            'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
-            'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
-            'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
-            'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
-            'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
-            '504': 'The request timed out. The video might be too large or the site is slow. Try a smaller format.',
+            '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
             '502': 'The server encountered an error. Please try again in a moment.',
             '503': 'Service temporarily unavailable. Please try again shortly.',
           };
-          // Use !== undefined (not truthy) so the check catches the string "0"
-          // which would be falsy but is a valid error code.
-          if (err.error_code !== undefined && errorHints[err.error_code]) {
-            msg = errorHints[err.error_code];
-          } else {
-            var statusKey = String(resp.status);
-            if (errorHints[statusKey]) {
-              msg = errorHints[statusKey];
-            }
+          if (errorHints[statusKey]) {
+            msg = errorHints[statusKey];
           }
-          // If the server sent raw yt-dlp output, append it for diagnostic value.
-          // This gives the user the actual error message yt-dlp produced (e.g.
-          // "Video unavailable. Try another source."), not just our generic label.
-          if (raw && typeof raw === 'string' && raw.length > 0 && raw.length < 400) {
-            msg += ': ' + raw;
-          }
+        }
+        // Append raw yt-dlp diagnostic to the friendly message.
+        if (raw) {
+          msg += ': ' + raw;
         }
         showError(msg);
         return;
