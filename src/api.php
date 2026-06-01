@@ -1068,6 +1068,9 @@ switch ($action) {
         // --no-playlist: extract single video, not playlist.
         // --skip-download: fetch metadata only (don't download the full file).
         // --geo-bypass: work around geographic restrictions.
+        // --add-header Accept-Language: signal preferred language to source sites,
+        //   improving the chance of reaching the original/unrestricted content variant
+        //   instead of a region-locked translation or localised version.
         // --referer: prevent video URL leaking as referer to the source site.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
@@ -1078,6 +1081,7 @@ switch ($action) {
             '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
             '--',
             $url,
         ];
@@ -1563,6 +1567,7 @@ switch ($action) {
             '--geo-bypass',
             '--referer', $referer,
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
             '--',
             $url,
         ];
