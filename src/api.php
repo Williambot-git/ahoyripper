@@ -1341,7 +1341,7 @@ switch ($action) {
         // Allow alphanum, _ . , - + [ ] < > = ! ~ ( ) % @ (parentheses and percent
         // for output template expansion — safe when passed as array element to
         // proc_open with bypass_shell=true, bypassing the shell entirely).
-        // @ is used for adaptive format selection in yt-dlp.
+        // @ is used for yt-dlp adaptive format selection (e.g. "best/@max").
         if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%@]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
