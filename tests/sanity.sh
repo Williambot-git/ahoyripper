@@ -409,6 +409,15 @@ else
 fi
 
 echo ""
+echo "==> Checking nginx-docker.conf server-level security headers include X-Robots-Tag..."
+if grep -q 'X-Robots-Tag "noindex, noai, noimage, noydir"' deploy/nginx-docker.conf; then
+    echo "  ✓ nginx-docker.conf has X-Robots-Tag at server level"
+else
+    echo "  ✗ nginx-docker.conf missing X-Robots-Tag at server level (AI crawlers can index static assets)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking COOP/CORP headers appear once (server level, no duplicate in location blocks)..."
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
