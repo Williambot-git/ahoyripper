@@ -1063,7 +1063,6 @@ switch ($action) {
             '--no-playlist',
             '--skip-download',
             '--geo-bypass',
-            '--extractor-args', 'youtube:player_client=web',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
             '--',
@@ -1549,14 +1548,12 @@ switch ($action) {
             '--no-playlist',
             '--no-warnings',
             '--geo-bypass',
-            '--extractor-args', 'youtube:player_client=web',
             '--referer', $referer,
             '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
             '--',
             $url,
         ];
 
-        $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
         $pipes = null;
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
