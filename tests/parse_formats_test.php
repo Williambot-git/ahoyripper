@@ -386,7 +386,27 @@ $result_audio = parseFormats($json_audio);
 $card_audio = $result_audio['formats'][0] ?? null;
 test('audio format has abr field', $card_audio && array_key_exists('abr', $card_audio));
 test('audio format abr value is correct (128)', $card_audio && ($card_audio['abr'] ?? null) === 128);
-test('audio format without abr has null abr', $result && ($result['formats'][0]['abr'] ?? null) === null);
+// Test: audio format with NO abr key at all in the JSON (not just set to null)
+// makeFormat() has abr: null by default, but array_merge() doesn't remove keys
+// — makeFormat([]) still includes abr: null from the defaults. Create the format
+// explicitly without the abr key to test the no-abr parsing path.
+$json_no_abr = json_encode([
+    'title' => 'No ABR Audio',
+    'thumbnail' => 'https://example.com/thumb.jpg',
+    'duration' => 180,
+    'uploader' => 'Test Channel',
+    'formats' => [[
+        'format_id' => '251',
+        'ext' => 'webm',
+        'vcodec' => 'none',
+        'acodec' => 'opus',
+        'tbr' => null,
+        'filesize' => 1048576,
+        // NO abr key at all
+    ]]
+]);
+$result_no_abr = parseFormats($json_no_abr);
+test('audio format without abr key has null abr', ($result_no_abr['formats'][0]['abr'] ?? null) === null);
 test('format has correct vcodec', $card && ($card['vcodec'] ?? '') === 'avc1.64001F');
 test('format has correct acodec', $card && ($card['acodec'] ?? '') === 'mp4a.40.2');
 test('format type is combined (video+audio)', $card && ($card['format_type'] ?? '') === 'combined');
