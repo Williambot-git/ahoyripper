@@ -1415,13 +1415,6 @@ switch ($action) {
             }
         }
 
-        // Add download rate limit response headers
-        $dl_reset = $dl_data['t'] + $dl_rate_window;
-        header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
-        header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
-        header('X-DL-RateLimit-Reset: ' . $dl_reset);
-        header('X-DL-RateLimit-Window: ' . $dl_rate_window);
-
         if (time() - $dl_data['t'] < $dl_rate_window) {
             if ($dl_data['c'] >= $dl_rate_limit) {
                 $dl_reset_ts = $dl_data['t'] + $dl_rate_window;
@@ -1441,12 +1434,26 @@ switch ($action) {
             $dl_data = ['t' => time(), 'c' => 1];
         }
 
+        // Set remaining AFTER increment so it reflects the cost of this request.
+        // Uses the same post-increment pattern as the info endpoint so remaining
+        // = limit - count consistently shows how many requests are left AFTER
+        // accommodating the current one.
+        $dl_remaining = max(0, $dl_rate_limit - $dl_data['c']);
+        $dl_reset = $dl_data['t'] + $dl_rate_window;
+
         ftruncate($dl_fp, 0);
         rewind($dl_fp);
         fwrite($dl_fp, json_encode($dl_data));
         fflush($dl_fp);
         flock($dl_fp, LOCK_UN);
         fclose($dl_fp);
+
+        // Add download rate limit response headers — set after increment so
+        // X-DL-RateLimit-Remaining is accurate (post-increment count pattern).
+        header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+        header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
+        header('X-DL-RateLimit-Reset: ' . $dl_reset);
+        header('X-DL-RateLimit-Window: ' . $dl_rate_window);
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
         if (!$unlimited) {
