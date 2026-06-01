@@ -38,4 +38,10 @@ COPY deploy/nginx-docker.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
 
-CMD service php*-fpm start && nginx -g 'daemon off;'
+# Docker HEALTHCHECK — uses the built-in /src/api.php?action=check endpoint
+# which is a zero-dependency JSON ping (no yt-dlp, no syscalls, no /proc).
+# Safe to call every 10s. Fails fast if PHP-FPM or nginx is down.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -sf http://localhost:8080/src/api.php?action=check > /dev/null || exit 1
+
+CMD service php*-fpm start && nginx -g 'daemon off;'"
