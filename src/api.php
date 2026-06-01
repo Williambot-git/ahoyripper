@@ -967,7 +967,11 @@ switch ($action) {
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
-        // Enforce on info action too — yt-dlp is equally expensive here.
+        // Key must be read BEFORE this point so $unlimited is available for the
+        // quota gate. The key-reading block is placed immediately below so it
+        // runs before any stateful operations (rate limit, quota).
+        // NOTE: $unlimited is declared at line 868 as `false` by default — it is
+        // set to true here only when a valid key is present.
         if (!$unlimited) {
             // Use the same $ip variable declared above for the rate-limit gate.
             // Both info and download actions share the same daily-quota file so
