@@ -400,6 +400,20 @@ else
 fi
 
 echo ""
+echo "==> Checking enforcement CSP in nginx-docker.conf includes report-uri /csp-report..."
+# The enforcement CSP (first CSP header, not the Report-Only variant) must include
+# 'report-uri /csp-report;' so the browser sends violation reports to the handler.
+# The report-only header is separate (not enforced by the browser) — only the
+# enforcement policy triggers actual violation reports.
+CSP_ENF=$(grep "add_header Content-Security-Policy" deploy/nginx-docker.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
+if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
+    echo "  ✓ Enforcement CSP includes report-uri /csp-report"
+else
+    echo "  ✗ Enforcement CSP missing report-uri /csp-report — violation reports won't be sent"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP report-uri location is configured in production nginx.conf..."
 if grep -q "location = /csp-report" deploy/nginx.conf; then
     echo "  ✓ /csp-report location configured in nginx.conf"
