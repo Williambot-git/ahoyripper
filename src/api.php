@@ -391,11 +391,14 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
             proc_terminate($proc, 9);
             $stderr .= "\nProcess timed out after {$timeout}s";
             $exit = -1; // convention: -1 = timeout
-            // Close any remaining open pipes first, then proc_close to harvest the
-            // exit code and release the process handle (avoids zombie on PHP shutdown).
+            // Use null sentinel so the post-loop proc_close skips this already-closed
+            // handle. This matches the pattern used in the download action and prevents
+            // double-close risk if runYtdlp is ever refactored to have a post-loop
+            // proc_close alongside this timeout path.
+            $proc = null;
+            // Close any remaining open pipes first to release handles.
             foreach ($pipes as $p) { if ($p) fclose($p); }
             $pipes = null;
-            proc_close($proc);
             return false;
         }
         $read = [];
@@ -442,7 +445,9 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
     foreach ($pipes as $p) { if ($p) fclose($p); }
     $pipes = null;
-    $exit = proc_close($proc);
+    // Only call proc_close if $proc is still open (null sentinel means timeout
+    // handler already closed it to avoid double-close).
+    $exit = ($proc !== null) ? proc_close($proc) : -1;
     return true;
 }
 
