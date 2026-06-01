@@ -498,6 +498,22 @@ test('combined formats sorted by height descending (1080 before 480 before 240)'
 test('audio-only formats sorted after combined (at end)',
     $ids[3] === 'audio');
 
+// ─── parseFormats: filesize_asc sort (smallest first) ─────────────────────────
+
+$formats_for_size = [
+    makeFormat(['format_id' => 'big', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 20971520]),   // 20 MB
+    makeFormat(['format_id' => 'small', 'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 1048576]),    // 1 MB
+    makeFormat(['format_id' => 'medium', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 5242880]),  // 5 MB
+];
+$json_size_asc = makeJson('Size Sort', $formats_for_size);
+$raw_err = null;
+$result_size_asc = parseFormats($json_size_asc, $raw_err, 'filesize_asc');
+$ids_size = array_column($result_size_asc['formats'], 'id');
+test('filesize_asc: smallest filesize first (1MB before 5MB before 20MB)',
+    $ids_size[0] === 'small' && $ids_size[1] === 'medium' && $ids_size[2] === 'big');
+test('filesize_asc: combined formats still grouped together (audio excluded)',
+    $result_size_asc['formats'][0]['format_type'] === 'combined');
+
 // ─── parseFormats: fps tiebreaker within same resolution tier ──────────────────
 
 $formats_same_height_diff_fps = [
