@@ -81,8 +81,34 @@ jobs:
         run: |
           # Start the container in the background
           docker run -d --name ahoyripper-health -p 8081:8080 ahoyripper-test
-          # Give services inside the container time to start (php-fpm + nginx)
-          sleep 5
+
+          # Poll the health endpoint until it responds or 60-second timeout is reached.
+          # A fixed sleep is unreliable on busy CI runners where php-fpm + nginx may
+          # take longer than 5 seconds to fully initialize. The action=check endpoint
+          # is lightweight (no yt-dlp, no /proc reads) so polling it is cheap.
+          echo "Waiting for container to be ready..."
+          HEALTH_CHECK_URL="http://localhost:8081/src/api.php?action=check"
+          MAX_ATTEMPTS=30
+          READY=false
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            RESP=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL" 2>/dev/null || echo "000")
+            if [ "$RESP" -ge 200 ] && [ "$RESP" -lt 400 ]; then
+              echo "Container ready after ${i} attempt(s) (HTTP $RESP)"
+              READY=true
+              break
+            fi
+            if [ $i -lt $MAX_ATTEMPTS ]; then
+              sleep 2
+            fi
+          done
+          if [ "$READY" != "true" ]; then
+            echo "Container health check timed out after ${MAX_ATTEMPTS} attempts (60s)"
+            docker logs ahoyripper-health 2>&1 | tail -20
+            docker kill ahoyripper-health 2>/dev/null || true
+            docker rm ahoyripper-health 2>/dev/null || true
+            exit 1
+          fi
+
           # Hit the health endpoint to confirm the API responds
           HEALTH_RESP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/src/api.php?action=health || echo "000")
           # Confirm nginx is serving the page (200 on index)
