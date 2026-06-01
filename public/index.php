@@ -175,6 +175,7 @@ $VERSION = '1.0.0';
         <div class="results-sort">
           <label for="sortSelect" class="sort-label">Sort:</label>
           <select id="sortSelect" class="sort-select" aria-label="Sort formats by">
+            <option value="quality">Quality Tier</option>
             <option value="height">Quality</option>
             <option value="filesize">Size (largest)</option>
             <option value="filesize_asc">Size (smallest)</option>

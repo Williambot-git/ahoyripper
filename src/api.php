@@ -728,6 +728,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+        } elseif ($sort === 'quality') {
+            // quality: numeric tier — pixel height for video (1080, 720, 480...),
+            // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
+            // Audio formats have lower quality values than all video tiers (max
+            // audio tier = 320), so they naturally sort after video in this order.
+            // Tie-break on fps same as other sort modes for consistency.
+            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
@@ -906,10 +913,10 @@ switch ($action) {
 
         // Read and validate sort parameter — must be declared before parseFormats
         // is called (line ~1015). Controls format ordering: height (default),
-        // filesize (largest first), filesize_asc (smallest first), or tbr.
+        // filesize (largest first), filesize_asc (smallest first), tbr, or quality.
         // Invalid values fall back to 'height'.
         $raw_sort = $_GET['sort'] ?? 'height';
-        $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr'];
+        $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality'];
         $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
 
         // Enforce max URL length after validation to ensure consistent error codes.

@@ -124,6 +124,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `filesize` — estimated file size, largest first
 - `filesize_asc` — estimated file size, smallest first
 - `tbr` — bitrate, highest first
+- `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
 
 **Success response:**
 ```json

@@ -230,6 +230,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+        } elseif ($sort === 'quality') {
+            // quality: numeric tier — pixel height for video (1080, 720, 480...),
+            // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
+            // Audio formats have lower quality values than all video tiers (max
+            // audio tier = 320), so they naturally sort after video in this order.
+            // Tie-break on fps same as other sort modes for consistency.
+            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
@@ -497,6 +504,49 @@ test('combined formats sorted by height descending (1080 before 480 before 240)'
     $ids[0] === 'high' && $ids[1] === 'mid' && $ids[2] === 'low');
 test('audio-only formats sorted after combined (at end)',
     $ids[3] === 'audio');
+
+// ─── parseFormats: quality sort (numeric quality tier) ─────────────────────────
+
+echo "\n==> Testing parseFormats() — quality sort (numeric tier)\n";
+
+// quality sort: video formats by pixel height, audio by bitrate tier.
+// max audio tier = 320, max video height = 1080, so all video sorts above audio.
+$formats_for_quality = [
+    makeFormat(['format_id' => 'audio_48',   'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 48, 'tbr' => null]),
+    makeFormat(['format_id' => 'video_480',  'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'audio_320',  'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 320, 'tbr' => null]),
+    makeFormat(['format_id' => 'video_720',  'height' => 720, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'audio_128',  'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 128, 'tbr' => null]),
+    makeFormat(['format_id' => 'video_1080', 'height' => 1080, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'audio_256',  'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 256, 'tbr' => null]),
+    makeFormat(['format_id' => 'video_240',  'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+];
+$json_quality = makeJson('Quality Sort', $formats_for_quality);
+$result_quality = parseFormats($json_quality, $raw_err, 'quality');
+$ids_quality = array_column($result_quality['formats'], 'id');
+// All video formats should appear before all audio formats (video quality tiers > 320).
+// Within video: 1080 > 720 > 480 > 240.
+// Within audio: 320 > 256 > 128 > 48.
+test('quality sort: video formats above audio (1080p > 720p > 480p > 240p above audio)',
+    $ids_quality[0] === 'video_1080' && $ids_quality[1] === 'video_720'
+    && $ids_quality[2] === 'video_480' && $ids_quality[3] === 'video_240');
+test('quality sort: audio formats sorted by bitrate tier descending (320 > 256 > 128 > 48)',
+    $ids_quality[4] === 'audio_320');
+test('quality sort: audio second position is 256kbps', $ids_quality[5] === 'audio_256');
+test('quality sort: audio third position is 128kbps', $ids_quality[6] === 'audio_128');
+test('quality sort: audio last position is 48kbps', $ids_quality[7] === 'audio_48');
+
+// quality sort: same quality tier tie-breaks by fps (same as other sort modes)
+$formats_same_quality = [
+    makeFormat(['format_id' => 'a30', 'height' => 1080, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'a60', 'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'a24', 'height' => 1080, 'fps' => 24, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+];
+$json_sq = makeJson('Same Quality FPS', $formats_same_quality);
+$result_sq = parseFormats($json_sq, $raw_err, 'quality');
+$ids_sq = array_column($result_sq['formats'], 'id');
+test('quality sort: same tier tie-breaks by fps descending (60fps > 30fps > 24fps)',
+    $ids_sq[0] === 'a60' && $ids_sq[1] === 'a30' && $ids_sq[2] === 'a24');
 
 // ─── parseFormats: filesize_asc sort (smallest first) ─────────────────────────
 
