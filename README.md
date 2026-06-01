@@ -126,6 +126,8 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `tbr` — bitrate, highest first
 - `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
 
+Pass an API key via `Authorization: Bearer <key>` header (preferred — keeps the key out of URLs and server logs) or the `key` query parameter to identify as an unlimited-key holder and bypass the daily quota on info requests. The info action and download action share the same daily quota (5 free per day), so both count toward the same limit.
+
 **Success response:**
 ```json
 {
