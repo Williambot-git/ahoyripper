@@ -818,8 +818,8 @@ $validation = function(string $action) use($request_id) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'missing_url']);
         echo json_encode([
-            'error' => 'Invalid URL. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
-            'error_code' => 'INVALID_URL',
+            'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
+            'error_code' => 'MISSING_URL',
             'request_id' => $request_id,
         ]);
         return false;
