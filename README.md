@@ -276,6 +276,8 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "status": "ok",
   "server_time": "2026-05-21T16:00:00+00:00",
   "request_id": "a3f1b2c9d4e5f678",
+  "app_version": "1.0.0",
+  "os": "Linux",
   "yt_dlp_version": "2024.x.x",
   "ffmpeg_version": "ffmpeg version 6.x",
   "yt_dlp_ok": true,

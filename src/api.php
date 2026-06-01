@@ -4,6 +4,8 @@
  * Handles: info extraction, format listing, and download serving
  */
 
+define('AHOYRIPPER_VERSION', '1.0.0');
+
 // CORS headers for API access
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -1943,6 +1945,7 @@ switch ($action) {
             'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
             'request_id' => $request_id,
+            'app_version' => AHOYRIPPER_VERSION,
             'os' => PHP_OS,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
