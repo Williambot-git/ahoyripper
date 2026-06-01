@@ -48,25 +48,27 @@ echo "  ✓ No deprecated yt-dlp flags"
 echo ""
 echo "==> Checking old YouTube URL-rewrite age-bypass is NOT present..."
 # The URL-rewrite approach (converting watch/shorts URLs to /embed/...) was
-# replaced by --extractor-args youtube:player_client=web. The old approach
-# is incomplete (missed many URL patterns) and less robust.
+# replaced by --extractor-args youtube:player_client=web, which has now been
+# removed due to yt-dlp #12577 (causes 422 bot detection errors).
+# Both approaches are now absent — age-restricted YouTube videos will return
+# YTDLP_ERROR/AGE_RESTRICTED with guidance to use AhoyVPN or sign in.
 if grep -q 'youtube.com/embed' src/api.php; then
-    echo "  ✗ Old YouTube URL-rewrite approach still present (should use --extractor-args)"
+    echo "  ✗ Old YouTube URL-rewrite approach still present"
     exit 1
 fi
-echo "  ✓ Old URL-rewrite approach removed (now using --extractor-args)"
+echo "  ✓ Old URL-rewrite approach absent"
 
 echo ""
-echo "==> Checking yt-dlp --extractor-args for YouTube age-restriction bypass..."
-# --extractor-args youtube:player_client=web tells yt-dlp to use the web player
-# client, which handles most age-restricted videos without cookies or embedding.
-# Present in both info and download yt-dlp invocations.
+echo "==> Checking yt-dlp --extractor-args for YouTube age-restriction bypass is NOT present..."
+# --extractor-args youtube:player_client=web was removed because it causes 422 bot
+# detection errors on YouTube ( yt-dlp #12577). Age-restricted YouTube videos will
+# fall through to YTDLP_ERROR with a clear message directing users to sign in or
+# use AhoyVPN. The flag must NOT be present in either info or download commands.
 if grep -q -- '--extractor-args.*youtube:player_client=web' src/api.php; then
-    echo "  ✓ --extractor-args youtube:player_client=web present"
-else
-    echo "  ✗ --extractor-args youtube:player_client=web missing (age-restricted YouTube videos will fail)"
+    echo "  ✗ --extractor-args youtube:player_client=web found (causes 422 bot detection)"
     exit 1
 fi
+echo "  ✓ --extractor-args youtube:player_client=web correctly removed (causes 422 errors)"
 
 echo ""
 echo "==> Checking yt-dlp --geo-bypass flag for info action..."

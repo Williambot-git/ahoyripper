@@ -1555,6 +1555,7 @@ switch ($action) {
         ];
 
         $pipes = null;
+        $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
         if (!$proc) {
