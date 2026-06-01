@@ -1308,10 +1308,11 @@ switch ($action) {
         // yt-dlp output templates use %(name)s and %(name)0d escape sequences
         // for dynamic filenames. Block shell metacharacters that could be
         // dangerous in proc_open calls: $ ` ; | & < > \ and whitespace.
-        // Allow alphanum, _ . , - + [ ] < > = ! ~ ( ) % (parentheses and percent
+        // Allow alphanum, _ . , - + [ ] < > = ! ~ ( ) % @ (parentheses and percent
         // for output template expansion — safe when passed as array element to
         // proc_open with bypass_shell=true, bypassing the shell entirely).
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/', $format_id)) {
+        // @ is used for adaptive format selection in yt-dlp.
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%@]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([

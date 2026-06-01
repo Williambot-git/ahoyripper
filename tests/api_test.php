@@ -295,7 +295,7 @@ test('returns null for empty string',
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/', $format_id);
+    return preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%@]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -341,6 +341,8 @@ test('accepts dots in codec version strings',
     validateFormatId('avc1.640028') > 0);
 test('accepts tilde for yt-dlp output template (e.g. --template "%(title)s.%(ext)s")',
     validateFormatId('bestvideo+baudio~%(title)s.%(ext)s') > 0);
+test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
+    validateFormatId('best/@max') > 0);
 
 // ─── derived filename sanitization (verbatim from api.php download action) ──
 // Security property verified: dangerous shell chars (semicolons, backticks,
