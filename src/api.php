@@ -244,7 +244,15 @@ if (in_array($action, $internal_actions, true)) {
     // for all non-download responses.
     header('Content-Type: application/json; charset=utf-8');
     header('X-Request-ID: ' . $request_id);
-    echo json_encode(['status' => 'ok', 'server_time' => date('c'), 'request_id' => $request_id]);
+    // Return PHP version as a minimal version signal for load-balancer health checks.
+    // load-balancer probes can confirm expected version without triggering a full yt-dlp probe.
+    echo json_encode([
+        'status' => 'ok',
+        'server_time' => date('c'),
+        'request_id' => $request_id,
+        'php_version' => PHP_VERSION,
+        'api_version' => '1.0.0',
+    ]);
     exit;
 }
 
