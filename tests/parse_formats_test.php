@@ -27,11 +27,20 @@ function test($name, $condition) {
 // ─── clean() and parseFormats() verbatim copies from api.php ──────────────────
 
 function clean($s) {
-    if ($s === null || $s === '') return 'Unknown';
-    // No htmlspecialchars — API outputs JSON, not HTML.
-    // Type coercion to string is sufficient.
+    // Return 'Unknown' for null, empty string, or numeric zero.
+    if ($s === null || $s === '' || $s === 0) return 'Unknown';
     return (string)$s;
 }
+
+echo "\n==> Testing clean() — numeric zero\n";
+test('clean(0) returns "Unknown"',
+    clean(0) === 'Unknown');
+test('clean(null) returns "Unknown"',
+    clean(null) === 'Unknown');
+test('clean("") returns "Unknown"',
+    clean('') === 'Unknown');
+test('clean(42) returns "42" (non-zero numeric)',
+    clean(42) === '42');
 
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);

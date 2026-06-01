@@ -453,7 +453,10 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
 // Sanitize string for JSON output
 function clean($s) {
-    if ($s === null || $s === '') return 'Unknown';
+    // Return 'Unknown' for null, empty string, or numeric zero.
+    // Numeric zero (e.g. width=0, height=0 from yt-dlp) is a missing/unknown
+    // value in this context — it is not a meaningful string to surface.
+    if ($s === null || $s === '' || $s === 0) return 'Unknown';
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;

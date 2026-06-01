@@ -461,6 +461,29 @@ test('rejects array (e.g. [0 => "https://..."])',
 test('rejects object',
     isValidUrl((object)['url' => 'https://example.com']) === false);
 
+// ─── Test clean() — numeric zero should return 'Unknown' ─────────────────────
+// clean() is called on format metadata fields (width, height) which yt-dlp
+// sometimes returns as 0 for unknown values. Numeric zero is not a meaningful
+// string in this context and should map to 'Unknown' alongside null and ''.
+
+function cleanForTest($s) {
+    if ($s === null || $s === '' || $s === 0) return 'Unknown';
+    return (string)$s;
+}
+
+echo "\n==> Testing clean() — numeric zero edge case\n";
+
+test('clean(null) returns "Unknown"',
+    cleanForTest(null) === 'Unknown');
+test('clean("") returns "Unknown"',
+    cleanForTest('') === 'Unknown');
+test('clean(0) returns "Unknown" (not "0")',
+    cleanForTest(0) === 'Unknown');
+test('clean("valid string") passes through unchanged',
+    cleanForTest('Rick Astley') === 'Rick Astley');
+test('clean(42) numeric non-zero becomes string "42"',
+    cleanForTest(42) === '42');
+
 // ─── Test classifyYtdlpError edge cases ────────────────────────────────────────
 // The regex patterns have specific thresholds. Non-matching phrases
 // (like "permission denied" or "invalid input") are NOT matched by
