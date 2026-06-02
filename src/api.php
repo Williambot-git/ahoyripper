@@ -1113,6 +1113,12 @@ switch ($action) {
         //   improving the chance of reaching the original/unrestricted content variant
         //   instead of a region-locked translation or localised version.
         // --referer: prevent video URL leaking as referer to the source site.
+        // --progress-template "": suppress ALL progress output to stderr — without this,
+        //   yt-dlp emits progress bars to stderr even during --dump-json (the progress
+        //   template is output even when --skip-download is set). This prepends garbage
+        //   to the JSON stdout, causing json_decode() to fail and returning a confusing
+        //   PARSE_ERROR instead of a properly classified yt-dlp error message.
+        //   Using "" (empty template) suppresses all progress output cleanly.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
@@ -1120,6 +1126,7 @@ switch ($action) {
             '--no-playlist',
             '--skip-download',
             '--no-geo-bypass',
+            '--progress-template', '',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
