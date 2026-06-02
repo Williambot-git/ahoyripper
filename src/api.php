@@ -1219,7 +1219,7 @@ switch ($action) {
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
             }
-            echo json_encode($resp);
+            echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -1259,7 +1259,7 @@ switch ($action) {
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
             }
-            echo json_encode($resp);
+            echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         if (isset($parsed['error'])) {
@@ -1787,7 +1787,7 @@ switch ($action) {
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
                 }
-                echo json_encode($resp);
+                echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             } else {
                 // Unclassified error — $err_classified is null; use 422 as safe default.
