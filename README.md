@@ -116,7 +116,7 @@ ahoyripper/
 
 ### Get video info + formats
 ```
-GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr>
+GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|quality>
 ```
 
 The `sort` parameter (optional, default `height`) controls format sort order:

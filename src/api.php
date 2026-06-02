@@ -540,7 +540,7 @@ function classifyYtdlpError($raw_err) {
 }
 
 // Parse yt-dlp output to extract formats
-// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr' — validated by caller
+// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality' — validated by caller
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
@@ -739,7 +739,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     }
 
     // Sort: combined formats first, then by the caller's selected sort key.
-    // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr' — validated by the
+    // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality' — validated by the
     // caller before being passed in, so no additional validation is needed here.
     usort($formats, function($a, $b) use ($sort) {
         // Combined first
