@@ -137,7 +137,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $height = isset($f['height']) ? (int)$f['height'] : 0;
         $vcodec = clean($f['vcodec'] ?? 'none');
         $acodec = clean($f['acodec'] ?? 'none');
-        $fps = isset($f['fps']) ? (int)$f['fps'] : null;
+        $fps = isset($f['fps']) && $f['fps'] !== null ? (int)(float)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
         $format_description = clean($f['format_description'] ?? '');
         $abr = isset($f['abr']) ? (int)$f['abr'] : null;

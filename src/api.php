@@ -38,6 +38,8 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // Safari) still receive reports via the legacy report-uri path while Chromium uses
 // the modern Reporting API.
 header('Reporting-Endpoints: csp-report="/csp-report"');
+// Also include report-to for browsers that support the modern Reporting API.
+// report-uri is kept as a fallback for older browsers.
 
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
