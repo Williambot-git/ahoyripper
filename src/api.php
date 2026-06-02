@@ -1840,7 +1840,7 @@ switch ($action) {
         $matched = glob($glob_pattern);
         $actual_file = $matched[0] ?? null;
 
-        if (!$actual_file || !is_file($actual_file) || @filesize($actual_file) === 0) {
+        if (!$actual_file || !is_file($actual_file)) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
@@ -1852,9 +1852,23 @@ switch ($action) {
             exit;
         }
 
-        // Stream the file to user then delete
+        // Clear stat cache before reading filesize — glob() uses cached directory
+        // entries and PHP's filesize() also caches result metadata. Without clearing,
+        // filesize() can return 0 or a stale size even for a freshly-downloaded file
+        // on long-running PHP processes that have hit the same path before.
+        clearstatcache(true, $actual_file);
         $filesize = @filesize($actual_file);
-        if ($filesize === false) $filesize = 0;
+        if ($filesize === false || $filesize === 0) {
+            foreach (glob($glob_pattern) as $f) { @unlink($f); }
+            logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
+                'error_code' => 'DOWNLOAD_EMPTY',
+                'request_id' => $request_id,
+            ]);
+            exit;
+        }
 
         // Detect extension and MIME from the actual downloaded file
         $ext = pathinfo($actual_file, PATHINFO_EXTENSION);
