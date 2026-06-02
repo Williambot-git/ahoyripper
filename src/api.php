@@ -1100,7 +1100,6 @@ switch ($action) {
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
-            '--quiet',
             '--no-warnings',
             '--no-playlist',
             '--skip-download',
@@ -1596,7 +1595,7 @@ switch ($action) {
         $referer = 'https://ahoyripper.com/';
 
         // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
-        // Preferred over the deprecated --quiet flag in modern yt-dlp (2024.04+).
+        // Using --no-warnings (not --quiet) per modern yt-dlp best practice (2024.04+).
         // --skip-download is intentionally absent: this action downloads the actual file.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
