@@ -393,6 +393,24 @@ else
 fi
 
 echo ""
+echo "==> Checking Report-To header defines the CSP reporting endpoint group..."
+# report-to requires a corresponding Report-To header that defines the named
+# endpoint group. Without it, Chromium silently drops violations since the
+# csp-report group is undefined. Both nginx.conf and nginx-docker.conf need it.
+if grep -q 'Report-To.*csp-report' deploy/nginx-docker.conf; then
+    echo "  ✓ nginx-docker.conf defines Report-To csp-report group"
+else
+    echo "  ✗ nginx-docker.conf missing Report-To header — Chromium ignores report-to csp-report"
+    exit 1
+fi
+if grep -q 'Report-To.*csp-report' deploy/nginx.conf; then
+    echo "  ✓ nginx.conf defines Report-To csp-report group"
+else
+    echo "  ✗ nginx.conf missing Report-To header — Chromium ignores report-to csp-report"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP report-uri location is configured in nginx-docker.conf..."
 if grep -q "location = /csp-report" deploy/nginx-docker.conf; then
     echo "  ✓ /csp-report location configured in nginx-docker.conf"
