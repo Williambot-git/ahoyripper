@@ -1092,7 +1092,10 @@ switch ($action) {
         // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
         // --no-playlist: extract single video, not playlist.
         // --skip-download: fetch metadata only (don't download the full file).
-        // --geo-bypass: work around geographic restrictions.
+        // --no-geo-bypass: do NOT bypass geographic restrictions by faking X-Forwarded-For
+        // headers. yt-dlp's default since 2023.11 — geographic blocks are surfaced as
+        // errors rather than silently bypassed, which is more honest and reliable.
+        // Use AhoyVPN to route through an allowed region if you encounter geo-blocks.
         // --add-header Accept-Language: signal preferred language to source sites,
         //   improving the chance of reaching the original/unrestricted content variant
         //   instead of a region-locked translation or localised version.
@@ -1103,7 +1106,7 @@ switch ($action) {
             '--no-warnings',
             '--no-playlist',
             '--skip-download',
-            '--geo-bypass',
+            '--no-geo-bypass',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
@@ -1597,13 +1600,15 @@ switch ($action) {
         // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
         // Using --no-warnings (not --quiet) per modern yt-dlp best practice (2024.04+).
         // --skip-download is intentionally absent: this action downloads the actual file.
+        // --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
+        // Use AhoyVPN to route through an allowed region when encountering geo-blocks.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
             '--no-warnings',
             '--no-playlist',
-            '--geo-bypass',
+            '--no-geo-bypass',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
@@ -1987,7 +1992,7 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download --geo-bypass -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download --no-geo-bypass -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
