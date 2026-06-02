@@ -398,6 +398,24 @@ Some platforms require you to be logged in to access certain content. If you enc
 1. **On YouTube:** Age-restricted videos require authentication. You can pass cookies to yt-dlp by adding a `cookies` option to the command in `src/api.php` — see [yt-dlp cookies guide](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#how-do-i-pass-cookies-to-yt-dlp).
 2. **On other platforms:** Content behind login walls (Instagram private posts, Patreon, etc.) cannot be downloaded without valid credentials.
 
+### Passing cookies to yt-dlp
+
+Some platforms (e.g., age-restricted YouTube videos, Spotify) require authentication. yt-dlp supports reading browser cookies via the `--cookies` flag, which lets it use your authenticated session to access restricted content.
+
+To enable cookie-based authentication:
+
+1. Export cookies from your browser (e.g., using the "Export Cookies" extension for Chrome/Edge, or the "cookies.txt" format from the "cookies.txt" extension for Firefox).
+2. Save the exported cookies file to `/var/www/ahoyripper/cookies.txt` on your server (ensure it's readable by `www-data`).
+3. Edit `src/api.php` — add `--cookies`, `$cookie_path` entries to both info and download `$ytdlp_cmd` arrays (after `--user-agent`):
+   ```php
+   '--cookies', '/var/www/ahoyripper/cookies.txt',
+   ```
+4. Restart nginx or PHP-FPM to apply the change.
+
+The `cookies.txt` file must be in the Netscape cookie format (the format produced by browser cookie exporters). Keep the file updated — cookies expire and may cause `LOGIN_REQUIRED` errors if they go stale.
+
+> **Security note:** The cookies file contains your authenticated session cookies. Treat it like a password — restrict file permissions to `www-data:www-data` with `0600` and never commit it to version control. In Docker, map it as a read-only volume or pass it via an environment variable pointing to a secure mount path.
+
 ### Platforms with known limitations
 
 | Platform | Limitation |
@@ -406,8 +424,6 @@ Some platforms require you to be logged in to access certain content. If you enc
 | TikTok | Some videos may be geo-restricted or require login |
 | Spotify | Requires `--cookies-from-browser` or `--cookies` for full access |
 | Netflix + streaming sites | DRM-protected content cannot be ripped |
-
----
 
 ---
 
