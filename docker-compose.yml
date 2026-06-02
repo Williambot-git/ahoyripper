@@ -6,6 +6,7 @@ services:
     environment:
       - TZ=UTC
       - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-RIPPER2026DEV}
+      - AHOY_USER_AGENT=${AHOY_USER_AGENT:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
