@@ -100,8 +100,8 @@ if command -v yt-dlp &>/dev/null; then
         $PIP_BIN install -q --upgrade yt-dlp 2>&1 | tail -1
     else
         # standalone binary — download the latest release directly from GitHub
-        # (--self-update is unreliable for standalone binaries as it may skip the
-        # update if the current build is considered "pinned" or is a dev version)
+        # rather than relying on self-update, which has known edge-case failures
+        # with pinned/dev versions and is unnecessary since we control the binary.
         echo "  Updating standalone yt-dlp binary..."
         curl -L -o /usr/local/bin/yt-dlp \
             https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
