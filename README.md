@@ -499,7 +499,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AHOY_USER_AGENT` | *(yt-dlp default)* | Custom User-Agent string for yt-dlp requests. Defaults to a modern Chrome UA. Override this if the source site blocks the default. |
+| `AHOY_USER_AGENT` | `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36` | Custom User-Agent string for yt-dlp requests. yt-dlp defaults to `python-requests/X.Y.Z` which is trivially blocked by anti-bot measures — this overrides it with a modern Chrome UA. Override via `AHOY_USER_AGENT` env var in docker-compose or cloud dashboard to mimic a different browser. |
 | `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key that grants unlimited daily quota. **Change in production.** Set to a long random string (e.g. `openssl rand -hex 32`) and pass to the container via `-e` or your orchestration layer. |
 
 Example:

@@ -637,6 +637,9 @@ function escapeHtml(s) {
       const parsed = new URL(url);
       if (!['http:', 'https:'].includes(parsed.protocol)) {
         showError('Only http:// and https:// URLs are supported. Please paste a valid web link.');
+        isFetching = false;
+        setLoading(false);
+        showProgress(false);
         return;
       }
     } catch (_) {

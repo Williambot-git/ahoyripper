@@ -360,6 +360,8 @@ test('accepts tilde for yt-dlp output template (e.g. --template "%(title)s.%(ext
     validateFormatId('bestvideo+baudio~%(title)s.%(ext)s') > 0);
 test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
     validateFormatId('best/@max') > 0);
+test('accepts @ in format selector string with qualifiers',
+    validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') > 0);
 
 // ─── derived filename sanitization (verbatim from api.php download action) ──
 // Security property verified: dangerous shell chars (semicolons, backticks,
