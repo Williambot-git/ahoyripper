@@ -118,6 +118,9 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
         return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.'];
     }
+    if (preg_match('/http error 403/i', $err_lower)) {
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription on the source platform.'];
+    }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
@@ -187,6 +190,18 @@ test('detects PRIVATE_VIDEO — "this video is private"',
 $result = classifyYtdlpError('ERROR: Video Is Private');
 test('detects PRIVATE_VIDEO — case insensitive',
     $result !== null && ($result['code'] ?? '') === 'PRIVATE_VIDEO');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
+test('detects LOGIN_REQUIRED from "HTTP Error 403" (YouTube age-restricted content)',
+    $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
+
+$result = classifyYtdlpError('ERROR: [youtube] HTTP Error 403');
+test('detects LOGIN_REQUIRED from "[youtube] HTTP Error 403"',
+    $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
+
+$result = classifyYtdlpError('ERROR: HTTP error 403 (thread needs auth)');
+test('detects LOGIN_REQUIRED from "HTTP error 403" case-insensitive',
+    $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
 
 // Note: "authentication required" is matched by the merged pattern
 // 'authentication required|login.*required|this video requires login'.

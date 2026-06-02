@@ -487,6 +487,15 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
         return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
     }
+    // "HTTP Error 403" from yt-dlp indicates the source site is blocking the
+    // request — typically due to needing login, subscription, or having TOS
+    // restrictions (e.g. age-gate, region-lock). Treat it like LOGIN_REQUIRED
+    // so the user knows authentication is needed rather than seeing a generic
+    // "could not fetch" error. Must come before the generic "authentication
+    // required" check so the specific "HTTP Error 403" pattern fires first.
+    if (preg_match('/http error 403/i', $err_lower)) {
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription on the source platform.', 'status' => 401];
+    }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
