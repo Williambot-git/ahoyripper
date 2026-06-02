@@ -1468,6 +1468,8 @@ switch ($action) {
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
                     'upgrade_url' => 'https://ahoyvpn.com',
+                    'retry_after' => $dl_reset_ts,
+                    'request_id' => $request_id,
                 ]);
                 exit;
             }
@@ -1701,10 +1703,14 @@ switch ($action) {
                 foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
+                // retry_after: Unix timestamp when the download can be retried.
+                // Use strtotime('+5 minutes') to match the 300s server-side timeout
+                // and give the client a consistent future reset point to count down to.
+                $retry_ts = time() + $timeout;
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
-                    'retry_after' => $timeout,
+                    'retry_after' => $retry_ts,
                     'request_id' => $request_id,
                 ]);
                 exit;
