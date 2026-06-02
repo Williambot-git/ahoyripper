@@ -156,7 +156,7 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.'];
     }
-    if (preg_match('/requested format(?!s)|format.*not.*available|does not contain|does not match/i', $err_lower)) {
+    if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
     }
     if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {

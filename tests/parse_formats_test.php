@@ -102,7 +102,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE'];
             }
-            if (preg_match('/requested format(?!s)|format.*not.*available|requested.*not.*available|does not contain|does not match/i', $err_lower)) {
+            if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
             }
