@@ -1271,8 +1271,7 @@ switch ($action) {
                 'DOWNLOAD_EMPTY' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
                 'FORMAT_UNAVAILABLE' => 422,
-                'SOURCE_TIMEOUT' => 504,
-                'SOURCE_RATE_LIMITED' => 429,
+                'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
             ];
             $err_status = $err_status_map[$parsed['error_code']] ?? 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
