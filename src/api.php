@@ -1895,6 +1895,8 @@ switch ($action) {
         // Minimal ping — zero dependency on yt-dlp, ffmpeg, or /proc/sys calls.
         // Intentionally omit: server_uptime, load_avg, memory, disk_free, versions.
         // Docker healthchecks and load-balancer probes should use this, not health.
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
         header('Cache-Control: no-cache');
         header('Connection: close');
         echo json_encode([
