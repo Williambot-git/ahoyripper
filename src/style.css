@@ -441,12 +441,14 @@ body {
 }
 .format-card:active { transform: translateY(0); }
 /* Improve touch target size on mobile for format cards.
-   Use pointer:coarse (finger on touchscreen) rather than hover:none
-   (which can match e-readers and other non-touch devices that happen
-   to lack a hover-capable primary input). coarse explicitly excludes
-   devices with fine pointers (mouse/trackpad), which is the right
-   signal for "this device is primarily touch-controlled". */
-@media (pointer: coarse) {
+   Use (hover: none) AND (pointer: coarse) — this targets devices that:
+     1. Have no hover capability (can't hover = touch device), AND
+     2. Use a coarse pointer (finger on touchscreen).
+   This correctly excludes devices with fine pointers (mouse/trackpad) that
+   still report pointer:coarse on some browsers, as well as e-readers and
+   other devices without hover that use fine pointers. The combination
+   is the standard responsive touch-target pattern per MDN / CSS spec. */
+@media (hover: none) and (pointer: coarse) {
   .format-card {
     min-height: 88px;
   }
