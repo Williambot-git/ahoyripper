@@ -879,6 +879,11 @@ $validation = function(string $action) use($request_id) {
 // Keep the value in a single place to simplify rotation.
 define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 
+// Configurable User-Agent — follows the same env-var pattern as AHOY_UNLIMITED_KEY.
+// Override via AHOY_USER_AGENT env var in docker-compose or cloud dashboard.
+// Used by all yt-dlp invocations (info, download) so agents stay consistent.
+define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36');
+
 // ─── ROUTING ────────────────────────────────────────────────
 
 // $unlimited is set in the download case below after reading the API key.
@@ -1098,7 +1103,7 @@ switch ($action) {
             '--skip-download',
             '--geo-bypass',
             '--referer', 'https://ahoyripper.com/',
-            '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
             '--',
             $url,
@@ -1599,7 +1604,7 @@ switch ($action) {
             '--no-playlist',
             '--geo-bypass',
             '--referer', $referer,
-            '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
             '--',
             $url,
