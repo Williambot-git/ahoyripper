@@ -53,10 +53,23 @@ function isValidUrl($url) {
     if ($parsed === false || $parsed === null) {
         return false;
     }
-    // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1)
-    $host = trim($parsed, '[]');
-    // If the host is an IP address, validate it is not private/reserved
-    if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+    // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1) before validation.
+    // parse_url with PHP_URL_HOST returns IPv6 addresses in bracketed form.
+    // filter_var with FILTER_VALIDATE_IP rejects bracketed strings, so we must
+    // strip the brackets before passing the host to the validator.
+    if (filter_var($parsed, FILTER_VALIDATE_IP) !== false) {
+        // Host is a bare IP (no brackets)
+        $host = $parsed;
+    } elseif (filter_var(substr($parsed, 1, -1), FILTER_VALIDATE_IP) !== false) {
+        // Host is a bracketed IP like [::1] or [fe80::1] — extract the bare IP
+        $host = substr($parsed, 1, -1);
+    } else {
+        // Host is a domain name — skip IP validation (domains don't fail FILTER_VALIDATE_IP)
+        $host = null;
+    }
+    // If the host resolved to an IP address, validate it is not private/reserved.
+    // This catches both bare IPs and IPv6 loopback/link-local stripped of brackets.
+    if ($host !== null && filter_var($host, FILTER_VALIDATE_IP) !== false) {
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
             return false;
         }
