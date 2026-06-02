@@ -71,23 +71,25 @@ fi
 echo "  ✓ --extractor-args youtube:player_client=web correctly removed (causes 422 errors)"
 
 echo ""
-echo "==> Checking yt-dlp --geo-bypass flag for info action..."
-# --geo-bypass enables yt-dlp's built-in geo-restriction bypass (HTTP header
-# manipulation) so content that is merely geo-restricted (not unavailable) can
-# be retrieved even when the server is in a restricted region.
-if grep -q -- '--geo-bypass' src/api.php; then
-    echo "  ✓ --geo-bypass flag present in yt-dlp info command"
+echo "==> Checking yt-dlp --no-geo-bypass flag for info action..."
+# --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
+# yt-dlp's default behavior is to NOT bypass geo-restrictions — it surfaces them as
+# errors instead. We explicitly pass --no-geo-bypass to be unambiguous about this
+# (and to override any user config that might set --geo-bypass globally).
+# Use AhoyVPN to route through an allowed region when encountering geo-blocks.
+if grep -q -- '--no-geo-bypass' src/api.php; then
+    echo "  ✓ --no-geo-bypass flag present in yt-dlp info command"
 else
-    echo "  ✗ --geo-bypass flag missing in yt-dlp info command"
+    echo "  ✗ --no-geo-bypass flag missing in yt-dlp info command"
     exit 1
 fi
 
 echo ""
-echo "==> Checking yt-dlp --geo-bypass flag for download action..."
-if sed -n "/case 'download':/,/case '/p" src/api.php | grep -q -- '--geo-bypass'; then
-    echo "  ✓ --geo-bypass flag present in yt-dlp download command"
+echo "==> Checking yt-dlp --no-geo-bypass flag for download action..."
+if sed -n "/case 'download':/,/case '/p" src/api.php | grep -q -- '--no-geo-bypass'; then
+    echo "  ✓ --no-geo-bypass flag present in yt-dlp download command"
 else
-    echo "  ✗ --geo-bypass flag missing in yt-dlp download command"
+    echo "  ✗ --no-geo-bypass flag missing in yt-dlp download command"
     exit 1
 fi
 
