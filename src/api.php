@@ -1056,8 +1056,8 @@ switch ($action) {
             $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips.
-            // Use the remaining count calculated BEFORE the increment so the value
-            // is correct even when this is the user's last free rip.
+            // Use the remaining count calculated AFTER the increment so the value
+            // reflects the number of rips available AFTER this request's quota hit.
             header('X-DailyLimit-Limit: ' . $daily_limit);
             header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
