@@ -304,8 +304,11 @@ if ($version_cache_file && is_readable($version_cache_file)) {
     }
 }
 if (!$GLOBALS['__ytdlp_version']) {
-    // Note: yt-dlp uses both -V and --version; --version is stable/canonical.
-    $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>/dev/null') ?: '');
+    // Note: yt-dlp outputs version to stdout (not stderr) — redirect stderr to
+    // stdout so shell_exec captures it (shell_exec sees only stdout, not the
+    // stderr pipe). Without 2>&1, the probe always returns empty and the cache
+    // is always stale, causing yt-dlp startup overhead on every single request.
+    $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>&1') ?: '');
     $GLOBALS['__ytdlp_version'] = $ver;
     if ($version_cache_file) {
         $hash = @md5_file('/usr/local/bin/yt-dlp') ?: '';
@@ -327,7 +330,7 @@ if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     }
 }
 if (!$GLOBALS['__ffmpeg_version']) {
-    $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>/dev/null | head -1') ?: '');
+    $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>&1 | head -1') ?: '');
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
         $hash = @md5_file('/usr/bin/ffmpeg') ?: '';
