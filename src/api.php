@@ -1622,6 +1622,10 @@ switch ($action) {
         // --skip-download is intentionally absent: this action downloads the actual file.
         // --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
         // Use AhoyVPN to route through an allowed region when encountering geo-blocks.
+        // --progress-template "": suppress ALL progress output to stderr — without this,
+        //   yt-dlp emits progress bars to stderr even during file downloads, which
+        //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
+        //   actual error messages correctly (progress bar text prepends the real error).
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
@@ -1629,6 +1633,7 @@ switch ($action) {
             '--no-warnings',
             '--no-playlist',
             '--no-geo-bypass',
+            '--progress-template', '',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
