@@ -1100,6 +1100,7 @@ switch ($action) {
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
+            '--quiet',
             '--no-warnings',
             '--no-playlist',
             '--skip-download',

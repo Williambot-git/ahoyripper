@@ -737,31 +737,6 @@ $desc2 = $result_no_desc['formats'][0]['description'] ?? '';
 test('description falls back to format_note when format_description absent',
     strpos($desc2, '480p') !== false);
 
-// ─── parseFormats: description uses format_description over format_note ────────
-// When both format_description AND format_note are present, description should
-// use format_description (the richer yt-dlp signal), not format_note.
-
-$fmt_desc2 = makeFormat([
-    'width' => 1920, 'height' => 1080,
-    'format_description' => '1080p60 HDR 10bit',
-    'vcodec' => 'avc1', 'acodec' => 'mp4a',
-]);
-$json_desc2 = makeJson('Desc Test', [$fmt_desc2]);
-$result_desc2 = parseFormats($json_desc2);
-$desc2a = $result_desc2['formats'][0]['description'] ?? '';
-test('description uses format_description when available (no width prefix comment)',
-    strpos($desc2a, '1080p60 HDR 10bit') !== false);
-
-$fmt_no_desc = makeFormat([
-    'width' => 0, 'height' => 480, 'format_note' => '480p',
-    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
-]);
-$json_no_desc = makeJson('No Desc', [$fmt_no_desc]);
-$result_no_desc = parseFormats($json_no_desc);
-$desc2 = $result_no_desc['formats'][0]['description'] ?? '';
-test('description falls back to format_note when format_description absent',
-    strpos($desc2, '480p') !== false);
-
 // When both format_description AND format_note are present, description should
 // use format_description (the richer yt-dlp signal), not format_note.
 $fmt_both = makeFormat([
