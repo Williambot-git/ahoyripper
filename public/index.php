@@ -112,7 +112,7 @@ $VERSION = '1.0.0';
 <main>
   <section class="hero">
     <h1>Rip any video, <span>anywhere.</span></h1>
-    <p>Free online media ripper - paste any link and download video or audio in MP4, MP3, FLAC, and more. Works with most platforms.</p>
+    <p>Free online media ripper — paste any link and download video or audio in MP4, MP3, FLAC, and more. Works with YouTube, TikTok, X/Twitter, SoundCloud, Reddit, Instagram, Facebook, Vimeo, and 1872+ platforms.</p>
 
     <!-- Error message (aria-live for screen reader announcements) -->
     <div class="rip-error" id="errorBox" role="alert" aria-live="polite" aria-atomic="true"></div>
@@ -213,7 +213,7 @@ $VERSION = '1.0.0';
       </div>
       <div class="feature-card">
         <h3>Many Platforms</h3>
-        <p>Most video and audio platforms are supported.</p>
+        <p>1872+ platforms supported — YouTube, TikTok, X/Twitter, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and more.</p>
       </div>
       <div class="feature-card">
         <h3>Fast</h3>
