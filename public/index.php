@@ -9,6 +9,16 @@ $jsEnabled = isset($_COOKIE['js']) || isset($_GET['js']);
 $default_url = $_GET['url'] ?? '';
 
 $VERSION = '1.0.0';
+
+// HSTS — tell browsers to only ever connect over HTTPS for this domain.
+// includeSubDomains: all subdomains must use HTTPS.
+// preload: include in browser HSTS preload lists for maximum protection.
+// max-age=31536000 (1 year) is required for preload list submission.
+// This header only applies when served over HTTPS (nginx redirects HTTP → HTTPS).
+// Adding it to the PHP layer ensures it is present on all responses served
+// from index.php, including any edge cases where the PHP built-in server
+// or a reverse proxy bypasses nginx (where the HTTP→HTTPS redirect may not apply).
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
 ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
