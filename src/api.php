@@ -768,9 +768,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         } elseif ($sort === 'quality') {
             // quality: numeric tier — pixel height for video (1080, 720, 480...),
             // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
-            // Audio formats have lower quality values than all video tiers (max
-            // audio tier = 320), so they naturally sort after video in this order.
-            // Tie-break on fps same as other sort modes for consistency.
+            // Audio formats are assigned a quality tier when parsed, so they
+            // participate in the quality sort correctly (320 > 256 > 192...).
             $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
