@@ -174,7 +174,7 @@ $VERSION = '1.0.0';
         </div>
         <div class="results-sort">
           <label for="sortSelect" class="sort-label">Sort:</label>
-          <select id="sortSelect" class="sort-select" aria-label="Sort formats by">
+          <select id="sortSelect" class="sort-select" aria-label="Sort formats by" disabled>
             <option value="quality">Quality Tier</option>
             <option value="height">Quality</option>
             <option value="filesize">Size (largest)</option>
@@ -802,6 +802,7 @@ function escapeHtml(s) {
 
       showProgress(false);
       showResults(true);
+      if (sortSelect) sortSelect.disabled = false;
       // Sync sort dropdown with what the server actually applied (sort_applied
       // may differ from the requested sort if the requested sort was invalid).
       if (sortSelect && data.sort_applied) {
@@ -837,6 +838,7 @@ function escapeHtml(s) {
     if (thumb) { thumb.src = ''; thumb.hidden = true; }
     if (sub) sub.textContent = '';
     if (plat) plat.hidden = true;
+    if (sortSelect) sortSelect.disabled = true;
     input.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
