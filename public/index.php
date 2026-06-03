@@ -31,7 +31,7 @@ header('X-Content-Type-Options: nosniff');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
-  <meta name="description" content="Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup, no ads — just paste a link.">
+  <meta name="description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1000+ platforms. Free, no signup, no ads.">
   <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
@@ -554,13 +554,19 @@ function escapeHtml(s) {
           .then(function(resp) {
             if (!resp.ok) {
               navigateOnSuccess = false;
-              return resp.json().catch(function() {
-                return { error: 'Download failed. Try another format.' };
-              }).then(function(err) {
-                showError(err.error || 'Download failed.');
+              // Attempt to parse the error JSON. If the response body is not valid
+              // JSON (e.g. a proxy error page), catch the parse failure and fall
+              // back to a generic message. Always remove the downloading state.
+              resp.json().then(function(err) {
+                showError(err.error || 'Download failed. Try another format.');
+                setLoading(false);
+                card.classList.remove('downloading');
+              }).catch(function() {
+                showError('Download failed. Try another format.');
                 setLoading(false);
                 card.classList.remove('downloading');
               });
+              return;
             }
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
