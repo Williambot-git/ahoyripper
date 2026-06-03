@@ -43,7 +43,7 @@ yt-dlp --list-extractors | wc -l
 - **Instagram:** Reels and public posts are supported. Private account content requires authentication and is not supported.
 - **Reddit:** Public videos from subreddits and users are supported. NSFW content may be restricted depending on server configuration.
 - **SoundCloud:** All public tracks and albums supported. Set `AHOY_USER_AGENT` if you encounter request blocks.
-- **TikTok / Instagram Stories:** Requires the `--no-check-certificates` flag in some cases. Not available in all regions.
+- **TikTok / Instagram Stories:** Web video downloads are supported via the TikTok extractor. Some regions may require the TikTok extractor to be updated — run `yt-dlp -U` if downloads fail.
 
 > **Tip:** If a platform returns `UNSUPPORTED_SITE`, the extractor may be disabled or require a yt-dlp update. Try `yt-dlp -U` to update, then test again.
 
