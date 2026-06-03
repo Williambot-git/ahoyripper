@@ -233,8 +233,20 @@ if (in_array($action, $internal_actions, true)) {
             'original-policy' => $report['csp-report']['original-policy'] ?? null,
         ];
         error_log('AhoyRipper CSP-VIOLATION: ' . json_encode($safe));
+        // Harden the csp-report response to match the rest of the API.
+        // These headers are set at the top of the script (lines 11-29) for all
+        // other endpoints; apply them here too so the violation report handler
+        // is not the weakest link in the security posture.
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
         header('X-Robots-Tag: noindex, noai, noimage, noydir');
         header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
         echo json_encode(['status' => 'ok']);
         exit;
     }
