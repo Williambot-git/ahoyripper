@@ -1232,7 +1232,7 @@ switch ($action) {
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
             }
-            echo json_encode($resp);
+            echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -1272,7 +1272,7 @@ switch ($action) {
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
             }
-            echo json_encode($resp);
+            echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         if (isset($parsed['error'])) {
