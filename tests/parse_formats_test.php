@@ -171,30 +171,6 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             continue;
         }
 
-        $quality = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $desc = $quality
-            ? (empty($format_description) || $format_description === 'Unknown'
-                ? ($format_note ?: $label)
-                : trim("{$quality} {$format_description}"))
-            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
-
-        if ($filesize === 0) {
-            $duration_secs = $duration ?: 180;
-            if ($vcodec !== 'none' && $acodec !== 'none') {
-                $bitrate_kbps = $tbr ?? (($height > 720) ? 5000 : (($height > 480) ? 2500 : 1000));
-                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
-            } elseif ($vcodec !== 'none') {
-                $bitrate_kbps = $tbr ?? (($height > 720) ? 4000 : 1500);
-                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
-            } else {
-                $bitrate_kbps = $tbr ?? 128;
-                $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
-            }
-        }
-
-        $filesize_mb = round($filesize / 1048576, 1);
-
-        // quality: numeric quality tier — height for video, audio bitrate tier for audio-only
         $quality = null;
         if ($vcodec !== 'none') {
             $quality = $height;
@@ -210,6 +186,31 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 else $quality = 48;
             }
         }
+
+        // description (human-readable, used for display)
+        $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
+        $desc = $resolution
+            ? (empty($format_description) || $format_description === 'Unknown'
+                ? ($format_note ?: $label)
+                : trim("{$resolution} {$format_description}"))
+            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
+
+        // filesize estimation
+        $fs = $filesize;
+        if ($fs === 0) {
+            $duration_secs = $duration ?: 180;
+            if ($vcodec !== 'none' && $acodec !== 'none') {
+                $bitrate_kbps = $tbr ?? (($height > 720) ? 5000 : (($height > 480) ? 2500 : 1000));
+                $fs = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            } elseif ($vcodec !== 'none') {
+                $bitrate_kbps = $tbr ?? (($height > 720) ? 4000 : 1500);
+                $fs = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            } else {
+                $bitrate_kbps = $tbr ?? 128;
+                $fs = ($bitrate_kbps * 1000 / 8) * $duration_secs;
+            }
+        }
+        $filesize_mb = round($fs / 1048576, 1);
 
         $formats[] = [
             'id' => $format_id,
@@ -481,6 +482,9 @@ $result_combined = parseFormats($json_combined);
 $label = $result_combined['formats'][0]['label'] ?? '';
 test('combined video+audio label includes height, fps, ext, format_note',
     strpos($label, '1080') !== false && strpos($label, '60') !== false && strpos($label, 'mp4') !== false);
+$desc = $result_combined['formats'][0]['description'] ?? '';
+test('combined description includes resolution prefix and HDR format_note',
+    strpos($desc, '1080') !== false && strpos($desc, 'HDR') !== false);
 
 $json_video_only = makeJson('Test', [makeFormat([
     'height' => 720, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'none', 'ext' => 'webm'
@@ -489,6 +493,9 @@ $result_video_only = parseFormats($json_video_only);
 $label_vo = $result_video_only['formats'][0]['label'] ?? '';
 test('video-only label says "Video 720p"',
     strpos($label_vo, 'Video 720p') !== false);
+$desc_vo = $result_video_only['formats'][0]['description'] ?? '';
+test('video-only description falls back to format_note when no format_description',
+    strpos($desc_vo, '720') !== false);
 
 $json_audio = makeJson('Test', [makeFormat([
     'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a', 'tbr' => 128
@@ -497,6 +504,9 @@ $result_audio = parseFormats($json_audio);
 $label_audio = $result_audio['formats'][0]['label'] ?? '';
 test('audio-only label shows bitrate and ext',
     strpos($label_audio, '128') !== false && strpos($label_audio, 'm4a') !== false);
+$desc_audio = $result_audio['formats'][0]['description'] ?? '';
+test('audio-only description shows bitrate and ext',
+    strpos($desc_audio, '128') !== false && strpos($desc_audio, 'm4a') !== false);
 
 // ─── parseFormats: format_type classification ────────────────────────────────
 
