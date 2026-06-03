@@ -313,7 +313,11 @@ if ($version_cache_file && is_readable($version_cache_file)) {
         // Hash check: verify the binary hasn't been replaced since we cached it.
         // If the hash doesn't match, the binary was upgraded — invalidate and re-fetch.
         $current_hash = @md5_file('/usr/local/bin/yt-dlp');
-        if ($current_hash !== false && isset($cached['hash']) && $current_hash === $cached['hash']) {
+        // If the binary can't be read, treat the cache as invalid — we can't
+        // verify whether the binary was replaced while the cache was expired.
+        if ($current_hash === false) {
+            $GLOBALS['__ytdlp_version'] = null;
+        } elseif (isset($cached['hash']) && $current_hash === $cached['hash']) {
             $GLOBALS['__ytdlp_version'] = $cached['ver'] ?? null;
         }
     }
@@ -326,8 +330,13 @@ if (!$GLOBALS['__ytdlp_version']) {
     $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>&1') ?: '');
     $GLOBALS['__ytdlp_version'] = $ver;
     if ($version_cache_file) {
-        $hash = @md5_file('/usr/local/bin/yt-dlp') ?: '';
-        @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
+        $hash = @md5_file('/usr/local/bin/yt-dlp');
+        // Only write to cache when we successfully read the binary.
+        // If md5_file fails, skip cache write so the next request re-probes
+        // rather than persisting an invalid empty hash that masks binary upgrades.
+        if ($hash !== false) {
+            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
+        }
     }
 }
 
@@ -339,7 +348,11 @@ if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
         $current_hash = @md5_file('/usr/bin/ffmpeg');
-        if ($current_hash !== false && isset($cached['hash']) && $current_hash === $cached['hash']) {
+        // If the binary can't be read, treat the cache as invalid — we can't
+        // verify whether the binary was replaced while the cache was expired.
+        if ($current_hash === false) {
+            $GLOBALS['__ffmpeg_version'] = null;
+        } elseif (isset($cached['hash']) && $current_hash === $cached['hash']) {
             $GLOBALS['__ffmpeg_version'] = $cached['ver'] ?? null;
         }
     }
@@ -348,8 +361,13 @@ if (!$GLOBALS['__ffmpeg_version']) {
     $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>&1 | head -1') ?: '');
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
-        $hash = @md5_file('/usr/bin/ffmpeg') ?: '';
-        @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + 3600]));
+        $hash = @md5_file('/usr/bin/ffmpeg');
+        // Only write to cache when we successfully read the binary.
+        // If md5_file fails, skip cache write so the next request re-probes
+        // rather than persisting an invalid empty hash that masks binary upgrades.
+        if ($hash !== false) {
+            @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + 3600]));
+        }
     }
 }
 
