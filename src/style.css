@@ -190,6 +190,12 @@ body {
   color: var(--color-error);
   animation: quota-warn 2s ease-in-out infinite;
 }
+.quota-limit {
+  font-weight: 600;
+  color: var(--color-text);
+  opacity: 0.45;
+  cursor: default;
+}
 @keyframes quota-warn {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.05); }

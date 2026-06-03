@@ -147,6 +147,7 @@ header('X-Content-Type-Options: nosniff');
       </form>
       <p class="rip-hint">
         <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN"></span>
+        <span id="quotaLimit" class="quota-limit" title="Get unlimited rips with AhoyVPN"></span>
         <span id="quotaLabel"> free rips/day &mdash;</span>
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
       </p>
@@ -285,14 +286,23 @@ header('X-Content-Type-Options: nosniff');
   // avoiding the stale "5 free rips/day" on returning visitors.
   (function restoreQuota() {
     var el = document.getElementById('quotaDisplay');
+    var limEl = document.getElementById('quotaLimit');
     var labelEl = document.getElementById('quotaLabel');
     var upgradeEl = document.getElementById('quotaUpgrade');
     if (!el) return;
     var stored = localStorage.getItem('ahoyrip_quota_remaining');
+    var storedLimit = localStorage.getItem('ahoyrip_quota_limit');
     if (stored !== null) {
       var rem = parseInt(stored, 10);
       if (!isNaN(rem) && rem >= 0) {
         el.textContent = rem;
+        // Restore the stored limit next to remaining count.
+        if (limEl && storedLimit !== null) {
+          var lim = parseInt(storedLimit, 10);
+          if (!isNaN(lim) && lim > 0) {
+            limEl.textContent = '/' + lim;
+          }
+        }
         if (rem <= 2) {
           el.classList.add('low');
         }
@@ -307,6 +317,7 @@ header('X-Content-Type-Options: nosniff');
     if (storedUnlimited === '1' && labelEl) {
       labelEl.style.display = 'none';
       el.style.display = 'none';
+      if (limEl) limEl.style.display = 'none';
     }
   })();
 
@@ -687,10 +698,18 @@ function escapeHtml(s) {
       var rem = resp.headers.get('X-DailyLimit-Remaining');
       var lim = resp.headers.get('X-DailyLimit-Limit');
       var el = document.getElementById('quotaDisplay');
+      var limEl = document.getElementById('quotaLimit');
       var labelEl = document.getElementById('quotaLabel');
       var upgradeEl = document.getElementById('quotaUpgrade');
       if (el && rem !== null && lim !== null) {
         el.textContent = rem;
+        // Show the limit (e.g. "5") next to the remaining count for transparency.
+        // Omit when limit is -1 (unlimited key holder) since the entire quota UI
+        // is hidden for those users below.
+        if (limEl) {
+          var limNum = parseInt(lim, 10);
+          limEl.textContent = (limNum > 0) ? '/' + limNum : '';
+        }
         // Warn user when quota is nearly exhausted (1–2 left)
         if (rem <= 2) {
           el.classList.add('low');
@@ -716,6 +735,7 @@ function escapeHtml(s) {
         if (Number(rem) === -1 && labelEl) {
           labelEl.style.display = 'none';
           el.style.display = 'none';
+          if (limEl) limEl.style.display = 'none';
         }
         // Persist quota to localStorage so the correct value is shown on page reload.
         // Only persist when the header is a real quota value (non-negative integer).
@@ -725,9 +745,16 @@ function escapeHtml(s) {
           localStorage.removeItem('ahoyrip_quota_remaining');
         } else {
           var remNum = parseInt(rem, 10);
+          var limNum = parseInt(lim, 10);
           if (!isNaN(remNum) && remNum >= 0) {
             localStorage.setItem('ahoyrip_quota_remaining', remNum);
             localStorage.removeItem('ahoyrip_quota_unlimited');
+            // Also persist limit so restoreQuota() can show "N/M" on reload.
+            if (!isNaN(limNum) && limNum > 0) {
+              localStorage.setItem('ahoyrip_quota_limit', limNum);
+            } else {
+              localStorage.removeItem('ahoyrip_quota_limit');
+            }
           }
         }
       }
