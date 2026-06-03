@@ -416,7 +416,54 @@ test('preserves underscores',
 test('preserves hyphens (allowed safe char)',
     strpos(sanitizeFilename('video-title'), '-') !== false);
 
-// ─── Test sanitizeRatingPair (CVE-2021 minimum-rating-count structural test) ─────
+// ─── Test CRLF injection prevention in filename param ──────────────────────
+// The download action strips control chars (\x00-\x1F\x7F) from the filename
+// param before sanitization to prevent Content-Disposition header injection.
+// A filename containing \r\n could allow header injection if not stripped.
+
+function sanitizeFilenameForTest($input) {
+    // Strip control characters including CR/LF before the main sanitization.
+    // CR/LF is stripped (not converted to space) so that injection sequences
+    // like "evil\r\nHeader: value" cannot pass through as "evil Header: value".
+    // The \s+ rule below handles converting actual spaces/tabs to underscores.
+    $v = preg_replace('/[\x00-\x1F\x7F]/', '', $input);
+    $v = preg_replace('/[^\w\s._-]/', '', $v);
+    $v = preg_replace('/\s+/', '_', trim($v));
+    $trimmed = trim($v);
+    if (strlen($trimmed) === 0 || strlen($trimmed) > 80) {
+        return 'ahoyrip';
+    }
+    return $trimmed;
+}
+
+echo "\n==> Testing CRLF injection prevention in filename param\n";
+
+test('strips LF (\\n) from filename',
+    strpos(sanitizeFilenameForTest("evil\nContent-Type: text/html"), "\n") === false);
+test('strips CR (\\r) from filename',
+    strpos(sanitizeFilenameForTest("evil\rContent-Type: text/html"), "\r") === false);
+test('strips CRLF sequence from filename',
+    strpos(sanitizeFilenameForTest("evil\r\nContent-Disposition: attachment"), "\r") === false);
+test('strips NULL byte from filename',
+    strpos(sanitizeFilenameForTest("evil\x00file.txt"), "\x00") === false);
+test('strips DEL character from filename',
+    strpos(sanitizeFilenameForTest("evil\x7ffile.txt"), "\x7f") === false);
+test('strips LF (\\n) from filename (control char stripped — no injection risk)',
+    strpos(sanitizeFilenameForTest("evil\nContent-Type: text/html"), "\n") === false);
+test('strips CR (\\r) from filename',
+    strpos(sanitizeFilenameForTest("evil\rContent-Type: text/html"), "\r") === false);
+test('strips CRLF sequence from filename',
+    strpos(sanitizeFilenameForTest("evil\r\nContent-Disposition: attachment"), "\r") === false);
+test('strips NULL byte from filename',
+    strpos(sanitizeFilenameForTest("evil\x00file.txt"), "\x00") === false);
+test('strips DEL character from filename',
+    strpos(sanitizeFilenameForTest("evil\x7ffile.txt"), "\x7f") === false);
+test('LF in filename is stripped (not injected — control char strip prevents CRLF injection)',
+    sanitizeFilenameForTest("evil\nfile") === 'evilfile');
+test('CRLF in filename is stripped (control char strip prevents injection)',
+    sanitizeFilenameForTest("evil\r\nfile") === 'evilfile');
+
+// ─── Test empty-string handling
 // Verifies ratingCount/ratingValue pairs are structurally plausible.
 // A schema setting ratingValue=5, ratingCount=1 is a false reputation boost —
 // the single vote always produces a 5-star aggregate. Real aggregates need a

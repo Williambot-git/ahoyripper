@@ -1601,12 +1601,20 @@ switch ($action) {
             header('X-DailyLimit-Window: unlimited');
         }
 
-        // ─── Sanitize derived filename ───
+// ─── Sanitize derived filename ───
         // allow only safe chars; fall back to generic name if empty/too long.
+        // Also strip CR/LF to prevent Content-Disposition header CRLF injection
+        // (a newline in the Content-Disposition filename parameter could allow
+        // header injection attacks even though the filename field itself is not
+        // directly used in binary download responses).
         $download_filename = trim($_GET['filename'] ?? '');
         if ($download_filename !== '') {
-            $download_filename = preg_replace('/[^\w\s._-]/', '', $download_filename);
-            $download_filename = preg_replace('/\s+/', '_', $download_filename);
+            // Strip control characters including newlines and carriage returns
+            // before sanitizing so that a filename like "evil\r\nContent-Type:..."
+            // cannot inject headers through the Content-Disposition header below.
+            $download_filename = preg_replace('/[\x00-\x1F\x7F]/', '', $download_filename);
+            $download_filename = preg_replace('/[^\\w\\s._-]/', '', $download_filename);
+            $download_filename = preg_replace('/\\s+/', '_', $download_filename);
             // Validate trimmed result — a filename that trims to empty is invalid.
             // Check this AFTER sanitization so inputs like "   " fall through to fallback.
             $trimmed = trim($download_filename);
