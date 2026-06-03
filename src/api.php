@@ -941,7 +941,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // Allow */* (browsers/clients that accept anything) and application/json variants.
 // Download action is exempt — it always returns the file regardless of Accept.
 $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-$json_actions = ['info', 'health', 'progress'];
+$json_actions = ['info', 'check', 'health', 'progress'];
 if (in_array($action, $json_actions, true) && $accept && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
     echo json_encode([
