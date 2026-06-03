@@ -2098,7 +2098,7 @@ switch ($action) {
         logRequest($action ?: 'unknown', 404, ['reason' => 'unknown_action']);
         http_response_code(404);
         echo json_encode([
-            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=progress, or ?action=health.',
+            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
             'request_id' => $request_id,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
