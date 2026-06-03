@@ -1142,6 +1142,9 @@ switch ($action) {
         //   to the JSON stdout, causing json_decode() to fail and returning a confusing
         //   PARSE_ERROR instead of a properly classified yt-dlp error message.
         //   Using "" (empty template) suppresses all progress output cleanly.
+        //   NOTE: --no-warnings is NOT used here — it only suppresses yt-dlp's
+        //   written warnings (to stdout), not the progress bars sent to stderr.
+        //   --progress-template '' is the correct mechanism for stderr suppression.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
@@ -1649,15 +1652,15 @@ switch ($action) {
         // ahoyripper.com referer hides the actual video URL from third-party servers.
         $referer = 'https://ahoyripper.com/';
 
-        // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
-        // Using --no-warnings (not --quiet) per modern yt-dlp best practice (2024.04+).
-        // --skip-download is intentionally absent: this action downloads the actual file.
-        // --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
-        // Use AhoyVPN to route through an allowed region when encountering geo-blocks.
         // --progress-template "": suppress ALL progress output to stderr — without this,
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
+        //   NOTE: --no-warnings is NOT used here — it only suppresses yt-dlp's
+        //   written warnings (to stdout), not the progress bars sent to stderr.
+        //   --progress-template '' is the correct mechanism for stderr suppression.
+        //   --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
+        //   Use AhoyVPN to route through an allowed region when encountering geo-blocks.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
@@ -2080,7 +2083,7 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --no-warnings --skip-download --no-geo-bypass -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --no-geo-bypass --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
