@@ -84,15 +84,10 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "AhoyRipper",
-    "description": "Download video and audio from most online platforms. Free, no signup required.",
+    "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
     "url": "https://ahoyripper.com",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
     "browserRequirements": "Requires JavaScript and a modern web browser."
   }
   </script>
