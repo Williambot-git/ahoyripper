@@ -247,7 +247,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format — audio-only is usually fastest |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh the page and pick another format |
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
@@ -301,7 +301,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
-| `422` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
+| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh and pick another format. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
 
@@ -524,7 +524,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `CONNECTION_FAILED` | Network error reaching source | Check your server's network and retry |
 | `FILE_TOO_LARGE` | File exceeds server limit | Try audio-only or lower resolution |
 | `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
-| `DOWNLOAD_TIMEOUT` | Exceeded 5-minute server timeout | Try a smaller format or lower resolution |
+| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh the page and pick another format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
