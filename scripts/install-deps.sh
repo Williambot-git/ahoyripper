@@ -56,12 +56,18 @@ else
     _install_yt_dlp yt-dlp || \
     _install_yt_dlp --user yt-dlp || {
         echo "  ! ERROR: yt-dlp installation failed via pip. Trying standalone binary..."
-        # Last resort: download the standalone binary directly
-        if curl -L -o /usr/local/bin/yt-dlp \
+        # Last resort: download the standalone binary directly.
+        # The explicit || exit 1 ensures a failed download (network error, 404, etc.)
+        # does not silently proceed with a stale or missing binary.
+        curl -L -o /usr/local/bin/yt-dlp \
             https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-            2>/dev/null && [ -s /usr/local/bin/yt-dlp ]; then
-            chmod +x /usr/local/bin/yt-dlp
-        fi
+            || { echo "  ! Standalone binary download failed (network or server error)."; exit 1; }
+        [ -s /usr/local/bin/yt-dlp ] || { echo "  ! Downloaded file is empty or missing."; exit 1; }
+        chmod +x /usr/local/bin/yt-dlp
+        # Verify the binary is actually executable and runs without error.
+        # A corrupt download (partial file, wrong binary) fails here before proceeding.
+        yt-dlp --version > /dev/null 2>&1 \
+            || { echo "  ! Downloaded yt-dlp binary is not functional."; exit 1; }
     }
 
     if ! command -v yt-dlp &>/dev/null; then
