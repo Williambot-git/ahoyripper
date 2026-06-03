@@ -1962,8 +1962,17 @@ switch ($action) {
         // Minimal ping — zero dependency on yt-dlp, ffmpeg, or /proc/sys calls.
         // Intentionally omit: server_uptime, load_avg, memory, disk_free, versions.
         // Docker healthchecks and load-balancer probes should use this, not health.
+        // All other security headers (HSTS, X-Frame-Options, Referrer-Policy,
+        // Permissions-Policy) are set at the top of api.php, but this action
+        // bypasses that block by sending its own echo+break — so set them here
+        // too so check responses are always fully hardened regardless of how
+        // the endpoint is served (nginx, PHP built-in server, reverse proxy, etc.).
         header('Content-Type: application/json; charset=utf-8');
         header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cache-Control: no-cache');
         header('Connection: close');
         echo json_encode([
