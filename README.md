@@ -157,7 +157,9 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `tbr` — bitrate, highest first
 - `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
 
-Pass an API key via `Authorization: Bearer <key>` header (preferred — keeps the key out of URLs and server logs) or the `key` query parameter to identify as an unlimited-key holder and bypass the daily quota on info requests. The info action and download action share the same daily quota (5 free per day), so both count toward the same limit.
+The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
+
+The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. Both fields are omitted from error responses to keep them lean.
 
 **Success response:**
 ```json
@@ -168,6 +170,7 @@ Pass an API key via `Authorization: Bearer <key>` header (preferred — keeps th
   "duration": 180,
   "uploader": "Channel Name",
   "platform": "YouTube",
+  "source_url": "https://www.youtube.com/watch?v=..."
   "derived_filename": "Video_Title",
   "formats": [
     {
@@ -206,8 +209,6 @@ Pass an API key via `Authorization: Bearer <key>` header (preferred — keeps th
 ```
 
 The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_type: "audio"`) and `null` on video formats. The `tbr` (total bitrate, in kbps) is available on most formats and can be used as a proxy for quality when `height` is not available.
-
-The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
 **Error codes:**
 
