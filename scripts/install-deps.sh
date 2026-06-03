@@ -110,6 +110,12 @@ if command -v yt-dlp &>/dev/null; then
     fi
 fi
 
+# Refresh package lists first so apt-get install sees current versions.
+# Skipping apt-get update is a common source of "package not found" errors on
+# stale systems and can cause stale package lists to hide available updates.
+echo "==> Updating package lists..."
+apt-get update -qq > /dev/null 2>&1
+
 echo "==> Installing ffmpeg..."
 apt-get install -y ffmpeg > /dev/null 2>&1
 ffmpeg -version | head -1
