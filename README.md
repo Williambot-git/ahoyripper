@@ -184,11 +184,28 @@ Pass an API key via `Authorization: Bearer <key>` header (preferred — keeps th
       "acodec": "mp4a.40.2",
       "format_type": "combined",
       "language": null
+    },
+    {
+      "id": "140",
+      "label": "128kbps m4a",
+      "description": "Audio m4a",
+      "ext": "m4a",
+      "filesize_mb": 2.0,
+      "height": null,
+      "fps": null,
+      "tbr": 128,
+      "abr": 128,
+      "vcodec": "none",
+      "acodec": "mp4a.40.2",
+      "format_type": "audio",
+      "language": null
     }
   ],
   "sort_applied": "height"
 }
 ```
+
+The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_type: "audio"`) and `null` on video formats. The `tbr` (total bitrate, in kbps) is available on most formats and can be used as a proxy for quality when `height` is not available.
 
 The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
