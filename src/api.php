@@ -1970,6 +1970,8 @@ switch ($action) {
         header('Content-Type: application/json; charset=utf-8');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Request-ID: ' . $request_id);
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
