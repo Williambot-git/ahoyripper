@@ -78,11 +78,16 @@ if ($referer) {
 }
 
 if ($blocked) {
-    logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
-    error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
-    http_response_code(403);
-    echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
-    exit;
+    // Exempt the check action (zero-dependency monitoring ping used by Docker
+    // HEALTHCHECK and external probes that cannot send a browser Referer header).
+    // info/download remain fully protected — monitoring tools should use action=check.
+    if ($action !== 'check') {
+        logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
+        error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
+        http_response_code(403);
+        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
+        exit;
+    }
 }
 
 // ─── Early action routing ────────────────────────────────────────────────
