@@ -21,6 +21,9 @@ $failures = 0;
 $tests_run = 0;
 $tests_passed = 0;
 
+// Define AHOY_UNLIMITED_KEY like api.php does (must match for test comparisons)
+define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
+
 function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
@@ -363,6 +366,39 @@ test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
     validateFormatId('best/@max') > 0);
 test('accepts @ in format selector string with qualifiers',
     validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') > 0);
+
+// ─── hash_equals timing-safe API key comparison (CVE mitigation) ─────────
+// hash_equals() prevents timing attacks: comparing the stored key against
+// a user-supplied key in constant time so an attacker cannot deduce how many
+// initial characters matched by measuring response latency.
+// PHP's == and === are short-circuiting — a mismatch at position 1 returns
+// immediately, leaking key prefix information through timing. hash_equals
+// compares all bytes regardless of where the first mismatch occurs.
+
+echo "\n==> Testing hash_equals() for API key comparison (timing safety)\n";
+
+// Simulate the exact comparison logic from api.php info and download actions.
+// hash_equals($known, $user) — known must be the first arg (constant-time compare
+// against user-supplied value prevents leaking the stored-key prefix via timing).
+$stored_key = AHOY_UNLIMITED_KEY; // define from api.php for test scope
+
+test('hash_equals accepts matching key (exact match — timing safe)',
+    hash_equals($stored_key, $stored_key) === true);
+
+test('hash_equals rejects single-char mismatch (prefix match only)',
+    hash_equals($stored_key, substr($stored_key, 0, -1) . 'X') === false);
+
+test('hash_equals rejects full key replacement',
+    hash_equals($stored_key, 'WRONG_KEY_THAT_IS_NOT_EVEN_CLOSE') === false);
+
+test('hash_equals rejects empty string (vs stored key)',
+    hash_equals($stored_key, '') === false);
+
+test('hash_equals rejects shorter key with matching prefix (timing safe)',
+    hash_equals($stored_key, substr($stored_key, 0, strlen($stored_key) - 4)) === false);
+
+// NOTE: hash_equals(null, $string) is a TypeError in PHP 8.x and must be guarded.
+// api.php guards with: if ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key))
 
 // ─── derived filename sanitization (verbatim from api.php download action) ──
 // Security property verified: dangerous shell chars (semicolons, backticks,

@@ -1011,7 +1011,7 @@ switch ($action) {
         // Reject invalid (non-null, non-matching) keys early so they don't burn
         // a daily quota hit. Null keys and empty-string tokens fall through and
         // are treated as unauthenticated (quota applies normally).
-        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+        if ($api_key !== null && ! hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
             logRequest('info', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
             echo json_encode([
@@ -1021,7 +1021,7 @@ switch ($action) {
             ]);
             exit;
         }
-        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
+        $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
 
         // ─── Daily download quota (5 free per day, skip if unlimited key) ───
         // Key must be read BEFORE this point so $unlimited is available for the
@@ -1431,7 +1431,7 @@ switch ($action) {
         // Reject invalid (non-null, non-matching) keys early so they don't burn
         // a daily quota hit. Null keys and empty-string tokens fall through and
         // are treated as unauthenticated (quota applies normally).
-        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+        if ($api_key !== null && ! hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
             logRequest('download', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
             echo json_encode([
@@ -1441,7 +1441,7 @@ switch ($action) {
             ]);
             exit;
         }
-        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
+        $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
 
         // ─── Download rate limiting (atomic via flock) ───
         $dl_rate_limit = 10; // download requests per minute
