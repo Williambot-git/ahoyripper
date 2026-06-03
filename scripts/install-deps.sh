@@ -13,9 +13,9 @@ fi
 # Check in order of preference, stopping at the first working one.
 echo "==> Checking for pip..."
 PIP_BIN=""
-for _pip in pip pip3 pip3.11 pip3.12 python3 -m pip; do
-    if $_pip --version &>/dev/null; then
-        PIP_BIN="$_pip"
+for pip_candidate in pip3 pip3.11 pip3.12 python3 -m pip; do
+    if $pip_candidate --version &>/dev/null; then
+        PIP_BIN="$pip_candidate"
         break
     fi
 done
@@ -23,9 +23,9 @@ done
 if [ -z "$PIP_BIN" ]; then
     echo "  ! pip not found. Installing python3-pip..."
     apt-get install -y python3-pip > /dev/null 2>&1
-    for _pip in pip pip3 python3 -m pip; do
-        if $_pip --version &>/dev/null; then
-            PIP_BIN="$_pip"
+    for pip_candidate in pip3 python3 -m pip; do
+        if $pip_candidate --version &>/dev/null; then
+            PIP_BIN="$pip_candidate"
             break
         fi
     done
