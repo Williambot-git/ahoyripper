@@ -371,6 +371,12 @@ Response headers on every API response:
 
 Download endpoint rate-limit headers use the `X-DL-RateLimit-*` prefix (e.g., `X-DL-RateLimit-Limit: 10`). Both `info` and `download` endpoints return daily quota headers (`X-DailyLimit-*`) for non-unlimited users.
 
+> **Note:** Download responses return two sets of rate-limit headers:
+> - `X-RateLimit-*` — shared gate (applies to both `info` and `download` together)
+> - `X-DL-RateLimit-*` — download-specific gate (download-only limit: 10/min)
+>
+> The download-specific `X-DL-RateLimit-*` headers are set **after** the quota increment, so `X-DL-RateLimit-Remaining: 0` means the download quota for this window is exhausted. The shared `X-RateLimit-*` headers are also present and cover the combined `info + download` request budget.
+
 On `info` and `download` responses (non-unlimited), additional daily quota headers:
 - `X-DailyLimit-Limit` — daily rip limit (default 5, unlimited-key holders see `-1`)
 - `X-DailyLimit-Remaining` — rips left in the current day (`-1` for unlimited-key holders)
