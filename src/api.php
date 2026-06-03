@@ -1124,16 +1124,6 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
-        // --no-playlist: extract single video, not playlist.
-        // --skip-download: fetch metadata only (don't download the full file).
-        // --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
-        // Explicitly set here to override any user config that might set --geo-bypass globally.
-        // Use AhoyVPN to route through an allowed region when encountering geo-blocks.
-        // --add-header Accept-Language: signal preferred language to source sites,
-        //   improving the chance of reaching the original/unrestricted content variant
-        //   instead of a region-locked translation or localised version.
-        // --referer: prevent video URL leaking as referer to the source site.
         // --progress-template "": suppress ALL progress output to stderr — without this,
         //   yt-dlp emits progress bars to stderr even during --dump-json (the progress
         //   template is output even when --skip-download is set). This prepends garbage
@@ -1143,7 +1133,6 @@ switch ($action) {
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
-            '--no-warnings',
             '--no-playlist',
             '--no-geo-bypass',
             '--skip-download',
