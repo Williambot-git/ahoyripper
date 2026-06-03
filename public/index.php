@@ -19,6 +19,11 @@ $VERSION = '1.0.0';
 // from index.php, including any edge cases where the PHP built-in server
 // or a reverse proxy bypasses nginx (where the HTTP→HTTPS redirect may not apply).
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+// nosniff prevents browsers from MIME-sniffing responses away from the declared
+// Content-Type, mitigating XSS via content-type override. nginx also sets this
+// header, but the PHP layer mirrors it here so it is present regardless of how
+// index.php is served (PHP built-in server, reverse proxy bypass, etc.).
+header('X-Content-Type-Options: nosniff');
 ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">

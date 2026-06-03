@@ -17,7 +17,37 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 ---
 
-## Quick Start (Production)
+## Supported Platforms
+
+AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. Major platforms include:
+
+| Platform | Examples |
+|----------|----------|
+| **Video** | YouTube, TikTok, X/Twitter, Instagram, Facebook, Reddit, Vimeo, Twitch, Dailymotion, VK |
+| **Audio** | SoundCloud, Spotify (public), Bandcamp, Mixcloud, Audiomack |
+| **Social** | Instagram Reels/Stories, Facebook Videos, Reddit Videos, Snapchat (public) |
+| **Arcade** | Streamable, Veoh, Metacafe, Break, Clipfish |
+| **International** | Bilibili (CN), Niconico (JP), VK Video (RU), Yandex Video, Pornhub, XVideos |
+| **News/Media** | BBC, CNN, Fox News, NBC, ABC, CBS (region permitting) |
+
+For the full list, run:
+
+```bash
+yt-dlp --list-extractors | wc -l
+```
+
+### Platform-specific notes
+
+- **YouTube:** Age-restricted and region-locked content returns a classified `AGE_RESTRICTED` or `GEOBLOCKED` error. Unlisted/private videos return `PRIVATE_VIDEO`. Login-gated content returns `LOGIN_REQUIRED`.
+- **TikTok:** Some videos may return `GEOBLOCKED` depending on creator restrictions. Web video downloads are supported via the TikTok extractor.
+- **Instagram:** Reels and public posts are supported. Private account content requires authentication and is not supported.
+- **Reddit:** Public videos from subreddits and users are supported. NSFW content may be restricted depending on server configuration.
+- **SoundCloud:** All public tracks and albums supported. Set `AHOY_USER_AGENT` if you encounter request blocks.
+- **TikTok / Instagram Stories:** Requires the `--no-check-certificates` flag in some cases. Not available in all regions.
+
+> **Tip:** If a platform returns `UNSUPPORTED_SITE`, the extractor may be disabled or require a yt-dlp update. Try `yt-dlp -U` to update, then test again.
+
+---
 
 ```bash
 # 1. Clone the repo
