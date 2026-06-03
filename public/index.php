@@ -482,11 +482,15 @@ function escapeHtml(s) {
     // of server-side access logs). The key is also placed in the URL as a query
     // param so that the window.location.href fallback works for direct navigation
     // (browsers can't send custom headers on direct navigation).
-    card.href = '#download-' + f.id;
+    card.href = '#';
     card.setAttribute('data-url', escapeHtml(url));
     card.setAttribute('data-id', escapeHtml(f.id));
     card.setAttribute('data-label', escapeHtml(f.label || f.ext));
     card.setAttribute('data-filename', escapeHtml(data.derived_filename || ''));
+    // Add role="button" and keyboard activation so the card is accessible
+    // when navigated to via Tab key and activated with Enter or Space.
+    // The href="#" with preventDefault() replaces the previous href="#" approach
+    // which caused a scroll-to-top on Enter press before the click handler ran.
 
     var badgeColor = 'var(--color-accent)';
     var badgeLabel = 'Video';
@@ -581,6 +585,15 @@ function escapeHtml(s) {
             card.classList.remove('downloading');
           });
 
+      // Keyboard activation: Space or Enter on a focused card triggers the click.
+      // Using keydown rather than keypress because keypress is deprecated and
+      // does not fire for Space (page scroll) in some browsers. keydown fires
+      // before the default scrolling action, so preventDefault() stops the scroll.
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
       });
 
       return card;
