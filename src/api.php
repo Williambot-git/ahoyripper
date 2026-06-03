@@ -696,18 +696,23 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // format_note (e.g. "480p" or "720p60") is a good fallback when description is absent.
         // label is the final fallback for audio formats and edge cases.
         // Build description string:
-        // - If we have resolution (width x height), prepend it to format_description.
-        //   When format_description is null, PHP's string interpolation produces a
-        //   trailing space ("1920x1080 ") — trim() removes it cleanly.
-        //   When format_description is '', the concat naturally has no trailing space.
+        // - If we have resolution (width x height), always prepend it when
+        //   format_description is present (e.g. "1920x1080 1080p60 HDR 10bit").
         // - When format_description is absent (empty or "Unknown"), fall back to
-        //   format_note (e.g. "720p60") first, then the compact label as last resort.
+        //   format_note first (e.g. "480p" or "720p60 HDR"), then the compact
+        //   label as the final fallback.
+        // - Audio formats (no resolution) use format_description if present,
+        //   otherwise fall back to format_note, then the label.
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $desc = $resolution
-            ? (empty($format_description) || $format_description === 'Unknown'
+        if ($resolution !== null) {
+            $desc = (empty($format_description) || $format_description === 'Unknown')
+                ? trim("{$resolution} " . ($format_note ?: $label))
+                : trim("{$resolution} {$format_description}");
+        } else {
+            $desc = (empty($format_description) || $format_description === 'Unknown')
                 ? ($format_note ?: $label)
-                : trim("{$resolution} {$format_description}"))
-            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
+                : $format_description;
+        }
 
         // Estimate filesize if not available
         if ($filesize === 0) {
