@@ -306,13 +306,14 @@ test('returns null for empty string',
     $result === null);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
-// Regex: '/^[a-zA-Z0-9_.,<>=![\]+\/-~()%]+$/' (tilde for output templates,
-// parens and percent for %(name)s template expansion sequences)
-// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/~()%)
+// Regex: '/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/' (tilde for output templates,
+// parens and percent for %(name)s template expansion sequences, @ for yt-dlp
+// adaptive format selection, ! for stream negation)
+// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/~()%@!)
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=![\]+\/-~()%@]+$/', $format_id);
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
