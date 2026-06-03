@@ -139,7 +139,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $acodec = clean($f['acodec'] ?? 'none');
         $fps = isset($f['fps']) && $f['fps'] !== null ? (int)(float)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
-        $format_description = clean($f['format_description'] ?? '');
+        $format_description = $f['format_description'] ?? '';
         $abr = isset($f['abr']) ? (int)$f['abr'] : null;
 
         $label = '';
@@ -188,12 +188,23 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         }
 
         // description (human-readable, used for display)
+        // format_description is used raw (null/empty = absent, string = present).
+        // Only clean format_note (safe string coercion). Never clean format_description —
+        // that would turn absent into the literal string "Unknown" and break fallback logic.
+        // Audio-only formats (no vcodec): never prefix resolution, use format_note or label.
+        // Video-containing formats: prefix resolution when width + height are available.
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        $desc = $resolution
-            ? (empty($format_description) || $format_description === 'Unknown'
-                ? ($format_note ?: $label)
-                : trim("{$resolution} {$format_description}"))
-            : (empty($format_description) || $format_description === 'Unknown' ? ($format_note ?: $label) : $format_description);
+        if ($resolution !== null && $vcodec !== 'none') {
+            // Video-containing formats get resolution prefix.
+            $desc = (empty($format_description) || $format_description === 'Unknown')
+                ? trim("{$resolution} " . ($format_note ?: $label))
+                : trim("{$resolution} {$format_description}");
+        } elseif ($acodec !== 'none') {
+            // Audio-only: no resolution prefix, prefer label (bitrate + ext) over format_note.
+            $desc = $label;
+        } else {
+            $desc = $label;
+        }
 
         // filesize estimation
         $fs = $filesize;
