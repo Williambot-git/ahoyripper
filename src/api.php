@@ -1122,6 +1122,9 @@ switch ($action) {
         // --no-warnings: suppress yt-dlp stderr output (progress bars, download stats).
         // --no-playlist: extract single video, not playlist.
         // --skip-download: fetch metadata only (don't download the full file).
+        // --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
+        // Explicitly set here to override any user config that might set --geo-bypass globally.
+        // Use AhoyVPN to route through an allowed region when encountering geo-blocks.
         // --add-header Accept-Language: signal preferred language to source sites,
         //   improving the chance of reaching the original/unrestricted content variant
         //   instead of a region-locked translation or localised version.
@@ -1137,6 +1140,7 @@ switch ($action) {
             '--dump-json',
             '--no-warnings',
             '--no-playlist',
+            '--no-geo-bypass',
             '--skip-download',
             '--progress-template', '',
             '--referer', 'https://ahoyripper.com/',
