@@ -514,7 +514,7 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 
 ### Diagnosing with the health probe
 
-Add `&probe=1` to the health endpoint to run a live connectivity check:
+Add `&probe=1` to the health endpoint to run a live yt-dlp connectivity check:
 
 ```
 GET /src/api.php?action=health&probe=1
@@ -544,7 +544,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
-| `UNKNOWN_ACTION` | Unrecognized action parameter | Use `info`, `download`, `health`, or `progress` |
+| `UNKNOWN_ACTION` | Unrecognized action parameter | Use `info`, `download`, `health`, or `check` |
 
 ---
 
