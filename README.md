@@ -318,10 +318,16 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 `action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
 
 ```json
-{ "status": "ok", "server_time": "2026-05-21T16:00:00+00:00", "request_id": "a3f1b2c9d4e5f678" }
+{
+  "status": "ok",
+  "server_time": "2026-05-21T16:00:00+00:00",
+  "request_id": "a3f1b2c9d4e5f678",
+  "php_version": "8.2.0",
+  "api_version": "1.0.0"
+}
 ```
 
-`app_version` is only present on `action=health` (not `check`) to keep the check endpoint lightweight.
+`php_version` surfaces the runtime version and `api_version` mirrors `app_version` for clients that prefer semantic versioning. Both are intentionally omitted from `action=health` to keep that response focused on system-resource metrics.
 
 `action=health` returns full system status:
 ```
