@@ -1165,7 +1165,7 @@ switch ($action) {
             '--progress-template', '',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
-            '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
+            '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
         ];
@@ -1687,7 +1687,7 @@ switch ($action) {
             '--progress-template', '',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
-            '--add-header', 'Accept-Language: en-US;q=0.9,*;q=0.5',
+            '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
         ];
