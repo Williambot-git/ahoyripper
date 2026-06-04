@@ -196,7 +196,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         if ($resolution !== null && $vcodec !== 'none') {
             // Video-containing formats (combined or video-only) get resolution prefix.
-            $desc = (empty($format_description) || $format_description === 'Unknown')
+            // Use null/empty-string checks instead of empty() to avoid false
+            // positives on the literal string "0" (empty("0") === true in PHP).
+            $has_desc = $format_description !== null && $format_description !== '';
+            $desc = (!$has_desc || $format_description === 'Unknown')
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
         } else {
@@ -805,6 +808,21 @@ $result_note = parseFormats($json_note);
 $note_desc = $result_note['formats'][0]['description'] ?? '';
 test('description falls back to format_note when format_description is null/empty',
     strpos($note_desc, '720p60 HDR') !== false);
+
+// "0" format_description is truthy and should be used (not treated as absent).
+// empty("0") === true in PHP — this test guards against that PHP gotcha breaking
+// the description logic for format descriptions that are the string "0".
+$fmt_zero_desc = makeFormat([
+    'format_description' => '0',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+    'width' => 1920, 'height' => 1080,
+    'format_note' => 'HDR',
+]);
+$json_zero_desc = makeJson('Zero Desc', [$fmt_zero_desc]);
+$result_zero_desc = parseFormats($json_zero_desc);
+$zero_desc_text = $result_zero_desc['formats'][0]['description'] ?? '';
+test('description uses "0" format_description (not treated as empty/falsy)',
+    strpos($zero_desc_text, '0') !== false);
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

@@ -722,7 +722,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         if ($resolution !== null && $vcodec !== 'none') {
             // Video-containing formats (combined or video-only) get resolution prefix.
-            $desc = (empty($format_description) || $format_description === 'Unknown')
+            // Use null/empty-string checks instead of empty() to avoid false
+            // positives on the literal string "0" (empty("0") === true in PHP).
+            $has_desc = $format_description !== null && $format_description !== '';
+            $desc = (!$has_desc || $format_description === 'Unknown')
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
         } else {
