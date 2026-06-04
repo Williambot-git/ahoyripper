@@ -1742,6 +1742,7 @@ switch ($action) {
                 // Use strtotime('+5 minutes') to match the 300s server-side timeout
                 // and give the client a consistent future reset point to count down to.
                 $retry_ts = time() + $timeout;
+                header('Retry-After: ' . $retry_ts);
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
