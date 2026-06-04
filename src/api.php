@@ -2041,6 +2041,8 @@ switch ($action) {
             'status' => 'ok',
             'server_time' => date('c'),
             'request_id' => $request_id,
+            'php_version' => PHP_VERSION,
+            'api_version' => '1.0.0',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
