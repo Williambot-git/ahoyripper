@@ -711,29 +711,23 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         } else {
             continue; // skip unknown
         }
-        // Use description (human-readable yt-dlp description) when available, else label.
-        // description carries extra context like "720p60 HDR" or "audio only" that
-        // label doesn't always capture — particularly for audio and alternative formats.
-        // format_description (e.g. "720p60 HDR 10bit") is the richest yt-dlp signal.
-        // format_note (e.g. "480p" or "720p60") is a good fallback when description is absent.
-        // label is the final fallback for audio formats and edge cases.
         // Build description string:
-        // - If we have resolution (width x height), always prepend it when
-        //   format_description is present (e.g. "1920x1080 1080p60 HDR 10bit").
+        // - Video-containing formats (combined or video-only): always prepend
+        //   resolution when width + height are available (e.g. "1920x1080 1080p60 HDR 10bit").
         // - When format_description is absent (empty or "Unknown"), fall back to
         //   format_note first (e.g. "480p" or "720p60 HDR"), then the compact
         //   label as the final fallback.
-        // - Audio formats (no resolution) use format_description if present,
-        //   otherwise fall back to format_note, then the label.
+        // - Audio-only formats: never prefix resolution; use label directly since
+        //   format_description carries no useful resolution context for audio.
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
-        if ($resolution !== null) {
+        if ($resolution !== null && $vcodec !== 'none') {
+            // Video-containing formats (combined or video-only) get resolution prefix.
             $desc = (empty($format_description) || $format_description === 'Unknown')
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
         } else {
-            $desc = (empty($format_description) || $format_description === 'Unknown')
-                ? ($format_note ?: $label)
-                : $format_description;
+            // Audio-only (or unknown codec with no resolution): use label directly.
+            $desc = $label;
         }
 
         // Estimate filesize if not available
