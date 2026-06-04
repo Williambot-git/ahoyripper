@@ -170,6 +170,13 @@ else
     echo "  ✗ format_id validation may be too restrictive for yt-dlp selectors"
     exit 1
 fi
+# Verify the validation allows single-quote (fallback selector syntax like 22/18').
+if grep -q "\\\\'" src/api.php || grep "preg_match.*format_id" src/api.php | grep -q "'\]" 2>/dev/null; then
+    echo "  ✓ format_id validation allows single-quote (fallback priority syntax)"
+else
+    echo "  ✗ format_id validation may reject single-quote (fallback priority syntax)"
+    exit 1
+fi
 
 echo ""
 echo "==> Checking HSTS includeSubDomains..."
