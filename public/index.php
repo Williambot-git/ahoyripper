@@ -530,8 +530,8 @@ function escapeHtml(s) {
     var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
     var extMeta = f.ext ? f.ext.toUpperCase() : '';
     var langMeta = f.language ? f.language.toUpperCase() : '';
-    var metaParts = [extMeta, tbrMeta].filter(Boolean).join(' ');
-    var langBadge = langMeta ? '<span class="format-lang">' + langMeta + '</span>' : '';
+    var metaParts = escapeHtml([extMeta, tbrMeta].filter(Boolean).join(' '));
+    var langBadge = langMeta ? '<span class="format-lang">' + escapeHtml(langMeta) + '</span>' : '';
     // Prefer description (human-readable yt-dlp description) when available, else label.
     // description carries extra context like "720p60 HDR" or "audio only" that
     // label doesn't always capture — particularly for audio and alternative formats.
