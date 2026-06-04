@@ -31,7 +31,7 @@ jobs:
 
       - name: Check security headers
         run: |
-          for header in X-Content-Type-Options X-Frame-Options Strict-Transport-Security Content-Security-Policy X-Download-Options; do
+          for header in X-Content-Type-Options X-Frame-Options Strict-Transport-Security Content-Security-Policy X-Download-Options Cross-Origin-Opener-Policy Cross-Origin-Resource-Policy; do
             if ! grep -q "$header" src/api.php; then echo "Missing: $header"; exit 1; fi
           done
 
