@@ -189,10 +189,10 @@ header('X-RateLimit-Window: ' . $rate_window);
 // Periodic cleanup of stale rate files and cache entries (every 100 requests).
 // Proactively removes expired entries from /tmp to prevent indefinite accumulation
 // on servers that run for months without restart.
-$cleanup_cutoff = time() - ($rate_window * 3); // grace period of 2x window beyond expiry
+$cleanup_cutoff = $rate_window; // stale = last request > 1 window ago
 foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
     $d = @json_decode(@file_get_contents($f), true);
-    if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
+    if (!$d || !is_array($d) || abs(time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
         @unlink($f);
     }
 }
