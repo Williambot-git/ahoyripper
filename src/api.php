@@ -1661,11 +1661,10 @@ switch ($action) {
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
-        //   NOTE: --no-warnings is NOT used here — it only suppresses yt-dlp's
-        //   written warnings (to stdout), not the progress bars sent to stderr.
-        //   --progress-template '' is the correct mechanism for stderr suppression.
-        //   --no-geo-bypass: geographic blocks surfaced as errors (yt-dlp default since 2023.11).
-        //   Use AhoyVPN to route through an allowed region when encountering geo-blocks.
+        //   NOTE: --no-warnings is used here to suppress yt-dlp's written warnings
+        //   (to stdout). --progress-template '' handles stderr progress-bar suppression.
+        //   Both flags are used together. Use AhoyVPN to route through an allowed
+        //   region when encountering geo-blocks.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
