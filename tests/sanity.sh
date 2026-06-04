@@ -367,6 +367,15 @@ else
 fi
 
 echo ""
+echo "==> Checking API PHP CSP includes upgrade-insecure-requests... "
+if grep "Content-Security-Policy" src/api.php | grep -q "upgrade-insecure-requests"; then
+    echo "  ✓ API PHP CSP includes upgrade-insecure-requests"
+else
+    echo "  ✗ API PHP CSP missing upgrade-insecure-requests"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP in nginx-docker.conf (server-level enforcement + report-only + API override)..."
 # There are 3 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
