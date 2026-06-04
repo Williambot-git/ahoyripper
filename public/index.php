@@ -32,7 +32,8 @@ header('X-Content-Type-Options: nosniff');
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
   <meta name="description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1000+ platforms. Free, no signup, no ads.">
-  <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
+  <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow, noai, noimage, noydir' ?>">
+  <meta name="ahoybot" content="noindex, nofollow">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
   <!-- apple-mobile-web-app-status-bar-style is the only iOS-supported mechanism
