@@ -1154,7 +1154,6 @@ switch ($action) {
             '/usr/local/bin/yt-dlp',
             '--dump-json',
             '--no-playlist',
-            '--no-geo-bypass',
             '--skip-download',
             '--progress-template', '',
             '--referer', 'https://ahoyripper.com/',
@@ -1671,7 +1670,6 @@ switch ($action) {
             '-o', $out_template,
             '--no-warnings',
             '--no-playlist',
-            '--no-geo-bypass',
             '--progress-template', '',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -2088,7 +2086,7 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --no-geo-bypass --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
