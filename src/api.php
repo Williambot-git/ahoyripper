@@ -1082,6 +1082,11 @@ switch ($action) {
             $today = gmdate('Y-m-d');
             if ($daily_data['t'] !== $today) {
                 $daily_data = ['t' => $today, 'c' => 0];
+                // Day rolled over — explicitly truncate the file before writing
+                // so any stale bytes from the prior day's larger record cannot
+                // persist and be misinterpreted as a higher count on the next read.
+                ftruncate($daily_fp, 0);
+                rewind($daily_fp);
             }
             if ($daily_data['c'] >= $daily_limit) {
                 flock($daily_fp, LOCK_UN);
@@ -1557,6 +1562,11 @@ switch ($action) {
             $today = gmdate('Y-m-d');
             if ($daily_data['t'] !== $today) {
                 $daily_data = ['t' => $today, 'c' => 0];
+                // Day rolled over — explicitly truncate the file before writing
+                // so any stale bytes from the prior day's larger record cannot
+                // persist and be misinterpreted as a higher count on the next read.
+                ftruncate($daily_fp, 0);
+                rewind($daily_fp);
             }
             if ($daily_data['c'] >= $daily_limit) {
                 flock($daily_fp, LOCK_UN);
