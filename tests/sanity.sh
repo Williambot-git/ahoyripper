@@ -134,6 +134,15 @@ for header in "${REQUIRED_HEADERS[@]}"; do
 done
 
 echo ""
+echo "==> Checking CSP worker-src directive for Web Worker isolation..."
+if grep -q "worker-src" src/api.php; then
+    echo "  ✓ worker-src directive present (Web Workers can be created)"
+else
+    echo "  ✗ worker-src directive missing from CSP (Web Workers blocked)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking rate limiting (info endpoint)..."
 if grep -q "rate_limit = 30" src/api.php; then
     echo "  ✓ Info rate limit (30/min) configured"
