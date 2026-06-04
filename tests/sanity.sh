@@ -383,6 +383,46 @@ else
 fi
 
 echo ""
+echo "==> Checking API location block CSP in nginx-docker.conf includes upgrade-insecure-requests..."
+# The API location block (location = /src/api.php) has its own standalone CSP that
+# completely overrides the server-level CSP. It must include upgrade-insecure-requests
+# to match the server-level policy — otherwise HTTP→HTTPS upgrade breaks for the API.
+API_CSP_LINE=$(grep -A 50 'location = /src/api.php' deploy/nginx-docker.conf | grep 'Content-Security-Policy' | head -1 || true)
+if echo "$API_CSP_LINE" | grep -q "upgrade-insecure-requests"; then
+    echo "  ✓ API location CSP includes upgrade-insecure-requests"
+else
+    echo "  ✗ API location CSP missing upgrade-insecure-requests (standalone CSP overrides server-level)"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking Permissions-Policy meta tag in public/index.php..."
+if grep -q 'meta http-equiv="Permissions-Policy"' public/index.php; then
+    echo "  ✓ Permissions-Policy meta tag present in index.php"
+else
+    echo "  ✗ Permissions-Policy meta tag missing from index.php"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking Permissions-Policy server-level header in nginx-docker.conf..."
+if grep -q 'Permissions-Policy' deploy/nginx-docker.conf; then
+    echo "  ✓ Permissions-Policy header present in nginx-docker.conf"
+else
+    echo "  ✗ Permissions-Policy header missing from nginx-docker.conf"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking Permissions-Policy server-level header in nginx.conf..."
+if grep -q 'Permissions-Policy' deploy/nginx.conf; then
+    echo "  ✓ Permissions-Policy header present in nginx.conf"
+else
+    echo "  ✗ Permissions-Policy header missing from nginx.conf"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP in nginx-docker.conf (server-level enforcement + report-only + API override)..."
 # There are 3 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
