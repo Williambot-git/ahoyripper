@@ -81,6 +81,9 @@ header('X-Content-Type-Options: nosniff');
        served through a reverse proxy, CDN, or alternative deployment that might
        strip or not propagate the HTTP header. Same policy as the nginx directive. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com; connect-src 'self' https://ahoyripper.com; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; form-action 'self'; base-uri 'self'; report-to csp-report; report-uri /csp-report;">
+  <!-- Permissions-Policy: Disable camera, microphone, geolocation, and interest-cohort
+       telemetry. Mirrors the header set by api.php and nginx. -->
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
 
   <!-- Favicon — ICO for legacy browsers, SVG for modern browsers, PNG for iOS home screen.
        iOS Safari requires a PNG with sizes attribute for home screen bookmarks.
