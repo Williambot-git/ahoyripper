@@ -1153,16 +1153,17 @@ switch ($action) {
         //   template is output even when --skip-download is set). This prepends garbage
         //   to the JSON stdout, causing json_decode() to fail and returning a confusing
         //   PARSE_ERROR instead of a properly classified yt-dlp error message.
-        //   Using "" (empty template) suppresses all progress output cleanly.
-        //   NOTE: --no-warnings is NOT used here — it only suppresses yt-dlp's
-        //   written warnings (to stdout), not the progress bars sent to stderr.
-        //   --progress-template '' is the correct mechanism for stderr suppression.
+// --progress-template '' is the correct mechanism for stderr suppression.
+        // --concurrent-fragments 4: parallelises fragment downloads for fragmented
+        //   streams (HLS/DASH), reducing wall-clock time for large video downloads.
+        //   Safe to use for info (metadata-only — no download) and download actions.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
             '--no-playlist',
             '--skip-download',
             '--progress-template', '',
+            '--concurrent-fragments', '4',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
@@ -1678,6 +1679,8 @@ switch ($action) {
         //   (to stdout). --progress-template '' handles stderr progress-bar suppression.
         //   Both flags are used together. Use AhoyVPN to route through an allowed
         //   region when encountering geo-blocks.
+        // --concurrent-fragments 4: parallelises fragment downloads (HLS/DASH),
+        //   reducing wall-clock time for large video downloads.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
@@ -1685,6 +1688,7 @@ switch ($action) {
             '--no-warnings',
             '--no-playlist',
             '--progress-template', '',
+            '--concurrent-fragments', '4',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
