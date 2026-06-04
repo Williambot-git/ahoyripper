@@ -21,19 +21,22 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. Major platforms include:
 
-| Platform | Examples |
-|----------|----------|
-| **Video** | YouTube, TikTok, X/Twitter, Instagram, Facebook, Reddit, Vimeo, Twitch, Dailymotion, VK |
-| **Audio** | SoundCloud, Spotify (public), Bandcamp, Mixcloud, Audiomack |
-| **Social** | Instagram Reels/Stories, Facebook Videos, Reddit Videos, Snapchat (public) |
-| **Arcade** | Streamable, Veoh, Metacafe, Break, Clipfish |
-| **International** | Bilibili (CN), Niconico (JP), VK Video (RU), Yandex Video, Pornhub, XVideos |
-| **News/Media** | BBC, CNN, Fox News, NBC, ABC, CBS (region permitting) |
+| Category | Platforms |
+|----------|-----------|
+| **Video** | YouTube, TikTok, X/Twitter, Instagram, Facebook, Reddit, Vimeo, Twitch, Dailymotion, VK, Snapchat |
+| **Music / Audio** | SoundCloud, Spotify, Bandcamp, Mixcloud, Audiomack, Napster, Qobuz |
+| **Short-form / Social** | Instagram Reels/Stories, Facebook Videos, Reddit Videos, Pinterest, Tumblr |
+| **Gaming / Streaming** | Streamable, Veoh, Metacafe, Break, Clipfish, Bilibili, Niconico (JP) |
+| **News / Media** | BBC, CNN, Fox News, NBC, ABC, CBS, NPR, C-SPAN, France 24, Al Jazeera |
+| **Adult** | Pornhub, XVideos, xHamster (region-permitting) |
+| **International** | VK Video (RU), Yandex Video (RU), Bilibili (CN), Niconico (JP), Share_videos (CN), Bilibili (HK/TW) |
 
-For the full list, run:
+> **Note:** Platform availability varies by region. Some platforms may be blocked or return `GEOBLOCKED` errors depending on your location. VPNs like [AhoyVPN](https://ahoyvpn.com) can help access region-restricted content. Run `yt-dlp --list-extractors | wc -l` for the full extractor count.
+
+For the full list of supported sites, run:
 
 ```bash
-yt-dlp --list-extractors | wc -l
+yt-dlp --list-extractors
 ```
 
 ### Platform-specific notes
@@ -484,7 +487,7 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 |----------|-------------|
 | YouTube | Age-restricted videos require authentication/cookies |
 | TikTok | Some videos may be geo-restricted or require login |
-| Spotify | Requires `--cookies-from-browser` or `--cookies` for full access |
+| Spotify | Requires `--cookies-from-browser` or `--cookies` for full access — non-authenticated requests have limited metadata access |
 | Netflix + streaming sites | DRM-protected content cannot be ripped |
 
 ---
