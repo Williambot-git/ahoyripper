@@ -554,7 +554,7 @@ function escapeHtml(s) {
       '<span class="format-ext" style="color:' + badgeColor + '">' + badgeLabel + '</span>' +
       '<div class="format-label">' + displayLabel + '</div>' +
       '<div class="format-meta">' + metaParts + langBadge + '</div>' +
-      '<div class="format-size">' + size + '</div>';
+      '<div class="format-size">' + escapeHtml(size) + '</div>';
 
       // Reset the guard at the start of each card click so a failed click
       // (e.g. timeout on card A) does not suppress navigation on a subsequent
