@@ -671,7 +671,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $acodec = clean($f['acodec'] ?? 'none');
         $fps = isset($f['fps']) && $f['fps'] !== null ? (int)(float)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
-        $format_description = clean($f['format_description'] ?? '');
+        $format_description = $f['format_description'] ?? null;
         $abr = isset($f['abr']) ? (int)$f['abr'] : null;
 
         // Build label
