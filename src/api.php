@@ -1329,6 +1329,7 @@ switch ($action) {
                 'FILE_TOO_LARGE' => 413,
                 'DOWNLOAD_EMPTY' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
+                'DOWNLOAD_CANCELLED' => 499,
                 'FORMAT_UNAVAILABLE' => 422,
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
             ];
@@ -1982,10 +1983,27 @@ switch ($action) {
             exit;
         }
         while (!feof($fp) && !connection_aborted()) {
-            echo fread($fp, 65536);
+            $chunk = fread($fp, 65536);
+            if ($chunk === false || $chunk === '') {
+                // Read error or connection closed — stop streaming and mark cancelled.
+                // Do NOT treat this as a quota-burning failure; the client simply gave up.
+                fclose($fp);
+                if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
+                logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+                exit;
+            }
+            echo $chunk;
             flush();
         }
         fclose($fp);
+        // Detect client abort AFTER the loop — feof() exits when the client disconnects,
+        // so connection_aborted() here catches the abort cleanly. An aborted transfer
+        // means the client gave up; no quota is burned since no usable file was received.
+        if (connection_aborted()) {
+            if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
+            logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+            exit;
+        }
         // Shutdown function handles unlink; call it explicitly on success
         if ($actual_file && file_exists($actual_file)) {
             @unlink($actual_file);
