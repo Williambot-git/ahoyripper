@@ -82,9 +82,14 @@ header('X-Content-Type-Options: nosniff');
        strip or not propagate the HTTP header. Same policy as the nginx directive. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com; connect-src 'self' https://ahoyripper.com; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; form-action 'self'; base-uri 'self'; report-to csp-report; report-uri /csp-report;">
 
-  <!-- Favicon -->
+  <!-- Favicon — ICO for legacy browsers, SVG for modern browsers, PNG for iOS home screen.
+       iOS Safari requires a PNG with sizes attribute for home screen bookmarks.
+       Using favicon-512.png (512×512) as the authoritative PNG — iOS crops to 180×180
+       for iPhone home screen and 167×167 for iPad Pro. -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+  <link rel="apple-touch-icon" href="/favicon-180.png">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
