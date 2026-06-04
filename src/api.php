@@ -912,7 +912,7 @@ $validation = function(string $action) use($request_id) {
     // Info action does not require a format parameter.
     if ($action === 'download') {
         $format_id = trim($_GET['format'] ?? '');
-        if (!$format_id) {
+        if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
             echo json_encode([
