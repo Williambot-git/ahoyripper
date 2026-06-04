@@ -253,7 +253,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
-| `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh the page and pick another format |
+| `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
@@ -306,7 +306,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
-| `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh and pick another format. |
+| `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
 
 ### Health check / progress
@@ -542,7 +542,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
-| `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh the page and pick another format |
+| `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
 | `UNKNOWN_ACTION` | Unrecognized action parameter | Use `info`, `download`, `health`, or `progress` |
 

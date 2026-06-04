@@ -821,7 +821,7 @@ function escapeHtml(s) {
               'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
               'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
               'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
-              'INVALID_FORMAT_ID': 'That format is not available. Refresh the page and pick another format.',
+              'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
               'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
               'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
               'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
