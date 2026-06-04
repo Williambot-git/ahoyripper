@@ -67,6 +67,7 @@ header('X-Content-Type-Options: nosniff');
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ahoyvpn">
+  <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Rip any video or audio from YouTube, TikTok, X, Instagram, Reddit & 1872+ platforms. Free, fast, no signup needed — just paste a link.">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
