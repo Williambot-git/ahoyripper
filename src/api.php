@@ -1972,6 +1972,9 @@ switch ($action) {
 
         $fp = fopen($actual_file, 'rb');
         if (!$fp) {
+            // Content-Type was already set to the detected MIME above; override
+            // back to JSON so the error response has the correct Content-Type.
+            header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
             echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id]);
             exit;
