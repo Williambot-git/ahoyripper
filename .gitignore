@@ -1,7 +1,11 @@
-# Temp files (PHP rate limiting)
-/tmp/ahoyrip_*
-/tmp/ahoyrip_rate_*
-/tmp/ahoyrip_dl_*
+# Temp files created by AhoyRipper PHP (not tracked by git, but documented here
+# so developers know what /tmp files are legitimate app artifacts).
+# PHP rate limiting: /tmp/ahoyripper_rate_<ip> (semaphore + quota file)
+# Download tracking: /tmp/ahoyripper_dl_<uuid> (active download metadata)
+/tmp/ahoyripper_rate_*
+/tmp/ahoyripper_dl_*
+# Daily quota resets: /tmp/ahoyripper_daily_<md5(ip)>
+/tmp/ahoyripper_daily_*
 
 # OS artifacts
 .DS_Store
