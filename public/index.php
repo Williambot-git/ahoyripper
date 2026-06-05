@@ -829,7 +829,7 @@ function escapeHtml(s) {
           if (err.error_code) {
             var errorHints = {
               'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
-              'GEOBLOCKED': 'This video is geo-restricted in your region. Download speeds or quality may be limited.',
+              'GEOBLOCKED': 'This video is geo-restricted in your region. Use AhoyVPN to route through an unblocked region: https://ahoyvpn.com',
               'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
               'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
               'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',

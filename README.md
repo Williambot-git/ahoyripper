@@ -270,7 +270,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded | Wait a minute and try again, or upgrade to an unlimited API key |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
-| `GEOBLOCKED` | Video is geo-restricted in your region | Download speeds or quality may be limited |
+| `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
 | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Try downloading while signed in to the platform |
 | `PARSE_ERROR` | The site returned a non-standard or unparseable response | The site may be temporarily unavailable or not supported |
