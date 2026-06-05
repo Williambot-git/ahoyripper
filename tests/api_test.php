@@ -463,7 +463,10 @@ test('preserves underscores',
 test('preserves hyphens (allowed safe char)',
     strpos(sanitizeFilename('video-title'), '-') !== false);
 
-// ─── Test CRLF injection prevention in filename param ──────────────────────
+test('falls back to ahoyrip on whitespace-only input',
+    sanitizeFilename('   ') === 'ahoyrip');
+test('falls back to ahoyrip on empty input',
+    sanitizeFilename('') === 'ahoyrip');
 // The download action strips control chars (\x00-\x1F\x7F) from the filename
 // param before sanitization to prevent Content-Disposition header injection.
 // A filename containing \r\n could allow header injection if not stripped.

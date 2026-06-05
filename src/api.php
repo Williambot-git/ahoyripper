@@ -688,7 +688,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
     if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
-    $derived_filename = $raw_fn ?: 'ahoyrip';
+    // Fall back to 'ahoyrip' when the title was entirely numeric (e.g. "0", "1080")
+    // and all digits were stripped by the sanitization regex above. Also guard
+    // against empty string after trim (whitespace-only titles).
+    $derived_filename = ($raw_fn !== '' && $raw_fn !== '0') ? $raw_fn : 'ahoyrip';
 
     $formats = [];
     foreach (($data['formats'] ?? []) as $f) {
@@ -771,7 +774,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 $bitrate_kbps = $tbr ?? (($height > 720) ? 4000 : 1500);
                 $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
             } else {
-                $bitrate_kbps = $tbr ?? 128;
+                // Audio-only with no bitrate data: use a sensible default (128kbps).
+                $bitrate_kbps = $tbr ?? $abr ?? 128;
                 $filesize = ($bitrate_kbps * 1000 / 8) * $duration_secs;
             }
         }
