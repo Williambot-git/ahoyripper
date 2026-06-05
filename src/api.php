@@ -45,6 +45,7 @@ header('Cross-Origin-Resource-Policy: same-origin');
 header('Reporting-Endpoints: csp-report="/csp-report"');
 // Also include report-to for browsers that support the modern Reporting API.
 // report-uri is kept as a fallback for older browsers.
+header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
 
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
@@ -2075,6 +2076,7 @@ switch ($action) {
         // nginx security-header stack).
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
         header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
