@@ -370,7 +370,8 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 }
 ```
 
-`php_version` surfaces the runtime version and `api_version` mirrors `app_version` for clients that prefer semantic versioning. Both are intentionally omitted from `action=health` to keep that response focused on system-resource metrics.
+`app_version` surfaces the application version for both health and check endpoints.
+`php_version` and `api_version` are only present on `action=check` (a minimal ping endpoint) — they are omitted from `action=health` to keep that response focused on system-resource metrics.
 
 `action=health` returns full system status:
 ```
