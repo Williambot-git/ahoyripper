@@ -69,7 +69,42 @@ sudo systemctl reload nginx
 # 4. Set permissions
 sudo chown -R www-data:www-data /var/www/ahoyripper
 
-# 5. Run tests (optional but recommended after updates)
+# 5. Configure HTTPS (required)
+# AhoyRipper requires HTTPS. Choose one of the following options:
+
+# Option A — Certbot (Let's Encrypt) — recommended for production
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d ahoyripper.com -d www.ahoyripper.com
+# Certbot auto-renews and configures TLS in the nginx config.
+# Restart nginx after certbot: sudo systemctl reload nginx
+
+# Option B — Cloudflare (or any reverse proxy/CDN in front of the server)
+# If Cloudflare proxies traffic to your server, enable "Full (strict)" TLS
+# in the Cloudflare dashboard. Your origin server does not need a certificate.
+# Ensure nginx listens on port 80 only (no TLS config needed) and Cloudflare
+# adds the X-Forwarded-Proto: https header so the application detects HTTPS.
+
+# Option C — Self-signed (testing only)
+# Generate a self-signed certificate (browsers will show a warning):
+sudo apt install openssl
+sudo mkdir -p /etc/nginx/ssl
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/ahoyripper.key \
+    -out /etc/nginx/ssl/ahoyripper.crt
+# Then add the following to /etc/nginx/sites-available/ahoyripper inside the
+# `server {` block, before the `location /` block:
+#
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     ssl_certificate /etc/nginx/ssl/ahoyripper.crt;
+#     ssl_certificate_key /etc/nginx/ssl/ahoyripper.key;
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_prefer_server_ciphers on;
+#     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+#
+# Keep the existing `listen 80` block for ACME certificate challenges (Option A).
+
+# 6. Run tests (optional but recommended after updates)
 bash tests/run.sh
 ```
 
