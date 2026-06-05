@@ -539,6 +539,26 @@ body {
 /* .active class switches visibility so the opacity transition always fires */
 .rip-error.active { visibility: visible; opacity: 1; }
 
+/* Retry button — appears when an error is shown so the user can immediately
+   retry a failed rip without re-pasting or refocusing the input field. */
+.rip-retry {
+  display: none;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0.5rem auto 0;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.rip-retry:hover { background: #2563eb; transform: translateY(-1px); }
+.rip-retry:active { transform: translateY(0); }
+.rip-retry:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.rip-retry.visible { display: inline-block; }
+
 /* VPN Banner */
 .vpn-banner {
   background: var(--color-accent-sub);

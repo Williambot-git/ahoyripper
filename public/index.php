@@ -141,6 +141,9 @@ header('X-Content-Type-Options: nosniff');
 
     <!-- Error message (aria-live for screen reader announcements) -->
     <div class="rip-error" id="errorBox" role="alert" aria-live="polite" aria-atomic="true"></div>
+    <!-- Retry button — shown when an error is displayed so the user can immediately
+         retry without having to re-paste or refocus the input field. -->
+    <button class="rip-retry" id="retryBtn" aria-label="Try again" hidden>Try again</button>
 
     <!-- Input form -->
     <div class="rip-box">
@@ -277,6 +280,7 @@ header('X-Content-Type-Options: nosniff');
   const input = document.getElementById('urlInput');
   const btn = document.getElementById('submitBtn');
   const errorBox = document.getElementById('errorBox');
+  const retryBtn = document.getElementById('retryBtn');
   const progressBox = document.getElementById('progressBox');
   const progressText = document.getElementById('progressText');
   const progressBar = document.getElementById('progressBar');
@@ -373,10 +377,12 @@ header('X-Content-Type-Options: nosniff');
   function showError(msg) {
     errorBox.textContent = msg;
     errorBox.classList.add('active');
+    retryBtn.classList.add('visible');
   }
 
   function hideError() {
     errorBox.classList.remove('active');
+    retryBtn.classList.remove('visible');
   }
 
   function setLoading(on) {
@@ -903,6 +909,18 @@ function escapeHtml(s) {
     e.preventDefault();
     fetchInfo();
   });
+
+  // Retry button — allows immediate retry of a failed rip without re-pasting.
+  // Appears alongside error messages; hidden during normal operation.
+  if (retryBtn) {
+    retryBtn.addEventListener('click', function() {
+      hideError();
+      // Only retry if the input still has a URL — otherwise do nothing.
+      if (input.value && input.value.startsWith('http')) {
+        fetchInfo();
+      }
+    });
+  }
 
   ripAgain.addEventListener('click', function() {
     input.value = '';
