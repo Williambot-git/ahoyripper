@@ -1677,17 +1677,16 @@ switch ($action) {
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
-        //   NOTE: --no-warnings is used here to suppress yt-dlp's written warnings
-        //   (to stdout). --progress-template '' handles stderr progress-bar suppression.
-        //   Both flags are used together. Use AhoyVPN to route through an allowed
-        //   region when encountering geo-blocks.
-        // --concurrent-fragments 4: parallelises fragment downloads (HLS/DASH),
+        //   NOTE: --no-warnings is NOT used here — it implies --quiet which suppresses
+        //   yt-dlp's stdout/stderr output entirely, making error diagnosis harder.
+        //   The download action only reads $proc_stderr (stdout is discarded), so
+        //   --progress-template '' is sufficient to keep the error channel clean.
+        //   --concurrent-fragments 4: parallelises fragment downloads (HLS/DASH),
         //   reducing wall-clock time for large video downloads.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
-            '--no-warnings',
             '--no-playlist',
             '--progress-template', '',
             '--concurrent-fragments', '4',
