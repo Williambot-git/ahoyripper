@@ -41,6 +41,8 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   line-height: 1.6;
   min-height: 100vh;
   /* Pad for iOS safe areas (notch / home indicator) when viewport-fit=cover is used */
