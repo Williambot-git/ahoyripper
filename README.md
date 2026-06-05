@@ -365,13 +365,13 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "status": "ok",
   "server_time": "2026-05-21T16:00:00+00:00",
   "request_id": "a3f1b2c9d4e5f678",
+  "app_version": "1.0.0",
   "php_version": "8.2.0",
   "api_version": "1.0.0"
 }
 ```
 
-`app_version` surfaces the application version for both health and check endpoints.
-`php_version` and `api_version` are only present on `action=check` (a minimal ping endpoint) — they are omitted from `action=health` to keep that response focused on system-resource metrics.
+`php_version` and `api_version` are only present on `action=check` (a minimal ping endpoint) — they are omitted from `action=health` to keep that response focused on system-resource metrics. `app_version` is present on both.
 
 `action=health` returns full system status:
 ```

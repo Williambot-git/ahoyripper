@@ -2101,6 +2101,7 @@ switch ($action) {
             'status' => 'ok',
             'server_time' => date('c'),
             'request_id' => $request_id,
+            'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
