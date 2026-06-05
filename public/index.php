@@ -92,7 +92,6 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
-  <link rel="apple-touch-icon" href="/favicon-180.png">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
