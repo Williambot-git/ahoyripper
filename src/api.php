@@ -1175,12 +1175,16 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // --progress-template "": suppress ALL progress output to stderr — without this,
+        // --no-warnings: suppress yt-dlp's stderr warning messages. Without this,
+        //   warnings (e.g. "Unable to download JSON metadata: HTTP Error 429") can
+        //   prepend to stdout and corrupt --dump-json output, causing json_decode()
+        //   to fail even when the video info was successfully fetched.
+        //   --progress-template "": suppress ALL progress output to stderr — without this,
         //   yt-dlp emits progress bars to stderr even during --dump-json (the progress
         //   template is output even when --skip-download is set). This prepends garbage
         //   to the JSON stdout, causing json_decode() to fail and returning a confusing
         //   PARSE_ERROR instead of a properly classified yt-dlp error message.
-// --progress-template '' is the correct mechanism for stderr suppression.
+        //   --progress-template '' is the correct mechanism for stderr suppression.
         // --concurrent-fragments 4: parallelises fragment downloads for fragmented
         //   streams (HLS/DASH), reducing wall-clock time for large video downloads.
         //   Safe to use for info (metadata-only — no download) and download actions.
@@ -1189,6 +1193,7 @@ switch ($action) {
             '--dump-json',
             '--no-playlist',
             '--skip-download',
+            '--no-warnings',
             '--progress-template', '',
             '--concurrent-fragments', '4',
             '--referer', 'https://ahoyripper.com/',
