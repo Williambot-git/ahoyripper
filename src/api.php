@@ -236,14 +236,22 @@ if (in_array($action, $internal_actions, true)) {
         // Log the report body for security monitoring (stripped of sensitive data).
         $body = file_get_contents('php://input');
         $report = json_decode($body, true);
-        // Log to error_log with a identifiable prefix for log scanning.
-        // Omit document-uri and referrer which may contain video URLs.
-        $safe = [
-            'blocked-uri' => $report['csp-report']['blocked-uri'] ?? null,
-            'violated-directive' => $report['csp-report']['violated-directive'] ?? null,
-            'original-policy' => $report['csp-report']['original-policy'] ?? null,
-        ];
-        error_log('AhoyRipper CSP-VIOLATION: ' . json_encode($safe));
+        // Validate the report structure before accessing nested keys — a malformed
+        // or unexpectedly-structured POST body could cause php warnings or undefined
+        // index errors if $report is null (json_decode failure) or not an array.
+        if (!is_array($report) || !is_array($report['csp-report'] ?? null)) {
+            // Log with request_id for correlation; omit body to avoid leaking data.
+            error_log("AhoyRipper CSP-VIOLATION [{$request_id}]: malformed report body");
+        } else {
+            // Log to error_log with identifiable prefix and request_id for correlation.
+            // Omit document-uri and referrer which may contain video URLs.
+            $safe = [
+                'blocked-uri' => $report['csp-report']['blocked-uri'] ?? null,
+                'violated-directive' => $report['csp-report']['violated-directive'] ?? null,
+                'original-policy' => $report['csp-report']['original-policy'] ?? null,
+            ];
+            error_log("AhoyRipper CSP-VIOLATION [{$request_id}]: " . json_encode($safe));
+        }
         // Harden the csp-report response to match the rest of the API.
         // These headers are set at the top of the script (lines 11-29) for all
         // other endpoints; apply them here too so the violation report handler
