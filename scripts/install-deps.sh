@@ -11,6 +11,9 @@ fi
 
 # Detect available pip and install yt-dlp.
 # Check in order of preference, stopping at the first working one.
+echo "==> Updating package lists..."
+apt-get update -qq > /dev/null 2>&1
+
 echo "==> Checking for pip..."
 PIP_BIN=""
 for pip_candidate in pip3 pip3.11 pip3.12 python3 -m pip; do
@@ -115,12 +118,6 @@ if command -v yt-dlp &>/dev/null; then
         echo "  Updated to: $(yt-dlp --version 2>&1 | head -1)"
     fi
 fi
-
-# Refresh package lists first so apt-get install sees current versions.
-# Skipping apt-get update is a common source of "package not found" errors on
-# stale systems and can cause stale package lists to hide available updates.
-echo "==> Updating package lists..."
-apt-get update -qq > /dev/null 2>&1
 
 echo "==> Installing ffmpeg..."
 apt-get install -y ffmpeg > /dev/null 2>&1
