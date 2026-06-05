@@ -27,14 +27,15 @@ function test($name, $condition) {
 // ─── clean() and parseFormats() verbatim copies from api.php ──────────────────
 
 function clean($s) {
-    // Return 'Unknown' for null, empty string, or numeric zero.
-    if ($s === null || $s === '' || $s === 0) return 'Unknown';
+    // Return 'Unknown' for null or empty string only.
+    // NOTE: do NOT treat integer 0 as 'Unknown' — height=0 is a valid value
+    // (audio-only formats in yt-dlp metadata sometimes report height=0).
+    // Converting 0 to 'Unknown' corrupts labels like "Video 0p" or "0kbps m4a".
+    if ($s === null || $s === '') return 'Unknown';
     return (string)$s;
 }
 
-echo "\n==> Testing clean() — numeric zero\n";
-test('clean(0) returns "Unknown"',
-    clean(0) === 'Unknown');
+echo "\n==> Testing clean() — null and empty string\n";
 test('clean(null) returns "Unknown"',
     clean(null) === 'Unknown');
 test('clean("") returns "Unknown"',
@@ -109,6 +110,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This content is not available due to a terms of service violation.', 'error_code' => 'DISALLOWED_CONTENT'];
+            }
+            // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+            // Distinct from connection-level "timed out" which implies a network failure.
+            if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'error_code' => 'SOURCE_TIMEOUT'];
             }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
             return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
