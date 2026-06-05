@@ -70,6 +70,11 @@ header('X-Request-ID: ' . $page_request_id);
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
+       This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
+       on social media or linked from external sites, since the og:image is the most
+       visually prominent element in link previews. It also helps Core Web Vitals. -->
+  <meta property="og:image:fetchpriority" content="high">
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://ahoyripper.com">
