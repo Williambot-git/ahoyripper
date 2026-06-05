@@ -581,7 +581,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `CONNECTION_FAILED` | Network error reaching source | Check your server's network and retry |
 | `FILE_TOO_LARGE` | File exceeds server limit | Try audio-only or lower resolution |
 | `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
-| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
