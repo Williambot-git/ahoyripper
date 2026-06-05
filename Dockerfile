@@ -1,5 +1,11 @@
 FROM debian:bookworm-slim
 
+# Fail fast: exit immediately on any command failure.
+# This ensures that a partial package installation (e.g. disk-space exhaustion,
+# network error mid-download, or a package not found) stops the build before
+# subsequent commands run against an incomplete system — preventing broken images.
+SHELL ["/bin/bash", "-e", "-o", "pipefail"]
+
 RUN apt-get update && apt-get install -y \
         curl \
         ffmpeg \
@@ -18,14 +24,19 @@ RUN apt-get update && apt-get install -y \
     && curl -L -o /tmp/yt-dlp-sha256 \
         https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.sha256 \
     # sha256sum exits 0 when the checksum matches, 1 when it doesn't, and 2
-    # when the checksum file itself couldn't be read. We treat all three as
-    # intentional (2 = build was run without checksums published yet, not a
-    # security failure of the actual binary). Fail only on actual mismatch (1).
-    && if echo "$(cat /tmp/yt-dlp-sha256)" | sha256sum --strict -c 2>/dev/null; then \
-         echo "yt-dlp SHA256 verified"; \
-       else \
-         echo "WARNING: SHA256 verification skipped (checksum unavailable or mismatch)"; \
-       fi \
+    # when the checksum file itself couldn't be read. We treat mismatch (1) as a
+    # hard failure and missing checksum (2) as a warning (build was run before
+    # checksums were published — not a security failure of the actual binary).
+    # Treat any unexpected exit code as "skip verification" (not a hard failure).
+    SHA256_STATUS=$(sha256sum --strict -c /tmp/yt-dlp-sha256 2>/dev/null; echo $?)
+    if [ "$SHA256_STATUS" = "0" ]; then
+         echo "yt-dlp SHA256 verified"
+    elif [ "$SHA256_STATUS" = "2" ]; then
+         echo "WARNING: SHA256 verification skipped (checksum file unavailable)"
+    else
+         echo "ERROR: yt-dlp SHA256 mismatch — binary may be corrupted or tampered with"
+         exit 1
+    fi
     && chmod +x /usr/local/bin/yt-dlp \
     && rm -f /tmp/yt-dlp-sha256
 
@@ -33,9 +44,9 @@ RUN apt-get update && apt-get install -y \
 # A corrupt or incomplete download produces a non-executable file;
 # catching it here fails the build fast rather than producing a broken container.
 # Capture and expose the version for build-time debugging and image inspection.
-RUN echo "yt-dlp version: $(yt-dlp --version)" \
-    && yt-dlp --version > /dev/null 2>&1 \
-    || { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
+RUN echo "yt-dlp version: $(yt-dlp --version)" && \
+    yt-dlp --version > /dev/null 2>&1 || \
+    { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
 
 WORKDIR /app
 
