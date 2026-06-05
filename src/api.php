@@ -275,7 +275,7 @@ if (in_array($action, $internal_actions, true)) {
         'server_time' => date('c'),
         'request_id' => $request_id,
         'php_version' => PHP_VERSION,
-        'api_version' => '1.0.0',
+        'api_version' => AHOYRIPPER_VERSION,
     ]);
     exit;
 }
@@ -2042,7 +2042,7 @@ switch ($action) {
             'server_time' => date('c'),
             'request_id' => $request_id,
             'php_version' => PHP_VERSION,
-            'api_version' => '1.0.0',
+            'api_version' => AHOYRIPPER_VERSION,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
