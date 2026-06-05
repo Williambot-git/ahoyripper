@@ -233,6 +233,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | error_code | Meaning | User action |
 |------------|---------|-------------|
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
+| `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded | Wait a minute and try again, or upgrade to an unlimited API key |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Download speeds or quality may be limited |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
@@ -244,6 +245,10 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available | Try another video |
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
 | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes |
+| `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
+| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source |
+| `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues | Try again shortly |
+| `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error | Try again shortly |
 | `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
