@@ -2040,6 +2040,15 @@ switch ($action) {
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Cache-Control: no-cache');
         header('Connection: close');
+        // Set the same CSP and Reporting-Endpoints headers that the top-of-script
+        // block applies to all other responses. api.php sets these globally but
+        // the 'check' action sends its own response via echo+break and therefore
+        // bypasses that block — repeat them here so check responses are fully
+        // hardened (especially important since this endpoint is used by Docker
+        // healthchecks and load-balancer probes that may route around the normal
+        // nginx security-header stack).
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-uri /csp-report;');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
