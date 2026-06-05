@@ -593,8 +593,9 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 
 - **Paste & go** — Paste any supported URL into the input field and the rip starts automatically. No need to press Enter or click a button.
 - **Pre-fill a URL via query param** — Append `?url=https://...` to the page URL to pre-load a video. Useful for sharing links directly (e.g. `https://ahoyripper.com/?url=https://www.youtube.com/watch?v=...`).
-- **Sort formats** — Use the Quality / Size / Bitrate dropdown above the format cards to reorder the list.
+- **Sort formats** — Use the Quality / Size / Bitrate dropdown above the format cards to reorder the list. Switching the sort re-fetches the format list from the server (costs 1 quota hit) — this is intentional as it lets yt-dlp sort accurately on the server side.
 - **Save your sort preference** — The sort choice is remembered in localStorage across visits.
+- **Daily quota resets at midnight UTC** — The free tier allows 5 total rips per day. Each call to the `info` or `download` API counts as one rip. Quota resets at 00:00 UTC.
 - **API key** — Enter your AhoyVPN unlimited key in the optional field to bypass the daily 5-rip limit.
 
 ---

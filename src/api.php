@@ -1191,7 +1191,10 @@ switch ($action) {
         //   --progress-template '' is the correct mechanism for stderr suppression.
         // --concurrent-fragments 4: parallelises fragment downloads for fragmented
         //   streams (HLS/DASH), reducing wall-clock time for large video downloads.
-        //   Safe to use for info (metadata-only — no download) and download actions.
+        //   In the info action, --skip-download is set so no actual fragment download
+        //   occurs — --concurrent-fragments is still safe to pass here as it has zero
+        //   effect in metadata-only mode but keeps the command array identical to the
+        //   download action, simplifying maintenance.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
