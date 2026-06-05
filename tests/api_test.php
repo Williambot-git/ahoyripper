@@ -175,6 +175,23 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
         return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.'];
     }
+    // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
+    if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
+        $code = (int)$m[1];
+        if ($code === 403) {
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'status' => 403];
+        }
+        if ($code === 404) {
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
+        }
+        if ($code === 429) {
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
+        }
+        if ($code === 500 || $code === 502 || $code === 503) {
+            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
+        }
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
+    }
     return null;
 }
 
@@ -304,6 +321,36 @@ test('returns null for unknown errors',
 $result = classifyYtdlpError('');
 test('returns null for empty string',
     $result === null);
+
+// ─── HTTP error classification (SOURCE_FORBIDDEN, SOURCE_NOT_FOUND, etc.) ─
+
+$result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
+test('detects SOURCE_FORBIDDEN — HTTP 403',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_FORBIDDEN');
+
+$result = classifyYtdlpError('ERROR: [twitter] HTTP Error 404: Not Found');
+test('detects SOURCE_NOT_FOUND — HTTP 404',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_NOT_FOUND');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
+test('detects SOURCE_RATE_LIMITED — HTTP 429',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_RATE_LIMITED');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
+test('detects SOURCE_SERVER_ERROR — HTTP 500',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 502: Bad Gateway');
+test('detects SOURCE_SERVER_ERROR — HTTP 502',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
+test('detects SOURCE_SERVER_ERROR — HTTP 503',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
+test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
 // Regex: '/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/' (tilde for output templates,

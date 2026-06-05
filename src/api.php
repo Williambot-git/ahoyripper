@@ -593,6 +593,28 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
         return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.', 'status' => 451];
     }
+    // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
+    // yt-dlp emits these when the source returns a non-2xx status. The numeric
+    // status is extracted from the message for classification; 403/404/429 are the
+    // most common and map to existing error codes. Others fall through to a generic
+    // upstream HTTP error response.
+    if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
+        $code = (int)$m[1];
+        if ($code === 403) {
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'status' => 403];
+        }
+        if ($code === 404) {
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
+        }
+        if ($code === 429) {
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
+        }
+        if ($code === 500 || $code === 502 || $code === 503) {
+            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
+        }
+        // Other HTTP errors — surface the status but give a generic message.
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
+    }
     return null;
 }
 
