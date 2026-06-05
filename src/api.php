@@ -1359,6 +1359,8 @@ switch ($action) {
                 'DOWNLOAD_CANCELLED' => 499,
                 'FORMAT_UNAVAILABLE' => 422,
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
+                'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
+                'SOURCE_SERVER_ERROR' => 502, 'SOURCE_HTTP_ERROR' => 502,
             ];
             $err_status = $err_status_map[$parsed['error_code']] ?? 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
