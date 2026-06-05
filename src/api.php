@@ -2128,7 +2128,13 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // --no-warnings: suppress yt-dlp's stderr warning messages (written to stderr,
+                //   not stdout — but without this, warnings can appear ahead of JSON in the
+                //   combined stdout output and cause json_decode() to fail on probe results).
+                // --progress-template "": suppress ALL progress output to stderr so it doesn't
+                //   corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
+                //   Both flags are needed together.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --no-warnings --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
