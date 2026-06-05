@@ -10,6 +10,13 @@ $default_url = $_GET['url'] ?? '';
 
 $VERSION = '1.0.0';
 
+// Generate a request correlation ID — mirrors the X-Request-ID added by api.php
+// and nginx for every API response. With this present on the HTML page too, all
+// three layers (nginx access log, PHP error log, and browser client) can be
+// correlated via the same request ID when debugging errors or support requests.
+// The ID is short (16 hex chars) to minimise overhead and log volume.
+$page_request_id = bin2hex(random_bytes(8));
+
 // HSTS — tell browsers to only ever connect over HTTPS for this domain.
 // includeSubDomains: all subdomains must use HTTPS.
 // preload: include in browser HSTS preload lists for maximum protection.
@@ -24,6 +31,8 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 // header, but the PHP layer mirrors it here so it is present regardless of how
 // index.php is served (PHP built-in server, reverse proxy bypass, etc.).
 header('X-Content-Type-Options: nosniff');
+// Request correlation ID — enables cross-layer log correlation (nginx, PHP, browser).
+header('X-Request-ID: ' . $page_request_id);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
@@ -274,6 +283,12 @@ header('X-Content-Type-Options: nosniff');
 <script>
 // ─── Frontend Logic ─────────────────────────────────────────
 (function() {
+  // Expose page_request_id for error reporting and support tickets.
+  // This lets users include the page's correlation ID when reporting issues,
+  // enabling direct lookup in server-side access/error logs alongside the
+  // API request_id that appears in API responses.
+  var PAGE_REQUEST_ID = '<?= htmlspecialchars($page_request_id, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>';
+
   const API = '/src/api.php';
 
   const form = document.getElementById('ripForm');
