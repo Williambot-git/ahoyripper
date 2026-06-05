@@ -112,6 +112,74 @@ header('X-Content-Type-Options: nosniff');
   }
   </script>
 
+  <!-- FAQPage structured data — helps search engines surface AhoyRipper Q&A in
+       rich results (People Also Ask, FAQ rich snippets). Questions drawn from
+       the Troubleshooting and Supported Platforms sections below. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What platforms does AhoyRipper support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AhoyRipper supports 1872+ platforms via yt-dlp, including YouTube, TikTok, X/Twitter, SoundCloud, Instagram, Facebook, Reddit, Vimeo, Twitch, Dailymotion, Pornhub, and many more. Run `yt-dlp --list-extractors` for the full list."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does it say 'Could not fetch that URL'?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The site may not be supported by yt-dlp, or the video is geo-restricted, private, age-restricted, or has been removed. Try running `yt-dlp --list-formats <URL>` on your server to see the exact error. VPNs like AhoyVPN can help bypass geographic restrictions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why am I getting a 429 rate limit error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The free tier allows 30 info requests and 10 downloads per minute, plus 5 total rips per day. Wait before retrying — rate limits reset every 60 seconds and daily limits reset at midnight UTC. Check the Retry-After header for the exact wait time."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does the download timeout?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Large 4K or 8K rips can exceed the 5-minute server timeout. Try an audio-only format (MP3/AAC) or a lower resolution (480p/720p). The source site may also be slow or unresponsive."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What formats does AhoyRipper support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MP4, WEBM, MP3, M4A, WAV, FLAC, OGG and more — depending on what the source platform offers. You can preview available formats and sort by quality, file size, or bitrate before downloading."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is AhoyRipper free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — 5 free rips per day with no signup required. Get an AhoyVPN unlimited key to bypass the daily cap and access unlimited ripping."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why did I get an empty or corrupt download file?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The selected format combination may not be available for this video. Try another format from the list, or fall back to 'best' which lets yt-dlp pick the most reliable option."
+        }
+      }
+    ]
+  }
+  </script>
+
 <meta name="keywords" content="media ripper, video downloader, audio downloader, video converter, audio converter, download video, download audio, free media converter, ripper tool, online ripper, web ripper, YouTube downloader, TikTok downloader, Twitter video downloader, SoundCloud downloader, Instagram downloader, Facebook video downloader, Vimeo downloader, mp4 downloader, mp3 downloader, FLAC downloader, OGG downloader, M4A downloader, WEBM downloader, video to mp3, extract audio">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 </head>
