@@ -27,8 +27,12 @@ User-agent: PetalBot
 User-agent: SemrushBot-Crawler
 User-agent: YouBot
 User-agent: PinterestBot
-User-agent: AhoyBot
 Disallow: /
+
+# AhoyBot is our own crawler — allow it to crawl the site normally so our
+# own SEO and indexing pipelines work correctly.
+User-agent: AhoyBot
+Allow: /
 
 # Disallow AI training crawlers and all other bots from the API endpoint.
 # The API returns JSON — it is not a crawlable resource and should not be
