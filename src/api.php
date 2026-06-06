@@ -2067,6 +2067,11 @@ switch ($action) {
                 fclose($fp);
                 if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
                 logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+                echo json_encode([
+                    'error' => 'Download cancelled by client.',
+                    'error_code' => 'DOWNLOAD_CANCELLED',
+                    'request_id' => $request_id,
+                ]);
                 exit;
             }
             echo $chunk;
@@ -2079,6 +2084,11 @@ switch ($action) {
         if (connection_aborted()) {
             if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
             logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+            echo json_encode([
+                'error' => 'Download cancelled by client.',
+                'error_code' => 'DOWNLOAD_CANCELLED',
+                'request_id' => $request_id,
+            ]);
             exit;
         }
         // Shutdown function handles unlink; call it explicitly on success
