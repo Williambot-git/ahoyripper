@@ -47,6 +47,11 @@ header('Reporting-Endpoints: csp-report="/csp-report"');
 // report-uri is kept as a fallback for older browsers.
 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
 
+// ─── Early action routing ───────────────────────────────────────────────
+// Declare $action before the referer gate so the exempt check can reference it.
+// Also used by the rate-limit gate below.
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
 // (which then calls the API via fetch from JS) — such calls always carry a referer.
@@ -95,12 +100,6 @@ if ($blocked) {
         exit;
     }
 }
-
-// ─── Early action routing ────────────────────────────────────────────────
-// Declare $action as early as possible so it is available for the rate-limit
-// gate below (line 75). Without this, $is_rate_limited is always false because
-// $action is undeclared at the time the in_array check runs.
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // ─── Rate limiting gate ───────────────────────────────────────────────────
 // Rate limiting applies to expensive actions only (info, download).
