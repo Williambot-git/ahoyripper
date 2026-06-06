@@ -202,10 +202,11 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
         @unlink($f);
     }
 }
-// Clean up stale version cache files (yt-dlp and ffmpeg) — they expire after 1 hour
-// but the files themselves accumulate on long-running servers if not removed.
+// Clean up stale version cache files (yt-dlp and ffmpeg) and the yt-dlp
+// connectivity probe cache — they expire after their respective TTLs but the
+// files themselves accumulate on long-running servers if not removed.
 // When the cache is cleared, also clear the in-memory global so the next request
-// fetches a fresh version rather than holding a stale entry across requests.
+// fetches a fresh value rather than holding a stale entry across requests.
 foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
@@ -215,6 +216,9 @@ foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp
         }
         if ($cache === '/tmp/ahoyrip_ffmpeg_ver.cache') {
             $GLOBALS['__ffmpeg_version'] = null;
+        }
+        if ($cache === '/tmp/ahoyrip_ytdlp_probe.cache') {
+            $GLOBALS['__ytdlp_probe'] = null;
         }
     }
 }
