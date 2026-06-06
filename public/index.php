@@ -78,6 +78,7 @@ header('X-Request-ID: ' . $page_request_id);
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://ahoyripper.com">
+  <link rel="canonical" href="https://ahoyripper.com">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
