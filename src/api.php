@@ -253,9 +253,17 @@ if (in_array($action, $internal_actions, true)) {
             error_log("AhoyRipper CSP-VIOLATION [{$request_id}]: " . json_encode($safe));
         }
         // Harden the csp-report response to match the rest of the API.
-        // These headers are set at the top of the script (lines 11-29) for all
-        // other endpoints; apply them here too so the violation report handler
-        // is not the weakest link in the security posture.
+        // Use fastcgi_finish_request() (PHP-FPM only) to flush the full response
+        // (top-of-script headers + body) before exiting. This eliminates the
+        // maintenance burden of manually duplicating all security headers here
+        // whenever a new header is added to the top-of-script block. In non-FPM
+        // SAPIs the function doesn't exist and we fall back to manual headers.
+        if (function_exists('fastcgi_finish_request')) {
+            echo json_encode(['status' => 'ok']);
+            fastcgi_finish_request();
+            exit;
+        }
+        // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers.
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('X-Download-Options: noopen');
