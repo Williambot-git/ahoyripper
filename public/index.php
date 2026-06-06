@@ -879,6 +879,17 @@ function escapeHtml(s) {
                 msg = errorHints[statusKey];
               }
             }
+            // Append human-readable retry countdown when retry_after is available.
+            // DOWNLOAD_TIMEOUT and SOURCE_TIMEOUT include retry_after as a Unix timestamp.
+            if (typeof err.retry_after === 'number' && err.retry_after > Date.now() / 1000) {
+              var secs = Math.ceil(err.retry_after - Date.now() / 1000);
+              if (secs > 60) {
+                var mins = Math.ceil(secs / 60);
+                msg += ' Try again in about ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.';
+              } else if (secs > 0) {
+                msg += ' Try again in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '.';
+              }
+            }
           }
           // Surface raw yt-dlp diagnostic output when available.
           if (typeof err.raw_error === 'string' && err.raw_error.length > 0 && err.raw_error.length < 400) {
@@ -895,6 +906,26 @@ function escapeHtml(s) {
           };
           if (errorHints[statusKey]) {
             msg = errorHints[statusKey];
+          }
+          // DOWNLOAD_TIMEOUT body may not be valid JSON — check via resp.text() briefly.
+          if (resp.status === 504) {
+            resp.text().then(function(txt) {
+              var m = txt.match(/"retry_after"\s*:\s*(\d+)/);
+              if (m) {
+                var secs = Math.ceil(parseInt(m[1], 10) - Date.now() / 1000);
+                if (secs > 0) {
+                  if (secs > 60) {
+                    var mins = Math.ceil(secs / 60);
+                    showError(msg + ' Try again in about ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.');
+                  } else {
+                    showError(msg + ' Try again in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '.');
+                  }
+                  return;
+                }
+              }
+              showError(msg);
+            }).catch(function() { showError(msg); });
+            return;
           }
         }
         // Append raw yt-dlp diagnostic to the friendly message.
