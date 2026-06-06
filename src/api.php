@@ -1225,7 +1225,6 @@ switch ($action) {
             '--dump-json',
             '--no-playlist',
             '--skip-download',
-            '--no-warnings',
             '--progress-template', '',
             '--concurrent-fragments', '4',
             '--referer', 'https://ahoyripper.com/',
@@ -1745,7 +1744,7 @@ switch ($action) {
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
-        //   NOTE: --no-warnings is used here to suppress yt-dlp's written warnings
+        //   NOTE: --progress-template '' suppresses yt-dlp's progress output to stderr,
         //   (to stdout). --progress-template '' handles stderr progress-bar suppression.
         //   Both flags are used together. Use AhoyVPN to route through an allowed
         //   region when encountering geo-blocks.
@@ -1755,7 +1754,6 @@ switch ($action) {
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
-            '--no-warnings',
             '--no-playlist',
             '--progress-template', '',
             '--concurrent-fragments', '4',
