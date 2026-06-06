@@ -196,6 +196,24 @@ else
 fi
 
 echo ""
+echo "==> Checking www redirect order in nginx-docker.conf (ahoyvpn before ahoyripper)..."
+# The www.ahoyvpn.com redirect must appear BEFORE www.ahoyripper.com.
+# If ahoyripper.com comes first, the www.ahoyvpn.com check never fires and
+# that domain's redirect silently falls through (PHP sees the wrong Host header).
+DOCKER_VPN_LINE=$(grep -n "if.*= 'www.ahoyvpn.com'" deploy/nginx-docker.conf | head -1 | cut -d: -f1)
+DOCKER_RIPPER_LINE=$(grep -n "if.*= 'www.ahoyripper.com'" deploy/nginx-docker.conf | head -1 | cut -d: -f1)
+if [ -n "$DOCKER_VPN_LINE" ] && [ -n "$DOCKER_RIPPER_LINE" ]; then
+    if [ "$DOCKER_VPN_LINE" -lt "$DOCKER_RIPPER_LINE" ]; then
+        echo "  ✓ nginx-docker.conf: www.ahoyvpn.com redirect precedes www.ahoyripper.com (line $DOCKER_VPN_LINE < line $DOCKER_RIPPER_LINE)"
+    else
+        echo "  ✗ nginx-docker.conf: www.ahoyripper.com redirect appears before www.ahoyvpn.com — wrong order (line $DOCKER_RIPPER_LINE < line $DOCKER_VPN_LINE, ahoyvpn must be first)"
+        exit 1
+    fi
+else
+    echo "  ⚠ Could not verify www redirect order in nginx-docker.conf (redirect blocks not found)"
+fi
+
+echo ""
 echo "==> Checking source-file access control in nginx-docker.conf..."
 # nginx-docker.conf must:
 # 1. Explicitly allow /src/api.php (used by the frontend JS).
