@@ -21,14 +21,22 @@ RUN apt-get update && apt-get install -y \
     # avoids pip installation complexity, reduces image size, and is faster.
     && curl -L -o /usr/local/bin/yt-dlp \
         https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    && curl -L -o /tmp/yt-dlp-sha256 \
-        https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.sha256 \
+    && curl -L -o /tmp/SHA2-256SUMS \
+        https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS \
     # sha256sum exits 0 when the checksum matches, 1 when it doesn't, and 2
-    # when the checksum file itself couldn't be read. We treat mismatch (1) as a
-    # hard failure and missing checksum (2) as a warning (build was run before
-    # checksums were published — not a security failure of the actual binary).
-    # Treat any unexpected exit code as "skip verification" (not a hard failure).
-    SHA256_STATUS=$(sha256sum --strict -c /tmp/yt-dlp-sha256 2>/dev/null; echo $?)
+    # when the checksum file itself couldn't be read. yt-dlp publishes the full
+    # SHA2-256SUMS file (not individual .sha256 files). Extract the line for
+    # the plain 'yt-dlp' binary (not yt-dlp.exe, etc.) and verify it.
+    # Treat missing checksum file (2) as a warning. Treat mismatch (1) as a hard
+    # failure — a corrupt or tampered binary must not be used.
+    YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS 2>/dev/null | awk '{print $1}')
+    if [ -n "$YT_DLP_HASH" ]; then
+        echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c -
+        SHA256_STATUS=$?
+    else
+        echo "WARNING: SHA2-256SUMS file missing or yt-dlp hash not found — skipping binary verification"
+        SHA256_STATUS=2
+    fi
     if [ "$SHA256_STATUS" = "0" ]; then
          echo "yt-dlp SHA256 verified"
     elif [ "$SHA256_STATUS" = "2" ]; then
@@ -38,7 +46,7 @@ RUN apt-get update && apt-get install -y \
          exit 1
     fi
     && chmod +x /usr/local/bin/yt-dlp \
-    && rm -f /tmp/yt-dlp-sha256
+    && rm -f /tmp/SHA2-256SUMS
 
 # Verify yt-dlp is intact and runs before declaring the image good.
 # A corrupt or incomplete download produces a non-executable file;
