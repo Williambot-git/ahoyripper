@@ -120,6 +120,10 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = 30; // requests per minute
 $rate_window = 60;
+// $cleanup_cutoff: stale rate files older than $rate_window seconds are removed.
+// A file is stale when (now - stored_timestamp) > $rate_window, meaning the
+// rate-limit window has fully expired and no new requests arrived to refresh it.
+$cleanup_cutoff = $rate_window;
 
 // $data is declared here so headers can be set outside the if block below,
 // making rate-limit metadata available to all API responses (including
