@@ -35,6 +35,8 @@ done
 echo "[2/4] ✓ Health response contains all required fields"
 
 # 3. yt-dlp binary check via health probe
+# The API enforces origin checks (Referer must be from ahoyripper.com or ahoyvpn.com).
+# Without a Referer, health requests return 403 and the probe silently fails.
 PROBE_JSON=$(curl -s "${API}?action=health&probe=1" \
   -H "Referer: https://ahoyripper.com/" 2>/dev/null || echo "{}")
 if echo "$PROBE_JSON" | grep -q '"yt_dlp_probe"'; then
