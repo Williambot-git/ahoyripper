@@ -1423,7 +1423,11 @@ switch ($action) {
                 }
             }
             http_response_code($err_status);
-            $resp = ['error' => $parsed['error'], 'request_id' => $request_id];
+            $resp = [
+                'error' => $parsed['error'],
+                'request_id' => $request_id,
+                'source_url' => $url,
+            ];
             if (!empty($parsed['error_code'])) {
                 $resp['error_code'] = $parsed['error_code'];
             }
