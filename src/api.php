@@ -192,13 +192,17 @@ header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
 header('X-RateLimit-Reset: ' . $reset);
 header('X-RateLimit-Window: ' . $rate_window);
 
-// Periodic cleanup of stale rate files and cache entries (every 100 requests).
+// Periodic cleanup of stale rate files and cache entries.
 // Proactively removes expired entries from /tmp to prevent indefinite accumulation
 // on servers that run for months without restart.
-$cleanup_cutoff = $rate_window; // stale = last request > 1 window ago
+// The rate file stores ['t' => timestamp_of_first_request_in_window, 'c' => count].
+// A file is stale when the stored timestamp is older than $rate_window seconds ago
+// (meaning the window has fully expired and no new requests arrived to refresh it).
+// Note: abs() is intentionally omitted — time() - $d['t'] is always >= 0 for valid
+// timestamps, and omitting abs() makes the condition self-documenting.
 foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
     $d = @json_decode(@file_get_contents($f), true);
-    if (!$d || !is_array($d) || abs(time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
+    if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
         @unlink($f);
     }
 }
