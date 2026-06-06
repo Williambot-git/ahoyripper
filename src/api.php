@@ -1021,8 +1021,11 @@ $unlimited = false;
 
 // Enforce GET for all API actions — POST is not used or documented.
 // Rejecting wrong methods early gives a clear 405 instead of ambiguous behaviour.
+// RFC 7231 §6.5.5: a 405 response MUST include an Allow header listing valid
+// methods so clients can discover the supported interface without trial-and-error.
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
+    header('Allow: GET');
     echo json_encode([
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
