@@ -410,15 +410,16 @@ else
 fi
 
 echo ""
-echo "==> Checking API location block CSP in nginx-docker.conf includes upgrade-insecure-requests..."
-# The API location block (location = /src/api.php) has its own standalone CSP that
-# completely overrides the server-level CSP. It must include upgrade-insecure-requests
-# to match the server-level policy — otherwise HTTP→HTTPS upgrade breaks for the API.
-API_CSP_LINE=$(grep -A 50 'location = /src/api.php' deploy/nginx-docker.conf | grep 'Content-Security-Policy' | head -1 || true)
-if echo "$API_CSP_LINE" | grep -q "upgrade-insecure-requests"; then
-    echo "  ✓ API location CSP includes upgrade-insecure-requests"
+echo "==> Checking API location block CSP includes worker-src 'self' (production nginx.conf)..."
+# The API location block CSP in nginx.conf must include worker-src 'self' so
+# ServiceWorkers and SharedWorkers can be created from the API origin (needed
+# for future PWA offline support). This mirrors the same directive in the Docker
+# config and the PHP layer.
+API_CSP_LINE=$(sed -n '/location = \/src\/api.php/,/^[[:space:]]*}/p' deploy/nginx.conf | grep 'Content-Security-Policy' | tail -1 || true)
+if echo "$API_CSP_LINE" | grep -q "worker-src"; then
+    echo "  ✓ Production nginx.conf API location CSP includes worker-src"
 else
-    echo "  ✗ API location CSP missing upgrade-insecure-requests (standalone CSP overrides server-level)"
+    echo "  ✗ Production nginx.conf API location CSP missing worker-src (blocks ServiceWorkers)"
     exit 1
 fi
 
