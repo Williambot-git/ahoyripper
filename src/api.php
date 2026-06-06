@@ -1704,7 +1704,12 @@ switch ($action) {
         // (a newline in the Content-Disposition filename parameter could allow
         // header injection attacks even though the filename field itself is not
         // directly used in binary download responses).
-        $download_filename = trim($_GET['filename'] ?? '');
+        // URL-decode first: the frontend sends this as a URL-encoded query parameter,
+        // so a filename like "My%20Video" must be decoded to "My Video" before
+        // length validation. Without urldecode(), encoded chars are counted literally
+        // (strlen("My%20Video") = 13) but the actual decoded value is shorter,
+        // causing valid filenames to fail the length check unexpectedly.
+        $download_filename = trim(urldecode($_GET['filename'] ?? ''));
         if ($download_filename !== '') {
             // Strip control characters including newlines and carriage returns
             // before sanitizing so that a filename like "evil\r\nContent-Type:..."
