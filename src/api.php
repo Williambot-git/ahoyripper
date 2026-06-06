@@ -1491,7 +1491,7 @@ switch ($action) {
         // for output template expansion; single-quote for fallback priority like 22/18;
         // asterisk for glob patterns like bestvideo*). Safe when passed as array
         // element to proc_open with bypass_shell=true, bypassing the shell entirely).
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=\[\]+\/-~()*%@!\']+$/', $format_id)) {
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=\[\]+\\/-~()*%@!\']+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([
