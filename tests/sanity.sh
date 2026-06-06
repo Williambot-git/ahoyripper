@@ -512,6 +512,19 @@ else
 fi
 
 echo ""
+echo "==> Checking nginx-docker.conf /csp-report hides X-Powered-By... "
+# The /csp-report location passes PHP-FPM directly (not via snippets/fastcgi-php.conf),
+# so it needs its own fastcgi_hide_header X-Powered-By directive to prevent PHP
+# version leakage to clients. Without this, CSP violation report responses expose
+# the PHP version even though the api.php location hides it.
+if grep -A 20 "location = /csp-report" deploy/nginx-docker.conf | grep -q "fastcgi_hide_header X-Powered-By"; then
+    echo "  ✓ nginx-docker.conf /csp-report hides X-Powered-By"
+else
+    echo "  ✗ nginx-docker.conf /csp-report is missing fastcgi_hide_header X-Powered-By (PHP version leaks)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking nginx-docker.conf server-level security headers include X-Robots-Tag..."
 if grep -q 'X-Robots-Tag "noindex, noai, noimage, noydir"' deploy/nginx-docker.conf; then
     echo "  ✓ nginx-docker.conf has X-Robots-Tag at server level"
