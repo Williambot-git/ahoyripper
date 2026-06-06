@@ -268,6 +268,8 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | error_code | Meaning | User action |
 |------------|---------|-------------|
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
+| `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
+| `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded | Wait a minute and try again, or upgrade to an unlimited API key |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
@@ -293,8 +295,6 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
-| `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
-| `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
 ### Download a format
