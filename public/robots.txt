@@ -41,5 +41,5 @@ Allow: /
 User-agent: *
 Disallow: /src/
 
-# Sitemap
+# Security contact — RFC 9116
 Sitemap: https://ahoyripper.com/sitemap.xml

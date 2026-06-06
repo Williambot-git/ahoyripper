@@ -1,0 +1,15 @@
+# AhoyRipper — Security contact information
+# RFC 9116 — https://www.rfc-editor.org/rfc/rfc9116
+#
+# For security vulnerabilities or concerns, please contact:
+#   mailto:security@ahoyripper.com
+#
+# Please include a description of the issue and any relevant details
+# (URLs, screenshots, or reproduction steps are helpful but not required).
+# Valid reports are acted upon promptly; you will receive a response within
+# a reasonable timeframe (typically 48–72 hours on business days).
+
+Contact: mailto:security@ahoyripper.com
+Expires: 2027-06-06T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://ahoyripper.com/.well-known/security.txt

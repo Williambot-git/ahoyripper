@@ -35,6 +35,23 @@ jobs:
             if ! grep -q "$header" src/api.php; then echo "Missing: $header"; exit 1; fi
           done
 
+      - name: Check security.txt (RFC 9116)
+        run: |
+          # security.txt must exist at /.well-known/security.txt (served under public/)
+          # and must contain a valid Contact: directive.
+          if [ ! -f "public/.well-known/security.txt" ]; then
+            echo "FAIL: public/.well-known/security.txt does not exist"
+            exit 1
+          fi
+          if ! grep -qi "^Contact:" public/.well-known/security.txt; then
+            echo "FAIL: security.txt missing Contact: directive (RFC 9116)"
+            exit 1
+          fi
+          if ! grep -qi "^Expires:" public/.well-known/security.txt; then
+            echo "FAIL: security.txt missing Expires: directive (RFC 9116)"
+            exit 1
+          fi
+
       - name: Check CSP on check endpoint (bypasses top-of-script block)
         run: |
           # The 'check' action sends its own response via echo+break (not a normal
