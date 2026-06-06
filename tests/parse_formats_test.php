@@ -131,7 +131,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
     if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
-    $derived_filename = $raw_fn ?: 'ahoyrip';
+    // Use ctype_digit() to catch ALL purely-numeric titles, not just "0".
+    $derived_filename = ($raw_fn !== '' && !ctype_digit($raw_fn)) ? $raw_fn : 'ahoyrip';
 
     $formats = [];
     foreach (($data['formats'] ?? []) as $f) {
@@ -347,6 +348,20 @@ test('derives filename from title (spaces become underscores)',
     $result && ($result['derived_filename'] ?? '') === 'Test_Video_Title');
 test('returns sort_applied as height',
     $result && ($result['sort_applied'] ?? '') === 'height');
+
+// Regression: purely numeric titles must fall back to 'ahoyrip', not use the
+// number as the filename. PHP's empty() is true for '0', so $raw_fn ?: 'ahoyrip'
+// would incorrectly use '1080' as the derived filename. The fix is
+// ($raw_fn !== '' && $raw_fn !== '0') ? $raw_fn : 'ahoyrip'.
+$json_numeric = makeJson('1080', []);
+$result_numeric = parseFormats($json_numeric);
+test('numeric title "1080" falls back to ahoyrip (not "1080")',
+    $result_numeric && ($result_numeric['derived_filename'] ?? '') === 'ahoyrip');
+
+$json_zero = makeJson('0', []);
+$result_zero = parseFormats($json_zero);
+test('title "0" falls back to ahoyrip (not "0")',
+    $result_zero && ($result_zero['derived_filename'] ?? '') === 'ahoyrip');
 
 $json2 = makeJson('Unknown', [], ['title' => null]);
 $result2 = parseFormats($json2);

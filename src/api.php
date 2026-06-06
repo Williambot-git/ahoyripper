@@ -708,7 +708,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // Fall back to 'ahoyrip' when the title was entirely numeric (e.g. "0", "1080")
     // and all digits were stripped by the sanitization regex above. Also guard
     // against empty string after trim (whitespace-only titles).
-    $derived_filename = ($raw_fn !== '' && $raw_fn !== '0') ? $raw_fn : 'ahoyrip';
+    // Use ctype_digit() to catch ALL purely-numeric titles, not just "0".
+    // PHP's empty('1080') is false, so $raw_fn ?: 'ahoyrip' would incorrectly
+    // use '1080' as the derived filename for a video whose title is "1080".
+    $derived_filename = ($raw_fn !== '' && !ctype_digit($raw_fn)) ? $raw_fn : 'ahoyrip';
 
     $formats = [];
     foreach (($data['formats'] ?? []) as $f) {
