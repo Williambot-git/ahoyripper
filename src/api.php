@@ -1204,16 +1204,14 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // --no-warnings: suppress yt-dlp's stderr warning messages. Without this,
-        //   warnings (e.g. "Unable to download JSON metadata: HTTP Error 429") can
-        //   prepend to stdout and corrupt --dump-json output, causing json_decode()
-        //   to fail even when the video info was successfully fetched.
-        //   --progress-template "": suppress ALL progress output to stderr — without this,
-        //   yt-dlp emits progress bars to stderr even during --dump-json (the progress
-        //   template is output even when --skip-download is set). This prepends garbage
-        //   to the JSON stdout, causing json_decode() to fail and returning a confusing
-        //   PARSE_ERROR instead of a properly classified yt-dlp error message.
-        //   --progress-template '' is the correct mechanism for stderr suppression.
+        // yt-dlp warnings are suppressed by default in modern yt-dlp versions via
+        // the YTDLP_COMPRESS=no environment variable. In older versions,
+        // --progress-template '' suppresses ALL progress output to stderr — without this,
+        // yt-dlp emits progress bars to stderr even during --dump-json (the progress
+        // template is output even when --skip-download is set). This prepends garbage
+        // to the JSON stdout, causing json_decode() to fail and returning a confusing
+        // PARSE_ERROR instead of a properly classified yt-dlp error message.
+        // --progress-template '' is the correct mechanism for stderr suppression.
         // --concurrent-fragments 4: parallelises fragment downloads for fragmented
         //   streams (HLS/DASH), reducing wall-clock time for large video downloads.
         //   In the info action, --skip-download is set so no actual fragment download
@@ -2206,13 +2204,11 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                // --no-warnings: suppress yt-dlp's stderr warning messages (written to stderr,
-                //   not stdout — but without this, warnings can appear ahead of JSON in the
-                //   combined stdout output and cause json_decode() to fail on probe results).
                 // --progress-template "": suppress ALL progress output to stderr so it doesn't
                 //   corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
-                //   Both flags are needed together.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --no-warnings --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                //   yt-dlp warnings are now suppressed by default in modern versions via
+                //   YTDLP_COMPRESS=no env var; --no-warnings flag was removed in yt-dlp 2024.x.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
