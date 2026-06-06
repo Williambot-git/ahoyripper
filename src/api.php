@@ -845,11 +845,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
-            // tbr is a tertiary tie-breaker for same-height/same-fps combined formats.
-            // Type group separation (combined/video/audio) is primary, height is secondary,
-            // fps is tertiary, and tbr is the last resort. This prevents audio formats
-            // with high tbr from floating above video formats of the same type group.
-            $cmp = 0; // tbr is NOT primary — height/fps resolve ties first.
+            // Sort by total bitrate (tbr) descending — highest bitrate first.
+            // Type group (combined/video/audio) is primary; tbr is secondary within
+            // each group, so audio formats with high bitrate sort above lower-bitrate
+            // audio, not above video formats in a different group.
+            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
             // quality: numeric tier — pixel height for video (1080, 720, 480...),
             // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).

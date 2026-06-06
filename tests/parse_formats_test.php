@@ -258,11 +258,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
-            // tbr is a tertiary tie-breaker for same-height/same-fps combined formats.
-            // Type group separation (combined/video/audio) is primary, height is secondary,
-            // fps is tertiary, and tbr is the last resort. This prevents audio formats
-            // with high tbr from floating above video formats of the same type group.
-            $cmp = 0; // tbr is NOT primary — height/fps resolve ties first.
+            // Sort by total bitrate (tbr) descending — highest bitrate first.
+            // Type group (combined/video/audio) is primary; tbr is secondary within
+            // each group, so audio formats with high bitrate sort above lower-bitrate
+            // audio, not above video formats in a different group.
+            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
             // quality: numeric tier — pixel height for video (1080, 720, 480...),
             // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
@@ -571,42 +571,39 @@ test('combined formats sorted by height descending (1080 before 480 before 240)'
 test('audio-only formats sorted after combined (at end)',
     $ids[3] === 'audio');
 
-// ─── parseFormats: tbr sort (secondary — height/fps is primary within group) ──
+// ─── parseFormats: tbr sort (primary sort key within type groups) ──
 
-echo "\n==> Testing parseFormats() — tbr sort (height/fps tie-break still primary)\n";
+echo "\n==> Testing parseFormats() — tbr sort (bitrate primary within type group)\n";
 
-// tbr is a secondary sort key — combined formats still sort by height first,
-// with tbr resolving ties only when heights are equal. This prevents audio
-// formats (which may have high tbr values) from floating to the top.
-// Note: the sort separates "combined" (video+audio) from "non-combined" (video-only
-// and audio-only both have one codec set to none), so video-only sorts after combined
-// of the same height — this is the same behaviour as the height/filesize sort modes.
+// tbr is the primary sort key within each type group (combined/video/audio).
+// Type group separation is still primary (combined before video before audio).
+// Within the same type group, highest tbr sorts first.
 $formats_for_tbr = [
     // Combined 1080p30 with low tbr
     makeFormat(['format_id' => 'c_1080_30_low',  'height' => 1080, 'fps' => 30, 'tbr' => 1000, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
-    // Combined 1080p30 with high tbr (should sort AFTER c_1080_30_low — same height, tbr resolves)
+    // Combined 1080p30 with high tbr (should sort BEFORE c_1080_30_low — tbr is primary)
     makeFormat(['format_id' => 'c_1080_30_high', 'height' => 1080, 'fps' => 30, 'tbr' => 5000, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
-    // Combined 720p60 with high tbr (should sort AFTER both 1080p — height is primary)
+    // Combined 720p60 with very high tbr (higher tbr than the 1080p formats — but height is secondary so 1080p still wins)
     makeFormat(['format_id' => 'c_720_60_hi_tbr', 'height' => 720,  'fps' => 60, 'tbr' => 8000, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
-    // Audio-only with very high tbr (should sort AFTER all combined — type is primary)
+    // Audio-only with very high tbr (should sort AFTER all combined — type group is primary)
     makeFormat(['format_id' => 'audio_hi_tbr',    'height' => 0,   'vcodec' => 'none', 'acodec' => 'opus', 'tbr' => 6000]),
 ];
 $json_tbr = makeJson('TBR Sort', $formats_for_tbr);
-$result_tbr = parseFormats($json_tbr);
+$result_tbr = parseFormats($json_tbr, $raw_err, 'tbr');
 $ids_tbr = array_column($result_tbr['formats'], 'id');
 
-// Combined formats come first (type separation), sorted by height desc (primary),
-// then by tbr desc (secondary within same height).
-test('tbr sort: combined 1080p comes before combined 720p (height primary)',
-    $ids_tbr[0] === 'c_1080_30_low' || $ids_tbr[0] === 'c_1080_30_high');
-test('tbr sort: combined 720p comes after combined 1080p (type group separation)',
-    in_array('c_720_60_hi_tbr', array_slice($ids_tbr, 0, 2), true) === false);
-test('tbr sort: audio-only comes after all combined (type separation beats high tbr)',
+// Type group separation (combined before video before audio) is the primary key.
+// Within the combined group, tbr is the sort key — highest tbr first.
+// c_720_60_hi_tbr (tbr=8000) > c_1080_30_high (tbr=5000) > c_1080_30_low (tbr=1000).
+// audio_hi_tbr is audio-only so it sorts after all combined formats.
+test('tbr sort: highest tbr combined format first (c_720_60_hi_tbr tbr=8000)',
+    $ids_tbr[0] === 'c_720_60_hi_tbr');
+test('tbr sort: 1080p30 high tbr (5000) before 1080p30 low tbr (1000)',
+    $ids_tbr[1] === 'c_1080_30_high');
+test('tbr sort: combined 720p60 (tbr=8000) before combined 1080p30 low tbr (1000)',
+    array_search('c_720_60_hi_tbr', $ids_tbr, true) < array_search('c_1080_30_low', $ids_tbr, true));
+test('tbr sort: audio-only comes after all combined (type group primary)',
     array_search('audio_hi_tbr', $ids_tbr, true) > 2);
-test('tbr sort: within same height, higher tbr sorts first',
-    // Both 1080p30 formats should be at indices 0 and 1; the one with higher tbr should be first
-    (array_search('c_1080_30_high', $ids_tbr, true) < array_search('c_1080_30_low', $ids_tbr, true)) ||
-    ($ids_tbr[0] === 'c_1080_30_high' && $ids_tbr[1] === 'c_1080_30_low'));
 
 // ─── parseFormats: quality sort (numeric quality tier) ─────────────────────────
 
