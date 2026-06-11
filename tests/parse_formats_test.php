@@ -63,7 +63,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video is private and cannot be downloaded.', 'error_code' => 'PRIVATE_VIDEO'];
             }
-            if (preg_match('/login.*required|authentication required|this video requires login/i', $err_lower)) {
+            // "authentication required" must be checked separately because the merged
+            // pattern "authentication.*required" would require "required" to appear
+            // twice — yt-dlp only says it once ("authentication required"), so we
+            // match it directly as its own alternative.
+            if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video requires login or subscription.', 'error_code' => 'LOGIN_REQUIRED'];
             }
