@@ -2144,6 +2144,21 @@ switch ($action) {
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+        // The check action is a lightweight ping with zero dependency on yt-dlp,
+        // ffmpeg, or /proc/sys. Rate-limit headers are included (with -1/unlimited
+        // sentinel values) so clients can distinguish this endpoint from /download
+        // without needing to interpret different response shapes.
+        // download rate limit: check is not a download action, so -1 (no limit)
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        // Standard rate-limit header family for generic API consumers.
+        // X-RateLimit-Limit: 0 = this endpoint has no request frequency cap.
+        header('X-RateLimit-Limit: 0');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
