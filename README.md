@@ -19,36 +19,13 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 ## Supported Platforms
 
-AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. Major platforms include:
+AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
 
-| Category | Platforms |
-|----------|-----------|
-| **Video** | YouTube, TikTok, X/Twitter, Instagram, Facebook, Reddit, Vimeo, Twitch, Dailymotion, VK, Snapchat |
-| **Music / Audio** | SoundCloud, Spotify, Bandcamp, Mixcloud, Audiomack, Napster, Qobuz |
-| **Short-form / Social** | Instagram Reels/Stories, Facebook Videos, Reddit Videos, Pinterest, Tumblr |
-| **Gaming / Streaming** | Streamable, Veoh, Metacafe, Break, Clipfish, Bilibili, Niconico (JP) |
-| **News / Media** | BBC, CNN, Fox News, NBC, ABC, CBS, NPR, C-SPAN, France 24, Al Jazeera |
-| **Adult** | Pornhub, XVideos, xHamster (region-permitting) |
-| **International** | VK Video (RU), Yandex Video (RU), Bilibili (CN), Niconico (JP), Share_videos (CN), Bilibili (HK/TW) |
-
-> **Note:** Platform availability varies by region. Some platforms may be blocked or return `GEOBLOCKED` errors depending on your location. VPNs like [AhoyVPN](https://ahoyvpn.com) can help access region-restricted content. Run `yt-dlp --list-extractors | wc -l` for the full extractor count.
-
-For the full list of supported sites, run:
+For the full extractor list:
 
 ```bash
 yt-dlp --list-extractors
 ```
-
-### Platform-specific notes
-
-- **YouTube:** Age-restricted and region-locked content returns a classified `AGE_RESTRICTED` or `GEOBLOCKED` error. Unlisted/private videos return `PRIVATE_VIDEO`. Login-gated content returns `LOGIN_REQUIRED`.
-- **TikTok:** Some videos may return `GEOBLOCKED` depending on creator restrictions. Web video downloads are supported via the TikTok extractor.
-- **Instagram:** Reels and public posts are supported. Private account content requires authentication and is not supported.
-- **Reddit:** Public videos from subreddits and users are supported. NSFW content may be restricted depending on server configuration.
-- **SoundCloud:** All public tracks and albums supported. Set `AHOY_USER_AGENT` if you encounter request blocks.
-- **TikTok / Instagram Stories:** Web video downloads are supported via the TikTok extractor. Some regions may require the TikTok extractor to be updated — run `yt-dlp -U` if downloads fail.
-
-> **Tip:** If a platform returns `UNSUPPORTED_SITE`, the extractor may be disabled or require a yt-dlp update. Try `yt-dlp -U` to update, then test again.
 
 ---
 
