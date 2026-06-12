@@ -30,10 +30,24 @@ else
 fi
 
 echo ""
-echo "==> Checking PHP syntax..."
-php -l src/api.php
-php -l public/index.php
-echo "  ✓ PHP syntax OK"
+echo "==> Checking PHP syntax (all project .php files)..."
+# Check all PHP files: application code, tests, and CLI scripts.
+# Use find to enumerate so new PHP files are automatically included.
+FAILED_PHP=0
+while IFS= read -r f; do
+    result=$(php -l "$f" 2>&1 || true)
+    if echo "$result" | grep -q "No syntax errors"; then
+        echo "  ✓ $(basename "$f")"
+    else
+        echo "  ✗ $(basename "$f"): $result"
+        FAILED_PHP=1
+    fi
+done < <(find "$PROJECT_ROOT" -name "*.php" -type f | sort)
+if [ "$FAILED_PHP" -eq 1 ]; then
+    echo "  PHP syntax errors detected."
+    exit 1
+fi
+echo "  ✓ All PHP syntax OK"
 
 # --no-warnings (plural) is the current recommended yt-dlp flag.
 # The deprecated form is --no-warning (singular).

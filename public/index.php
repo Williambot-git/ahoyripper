@@ -296,6 +296,49 @@ header('X-Request-ID: ' . $page_request_id);
 
   const API = '/src/api.php';
 
+  // Shared error hint map — single source of truth for human-readable error messages
+  // keyed by error_code (from API response) and by HTTP status code (fallback).
+  // Used by both the !resp.ok branch and the catch branch so they stay in sync.
+  var ERROR_HINTS = {
+    'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
+    'GEOBLOCKED': 'This video is geo-restricted in your region. Use AhoyVPN to route through an unblocked region: https://ahoyvpn.com',
+    'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
+    'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
+    'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
+    'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
+    'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
+    'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
+    'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
+    'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
+    'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
+    'SOURCE_TIMEOUT': 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
+    'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
+    'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
+    'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
+    'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
+    'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
+    'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
+    'DOWNLOAD_TIMEOUT': 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
+    'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
+    'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
+    'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
+    'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
+    'SOURCE_SERVER_ERROR': 'The source site returned an error and is having issues. Try again shortly.',
+    'SOURCE_HTTP_ERROR': 'The source site returned an unexpected error. Try again in a moment.',
+    'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
+    'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
+    'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
+    'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
+    'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
+    'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
+    'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
+    'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
+    'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
+    '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
+    '502': 'The server encountered an error. Please try again in a moment.',
+    '503': 'Service temporarily unavailable. Please try again shortly.',
+  };
+
   const form = document.getElementById('ripForm');
   const input = document.getElementById('urlInput');
   const btn = document.getElementById('submitBtn');
@@ -832,51 +875,12 @@ function escapeHtml(s) {
           var err = await resp.json();
           msg = err.error || msg;
           if (err.error_code) {
-            var errorHints = {
-              'RATE_LIMIT_EXCEEDED': 'Too many requests. Slow down. Get AhoyVPN for unlimited access: https://ahoyvpn.com',
-              'GEOBLOCKED': 'This video is geo-restricted in your region. Use AhoyVPN to route through an unblocked region: https://ahoyvpn.com',
-              'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
-              'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
-              'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
-              'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
-              'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
-              'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',
-              'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
-              'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
-              'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes.',
-              'SOURCE_TIMEOUT': 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
-              'SSL_ERROR': 'Secure connection to the source failed. Try again shortly.',
-              'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
-              'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
-              'FORMAT_UNAVAILABLE': 'That format is not available for this video. Choose another from the list.',
-              'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
-              'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
-              'DOWNLOAD_TIMEOUT': 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
-              'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
-              'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
-              'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
-              'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
-              'SOURCE_SERVER_ERROR': 'The source site returned an error and is having issues. Try again shortly.',
-              'SOURCE_HTTP_ERROR': 'The source site returned an unexpected error. Try again in a moment.',
-              'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
-              'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
-              'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
-              'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
-              'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
-              'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
-              'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
-              'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
-              'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
-              '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
-              '502': 'The server encountered an error. Please try again in a moment.',
-              '503': 'Service temporarily unavailable. Please try again shortly.',
-            };
-            if (errorHints[err.error_code]) {
-              msg = errorHints[err.error_code];
+            if (ERROR_HINTS[err.error_code]) {
+              msg = ERROR_HINTS[err.error_code];
             } else {
               var statusKey = String(resp.status);
-              if (errorHints[statusKey]) {
-                msg = errorHints[statusKey];
+              if (ERROR_HINTS[statusKey]) {
+                msg = ERROR_HINTS[statusKey];
               }
             }
             // Append human-readable retry countdown when retry_after is available.
@@ -899,13 +903,8 @@ function escapeHtml(s) {
           // resp.json() failed — response was not valid JSON (e.g. nginx error page).
           // Fall through with the generic msg. Check resp.status for error-page hint.
           var statusKey = String(resp.status);
-          var errorHints = {
-            '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
-            '502': 'The server encountered an error. Please try again in a moment.',
-            '503': 'Service temporarily unavailable. Please try again shortly.',
-          };
-          if (errorHints[statusKey]) {
-            msg = errorHints[statusKey];
+          if (ERROR_HINTS[statusKey]) {
+            msg = ERROR_HINTS[statusKey];
           }
           // DOWNLOAD_TIMEOUT body may not be valid JSON — check via resp.text() briefly.
           if (resp.status === 504) {
