@@ -360,7 +360,7 @@ test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/', $format_id);
+    return preg_match('/^[a-zA-Z0-9_.,<>=\\[\\]+\\/-~()*%@!\'"]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";

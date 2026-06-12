@@ -81,6 +81,7 @@ header('X-Request-ID: ' . $page_request_id);
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:domain" content="ahoyripper.com">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
