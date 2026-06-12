@@ -513,6 +513,31 @@ else
 fi
 
 echo ""
+echo "==> Checking Reporting-Endpoints header (modern Reporting API, Chromium 84+)..."
+# Reporting-Endpoints is the modern standard (Chromium 84+, Firefox 79+) that routes
+# CSP violations through the browser's Reporting API. Without this, Chromium silently
+# drops reports even when report-to csp-report is specified in the CSP header.
+# api.php sets this header; nginx-docker.conf must also set it for parity.
+if grep -q 'Reporting-Endpoints' deploy/nginx-docker.conf; then
+    echo "  ✓ nginx-docker.conf defines Reporting-Endpoints header"
+else
+    echo "  ✗ nginx-docker.conf missing Reporting-Endpoints — Chromium 84+ drops CSP violation reports"
+    exit 1
+fi
+if grep -q 'Reporting-Endpoints' deploy/nginx.conf; then
+    echo "  ✓ nginx.conf defines Reporting-Endpoints header"
+else
+    echo "  ✗ nginx.conf missing Reporting-Endpoints — Chromium 84+ drops CSP violation reports"
+    exit 1
+fi
+if grep -q 'Reporting-Endpoints' src/api.php; then
+    echo "  ✓ api.php defines Reporting-Endpoints header"
+else
+    echo "  ✗ api.php missing Reporting-Endpoints — PHP layer inconsistent with nginx layer"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking CSP report-uri location is configured in nginx-docker.conf..."
 if grep -q "location = /csp-report" deploy/nginx-docker.conf; then
     echo "  ✓ /csp-report location configured in nginx-docker.conf"
