@@ -664,7 +664,19 @@ function escapeHtml(s) {
               // JSON (e.g. a proxy error page), catch the parse failure and fall
               // back to a generic message. Always remove the downloading state.
               resp.json().then(function(err) {
-                showError(err.error || 'Download failed. Try another format.');
+                // Prefer ERROR_HINTS[error_code] over raw err.error — gives
+                // actionable messages with upsell links (e.g. RATE_LIMIT_EXCEEDED
+                // maps to the AhoyVPN upgrade URL). Mirrors the info handler below.
+                var dlMsg = err.error || 'Download failed. Try another format.';
+                if (err.error_code && ERROR_HINTS[err.error_code]) {
+                  dlMsg = ERROR_HINTS[err.error_code];
+                } else {
+                  var dlStatusKey = String(resp.status);
+                  if (ERROR_HINTS[dlStatusKey]) {
+                    dlMsg = ERROR_HINTS[dlStatusKey];
+                  }
+                }
+                showError(dlMsg);
                 setLoading(false);
                 card.classList.remove('downloading');
               }).catch(function() {
