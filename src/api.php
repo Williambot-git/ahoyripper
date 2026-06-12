@@ -286,7 +286,7 @@ if (in_array($action, $internal_actions, true)) {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Reporting-Endpoints: csp-report="/csp-report"');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
         echo json_encode(['status' => 'ok']);
         exit;
     }
