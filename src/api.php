@@ -1238,19 +1238,16 @@ switch ($action) {
         // to the JSON stdout, causing json_decode() to fail and returning a confusing
         // PARSE_ERROR instead of a properly classified yt-dlp error message.
         // --progress-template '' is the correct mechanism for stderr suppression.
-        // --concurrent-fragments 4: parallelises fragment downloads for fragmented
-        //   streams (HLS/DASH), reducing wall-clock time for large video downloads.
-        //   In the info action, --skip-download is set so no actual fragment download
-        //   occurs — --concurrent-fragments is still safe to pass here as it has zero
-        //   effect in metadata-only mode but keeps the command array identical to the
-        //   download action, simplifying maintenance.
+        // --concurrent-fragments N was removed in yt-dlp 2024.10 (deprecated since 2023.11).
+        // yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
+        // produces a stderr warning that can pollute the JSON output in the info action
+        // and corrupt error classification. Removed from both info and download commands.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
             '--no-playlist',
             '--skip-download',
             '--progress-template', '',
-            '--concurrent-fragments', '4',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
@@ -1778,15 +1775,14 @@ switch ($action) {
         //   actual error messages correctly (progress bar text prepends the real error).
         //   yt-dlp warnings are suppressed by default in modern versions via
         //   YTDLP_COMPRESS=no; --progress-template '' handles older versions.
-        // --concurrent-fragments 4: parallelises fragment downloads (HLS/DASH),
-        //   reducing wall-clock time for large video downloads.
+        // --concurrent-fragments was removed in yt-dlp 2024.10 — yt-dlp now handles
+        //   HLS/DASH fragment concurrency internally.
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
             '--progress-template', '',
-            '--concurrent-fragments', '4',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
