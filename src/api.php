@@ -2313,6 +2313,20 @@ switch ($action) {
             $out['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
         }
 
+        // Rate-limit headers for the health endpoint — signals to clients that
+        // this endpoint is not subject to download rate limiting (X-DL-RateLimit
+        // uses -1/unlimited sentinel values since health is a read-only probe).
+        // download rate limit: health is not a download action, so -1 (no limit)
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        // Standard rate-limit header family for generic API consumers.
+        header('X-RateLimit-Limit: 0');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
+
         header('Cache-Control: no-cache');
         header('Connection: close');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
