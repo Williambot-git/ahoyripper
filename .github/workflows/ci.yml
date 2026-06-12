@@ -25,7 +25,7 @@ jobs:
 
       - name: Check required files
         run: |
-          for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do
+          for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh public/opensearch.xml; do
             if [ ! -f "$f" ]; then echo "Missing: $f"; exit 1; fi
           done
 
