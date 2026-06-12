@@ -96,7 +96,7 @@ if ($blocked) {
         logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
         error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
         http_response_code(403);
-        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id]);
+        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 }
@@ -134,14 +134,14 @@ if ($is_rate_limited) {
     if (!$fp) {
         http_response_code(503);
         header('Retry-After: 5');
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
+        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
     if (!flock($fp, LOCK_EX)) {
         fclose($fp);
         http_response_code(503);
         header('Retry-After: 5');
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id]);
+        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
@@ -169,7 +169,7 @@ if ($is_rate_limited) {
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => 'https://ahoyvpn.com',
                 'retry_after' => $reset_timestamp,
-            ]);
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         $data['c']++;
@@ -1818,7 +1818,7 @@ switch ($action) {
                 }
             }
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to start download process.', 'request_id' => $request_id]);
+            echo json_encode(['error' => 'Failed to start download process.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -2074,7 +2074,7 @@ switch ($action) {
             // back to JSON so the error response has the correct Content-Type.
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id]);
+            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         while (!feof($fp) && !connection_aborted()) {
