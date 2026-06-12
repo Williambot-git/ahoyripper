@@ -1349,6 +1349,7 @@ switch ($action) {
                 'error_code' => 'YTDLP_ERROR',
                 'action' => 'info',
                 'request_id' => $request_id,
+                'source_url' => $url,
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
@@ -1385,9 +1386,10 @@ switch ($action) {
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code($err_status);
             $resp = [
-                'error' => 'Could not parse video info. The site may not be supported.',
+                'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
                 'request_id' => $request_id,
+                'source_url' => $url,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
