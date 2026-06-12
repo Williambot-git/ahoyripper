@@ -124,7 +124,12 @@ apt-get install -y ffmpeg > /dev/null 2>&1
 ffmpeg -version | head -1
 
 echo "==> Installing PHP and modules..."
-apt-get install -y php php-fpm php-mbstring php-curl > /dev/null 2>&1
+# php-json is required for json_encode/json_decode used throughout api.php.
+# It is bundled with php on Ubuntu 22.04+ default installs but may be missing
+# on minimal, custom, or non-LTS PHP installations (e.g., ondrej/php PPA,
+# Debian bookworm minimal, or custom-compiled PHP). Installing it explicitly
+# prevents cryptic "Call to undefined function json_encode()" errors.
+apt-get install -y php php-fpm php-mbstring php-curl php-json > /dev/null 2>&1
 php -v | head -1
 
 echo "==> Installing Nginx..."
