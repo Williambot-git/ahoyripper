@@ -57,6 +57,11 @@ header('X-Request-ID: ' . $page_request_id);
   <link rel="apple-touch-icon" href="/favicon-180.png">
   <meta name="referrer" content="no-referrer">
 
+  <!-- OpenSearch — lets browsers add ahoyripper.com as a searchable engine
+       (e.g. Firefox's URL bar shows "Search AhoyRipper" after the file is served).
+       The XML file is referenced by this link tag for auto-discovery. -->
+  <link rel="search" type="application/opensearchdescription+xml" title="AhoyRipper" href="/opensearch.xml">
+
   <!-- Canonical URL -->
   <link rel="canonical" href="https://ahoyripper.com">
 

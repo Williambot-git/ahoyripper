@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <!--
+    AhoyRipper OpenSearch description.
+    Browsers (Chrome, Firefox, Safari, Edge) use this to let users add ahoyripper.com
+    as a search engine — e.g. Firefox shows "Search AhoyRipper" in the URL bar.
+    The {searchTerms} placeholder is replaced with the user's query.
+    HTTPS is guaranteed via HSTS preload, so no mixed-content risk.
+  -->
+  <ShortName>AhoyRipper</ShortName>
+  <Description>Download video and audio from YouTube, TikTok, Twitter, SoundCloud, Instagram and 1872+ sites.</Description>
+  <Url type="text/html" method="get" template="https://ahoyripper.com/?url={searchTerms}"/>
+  <Url type="application/xhtml+xml" method="get" template="https://ahoyripper.com/?url={searchTerms}"/>
+  <Image width="16" height="16" type="image/png">https://ahoyripper.com/favicon-180.png</Image>
+  <Image width="64" height="64" type="image/png">https://ahoyripper.com/favicon-512.png</Image>
+  <Language>en-us</Language>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <!--
+    AdultContent: probe is set to "maybe" since AhoyRipper supports adult platforms.
+    This prevents search engines from filtering AhoyRipper results as explicit content
+    when the query itself is not adult in nature, while still marking the engine as
+    capable of returning adult content (per the OpenSearch 1.1 spec §4.4.3).
+  -->
+  <AdultContent>maybe</AdultContent>
+</OpenSearchDescription>
