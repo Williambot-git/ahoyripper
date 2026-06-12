@@ -300,6 +300,11 @@ if (in_array($action, $internal_actions, true)) {
     header('X-Request-ID: ' . $request_id);
     // Return PHP version as a minimal version signal for load-balancer health checks.
     // load-balancer probes can confirm expected version without triggering a full yt-dlp probe.
+    // Connection: close tells the client to close the TCP connection immediately after
+    // receiving the response — appropriate for high-frequency lightweight pings (every 10s).
+    // This frees server resources faster than waiting for the connection to idle-timeout.
+    // Mirrors the same header in the health action for consistent connection management.
+    header('Connection: close');
     echo json_encode([
         'status' => 'ok',
         'server_time' => date('c'),
