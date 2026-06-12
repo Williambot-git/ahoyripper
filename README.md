@@ -631,6 +631,46 @@ The default key is only suitable for local development — never deploy with it 
 
 ---
 
+## Troubleshooting
+
+### Update yt-dlp (fixes most failures)
+yt-dlp releases are frequent — an outdated version often causes `YTDLP_ERROR` or `UNSUPPORTED_SITE` on platforms that have since changed their APIs.
+
+```bash
+# Self-hosted: update via pip (or use yt-dlp -U if installed via pip)
+pip install -U yt-dlp
+
+# Docker: rebuild the image to pull the latest yt-dlp
+docker compose down && docker compose build --no-cache && docker compose up -d
+```
+
+After updating, retry the same URL that previously failed.
+
+### Common error codes
+
+| Error code | Meaning | Fix |
+|------------|---------|-----|
+| `YTDLP_ERROR` | yt-dlp could not parse the URL | Try again — often transient. If persistent, update yt-dlp. |
+| `GEOBLOCKED` | Video is region-restricted | Use AhoyVPN to route through an unblocked region. |
+| `UNSUPPORTED_SITE` | Site not recognized by yt-dlp | Update yt-dlp (`pip install -U yt-dlp`). If still failing, the site may not be supported. |
+| `AGE_RESTRICTED` | YouTube requires age verification | Sign in to YouTube in your browser first, or use AhoyVPN. |
+| `PRIVATE_VIDEO` | Video is private or unlisted | Try a public video instead. |
+| `LOGIN_REQUIRED` | Platform requires authentication | Some content (e.g. unlisted videos, private playlists) is not downloadable. |
+| `SOURCE_TIMEOUT` | Source site took too long | Try a smaller format (audio-only is fastest) or try when the site is less busy. |
+| `SOURCE_RATE_LIMITED` | Source site is rate-limiting requests | Wait a few minutes and retry. |
+| `FORMAT_UNAVAILABLE` | Selected format doesn't exist for this video | Choose another format from the list. |
+| `DOWNLOAD_TIMEOUT` | Download exceeded 5-minute server limit | Try a smaller format or audio-only. |
+| `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access. |
+| `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips. |
+
+### Still not working?
+1. Update yt-dlp: `pip install -U yt-dlp`
+2. Try a different format (audio-only often works when video fails)
+3. Try a different video from the same platform (rules out site-wide blocks)
+4. Check [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — the platform may have added/changed its API
+
+---
+
 ## Legal
 
 For personal use only. Respect copyright. This tool is provided as-is. DMCA requests: dmca@ahoyvpn.com
