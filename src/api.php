@@ -842,6 +842,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             }
         }
 
+        $is_combined = ($vcodec !== 'none' && $acodec !== 'none');
+        $is_video_only = ($vcodec !== 'none' && $acodec === 'none');
+        $is_audio_only = ($vcodec === 'none' && $acodec !== 'none');
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
@@ -856,6 +859,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'vcodec' => $vcodec,
             'acodec' => $acodec,
             'format_type' => ($vcodec !== 'none' && $acodec !== 'none') ? 'combined' : ($vcodec !== 'none' ? 'video' : 'audio'),
+            'type_group' => $is_combined ? 0 : ($is_video_only ? 1 : 2),
             'language' => $language ?: null,
         ];
     }
@@ -864,25 +868,25 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality' — validated by the
     // caller before being passed in, so no additional validation is needed here.
     usort($formats, function($a, $b) use ($sort) {
-        // Combined first
-        if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
-        if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
-        // Then by selected sort key
+        // type_group: 0=combined, 1=video-only, 2=audio-only — used as primary
+        // sort key for 'quality' sort so video formats always appear before audio
+        // regardless of their quality number (e.g. 720p video-only = 720 sorts
+        // above 320kbps audio-only = 320, which would be wrong if sorted by quality alone).
+        $type_cmp = $a['type_group'] <=> $b['type_group'];
+        if ($type_cmp !== 0) {
+            // Different type groups — sort by group order (combined → video → audio).
+            // For 'quality' sort this is the primary signal; for other sorts it ensures
+            // the type-group separation is preserved even when sort keys are equal.
+            return $type_cmp;
+        }
+        // Same type group — sort by the caller's selected key.
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
-            // Sort by total bitrate (tbr) descending — highest bitrate first.
-            // Type group (combined/video/audio) is primary; tbr is secondary within
-            // each group, so audio formats with high bitrate sort above lower-bitrate
-            // audio, not above video formats in a different group.
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
-            // quality: numeric tier — pixel height for video (1080, 720, 480...),
-            // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
-            // Audio formats are assigned a quality tier when parsed, so they
-            // participate in the quality sort correctly (320 > 256 > 192...).
             $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);

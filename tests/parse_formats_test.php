@@ -236,6 +236,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         }
         $filesize_mb = round($fs / 1048576, 1);
 
+        $is_combined = ($vcodec !== 'none' && $acodec !== 'none');
+        $is_video_only = ($vcodec !== 'none' && $acodec === 'none');
+        $is_audio_only = ($vcodec === 'none' && $acodec !== 'none');
         $formats[] = [
             'id' => $format_id,
             'label' => $label,
@@ -250,44 +253,34 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'vcodec' => $vcodec,
             'acodec' => $acodec,
             'format_type' => ($vcodec !== 'none' && $acodec !== 'none') ? 'combined' : ($vcodec !== 'none' ? 'video' : 'audio'),
+            'type_group' => $is_combined ? 0 : ($is_video_only ? 1 : 2),
             'language' => $language ?: null,
         ];
     }
 
-    // Sort: combined first, then by selected sort key
+    // Sort: combined formats first, then by selected sort key
     usort($formats, function($a, $b) use ($sort) {
-        if ($a['vcodec'] !== 'none' && $a['acodec'] !== 'none' && ($b['vcodec'] === 'none' || $b['acodec'] === 'none')) return -1;
-        if (($a['vcodec'] === 'none' || $a['acodec'] === 'none') && $b['vcodec'] !== 'none' && $b['acodec'] !== 'none') return 1;
+        $type_cmp = $a['type_group'] <=> $b['type_group'];
+        if ($type_cmp !== 0) {
+            return $type_cmp;
+        }
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
         } elseif ($sort === 'tbr') {
-            // Sort by total bitrate (tbr) descending — highest bitrate first.
-            // Type group (combined/video/audio) is primary; tbr is secondary within
-            // each group, so audio formats with high bitrate sort above lower-bitrate
-            // audio, not above video formats in a different group.
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
-            // quality: numeric tier — pixel height for video (1080, 720, 480...),
-            // audio bitrate tier for audio (320, 256, 192, 128, 96, 64, 48).
-            // Audio formats have lower quality values than all video tiers (max
-            // audio tier = 320), so they naturally sort after video in this order.
-            // Tie-break on fps same as other sort modes for consistency.
             $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
-        // Secondary: within same type group, sort by height descending for consistency.
-        // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
-        // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
         if ($cmp === 0) {
             $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
         }
-        // Tertiary: within same type + height + fps, highest tbr wins.
         if ($cmp === 0) {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         }
