@@ -360,7 +360,12 @@ test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=\\[\\]+\\/-~()*%@!\'"]+$/', $format_id);
+    // Must match api.php download action's format_id validation regex exactly:
+    // '/^[a-zA-Z0-9_.,<>=!\[\]+\\/-~()*%@!'\'']+$/'
+    // Allows alphanum + yt-dlp selector chars (<>=![]+-/~()%@!')
+    // The test regex previously had a trailing " which caused it to accept any
+    // string ending with a double-quote — fixed to match the API regex exactly.
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\[\]+\\/-~()*%@!\']+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -377,6 +382,8 @@ test('accepts fallback with slash (yt-dlp fallback selector)',
     validateFormatId('137+bestaudio/best') > 0);
 test('accepts with exclamation (negation)',
     validateFormatId('bestvideo[height!=720]') > 0);
+test('accepts exclamation in conditional (stream negation)',
+    validateFormatId('best!video') > 0);
 test('accepts with square brackets and equals',
     validateFormatId('bestaudio[ext=m4a]') > 0);
 test('rejects shell metacharacter `$` (command substitution)',
@@ -400,6 +407,8 @@ test('rejects whitespace (space, tab, newline)',
     validateFormatId("22\r\nls") === 0);
 test('rejects empty string',
     validateFormatId('') === 0);
+test('rejects trailing double-quote (regex copy-paste bug regression)',
+    validateFormatId('22"') === 0);
 test('rejects parentheses `()` (command substitution syntax)',
     validateFormatId('$(whoami)') === 0);
 test('accepts dots in codec version strings',
