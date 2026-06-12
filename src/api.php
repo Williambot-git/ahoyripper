@@ -2322,6 +2322,42 @@ switch ($action) {
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
+    case 'csp-report': {
+        // Receive and log CSP violation reports from browsers.
+        // nginx routes POST /csp-report here (via fastcgi_pass to this script).
+        // The browser POSTs a JSON report body — no authentication needed since
+        // the endpoint is only accessible via cross-origin CSP violation triggers
+        // (which require the user to visit the AhoyRipper page first).
+        // The Referer check above already ensures the request originated from
+        // the AhoyRipper origin, providing origin confirmation.
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed'], JSON_INVALID_UTF8_SUBSTITUTE);
+            break;
+        }
+        $raw_body = file_get_contents('php://input');
+        $report = json_decode($raw_body, true);
+        if (!$report || !is_array($report)) {
+            // Return 204 anyway — browsers don't retry CSP reports and a
+            // malformed report should not cause client-side error display.
+            header('HTTP/1.1 204 No Content');
+            break;
+        }
+        // Strip any null bytes or control characters from report fields
+        // to prevent log injection via CSP violation reports.
+        $sanitized = preg_replace('/[\x00-\x1F\x7F]/', '', json_encode($report));
+        $log_line = json_encode([
+            'ts' => date('c'),
+            'request_id' => $request_id,
+            'csp_report' => json_decode($sanitized, true),
+        ]);
+        @file_put_contents('/var/log/ahoyripper/csp-reports.log', $log_line . "\n", FILE_APPEND);
+        // 204 No Content — the standard response for successful CSP reports.
+        // Browsers don't parse the response body and don't retry on 204.
+        header('HTTP/1.1 204 No Content');
+        break;
+    }
+
     default: {
         // Return 404 Not Found — the action/endpoint is not recognized.
         // 400 Bad Request would imply a malformed request syntax, which is
