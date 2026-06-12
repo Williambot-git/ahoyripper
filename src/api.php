@@ -1144,7 +1144,9 @@ switch ($action) {
             // Both info and download actions share the same daily-quota file so
             // that a user hitting 5 info calls has no download quota left.
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
-            $daily_limit = 5;
+            // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
+            // Defaults to 5 when the env var is absent or zero/negative.
+            $daily_limit = max(1, (int)getenv('QUOTA_DAILY') ?: 5);
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
