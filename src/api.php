@@ -1731,9 +1731,10 @@ switch ($action) {
             // Strip control characters including newlines and carriage returns
             // before sanitizing so that a filename like "evil\r\nContent-Type:..."
             // cannot inject headers through the Content-Disposition header below.
-            $download_filename = preg_replace('/[\x00-\x1F\x7F]/', '', $download_filename);
-            $download_filename = preg_replace('/[^\\w\\s._-]/', '', $download_filename);
-            $download_filename = preg_replace('/\\s+/', '_', $download_filename);
+            // Unicode letters, numbers, spaces, dots, underscores, hyphens are preserved.
+            $download_filename = preg_replace('/[\x00-\x1F\x7F]/u', '', $download_filename);
+            $download_filename = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $download_filename);
+            $download_filename = preg_replace('/\s+/u', '_', $download_filename);
             // Validate trimmed result — a filename that trims to empty is invalid.
             // Check this AFTER sanitization so inputs like "   " fall through to fallback.
             $trimmed = trim($download_filename);
