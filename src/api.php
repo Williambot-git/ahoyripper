@@ -1019,6 +1019,11 @@ define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 // Used by all yt-dlp invocations (info, download) so agents stay consistent.
 define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36');
 
+// Shared constant: maximum URL length in characters.
+// Both info and download actions enforce this same limit so clients get
+// consistent error codes (INVALID_URL) regardless of which action they call.
+define('MAX_URL_LEN', 2048);
+
 // ─── ROUTING ────────────────────────────────────────────────
 
 // $unlimited is set in the download case below after reading the API key.
@@ -1070,27 +1075,23 @@ switch ($action) {
         // Check URL length first — reject pathologically long strings before
         // doing expensive URL format validation. This fails fast on abuse and
         // avoids burning a daily quota increment on obviously invalid requests.
-        // The 2048-char limit covers all normal video URLs with tracking params.
-        // Uses MAX_URL_LEN (same constant as the yt-dlp gate below) so the
+        // The MAX_URL_LEN constant covers all normal video URLs with tracking params.
+        // Uses MAX_URL_LEN so the
         // error_code is INVALID_URL, matching the frontend error hint map.
-        $MAX_URL_LEN = 2048;
-
         $url = $validation('info');
         if ($url === false) {
             exit;
         }
 
         // Read and validate sort parameter — must be declared before parseFormats
-        // is called (line ~1015). Controls format ordering: height (default),
-        // filesize (largest first), filesize_asc (smallest first), tbr, or quality.
+        // is called. Controls format ordering: height (default), filesize (largest
+        // first), filesize_asc (smallest first), tbr, or quality.
         // Invalid values fall back to 'height'.
         $raw_sort = $_GET['sort'] ?? 'height';
         $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality'];
         $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
 
-        // Enforce max URL length after validation to ensure consistent error codes.
-        // The 2048-char limit covers all reasonable video URLs with tracking params.
-        if (strlen($url) > $MAX_URL_LEN) {
+        if (strlen($url) > MAX_URL_LEN) {
             http_response_code(400);
             logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
             echo json_encode([
@@ -1495,12 +1496,9 @@ switch ($action) {
         if ($url === false) {
             exit;
         }
-        // Max URL length — uses same constant as info action for consistency.
-        $MAX_URL_LEN = 2048;
-        // Enforce a max URL length to prevent pathologically long URLs from reaching
-        // yt-dlp. The limit of 2048 chars covers all reasonable video URLs with
-        // tracking parameters while stopping abuse.
-        if (strlen($url) > $MAX_URL_LEN) {
+        // Enforce the shared URL length limit so clients get consistent error codes
+        // regardless of which action they call. Uses the shared MAX_URL_LEN constant.
+        if (strlen($url) > MAX_URL_LEN) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
             echo json_encode([

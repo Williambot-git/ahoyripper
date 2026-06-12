@@ -108,6 +108,7 @@ docker compose up -d
 |----------|---------|-------------|
 | `AHOY_USER_AGENT` | *(yt-dlp default)* | Custom User-Agent string for yt-dlp requests. Defaults to a modern Chrome UA. Change this if the source site blocks the default. |
 | `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key granting unlimited daily quota. **Change this in production** — generate a secure value with `openssl rand -hex 32`. |
+| `QUOTA_DAILY` | `5` | Daily rip limit for unauthenticated users. Set to a positive integer to increase or decrease the free quota. `-1` or `0` effectively disables the free tier (users must provide a valid `AHOY_UNLIMITED_KEY`). |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
 
