@@ -2146,6 +2146,10 @@ switch ($action) {
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Cache-Control: no-cache');
         header('Connection: close');
+        // Suppress X-Powered-By at the PHP layer for defense-in-depth parity
+        // with nginx's fastcgi_hide_header. The check action bypasses the top-of-
+        // script header block by sending its own response, so this must be set here.
+        header_remove('X-Powered-By');
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. api.php sets these globally but
         // the 'check' action sends its own response via echo+break and therefore
