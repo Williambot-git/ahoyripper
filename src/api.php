@@ -1134,7 +1134,7 @@ switch ($action) {
         }
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
-        // ─── Daily download quota (5 free per day, skip if unlimited key) ───
+        // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         // Key must be read BEFORE this point so $unlimited is available for the
         // quota gate. The key-reading block is placed immediately below so it
         // runs before any stateful operations (rate limit, quota).
@@ -1191,7 +1191,7 @@ switch ($action) {
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
                 header('X-DailyLimit-Window: daily');
                 echo json_encode([
-                    'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
+                    'error' => "Daily limit reached. You get {$daily_limit} free rips per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
@@ -1632,12 +1632,16 @@ switch ($action) {
         header('X-DL-RateLimit-Reset: ' . $dl_reset);
         header('X-DL-RateLimit-Window: ' . $dl_rate_window);
 
-        // ─── Daily download quota (5 free per day, skip if unlimited key) ───
+        // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         if (!$unlimited) {
             // Use the same $ip variable declared at the top of the script for the
             // rate-limit gate. Both info and download share the daily-quota file.
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
-            $daily_limit = 5;
+            // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
+            // Defaults to 5 when the env var is absent or zero/negative.
+            // Mirrors the same constant used in the info action so both actions
+            // enforce the same daily limit regardless of which endpoint is called.
+            $daily_limit = max(1, (int)getenv('QUOTA_DAILY') ?: 5);
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
@@ -1681,7 +1685,7 @@ switch ($action) {
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
                 header('X-DailyLimit-Window: daily');
                 echo json_encode([
-                    'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, get AhoyVPN.',
+                    'error' => "Daily limit reached. You get {$daily_limit} free rips per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
