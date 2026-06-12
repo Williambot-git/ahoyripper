@@ -1595,6 +1595,10 @@ switch ($action) {
                 flock($dl_fp, LOCK_UN);
                 fclose($dl_fp);
                 http_response_code(429);
+                header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                header('X-DL-RateLimit-Remaining: 0');
+                header('X-DL-RateLimit-Reset: ' . $dl_reset_ts);
+                header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                 header('Retry-After: ' . max(1, $dl_reset_ts - time()));
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
@@ -1607,7 +1611,10 @@ switch ($action) {
             }
             $dl_data['c']++;
         } else {
-            $dl_data = ['t' => time(), 'c' => 1];
+            // Fresh window — current request will be counted after the write.
+            // Must use c=0 (not c=1) so the write below produces c=1 after increment.
+            // Using c=1 here would make the first request count as 2 (c=1 then c++).
+            $dl_data = ['t' => time(), 'c' => 0];
         }
 
         // Set remaining AFTER increment so it reflects the cost of this request.
