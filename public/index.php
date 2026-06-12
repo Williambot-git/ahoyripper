@@ -335,6 +335,8 @@ header('X-Request-ID: ' . $page_request_id);
     'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
     'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
+    '403': 'The server understood the request but refused to fulfill it. Try again or use AhoyVPN to change your exit IP.',
+    '404': 'The requested resource was not found. The content may have been removed or the URL may be incorrect.',
     '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
     '502': 'The server encountered an error. Please try again in a moment.',
     '503': 'Service temporarily unavailable. Please try again shortly.',
