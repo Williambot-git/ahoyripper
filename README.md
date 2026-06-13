@@ -99,6 +99,7 @@ cd /var/www/ahoyripper
 echo "AHOY_UNLIMITED_KEY=your-generated-key" > .env
 
 # Start the app (app runs at http://localhost:8080)
+# AHOY_UNLIMITED_KEY must be set — generate one with: openssl rand -hex 32
 docker compose up -d
 ```
 

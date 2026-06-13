@@ -5,7 +5,12 @@ services:
       - "8080:8080"
     environment:
       - TZ=UTC
-      - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-RIPPER2026DEV}
+      # AHOY_UNLIMITED_KEY must be set in production — a hardcoded fallback is
+      # intentionally NOT provided here. Using the default key in production gives
+      # everyone unlimited quota. Generate a secure key with:
+      #   openssl rand -hex 32
+      # Then pass it via: echo "AHOY_UNLIMITED_KEY=$(openssl rand -hex 32)" > .env
+      - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-}
       - AHOY_USER_AGENT=${AHOY_USER_AGENT:-}
     restart: unless-stopped
     healthcheck:
