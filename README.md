@@ -316,6 +316,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | Code | `error_code` | Meaning |
 |------|--------------|---------|
 | `422` | `MISSING_URL` | No URL was provided on the download request. |
+| `422` | `MISSING_FORMAT` | No format was selected on the download request. |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `422` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `422` | `LOGIN_REQUIRED` | Video requires login or subscription |
