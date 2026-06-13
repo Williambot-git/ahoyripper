@@ -494,16 +494,6 @@ test('strips NULL byte from filename',
     strpos(sanitizeFilenameForTest("evil\x00file.txt"), "\x00") === false);
 test('strips DEL character from filename',
     strpos(sanitizeFilenameForTest("evil\x7ffile.txt"), "\x7f") === false);
-test('strips LF (\\n) from filename (control char stripped — no injection risk)',
-    strpos(sanitizeFilenameForTest("evil\nContent-Type: text/html"), "\n") === false);
-test('strips CR (\\r) from filename',
-    strpos(sanitizeFilenameForTest("evil\rContent-Type: text/html"), "\r") === false);
-test('strips CRLF sequence from filename',
-    strpos(sanitizeFilenameForTest("evil\r\nContent-Disposition: attachment"), "\r") === false);
-test('strips NULL byte from filename',
-    strpos(sanitizeFilenameForTest("evil\x00file.txt"), "\x00") === false);
-test('strips DEL character from filename',
-    strpos(sanitizeFilenameForTest("evil\x7ffile.txt"), "\x7f") === false);
 test('LF in filename is stripped (not injected — control char strip prevents CRLF injection)',
     sanitizeFilenameForTest("evil\nfile") === 'evilfile');
 test('CRLF in filename is stripped (control char strip prevents injection)',
