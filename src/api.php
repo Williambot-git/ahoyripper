@@ -1082,7 +1082,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'request_id' => $request_id,
         'received_accept' => $accept,
         'hint' => 'Send Accept: */* or Accept: application/json',
-    ]);
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
