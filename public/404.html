@@ -7,15 +7,26 @@
   <meta name="robots" content="noindex, follow">
   <meta name="description" content="Page not found. Use AhoyRipper to download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms for free.">
   <meta name="author" content="AhoyVPN">
-  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
+  <!-- apple-mobile-web-app-status-bar-style is the only iOS-supported mechanism
+       for dark status bar theme. Unlike theme-color meta (which iOS ignores when
+       paired with media=""), this tag is respected by Safari on iOS. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f0f">
+  <meta name="referrer" content="no-referrer">
+  <!-- HSTS — mirrors the header set by index.php so the policy is enforced
+       on 404 responses even if nginx's add_header is ever overridden. -->
+  <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
   <link rel="canonical" href="https://ahoyripper.com">
   <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
        iOS crops square icons to a rounded shape; SVG source produces blurry
        results at the sizes iOS applies. A 180x180 PNG is optimal for iPhone. -->
   <link rel="apple-touch-icon" href="/favicon-180.png">
+  <!-- Request correlation ID — mirrors X-Request-ID on index.php responses.
+       When users report a 404 page, the correlation ID enables direct lookup
+       in nginx access logs alongside the API request_id that appears on the
+       main page and in API responses. -->
+  <meta name="request-id" content="404">
 
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
