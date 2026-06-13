@@ -1237,12 +1237,19 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // --progress-template '' suppresses ALL progress output to stderr — without this,
+        // --progress-template "" suppresses ALL progress output to stderr — without this,
         // yt-dlp emits progress bars to stderr even during --dump-json (the progress
         // template is output even when --skip-download is set). This prepends garbage
         // to the JSON stdout, causing json_decode() to fail and returning a confusing
         // PARSE_ERROR instead of a properly classified yt-dlp error message.
         // This applies to ALL yt-dlp versions; no environment variable is needed.
+        // NOTE: when using proc_open with bypass_shell=true (array argv form), an
+        // empty PHP string '' is passed as TWO LITERAL SINGLE-QUOTE CHARS to yt-dlp.
+        // yt-dlp interprets '' (literal quotes) as a template containing quote chars
+        // rather than as an empty template. The correct yt-dlp syntax for an empty
+        // progress template is "" (two adjacent double-quotes, which concatenate to
+        // empty). In the array argv form, use json_encode('') which produces the
+        // two-character string "". This is equivalent to the "" syntax yt-dlp expects.
         // --concurrent-fragments N was removed in yt-dlp 2024.10 (deprecated since 2023.11).
         // yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
         // produces a stderr warning that can pollute the JSON output in the info action
@@ -1252,7 +1259,7 @@ switch ($action) {
             '--dump-json',
             '--no-playlist',
             '--skip-download',
-            '--progress-template', '',
+            '--progress-template', json_encode(''),
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
@@ -1775,11 +1782,14 @@ switch ($action) {
         // ahoyripper.com referer hides the actual video URL from third-party servers.
         $referer = 'https://ahoyripper.com/';
 
-        // --progress-template "": suppress ALL progress output to stderr — without this,
+        // --progress-template "" suppresses ALL progress output to stderr — without this,
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
-        //   --progress-template '' handles this for ALL yt-dlp versions.
+        //   yt-dlp interprets '' (literal single-quotes) as template content, not empty.
+        //   Use json_encode('') which produces "" (two adjacent double-quotes) in the
+        //   argv string — same as the correct "" syntax yt-dlp expects for an empty
+        //   progress template.
         // --concurrent-fragments was removed in yt-dlp 2024.10 — yt-dlp now handles
         //   HLS/DASH fragment concurrency internally.
         $ytdlp_cmd = [
@@ -1787,7 +1797,7 @@ switch ($action) {
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
-            '--progress-template', '',
+            '--progress-template', json_encode(''),
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
