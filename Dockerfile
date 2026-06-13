@@ -75,4 +75,11 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -sf http://localhost:8080/src/api.php?action=check > /dev/null || exit 1
 
-CMD service php*-fpm start && nginx -g 'daemon off;'"
+# Use php-fpm in foreground mode — correct for single-process Docker containers.
+# DO NOT use "service php*-fpm start" here: the glob pattern is resolved by
+# the shell at runtime, but the service command on Debian Bookworm may not
+# handle the wildcard correctly (service name is php8.2-fpm, not php-fpm),
+# causing PHP-FPM to fail silently and requests to return 502. Running
+# "php-fpm" directly (without "service") forks into background daemon mode
+# automatically and is the canonical approach for Docker CMD/ENTRYPOINT scripts.
+CMD php-fpm && nginx -g 'daemon off;'
