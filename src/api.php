@@ -2269,11 +2269,14 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                // --progress-template "": suppress ALL progress output to stderr so it doesn't
+                // --progress-template '': suppress ALL progress output to stderr so it doesn't
                 //   corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
                 //   yt-dlp warnings are now suppressed by default in modern versions via
                 //   YTDLP_COMPRESS=no env var; --no-warnings flag was removed in yt-dlp 2024.x.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                //   NOTE: pass an empty string ('') as the template value — do NOT pass '""'
+                //   (two literal quote chars), which would be interpreted as a template
+                //   containing quote characters and would NOT suppress progress output.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template \x27\x27 -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
