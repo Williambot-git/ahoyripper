@@ -1237,14 +1237,12 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // yt-dlp warnings are suppressed by default in modern yt-dlp versions via
-        // the YTDLP_COMPRESS=no environment variable. In older versions,
         // --progress-template '' suppresses ALL progress output to stderr — without this,
         // yt-dlp emits progress bars to stderr even during --dump-json (the progress
         // template is output even when --skip-download is set). This prepends garbage
         // to the JSON stdout, causing json_decode() to fail and returning a confusing
         // PARSE_ERROR instead of a properly classified yt-dlp error message.
-        // --progress-template '' is the correct mechanism for stderr suppression.
+        // This applies to ALL yt-dlp versions; no environment variable is needed.
         // --concurrent-fragments N was removed in yt-dlp 2024.10 (deprecated since 2023.11).
         // yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
         // produces a stderr warning that can pollute the JSON output in the info action
@@ -1781,8 +1779,7 @@ switch ($action) {
         //   yt-dlp emits progress bars to stderr even during file downloads, which
         //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
         //   actual error messages correctly (progress bar text prepends the real error).
-        //   yt-dlp warnings are suppressed by default in modern versions via
-        //   YTDLP_COMPRESS=no; --progress-template '' handles older versions.
+        //   --progress-template '' handles this for ALL yt-dlp versions.
         // --concurrent-fragments was removed in yt-dlp 2024.10 — yt-dlp now handles
         //   HLS/DASH fragment concurrency internally.
         $ytdlp_cmd = [
@@ -2273,8 +2270,8 @@ switch ($action) {
                 $probe_exit = -1;
                 // --progress-template '': suppress ALL progress output to stderr so it doesn't
                 //   corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
-                //   yt-dlp warnings are now suppressed by default in modern versions via
-                //   YTDLP_COMPRESS=no env var; --no-warnings flag was removed in yt-dlp 2024.x.
+                //   --no-warnings was removed in yt-dlp 2024.x; --progress-template ''
+                //   is the version-agnostic mechanism that suppresses all progress output.
                 //   NOTE: pass an empty string ('') as the template value — do NOT pass '""'
                 //   (two literal quote chars), which would be interpreted as a template
                 //   containing quote characters and would NOT suppress progress output.
