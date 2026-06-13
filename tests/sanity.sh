@@ -3,6 +3,11 @@
 # Run: bash tests/sanity.sh
 
 set -e
+
+# Derive PROJECT_ROOT the same way run.sh does — subshells don't inherit cd.
+# This lets sanity.sh be run directly (without run.sh) or via run.sh.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 echo ""
 echo "==> Checking yt-dlp binary is installed and callable..."
 if ! command -v yt-dlp > /dev/null 2>&1; then
