@@ -1965,6 +1965,7 @@ switch ($action) {
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
+                    'source_url' => $url,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -1980,6 +1981,7 @@ switch ($action) {
                     'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
+                    'source_url' => $url,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
