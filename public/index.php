@@ -128,7 +128,25 @@ header('X-Request-ID: ' . $page_request_id);
     "url": "https://ahoyripper.com",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
-    "browserRequirements": "Requires JavaScript and a modern web browser."
+    "browserRequirements": "Requires JavaScript and a modern web browser.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/OnlineOnly",
+      "seller": {
+        "@type": "Organization",
+        "name": "AhoyVPN"
+      }
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://ahoyripper.com/?url={searchTerms}"
+      },
+      "query-input": "required name=searchTerms"
+    }
   }
   </script>
 
