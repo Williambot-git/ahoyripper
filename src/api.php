@@ -625,8 +625,9 @@ function classifyYtdlpError($raw_err) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
 
-    // Internal PHP-side process timeout ("Process timed out after 45s") — distinct
-    // from a connection-level "timed out" (which implies network-level failure).
+    // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+    // Distinct from connection-level "timed out" which implies a network failure.
+    // Uses INFO_TIMEOUT (configurable via YTDLP_TIMEOUT env var, default 45s).
     // This means the server reached the source but the source was too slow to respond
     // within the allowed window. Return 504 so the client distinguishes it from
     // CONNECTION_FAILED (502) which implies a network or DNS issue on our end.
@@ -1043,6 +1044,15 @@ define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 
 // consistent error codes (INVALID_URL) regardless of which action they call.
 define('MAX_URL_LEN', 2048);
 
+// Configurable timeout for the info action (metadata fetch).
+// Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
+// Defaults to 45 seconds when the env var is absent or zero/negative.
+// This is the PHP-side timeout — distinct from yt-dlp's own connection timeout.
+// The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT and terminates
+// the process, producing "Process timed out after Ns" in the error output.
+//yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
+define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
+
 // ─── ROUTING ────────────────────────────────────────────────
 
 // $unlimited is set in the download case below after reading the API key.
@@ -1294,14 +1304,14 @@ switch ($action) {
         } else {
             fclose($pipes[0]);
             unset($pipes[0]);
-            stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > 45 is authoritative
+            stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > INFO_TIMEOUT is authoritative
             stream_set_timeout($pipes[2], 0);  // Timeout fires only when child process stalls; feof() stays false until proc closes pipe
             $out = $err = '';
             $start = time();
             while (!feof($pipes[1]) || !feof($pipes[2])) {
-                if ((time() - $start) > 45) {
+                if ((time() - $start) > INFO_TIMEOUT) {
                     proc_terminate($proc, 9);
-                    $err .= "\nProcess timed out after 45s";
+                    $err .= "\nProcess timed out after " . INFO_TIMEOUT . "s";
                     $exit = -1;
                     foreach ($pipes as $p) { if ($p) fclose($p); }
                     $pipes = null;

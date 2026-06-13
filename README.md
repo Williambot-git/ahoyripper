@@ -608,6 +608,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 |----------|---------|-------------|
 | `AHOY_USER_AGENT` | `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36` | Custom User-Agent string for yt-dlp requests. yt-dlp defaults to `python-requests/X.Y.Z` which is trivially blocked by anti-bot measures — this overrides it with a modern Chrome UA. Override via `AHOY_USER_AGENT` env var in docker-compose or cloud dashboard to mimic a different browser. |
 | `QUOTA_DAILY` | `5` | Daily rip limit per IP for unauthenticated requests. Each call to `info` or `download` counts as one rip. Set to a higher number (e.g. `100`) for less restrictive quotas, or use an unlimited API key to bypass the daily cap entirely. |
+| `YTDLP_TIMEOUT` | `45` | Timeout in seconds for the info action (metadata fetch). If yt-dlp does not return within this window, the process is terminated and a `SOURCE_TIMEOUT` error is returned. Override via `YTDLP_TIMEOUT` env var (e.g. `YTDLP_TIMEOUT=60`). The download action has a separate 5-minute hard timeout. |
 | `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key that grants unlimited daily quota. **Change in production.** Set to a long random string (e.g. `openssl rand -hex 32`) and pass to the container via `-e` or your orchestration layer. |
 
 Example:
