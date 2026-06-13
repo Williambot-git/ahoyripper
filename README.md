@@ -250,6 +250,8 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded | Wait a minute and try again, or upgrade to an unlimited API key |
+| `INVALID_KEY` | The API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
+| `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
@@ -272,8 +274,9 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
+| `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost | Try again — your daily quota was not charged |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
 ### Download a format
