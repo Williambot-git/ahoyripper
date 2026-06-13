@@ -162,6 +162,13 @@ body {
 .rip-btn:active { transform: translateY(0); }
 .rip-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
+.rip-noscript-msg {
+  color: var(--color-error, #ef4444);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
 .rip-hint {
   font-size: 0.8rem;
   color: var(--color-text-ter);

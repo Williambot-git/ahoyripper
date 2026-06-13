@@ -182,6 +182,7 @@ header('X-Request-ID: ' . $page_request_id);
           spellcheck="false"
         >
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
+        <noscript><p class="rip-noscript-msg">JavaScript is required to use AhoyRipper. Please enable JavaScript in your browser settings.</p></noscript>
       </form>
       <p class="rip-hint">
         <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN" aria-label="Free rips remaining today"></span>
