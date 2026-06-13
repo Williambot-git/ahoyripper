@@ -503,6 +503,17 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 
 ## Troubleshooting
 
+### Update yt-dlp first
+yt-dlp releases are frequent — an outdated version often causes `YTDLP_ERROR` or `UNSUPPORTED_SITE` on platforms that have since changed their APIs. Update before trying anything else:
+
+```bash
+# Self-hosted: update via pip
+pip install -U yt-dlp
+
+# Docker: rebuild to pull the latest yt-dlp
+docker compose down && docker compose build --no-cache && docker compose up -d
+```
+
 ### Common error codes
 
 | Error code | Cause | Solution |
@@ -521,6 +532,11 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 | `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Pick a different format from the list |
 | `PARSE_ERROR` | Site returned an unrecognizable response | The site may be temporarily unavailable |
+| `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access |
+| `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
+| `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
+| `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
+| `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
 
 ### Still stuck?
 
@@ -543,7 +559,7 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 | Spotify | Requires `--cookies-from-browser` or `--cookies` for full access — non-authenticated requests have limited metadata access |
 | Netflix + streaming sites | DRM-protected content cannot be ripped |
 
----
+### Verify connectivity with the health probe
 
 Add `&probe=1` to the health endpoint to run a live yt-dlp connectivity check:
 
@@ -555,27 +571,12 @@ This fetches metadata from a known-stable YouTube video to verify end-to-end con
 
 A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — check `yt_dlp_version` and `ffmpeg_version` in the health response to confirm both are installed and callable.
 
-### Interpreting error codes
+### Still not working?
 
-| error_code | Cause | Action |
-|------------|-------|--------|
-| `GEOBLOCKED` | Video is region-locked | Use a VPN to route through an allowed region |
-| `PRIVATE_VIDEO` | Video is private or unlisted | Cannot be downloaded |
-| `LOGIN_REQUIRED` | Video requires platform login | Sign in to the platform first |
-| `UNSUPPORTED_SITE` | Site not in yt-dlp extractor list | Check [supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) |
-| `COPYRIGHT_REMOVED` | Content removed by copyright holder | No workaround |
-| `VIDEO_UNAVAILABLE` | Video deleted or delisted | No workaround |
-| `AGE_RESTRICTED` | Video requires age verification on source | Sign in to the platform |
-| `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait 30–60 seconds and retry |
-| `SSL_ERROR` | TLS/certificate error with source | Retry — usually transient |
-| `CONNECTION_FAILED` | Network error reaching source | Check your server's network and retry |
-| `FILE_TOO_LARGE` | File exceeds server limit | Try audio-only or lower resolution |
-| `FORMAT_UNAVAILABLE` | Selected format not available | Choose another format from the list |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
-| `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
-| `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
-| `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
-| `UNKNOWN_ACTION` | Unrecognized action parameter | Use `info`, `download`, `health`, or `check` |
+1. Update yt-dlp: `pip install -U yt-dlp`
+2. Try a different format (audio-only often works when video fails)
+3. Try a different video from the same platform (rules out site-wide blocks)
+4. Check [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — the platform may have added/changed its API
 
 ---
 
@@ -619,46 +620,6 @@ The default key is only suitable for local development — never deploy with it 
 - PHP 8.x + php-fpm + php-mbstring + php-curl
 - Nginx
 - 4GB+ RAM recommended
-
----
-
-## Troubleshooting
-
-### Update yt-dlp (fixes most failures)
-yt-dlp releases are frequent — an outdated version often causes `YTDLP_ERROR` or `UNSUPPORTED_SITE` on platforms that have since changed their APIs.
-
-```bash
-# Self-hosted: update via pip (or use yt-dlp -U if installed via pip)
-pip install -U yt-dlp
-
-# Docker: rebuild the image to pull the latest yt-dlp
-docker compose down && docker compose build --no-cache && docker compose up -d
-```
-
-After updating, retry the same URL that previously failed.
-
-### Common error codes
-
-| Error code | Meaning | Fix |
-|------------|---------|-----|
-| `YTDLP_ERROR` | yt-dlp could not parse the URL | Try again — often transient. If persistent, update yt-dlp. |
-| `GEOBLOCKED` | Video is region-restricted | Use AhoyVPN to route through an unblocked region. |
-| `UNSUPPORTED_SITE` | Site not recognized by yt-dlp | Update yt-dlp (`pip install -U yt-dlp`). If still failing, the site may not be supported. |
-| `AGE_RESTRICTED` | YouTube requires age verification | Sign in to YouTube in your browser first, or use AhoyVPN. |
-| `PRIVATE_VIDEO` | Video is private or unlisted | Try a public video instead. |
-| `LOGIN_REQUIRED` | Platform requires authentication | Some content (e.g. unlisted videos, private playlists) is not downloadable. |
-| `SOURCE_TIMEOUT` | Source site took too long | Try a smaller format (audio-only is fastest) or try when the site is less busy. |
-| `SOURCE_RATE_LIMITED` | Source site is rate-limiting requests | Wait a few minutes and retry. |
-| `FORMAT_UNAVAILABLE` | Selected format doesn't exist for this video | Choose another format from the list. |
-| `DOWNLOAD_TIMEOUT` | Download exceeded 5-minute server limit | Try a smaller format or audio-only. |
-| `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access. |
-| `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips. |
-
-### Still not working?
-1. Update yt-dlp: `pip install -U yt-dlp`
-2. Try a different format (audio-only often works when video fails)
-3. Try a different video from the same platform (rules out site-wide blocks)
-4. Check [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — the platform may have added/changed its API
 
 ---
 
