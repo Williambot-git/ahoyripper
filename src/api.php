@@ -308,11 +308,12 @@ if (in_array($action, $internal_actions, true)) {
     header('X-Request-ID: ' . $request_id);
     // Return PHP version as a minimal version signal for load-balancer health checks.
     // load-balancer probes can confirm expected version without triggering a full yt-dlp probe.
-    // Connection: close tells the client to close the TCP connection immediately after
-    // receiving the response — appropriate for high-frequency lightweight pings (every 10s).
-    // This frees server resources faster than waiting for the connection to idle-timeout.
-    // Mirrors the same header in the health action for consistent connection management.
-    header('Connection: close');
+    // NOTE: Connection: close is intentionally NOT set here. Sending "Connection: close"
+    // breaks HTTP keep-alive, forcing a new TCP connection for every check request and
+    // negating connection-pooling benefits. For high-frequency pings (every 10s), the
+    // overhead of establishing a new connection each time is measurable. With keep-alive,
+    // the same connection is reused across multiple requests, which is the correct
+    // default for a lightweight JSON API endpoint.
     echo json_encode([
         'status' => 'ok',
         'server_time' => date('c'),
