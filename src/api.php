@@ -511,6 +511,9 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
             // Close any remaining open pipes first to release handles.
             foreach ($pipes as $p) { if ($p) fclose($p); }
             $pipes = null;
+            // Populate output parameters so callers that inspect $probe_err on
+            // timeout receive the timeout message rather than uninitialized data.
+            $probe_err = $stderr;
             return false;
         }
         $read = [];
