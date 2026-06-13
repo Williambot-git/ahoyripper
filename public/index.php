@@ -292,6 +292,21 @@ header('X-Request-ID: ' . $page_request_id);
 </footer>
 
 <script>
+// ─── PWA Service Worker registration ───────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(registration) {
+        registration.addEventListener('updatefound', function() {
+          console.log('[SW] New service worker installing in background.');
+        });
+      })
+      .catch(function(err) {
+        console.warn('[SW] registration failed:', err);
+      });
+  });
+}
+
 // ─── Frontend Logic ─────────────────────────────────────────
 (function() {
   // Expose page_request_id for error reporting and support tickets.
