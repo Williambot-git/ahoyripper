@@ -6,6 +6,13 @@
 
 define('AHOYRIPPER_VERSION', '1.0.0');
 
+// Set UTC for all date/time functions — gmdate() and date('c') are used
+// throughout this script without an explicit timezone argument. PHP issues
+// a warning when no default timezone is configured and a date function is
+// called. Setting UTC here ensures consistent, predictable output regardless
+// of the host system's PHP timezone configuration.
+date_default_timezone_set('UTC');
+
 // CORS headers for API access
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -2384,7 +2391,7 @@ switch ($action) {
         if (!$report || !is_array($report)) {
             // Return 204 anyway — browsers don't retry CSP reports and a
             // malformed report should not cause client-side error display.
-            header('HTTP/1.1 204 No Content');
+            http_response_code(204);
             break;
         }
         // Strip any null bytes or control characters from report fields
@@ -2398,7 +2405,7 @@ switch ($action) {
         @file_put_contents('/var/log/ahoyripper/csp-reports.log', $log_line . "\n", FILE_APPEND);
         // 204 No Content — the standard response for successful CSP reports.
         // Browsers don't parse the response body and don't retry on 204.
-        header('HTTP/1.1 204 No Content');
+        http_response_code(204);
         break;
     }
 
