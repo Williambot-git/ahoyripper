@@ -197,12 +197,14 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "ext": "mp4",
       "filesize_mb": 45.2,
       "height": 720,
+      "quality": 720,
       "fps": 60,
       "tbr": 2500,
       "abr": null,
       "vcodec": "avc1.64001F",
       "acodec": "mp4a.40.2",
       "format_type": "combined",
+      "type_group": 0,
       "language": null
     },
     {
@@ -212,16 +214,19 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "ext": "m4a",
       "filesize_mb": 2.0,
       "height": null,
+      "quality": null,
       "fps": null,
       "tbr": 128,
       "abr": 128,
       "vcodec": "none",
       "acodec": "mp4a.40.2",
       "format_type": "audio",
+      "type_group": 2,
       "language": null
     }
   ],
-  "sort_applied": "height"
+  "sort_applied": "height",
+  "yt_dlp_version": "2026.03.17"
 }
 ```
 
