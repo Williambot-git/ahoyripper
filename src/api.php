@@ -568,12 +568,11 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
 // Sanitize string for JSON output
 function clean($s) {
-    // Return 'Unknown' for null or empty string only.
-    // NOTE: do NOT treat integer 0 as 'Unknown' — height=0 is a valid value
-    // (audio-only formats in yt-dlp metadata sometimes report height=0).
-    // Converting 0 to 'Unknown' corrupts labels like "Video 0p" or "0kbps m4a".
-    // The calling code must handle the null/empty case for string fields itself.
-    if ($s === null || $s === '') return 'Unknown';
+    // Return 'Unknown' for null, empty string, or numeric zero.
+    // Numeric zero from format metadata fields (format_note, ext, language, etc.)
+    // is not a meaningful string value — mapping it to 'Unknown' keeps labels
+    // clean and prevents empty-looking fields in the UI.
+    if ($s === null || $s === '' || $s === 0) return 'Unknown';
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;
