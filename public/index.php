@@ -184,7 +184,7 @@ header('X-Request-ID: ' . $page_request_id);
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
       </form>
       <p class="rip-hint">
-        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN"></span>
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN" aria-label="Free rips remaining today"></span>
         <span id="quotaLimit" class="quota-limit" title="Get unlimited rips with AhoyVPN"></span>
         <span id="quotaLabel"> free rips/day &mdash;</span>
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>

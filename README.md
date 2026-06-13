@@ -511,28 +511,6 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 
 ---
 
-## Troubleshooting
-
-**"Could not fetch that URL"** — The site may not be supported by yt-dlp, or the video is geo-restricted/private/unavailable. Check the [yt-dlp supported sites list](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites). If the site is supported, the video may be age-restricted, region-locked, or removed.
-
-**Rate limited (429)** — Wait before retrying. Check the `Retry-After` header for the number of seconds to wait. Limits reset every 60 seconds (rate limit) or at midnight UTC (daily quota).
-
-**Download times out** — Large 4K/8K rips can exceed the 5-minute server timeout. Try an audio-only format (MP3/AAC) or a lower resolution (480p/720p). The source may also be slow or unresponsive.
-
-**Empty download / corrupt file** — The selected format may not be available in that combination. Try another format from the list, or fall back to `best` which lets yt-dlp pick the most reliable option.
-
-**"No formats found"** — If the info API returns an empty or near-empty format list, yt-dlp could not extract any playable streams from the URL. This usually means: the video is on an unsupported platform, geo-restricted, requires login, or has been removed. Try running `yt-dlp --list-formats <URL>` directly on your server to see what yt-dlp itself reports.
-
-**Quota exhausted (5/5 rips used)** — The free tier allows 5 total API calls per day (midnight UTC reset). Each call to `info` or `download` counts as one rip. Enter an AhoyVPN unlimited key in the optional field to bypass the daily cap.
-
-**Sort change triggers a new API call** — Switching the Quality / Size / Bitrate dropdown re-fetches the format list from the server (costs 1 quota hit). This is intentional — it lets yt-dlp sort formats differently on the server side for accurate results.
-
-**503 Service unavailable** — The server is temporarily overloaded or the rate-limit gate could not open a file. Retry after a few seconds. If the issue persists, it may indicate a server-side resource problem.
-
-**Geo-blocked / region restricted** — The video is not available in your server's geographic location. Using AhoyVPN can route the request through a different region.
-
-### Diagnosing with the health probe
-
 Add `&probe=1` to the health endpoint to run a live yt-dlp connectivity check:
 
 ```
