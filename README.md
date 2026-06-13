@@ -176,7 +176,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 
 The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
-The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. Both fields are omitted from error responses to keep them lean.
+The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. It is omitted from error responses to keep them lean.
 
 **Success response:**
 ```json
@@ -302,6 +302,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
   "error": "This video is geo-restricted in your region.",
   "error_code": "GEOBLOCKED",
   "request_id": "a3f1b2c9d4e5f678",
+  "source_url": "https://www.youtube.com/watch?v=...",
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -312,6 +313,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
   "error": "Download failed: requested format not available.",
   "error_code": "YTDLP_ERROR",
   "request_id": "a3f1b2c9d4e5f678",
+  "source_url": "https://www.youtube.com/watch?v=...",
   "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
