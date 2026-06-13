@@ -279,9 +279,9 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
-| `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid | Try another format from the list |
-| `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost | Try again — your daily quota was not charged |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout | Try a smaller format or lower resolution |
+| `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
+| `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
 ### Download a format
@@ -338,6 +338,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
+| `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
 
 ### Health check / progress
 ```
