@@ -499,6 +499,39 @@ To enable cookie-based authentication:
 
 The `cookies.txt` file must be in the Netscape cookie format (the format produced by browser cookie exporters). Keep the file updated — cookies expire and may cause `LOGIN_REQUIRED` errors if they go stale.
 
+---
+
+## Troubleshooting
+
+### Common error codes
+
+| Error code | Cause | Solution |
+|-----------|-------|---------|
+| `MISSING_URL` | No URL was provided | Paste a valid link from a supported platform |
+| `INVALID_URL` | URL is malformed or not supported | Verify the link is correct and public |
+| `GEOBLOCKED` | Video is restricted in your region | Route through AhoyVPN to an unblocked region |
+| `PRIVATE_VIDEO` | Video is set to private | Request the video from the uploader directly |
+| `LOGIN_REQUIRED` | Content requires platform login | Pass cookies from a logged-in session (see [cookies](#passing-cookies-to-yt-dlp)) |
+| `AGE_RESTRICTED` | Video requires age verification | Sign in to the platform in your browser first, then try |
+| `COPYRIGHT_REMOVED` | Content was removed due to a copyright claim | This content cannot be redistributed |
+| `UNSUPPORTED_SITE` | Site is not in yt-dlp's extractor list | Check [yt-dlp's supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) |
+| `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again |
+| `SOURCE_TIMEOUT` | Source site took too long to respond | Try audio-only (fastest) or a lower resolution |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server limit | Try a smaller format or audio-only |
+| `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution |
+| `FORMAT_UNAVAILABLE` | That format is not available for this video | Pick a different format from the list |
+| `PARSE_ERROR` | Site returned an unrecognizable response | The site may be temporarily unavailable |
+
+### Still stuck?
+
+- **VPN-related blocks**: Many sites (YouTube, TikTok, etc.) block requests from VPN exit nodes. If you get repeated `SOURCE_FORBIDDEN` or `CONNECTION_FAILED` errors, try switching to a different VPN server location.
+- **Playlist URLs**: Use the direct video URL, not the playlist page. Pass `--yes-playlist` to yt-dlp to fetch playlists — note this counts as one rip per video in the playlist.
+- **Instagram private posts**: Requires a valid Instagram session cookie. See [Passing cookies to yt-dlp](#passing-cookies-to-yt-dlp).
+- **TikTok without watermark**: Use the TikTok app to copy the link — the official share link gives the cleanest URL. Watermark removal depends on TikTok's current implementation.
+- **SoundCloud**: Public tracks work out of the box. Private tracks or tracks behind login walls require cookies.
+- **Age-restricted YouTube**: Pass cookies from a signed-in browser session. See [Passing cookies to yt-dlp](#passing-cookies-to-yt-dlp).
+- **DRM-protected content** (Netflix, Disney+, Prime, Hulu, Max, Peacock): These platforms use DRM encryption. Only non-DRM content (some older or user-uploaded videos) can be ripped. Subscription content with DRM cannot be bypassed.
+
 > **Security note:** The cookies file contains your authenticated session cookies. Treat it like a password — restrict file permissions to `www-data:www-data` with `0600` and never commit it to version control. In Docker, map it as a read-only volume or pass it via an environment variable pointing to a secure mount path.
 
 ### Platforms with known limitations
