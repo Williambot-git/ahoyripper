@@ -238,7 +238,7 @@ else
     echo "  ✗ /src/api.php access rule missing — will be blocked by dotfile catch-all"
     exit 1
 fi
-if awk '/location ~ \/\. \{ deny/' deploy/nginx-docker.conf; then
+if awk 'NR==1{found=0} /location ~ \/\. \{ deny/ {found=1; exit 0} END{exit found==0?0:1}' deploy/nginx-docker.conf; then
     echo "  ✓ Dotfile catch-all present"
 else
     echo "  ✗ Dotfile catch-all missing"
@@ -256,6 +256,17 @@ if grep -q "location ~ \^/includes/" deploy/nginx-docker.conf; then
 fi
 if grep -q "location ~ \^/scripts/" deploy/nginx-docker.conf; then
     echo "  ✗ Redundant ^/scripts/ prefix rule found"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking nginx-docker.conf static asset location serves manifest.json as application/json..."
+# The static asset location regex must include .json so manifest.json is served
+# with Content-Type: application/json (not nginx's default application/octet-stream).
+if fgrep -e 'json)$' deploy/nginx-docker.conf > /dev/null 2>&1; then
+    echo "  ✓ .json extension in static asset location (manifest.json gets correct MIME)"
+else
+    echo "  ✗ .json extension missing from static asset location (manifest.json mis-served)"
     exit 1
 fi
 
