@@ -1053,8 +1053,16 @@ define('MAX_URL_LEN', 2048);
 // This is the PHP-side timeout — distinct from yt-dlp's own connection timeout.
 // The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT and terminates
 // the process, producing "Process timed out after Ns" in the error output.
-//yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
+// yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
 define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
+
+// Configurable timeout for the download action (file download).
+// Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
+// Defaults to 300 seconds (5 minutes) when the env var is absent or zero/negative.
+// The download action is I/O-bound (large media files) and needs a longer timeout
+// than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
+// controls download so the two can be tuned independently without compromise.
+define('DOWNLOAD_TIMEOUT', max(1, (int)getenv('YTDLP_DOWNLOAD_TIMEOUT') ?: 300));
 
 // ─── ROUTING ────────────────────────────────────────────────
 
@@ -1888,7 +1896,7 @@ switch ($action) {
         }
 
         $start = time();
-        $timeout = 300; // 5 min max
+        $timeout = DOWNLOAD_TIMEOUT; // configurable via YTDLP_DOWNLOAD_TIMEOUT env var (default 300s)
         $proc_killed = false;
         $proc_stdout = '';
         $proc_stderr = '';
@@ -1911,8 +1919,8 @@ switch ($action) {
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
                 // retry_after: Unix timestamp when the download can be retried.
-                // Use strtotime('+5 minutes') to match the 300s server-side timeout
-                // and give the client a consistent future reset point to count down to.
+                // Set to now + the actual $timeout so the client has a consistent
+                // future reset point to count down to regardless of the configured limit.
                 $retry_ts = time() + $timeout;
                 header('Retry-After: ' . $retry_ts);
                 echo json_encode([
