@@ -69,8 +69,11 @@ else
         chmod +x /usr/local/bin/yt-dlp
         # Verify the binary is actually executable and runs without error.
         # A corrupt download (partial file, wrong binary) fails here before proceeding.
-        yt-dlp --version > /dev/null 2>&1 \
-            || { echo "  ! Downloaded yt-dlp binary is not functional."; exit 1; }
+        if ! yt-dlp --version > /dev/null 2>&1; then
+            echo "  ! Downloaded yt-dlp binary is not functional."
+            exit 1
+        fi
+        echo "  Installed: $(yt-dlp --version 2>&1 | head -1)"
     }
 
     if ! command -v yt-dlp &>/dev/null; then
