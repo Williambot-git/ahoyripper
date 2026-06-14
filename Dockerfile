@@ -29,22 +29,22 @@ RUN apt-get update && apt-get install -y \
     # the plain 'yt-dlp' binary (not yt-dlp.exe, etc.) and verify it.
     # Treat missing checksum file (2) as a warning. Treat mismatch (1) as a hard
     # failure — a corrupt or tampered binary must not be used.
-    YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS 2>/dev/null | awk '{print $1}')
-    if [ -n "$YT_DLP_HASH" ]; then
-        echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c -
-        SHA256_STATUS=$?
-    else
-        echo "WARNING: SHA2-256SUMS file missing or yt-dlp hash not found — skipping binary verification"
-        SHA256_STATUS=2
-    fi
-    if [ "$SHA256_STATUS" = "0" ]; then
-         echo "yt-dlp SHA256 verified"
-    elif [ "$SHA256_STATUS" = "2" ]; then
-         echo "WARNING: SHA256 verification skipped (checksum file unavailable)"
-    else
-         echo "ERROR: yt-dlp SHA256 mismatch — binary may be corrupted or tampered with"
-         exit 1
-    fi
+    && YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS 2>/dev/null | awk '{print $1}') \
+    && if [ -n "$YT_DLP_HASH" ]; then \
+        echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c -; \
+        SHA256_STATUS=$?; \
+    else \
+        echo "WARNING: SHA2-256SUMS file missing or yt-dlp hash not found — skipping binary verification"; \
+        SHA256_STATUS=2; \
+    fi \
+    && if [ "$SHA256_STATUS" = "0" ]; then \
+         echo "yt-dlp SHA256 verified"; \
+    elif [ "$SHA256_STATUS" = "2" ]; then \
+         echo "WARNING: SHA256 verification skipped (checksum file unavailable)"; \
+    else \
+         echo "ERROR: yt-dlp SHA256 mismatch — binary may be corrupted or tampered with"; \
+         exit 1; \
+    fi \
     && chmod +x /usr/local/bin/yt-dlp \
     && rm -f /tmp/SHA2-256SUMS
 

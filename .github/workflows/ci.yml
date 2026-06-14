@@ -57,9 +57,10 @@ jobs:
           # The 'check' action sends its own response via echo+break (not a normal
           # return), so it must explicitly set CSP and Reporting-Endpoints rather
           # than relying on the top-of-script block. Confirm both headers appear
-          # inside the 'check' case block.
-          grep -A5 "case 'check':" src/api.php | grep -q "Content-Security-Policy"
-          grep -A5 "case 'check':" src/api.php | grep -q "Reporting-Endpoints"
+          # inside the 'check' case block. Use -A50 because the headers are set
+          # ~35 lines after the case label (after all other security headers).
+          grep -A50 "case 'check':" src/api.php | grep -q "Content-Security-Policy"
+          grep -A50 "case 'check':" src/api.php | grep -q "Reporting-Endpoints"
 
       - name: Check rate limiting
         run: |
