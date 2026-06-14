@@ -1000,6 +1000,7 @@ $validation = function(string $action) use($request_id) {
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
             'request_id' => $request_id,
+            'source_url' => null,
         ]);
         return false;
     }
@@ -1010,6 +1011,7 @@ $validation = function(string $action) use($request_id) {
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
             'request_id' => $request_id,
+            'source_url' => $url,
         ]);
         return false;
     }
@@ -1024,6 +1026,7 @@ $validation = function(string $action) use($request_id) {
                 'error' => 'A format must be selected before downloading.',
                 'error_code' => 'MISSING_FORMAT',
                 'request_id' => $request_id,
+                'source_url' => $url,
             ]);
             return false;
         }
