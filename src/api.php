@@ -1047,6 +1047,12 @@ define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 // Used by all yt-dlp invocations (info, download) so agents stay consistent.
 define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36');
 
+// Path to a Netscape-format cookies.txt file for authenticated requests
+// (age-restricted YouTube, Spotify, etc.). Set via COOKIES_PATH env var or
+// docker-compose. When absent or empty, no --cookies flag is passed to yt-dlp.
+// See README.md "Passing cookies to yt-dlp" for setup instructions.
+define('COOKIES_PATH', getenv('COOKIES_PATH') ?: '');
+
 // Shared constant: maximum URL length in characters.
 // Both info and download actions enforce this same limit so clients get
 // consistent error codes (INVALID_URL) regardless of which action they call.
@@ -1327,10 +1333,18 @@ switch ($action) {
             '--socket-timeout', (string)$socket_timeout,
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
+        ];
+        // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
+        // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
+        if (COOKIES_PATH !== '') {
+            $ytdlp_cmd[] = '--cookies';
+            $ytdlp_cmd[] = COOKIES_PATH;
+        }
+        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
-        ];
+        ]);
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
         $pipes = null;
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
@@ -1887,10 +1901,18 @@ switch ($action) {
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
+        ];
+        // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
+        // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
+        if (COOKIES_PATH !== '') {
+            $ytdlp_cmd[] = '--cookies';
+            $ytdlp_cmd[] = COOKIES_PATH;
+        }
+        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
-        ];
+        ]);
 
         $pipes = null;
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
