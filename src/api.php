@@ -699,14 +699,14 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             if ($raw_error_out !== null) {
                 $raw_error_out = $err_msg;
             }
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
         if ($raw_error_out !== null) {
             $raw_error_out = 'JSON parse failed — response was not valid JSON.';
         }
-        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR'];
+        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $raw_error_out];
     }
 
     // JSON parsed successfully but has no formats key — this is a distinct
@@ -1508,6 +1508,16 @@ switch ($action) {
             }
             echo json_encode($resp);
             exit;
+        }
+
+        // Strip the "yt-dlp error: " prefix from the error message returned by
+        // parseFormats for unclassified yt-dlp errors — the "yt-dlp error:" prefix
+        // is an implementation detail that makes the backend log more descriptive, but
+        // is not user-facing text. The frontend's ERROR_HINTS[YTDLP_ERROR] already
+        // provides a clean, human-readable message, and raw_error surfaces the raw
+        // yt-dlp output separately.
+        if (isset($parsed['error_code']) && $parsed['error_code'] === 'YTDLP_ERROR' && isset($parsed['error'])) {
+            $parsed['error'] = preg_replace('/^yt-dlp error: /i', '', $parsed['error']);
         }
 
         $parsed['request_id'] = $request_id;
