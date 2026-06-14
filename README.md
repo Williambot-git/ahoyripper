@@ -324,20 +324,25 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 |------|--------------|---------|
 | `422` | `MISSING_URL` | No URL was provided on the download request. |
 | `422` | `MISSING_FORMAT` | No format was selected on the download request. |
-| `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
-| `422` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
-| `422` | `LOGIN_REQUIRED` | Video requires login or subscription |
-| `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
-| `422` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
-| `422` | `SOURCE_TIMEOUT` | The source site timed out. Try a smaller format or audio-only. |
-| `422` | `CONNECTION_FAILED` | Could not connect to the source |
-| `422` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
-| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
-| `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation |
-| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
-| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
 | `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
-| `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
+| `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
+| `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
+| `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
+| `401` | `LOGIN_REQUIRED` | Video requires login or subscription |
+| `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `429` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
+| `403` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) — try a different format or use AhoyVPN |
+| `404` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted |
+| `502` | `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues |
+| `502` | `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error |
+| `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
+| `502` | `CONNECTION_FAILED` | Could not connect to the source |
+| `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
+| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
+| `422` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
+| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
+| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
+| `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
 
 ### Health check / progress
