@@ -250,7 +250,10 @@ foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp
 // Unlike health (which may run yt-dlp, syscalls, reads /proc), this is a pure
 // JSON ping that adds zero server load — safe to call every 10 seconds.
 // Placed BEFORE the referer gate so it exits before that check runs.
-$internal_actions = ['check', 'health', 'progress', 'csp-report'];
+// NOTE: 'progress' was previously listed here but was an alias for 'health' that
+// fell through to the 'check' response — it has been removed so it correctly
+// routes to the 'health' switch case below.
+$internal_actions = ['check', 'health', 'csp-report'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
     // csp-report: receive and log browser CSP violation reports (nginx POSTs
