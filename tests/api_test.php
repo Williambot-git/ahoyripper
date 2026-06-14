@@ -156,7 +156,7 @@ function classifyYtdlpError($raw_err) {
         return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.'];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
-        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.'];
+        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
     // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
     // Distinct from connection-level "timed out" which implies a network failure.
@@ -757,6 +757,17 @@ test('detects SOURCE_TIMEOUT — "process timed out" from PHP-side timeout',
 $result = classifyYtdlpError('Read at byte 0: timeout');
 test('detects SOURCE_TIMEOUT — "read at byte...timeout" from slow source',
     $result !== null && ($result['code'] ?? '') === 'SOURCE_TIMEOUT');
+
+// Edge case: "Process timed out" without a duration suffix.
+// Some environments or older yt-dlp versions may omit the "Ns" suffix.
+$result = classifyYtdlpError('Process timed out');
+test('detects SOURCE_TIMEOUT — "process timed out" without duration suffix',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_TIMEOUT');
+
+// Edge case: SSL error with a custom tls handshake message.
+$result = classifyYtdlpError('TLS handshake timeout');
+test('detects SSL_ERROR — "tls handshake timeout" variant',
+    $result !== null && ($result['code'] ?? '') === 'SSL_ERROR' && ($result['status'] ?? 0) === 502);
 
 // ─── filesize_asc sort (client-side sort option, never tested) ───────────────
 // Ascending: smallest files first (useful for finding lightweight mobile formats).

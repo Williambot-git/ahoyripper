@@ -34,12 +34,16 @@ Disallow: /
 User-agent: AhoyBot
 Allow: /
 
-# Disallow AI training crawlers and all other bots from the API endpoint.
+# Disallow all crawlers (including general bots) from the API endpoint.
 # The API returns JSON — it is not a crawlable resource and should not be
-# indexed. This also prevents accidental crawling of /src/api.php by any
-# crawler that respects robots.txt.
+# indexed. Placed BEFORE Allow: / so crawlers see the disallow first.
+# Note: crawlers listed in specific blocks above (GPTBot, ClaudeBot, etc.)
+# already have their own Disallow: / so this rule is redundant for them,
+# but placing it in this general block ensures crawlers that don't match
+# any specific block (and fall through to User-agent: *) cannot crawl /src/.
 User-agent: *
 Disallow: /src/
+Allow: /
 
 # Security contact — RFC 9116
 Sitemap: https://ahoyripper.com/sitemap.xml
