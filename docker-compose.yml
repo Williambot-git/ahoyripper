@@ -12,6 +12,7 @@ services:
       # Then pass it via: echo "AHOY_UNLIMITED_KEY=$(openssl rand -hex 32)" > .env
       - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-}
       - AHOY_USER_AGENT=${AHOY_USER_AGENT:-}
+      - COOKIES_PATH=${COOKIES_PATH:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]

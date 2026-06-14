@@ -507,12 +507,22 @@ Some platforms (e.g., age-restricted YouTube videos, Spotify) require authentica
 To enable cookie-based authentication:
 
 1. Export cookies from your browser (e.g., using the "Export Cookies" extension for Chrome/Edge, or the "cookies.txt" format from the "cookies.txt" extension for Firefox).
-2. Save the exported cookies file to `/var/www/ahoyripper/cookies.txt` on your server (ensure it's readable by `www-data`).
-3. Edit `src/api.php` — add `--cookies`, `$cookie_path` entries to both info and download `$ytdlp_cmd` arrays (after `--user-agent`):
-   ```php
-   '--cookies', '/var/www/ahoyripper/cookies.txt',
+2. Save the exported cookies file to a location on your server (e.g., `/var/www/ahoyripper/cookies.txt`) and ensure it's readable by the web server user (`www-data` on Ubuntu, or the `php` user in Docker).
+3. **Self-hosted (non-Docker):** Set the `COOKIES_PATH` environment variable before starting PHP-FPM:
+   ```bash
+   export COOKIES_PATH=/var/www/ahoyripper/cookies.txt
    ```
-4. Restart nginx or PHP-FPM to apply the change.
+   Or add it to your PHP-FPM or systemd environment file.
+4. **Docker:** Mount the cookies file into the container and set the path via docker-compose:
+   ```yaml
+   services:
+     ahoyripper:
+       volumes:
+         - /path/to/your/cookies.txt:/cookies.txt:ro
+       environment:
+         - COOKIES_PATH=/cookies.txt
+   ```
+   Then `docker compose up -d` to apply.
 
 The `cookies.txt` file must be in the Netscape cookie format (the format produced by browser cookie exporters). Keep the file updated — cookies expire and may cause `LOGIN_REQUIRED` errors if they go stale.
 
@@ -617,6 +627,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 | `YTDLP_TIMEOUT` | `45` | Timeout in seconds for the info action (metadata fetch). If yt-dlp does not return within this window, the process is terminated and a `SOURCE_TIMEOUT` error is returned. Override via `YTDLP_TIMEOUT` env var (e.g. `YTDLP_TIMEOUT=60`). The download action has its own separate timeout controlled by `YTDLP_DOWNLOAD_TIMEOUT`. |
 | `YTDLP_DOWNLOAD_TIMEOUT` | `300` | Timeout in seconds for the download action (file download). Large media files may require longer than the default 5 minutes; increase this for high-resolution or slow-source downloads. Override via `YTDLP_DOWNLOAD_TIMEOUT` env var (e.g. `YTDLP_DOWNLOAD_TIMEOUT=600`). The info action has its own separate timeout controlled by `YTDLP_TIMEOUT`. |
 | `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key that grants unlimited daily quota. **Change in production.** Set to a long random string (e.g. `openssl rand -hex 32`) and pass to the container via `-e` or your orchestration layer. |
+| `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. Mount the file into the container and set the path here (e.g. `/cookies.txt`). See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
 
 Example:
 ```bash
