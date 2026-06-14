@@ -2157,9 +2157,6 @@ switch ($action) {
                     $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
                 }
             }
-            // Determine if substitution occurred by checking whether the requested format
-            // materially differed from what was delivered. Only flag as substituted when
-            // the actual height dropped by more than one quality tier (≥144p drop).
             // Parse requested height from format_id (e.g. "bestvideo[height>=1080]" → 1080).
             if ($actual_height !== null && $format_id !== 'best') {
                 $requested_height = null;
@@ -2182,6 +2179,7 @@ switch ($action) {
                         }
                     }
                 }
+            }
             // Also flag substitution when the actual stream height is suspiciously
             // low (<180p). This catches bare format IDs like "22" (YouTube 720p)
             // where $requested_height is null (no height constraint in format ID),
@@ -2190,7 +2188,6 @@ switch ($action) {
             // null actual_height (audio-only files have actual_height = null).
             if (!$format_substituted && $actual_height !== null && $actual_height < 180) {
                 $format_substituted = true;
-            }
             }
             // Flag substitution when the extension changed (e.g. webm → mkv) —
             // this usually means yt-dlp had to use a different container.
