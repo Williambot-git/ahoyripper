@@ -2284,6 +2284,15 @@ switch ($action) {
         // return with the default Content-Type: application/json from the top of
         // the script rather than application/octet-stream.
 
+        // Suppress SIGPIPE so that a client abort during the streaming loop does
+        // not kill the PHP process. Without this, writing to a closed connection
+        // sends SIGPIPE to the process, which terminates it ungracefully (the
+        // connection_aborted() check happens on the NEXT iteration, not before
+        // echo, so the first SIGPIPE can still fire). Using pcntl_signal(SIGPIPE, SIG_IGN)
+        // requires pcntl extension; guard with function_exists as a hard requirement.
+        if (function_exists('pcntl_signal')) {
+            pcntl_signal(SIGPIPE, SIG_IGN);
+        }
         ignore_user_abort(true);
 
         $mem_set = ini_set('memory_limit', '256M');
