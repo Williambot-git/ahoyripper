@@ -515,9 +515,9 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
             // Close any remaining open pipes first to release handles.
             foreach ($pipes as $p) { if ($p) fclose($p); }
             $pipes = null;
-            // Populate output parameters so callers that inspect $probe_err on
-            // timeout receive the timeout message rather than uninitialized data.
-            $probe_err = $stderr;
+            // $stderr is already populated with the timeout message (line 508 above).
+            // The $stdout reference parameter is intentionally left empty on timeout
+            // since there is no valid JSON to parse from a timed-out process.
             return false;
         }
         $read = [];
