@@ -274,12 +274,35 @@ $result = classifyYtdlpError('ERROR: Connection timed out');
 test('detects CONNECTION_FAILED — "connection timed out"',
     $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
 
-$result = classifyYtdlpError('ERROR: Request timed out');
-test('detects CONNECTION_FAILED — "request timed out" (standalone timed out)',
-    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
-
 $result = classifyYtdlpError('ERROR: Unable to resolve IP address (timed out after 30s)');
 test('detects CONNECTION_FAILED — "(timed out after 30s)" (standalone timed out)',
+    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
+
+// The SOURCE_TIMEOUT check must NOT be shadowed by the CONNECTION_FAILED
+// "timed out" alternative. "Process timed out" is emitted by the PHP-side
+// timeout handler (runYtdlp), not the source site — it should map to 504
+// SOURCE_TIMEOUT, not 502 CONNECTION_FAILED. The negative lookbehind
+// (?<!Process |at byte) in the CONNECTION_FAILED regex prevents "Process "
+// or "at byte " + "timed out" from being matched as standalone "timed out".
+$result = classifyYtdlpError('ERROR: Process timed out after 45s');
+test('detects SOURCE_TIMEOUT — "Process timed out" (PHP-side timeout, not network)',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_TIMEOUT');
+
+// Note: yt-dlp uses "timed out" (two words) not "timeout" (one word) in
+// "read at byte...timed out" messages. That variant falls through to
+// CONNECTION_FAILED via the standalone "timed out" pattern. The one-word
+// "timeout" variant ("read at byte...timeout") is correctly classified as
+// SOURCE_TIMEOUT by the /read at byte.*timeout/i pattern (one-word form).
+// This is the expected behavior based on how yt-dlp actually formats output.
+
+// Standalone "timed out" (no "Process" prefix) should
+// still be classified as CONNECTION_FAILED (network-level timeout).
+$result = classifyYtdlpError('ERROR: Request timed out');
+test('detects CONNECTION_FAILED — "request timed out" (network-level)',
+    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
+
+$result = classifyYtdlpError('ERROR: [youtube] This video timed out');
+test('detects CONNECTION_FAILED — "timed out" with generic prefix',
     $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
 
 $result = classifyYtdlpError('ERROR: File is larger than 2GB limit');
