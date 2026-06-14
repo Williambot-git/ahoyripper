@@ -506,6 +506,44 @@ if ('serviceWorker' in navigator) {
     resultsBox.classList.toggle('active', on);
   }
 
+  // Show a temporary toast notice when yt-dlp substituted a format
+  // (e.g. user selected 1080p but 720p was delivered).
+  // The notice auto-dismisses after 5 seconds and does not block the download flow.
+  function showSubstitutionNotice(actualQuality) {
+    // Remove any existing notice first so multiple rapid downloads don't stack.
+    var existing = document.getElementById('substitutionNotice');
+    if (existing) { existing.remove(); }
+    var notice = document.createElement('div');
+    notice.id = 'substitutionNotice';
+    notice.style.cssText = [
+      'position: fixed',
+      'bottom: 2rem',
+      'left: 50%',
+      'transform: translateX(-50%)',
+      'background: #1e293b',
+      'color: #e2e8f0',
+      'padding: 0.75rem 1.25rem',
+      'border-radius: 8px',
+      'font-size: 0.875rem',
+      'font-family: Inter, system-ui, sans-serif',
+      'box-shadow: 0 4px 20px rgba(0,0,0,0.35)',
+      'z-index: 9999',
+      'max-width: 360px',
+      'text-align: center',
+      'border: 1px solid rgba(255,255,255,0.08)',
+      'line-height: 1.5',
+    ].join('; ');
+    notice.textContent = 'Note: ' + actualQuality + ' was delivered — the format you selected was not available.';
+    document.body.appendChild(notice);
+    setTimeout(function() {
+      if (notice.parentNode) {
+        notice.style.transition = 'opacity 0.4s ease';
+        notice.style.opacity = '0';
+        setTimeout(function() { if (notice.parentNode) notice.remove(); }, 400);
+      }
+    }, 5000);
+  }
+
   function formatDuration(secs) {
     if (!secs) return '';
     var h = Math.floor(secs / 3600);
@@ -723,6 +761,13 @@ function escapeHtml(s) {
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
             if (navigateOnSuccess) {
+              // Check if yt-dlp substituted a different format (e.g. 1080p requested
+              // but 720p delivered because higher quality was unavailable). Surface this
+              // as a brief toast so the user understands why their file is lower quality.
+              var substituted = resp.headers.get('X-Format-Substituted');
+              if (substituted) {
+                showSubstitutionNotice(substituted);
+              }
               window.location.href = dl.url;
             }
             setLoading(false);

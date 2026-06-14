@@ -2081,6 +2081,105 @@ switch ($action) {
         // the generic "ahoyrip.<ext>" so the browser still proposes a useful name.
         $download_name = $download_filename . '.' . ($ext ?: 'mp4');
 
+        // Detect format substitution: yt-dlp may silently substitute a different
+        // format when the requested one is unavailable (e.g. no 1080p → best 720p).
+        // Run ffprobe on the actual file to get real codec and resolution metadata,
+        // then compare against the requested format_id to determine if substitution occurred.
+        // Only flag substitution when it materially changes the quality the user selected.
+        $actual_height = null;
+        $actual_width = null;
+        $actual_video_codec = null;
+        $format_substituted = false;
+        $substituted_label = null;
+        $ffprobe_bin = '/usr/bin/ffprobe';
+        if (is_file($actual_file) && is_executable($ffprobe_bin)) {
+            // JSON probe — video stream only, no audio needed for substitution check.
+            // Exit code 0 is required; ffprobe returns non-zero for unreadable files.
+            $probe_cmd = [
+                $ffprobe_bin,
+                '-v', 'quiet',
+                '-print_format', 'json',
+                '-show_entries', 'stream=codec_name,codec_type,width,height',
+                '-select_streams', 'v:0',
+                '--',
+                $actual_file,
+            ];
+            $probe_out = '';
+            $probe_err = '';
+            $probe_exit = 0;
+            $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
+            if ($probe_proc) {
+                fclose($probe_pipes[0]);
+                unset($probe_pipes[0]);
+                stream_set_timeout($probe_pipes[1], 5);
+                stream_set_timeout($probe_pipes[2], 5);
+                $probe_out = stream_get_contents($probe_pipes[1]);
+                $probe_err = stream_get_contents($probe_pipes[2]);
+                foreach ($probe_pipes as $p) { if ($p) fclose($p); }
+                $probe_exit = proc_close($probe_proc);
+            }
+            if ($probe_exit === 0 && $probe_out) {
+                $probe = @json_decode($probe_out, true);
+                $vstream = $probe['streams'][0] ?? null;
+                if ($vstream) {
+                    $actual_video_codec = $vstream['codec_name'] ?? null;
+                    $actual_width = isset($vstream['width']) ? (int)$vstream['width'] : null;
+                    $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
+                }
+            }
+            // Determine if substitution occurred by checking whether the requested format
+            // materially differed from what was delivered. Only flag as substituted when
+            // the actual height dropped by more than one quality tier (≥144p drop).
+            // Parse requested height from format_id (e.g. "bestvideo[height>=1080]" → 1080).
+            if ($actual_height !== null && $format_id !== 'best') {
+                $requested_height = null;
+                if (preg_match('/\[height(>=|<=|<|>)?(\d+)\]/', $format_id, $hm)) {
+                    $requested_height = (int)$hm[2];
+                    if ($hm[1] === '>=' || $hm[1] === '>') {
+                        // Requested minimum; actual is substituted only if below that minimum
+                        if ($actual_height < $requested_height) {
+                            $format_substituted = true;
+                        }
+                    } elseif ($hm[1] === '<=' || $hm[1] === '<') {
+                        // Requested maximum; actual above it means yt-dlp upgraded
+                        if ($actual_height > $requested_height) {
+                            $format_substituted = true;
+                        }
+                    } else {
+                        // Exact match (no operator); any difference is substitution
+                        if ($actual_height !== $requested_height) {
+                            $format_substituted = true;
+                        }
+                    }
+                }
+                // Also flag substitution when the user selected a specific height like
+                // "22" (YouTube format code) but the actual stream height is
+                // noticeably lower than expected from that tier (>180p gap).
+                if (!$format_substituted && $requested_height !== null && $actual_height < ($requested_height - 180)) {
+                    $format_substituted = true;
+                }
+            }
+            // Flag substitution when the extension changed (e.g. webm → mkv) —
+            // this usually means yt-dlp had to use a different container.
+            if (!$format_substituted && $ext !== '') {
+                $requested_ext = null;
+                if (preg_match('/\[ext=([^\]]+)\]/', $format_id, $em)) {
+                    $requested_ext = $em[1];
+                    if ($requested_ext !== $ext) {
+                        $format_substituted = true;
+                    }
+                }
+            }
+            if ($format_substituted && $actual_height !== null) {
+                $substituted_label = ($actual_width && $actual_height)
+                    ? "{$actual_width}x{$actual_height}"
+                    : "{$actual_height}p";
+                if ($actual_video_codec) {
+                    $substituted_label .= " {$actual_video_codec}";
+                }
+            }
+        }
+
         $mime = 'application/octet-stream';
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $detected = $finfo->file($actual_file);
@@ -2102,6 +2201,13 @@ switch ($action) {
         }
         header('Content-Disposition: ' . $disposition);
         header('Cache-Control: no-cache');
+        // X-Format-Substituted: set when ffprobe detects the downloaded file differs
+        // materially from what was requested (different resolution or container).
+        // The frontend uses this to show "Downloaded 720p (requested 1080p — not available)"
+        // instead of silently giving the user a lower quality than they selected.
+        if ($format_substituted) {
+            header('X-Format-Substituted: ' . ($substituted_label ?? 'true'));
+        }
         // Content-Type and X-Download-Options are set immediately before streaming
         // so that error response paths above (empty-file, timeout, proc failure)
         // return with the default Content-Type: application/json from the top of
