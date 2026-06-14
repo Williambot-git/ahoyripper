@@ -1502,6 +1502,10 @@ switch ($action) {
                 'error' => $parsed['error'],
                 'request_id' => $request_id,
                 'source_url' => $url,
+                // yt_dlp_version helps clients debug which yt-dlp build is running
+                // when a classified error (GEOBLOCKED, LOGIN_REQUIRED, etc.) is returned.
+                // Included in success responses; add it here for parity on error responses.
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ];
             if (!empty($parsed['error_code'])) {
                 $resp['error_code'] = $parsed['error_code'];
