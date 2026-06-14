@@ -1311,12 +1311,19 @@ switch ($action) {
         // yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
         // produces a stderr warning that can pollute the JSON output in the info action
         // and corrupt error classification. Removed from both info and download commands.
+        // --socket-timeout:yt-dlp's per-connection timeout. Set to INFO_TIMEOUT - 5s so
+        // PHP's process-level timeout (INFO_TIMEOUT) is always the outer limit and has time
+        // to cleanly terminate the process and emit a classified SOURCE_TIMEOUT error.
+        // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's
+        // timeout and produce an unclassified CONNECTION_FAILED instead of SOURCE_TIMEOUT.
+        $socket_timeout = max(1, INFO_TIMEOUT - 5);
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
             '--no-playlist',
             '--skip-download',
             '--progress-template', json_encode(''),
+            '--socket-timeout', (string)$socket_timeout,
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
@@ -1863,13 +1870,20 @@ switch ($action) {
         //   argv string — same as the correct "" syntax yt-dlp expects for an empty
         //   progress template.
         // --concurrent-fragments was removed in yt-dlp 2024.10 — yt-dlp now handles
-        //   HLS/DASH fragment concurrency internally.
+        // HLS/DASH fragment concurrency internally.
+        // --socket-timeout: yt-dlp's per-connection timeout. Set to DOWNLOAD_TIMEOUT - 15s so
+        // PHP's process-level timeout (DOWNLOAD_TIMEOUT) is always the outer limit and has time
+        // to cleanly terminate the process and emit a classified DOWNLOAD_TIMEOUT error.
+        // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's timeout
+        // and produce an unclassified error instead of DOWNLOAD_TIMEOUT.
+        $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
             '--no-playlist',
             '--progress-template', json_encode(''),
+            '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
