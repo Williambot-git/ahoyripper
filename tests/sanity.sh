@@ -481,7 +481,27 @@ else
 fi
 
 echo ""
-echo "==> Checking CSP in nginx-docker.conf (server-level enforcement + report-only + API override)..."
+echo "==> Checking Reporting-Endpoints header in nginx-docker.conf server-level..."
+# nginx-docker.conf must have Reporting-Endpoints at server level (not just in the
+# CSP Reporting API location block) so the modern Reporting API works for server-level
+# CSP headers in Docker deployments, matching what nginx.conf provides in production.
+if grep -q "Reporting-Endpoints" deploy/nginx-docker.conf; then
+    # Verify it's at server level (appears before the first location block).
+    # Count occurrences — must appear at server level AND in the CSP Reporting location.
+    RE_COUNT=$(grep -c "Reporting-Endpoints" deploy/nginx-docker.conf || true)
+    if [ "$RE_COUNT" -ge 2 ]; then
+        echo "  ✓ Reporting-Endpoints present at server level (and in CSP Reporting location)"
+    else
+        echo "  ✗ Reporting-Endpoints missing from server level in nginx-docker.conf"
+        exit 1
+    fi
+else
+    echo "  ✗ Reporting-Endpoints header missing from nginx-docker.conf"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcement + report-only + API override)..."
 # There are 3 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
 #   2. Server-level report-only (add_header ... Content-Security-Policy-Report-Only ...)
