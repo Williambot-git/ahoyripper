@@ -2060,6 +2060,7 @@ switch ($action) {
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -2076,6 +2077,7 @@ switch ($action) {
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
