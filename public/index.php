@@ -686,12 +686,14 @@ function escapeHtml(s) {
     // Prefer description (human-readable yt-dlp description) when available, else label.
     // description carries extra context like "720p60 HDR" or "audio only" that
     // label doesn't always capture — particularly for audio and alternative formats.
-    // Filter out "Unknown" sentinel from description: the API returns "Unknown"
-    // when format_description/f.format_note were not available, which is not
-    // a useful display string. Fall through to label in that case.
+    // Filter out "Unknown" sentinel from both description and label: the API's clean()
+    // function returns "Unknown" when those fields were absent in yt-dlp metadata,
+    // which is not a useful display string. Fall through to ext in that case.
     // description and label come from yt-dlp (user-controlled metadata) and are
     // HTML-escaped before use to prevent stored XSS via innerHTML injection.
-    var rawDisplayLabel = (f.description && f.description !== 'Unknown') ? f.description : (f.label || (f.ext ? f.ext.toUpperCase() : 'Format'));
+    var rawDisplayLabel = (f.description && f.description !== 'Unknown')
+        ? f.description
+        : ((f.label && f.label !== 'Unknown') ? f.label : (f.ext ? f.ext.toUpperCase() : 'Format'));
     var displayLabel = escapeHtml(rawDisplayLabel);
     // title attribute — use ≈ prefix for estimated sizes so the tooltip
     // clearly distinguishes "known" (from yt-dlp metadata) from "approximate"
