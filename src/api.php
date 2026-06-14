@@ -1266,6 +1266,19 @@ switch ($action) {
             header('X-DailyLimit-Window: unlimited');
         }
 
+        // Per-minute rate-limit headers — info is not a download action, so
+        // X-DL-RateLimit uses -1 (not applicable). X-RateLimit reflects the
+        // info endpoint's configured per-minute ceiling (30 req/min), giving
+        // clients full header parity with download/health/check responses.
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        header('X-RateLimit-Limit: 30');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: 60');
+
         // URL is already validated by isValidUrl() and the length-check above.
         // No shell metacharacters possible when passed as a direct array element
         // to proc_open (no shell involved). $MAX_URL_LEN is declared at the top
