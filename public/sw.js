@@ -30,10 +30,19 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => cache.addAll(STATIC_ASSETS))
-      // Skip waiting so the new SW activates immediately (no need to wait
-      // for all tabs to close before taking control).
-      .then(() => self.skipWaiting())
   );
+  // Do NOT skipWaiting here — let the frontend decide when to activate.
+  // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
+});
+
+// ─── Message: apply pending update immediately ────────────────────────────────
+// Frontend calls registration.waiting.postMessage({type:'SKIP_WAITING'})
+// after displaying an "update available" notice to the user. This ensures
+// the user sees the new version before the page refreshes.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ─── Activate: clean up old caches ───────────────────────────────────────────

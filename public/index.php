@@ -171,6 +171,12 @@ header('X-Request-ID: ' . $page_request_id);
   </div>
 </nav>
 
+<!-- PWA update banner — shown when a new service worker is installed and waiting -->
+<div id="update-banner" class="update-banner" style="display:none" role="status" aria-live="polite">
+  <span>A new version of AhoyRipper is available.</span>
+  <button type="button" class="refresh-btn">Update now</button>
+</div>
+
 <!-- Main -->
 <main>
   <section class="hero">
@@ -316,8 +322,28 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js')
       .then(function(registration) {
+        // Track when a new SW is installing in the background.
         registration.addEventListener('updatefound', function() {
-          console.log('[SW] New service worker installing in background.');
+          var installing = registration.installing;
+          if (!installing) return;
+
+          // Show user-facing update prompt when the new SW is installed
+          // (but not yet activated — it waits for our SKIP_WAITING message).
+          installing.addEventListener('statechange', function() {
+            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+              // New version is waiting — prompt user to refresh to apply.
+              var banner = document.getElementById('update-banner');
+              if (banner) {
+                banner.style.display = 'block';
+                banner.querySelector('.refresh-btn').addEventListener('click', function() {
+                  // Tell the waiting SW to activate immediately, then reload.
+                  if (registration.waiting) {
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                });
+              }
+            }
+          });
         });
       })
       .catch(function(err) {
