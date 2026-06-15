@@ -17,6 +17,15 @@
   <!-- HSTS — mirrors the header set by index.php so the policy is enforced
        on 404 responses even if nginx's add_header is ever overridden. -->
   <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
+  <!-- X-Content-Type-Options: Prevent MIME-sniffing of responses (including 404s)
+       so browsers don't interpret them as scripts. -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <!-- X-Download-Options: Disable "Open this save-as" option in IE/Edge for
+       download dialogs originating from this page. -->
+  <meta http-equiv="X-Download-Options" content="noopen">
+  <!-- Permissions-Policy: Disable camera, microphone, geolocation, and interest-cohort
+       telemetry. Mirrors the header set by index.php and nginx. -->
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
   <link rel="canonical" href="https://ahoyripper.com">
   <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
        iOS crops square icons to a rounded shape; SVG source produces blurry
