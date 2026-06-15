@@ -52,8 +52,9 @@ RUN apt-get update && apt-get install -y \
 # A corrupt or incomplete download produces a non-executable file;
 # catching it here fails the build fast rather than producing a broken container.
 # Capture and expose the version for build-time debugging and image inspection.
-RUN echo "yt-dlp version: $(yt-dlp --version)" && \
-    yt-dlp --version > /dev/null 2>&1 || \
+# Note: command substitution $(yt-dlp --version) produces empty string on failure
+# (not an error), so we check the exit code explicitly via a subshell.
+RUN (yt-dlp --version && echo "yt-dlp version: $(yt-dlp --version)") || \
     { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
 
 WORKDIR /app
