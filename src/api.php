@@ -183,7 +183,8 @@ if ($is_rate_limited) {
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => 'https://ahoyvpn.com',
-                'retry_after' => $reset_timestamp,
+                'retry_after' => max(1, (int)($reset_timestamp - time())),
+                'request_id' => $request_id,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
