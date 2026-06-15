@@ -46,6 +46,13 @@ test('clean(42) returns "42" (non-zero numeric)',
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
+        // Repair non-UTF-8 byte sequences before declaring the JSON invalid.
+        // mb_convert_encoding replaces malformed byte sequences with a replacement
+        // character (U+FFFD), producing valid UTF-8 that json_decode can parse.
+        // This is idempotent for valid UTF-8 input — no change if already clean.
+        $data = json_decode(mb_convert_encoding($json_str, 'UTF-8', 'UTF-8'), true);
+    }
+    if (!$data) {
         $raw = trim($json_str);
         if (preg_match('/^(ERROR|WARNING)/im', $raw)) {
             $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
