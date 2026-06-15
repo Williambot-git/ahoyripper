@@ -176,7 +176,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 
 The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1280x720 720p60 HDR 10bit"`) — use this for display when available. The `format_type` field distinguishes `"combined"` (video+audio), `"video"` (video-only), and `"audio"` (audio-only) formats. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
-The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. It is omitted from error responses to keep them lean.
+The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. It is omitted from error responses to keep them lean. `uploader_url` is the URL to the channel/uploader page as reported by yt-dlp (e.g. a YouTube channel URL), or `null` when not available from the source.
 
 **Success response:**
 ```json
@@ -186,6 +186,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "thumbnail": "https://...",
   "duration": 180,
   "uploader": "Channel Name",
+  "uploader_url": "https://www.youtube.com/channel/...",
   "platform": "YouTube",
   "source_url": "https://www.youtube.com/watch?v=..."
   "derived_filename": "Video_Title",

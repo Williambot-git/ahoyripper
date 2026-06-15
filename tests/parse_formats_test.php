@@ -314,6 +314,7 @@ function makeJson($title, $formats, $extras = []) {
         'thumbnail' => 'https://example.com/thumb.jpg',
         'duration' => 180,
         'uploader' => 'Test Channel',
+        'uploader_url' => 'https://example.com/channel/test',
     ], $extras);
     $base['formats'] = $formats;
     return json_encode($base);
@@ -348,6 +349,8 @@ test('extracts duration as integer',
     $result && ($result['duration'] ?? 0) === 180);
 test('extracts uploader',
     $result && ($result['uploader'] ?? '') === 'Test Channel');
+test('extracts uploader_url',
+    $result && ($result['uploader_url'] ?? '') === 'https://example.com/channel/test');
 test('derives filename from title (spaces become underscores)',
     $result && ($result['derived_filename'] ?? '') === 'Test_Video_Title');
 test('returns sort_applied as height',

@@ -750,6 +750,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // Surface it in the info response so the UI can display "From: YouTube" to confirm
     // the URL was parsed by the correct extractor.
     $platform = clean($data['extractor_key'] ?? '');
+    // uploader_url is the URL to the video/channel page (e.g. YouTube channel URL).
+    // Return null when absent so API consumers can distinguish "no URL provided" from
+    // empty string — both clean() to 'Unknown' but uploader_url should be null.
+    $uploader_url = isset($data['uploader_url']) && $data['uploader_url'] !== ''
+        ? (string)$data['uploader_url']
+        : null;
     // Sanitize a derived filename from the title for use in Content-Disposition.
     // yt-dlp would name the file this way; we use it so the browser saves a
     // meaningful name instead of the generic "ahoyrip.mp4".
@@ -950,6 +956,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         'thumbnail' => $thumbnail,
         'duration' => $duration,
         'uploader' => $uploader,
+        'uploader_url' => $uploader_url,
         'platform' => $platform,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
