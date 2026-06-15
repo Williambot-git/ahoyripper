@@ -13,6 +13,7 @@ services:
       - AHOY_UNLIMITED_KEY=${AHOY_UNLIMITED_KEY:-}
       - AHOY_USER_AGENT=${AHOY_USER_AGENT:-}
       - COOKIES_PATH=${COOKIES_PATH:-}
+      - QUOTA_DAILY=${QUOTA_DAILY:-5}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
