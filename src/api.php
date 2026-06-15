@@ -407,14 +407,29 @@ if (!$GLOBALS['__ytdlp_version']) {
     // stderr pipe). Without 2>&1, the probe always returns empty and the cache
     // is always stale, causing yt-dlp startup overhead on every single request.
     $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>&1') ?: '');
+    // Distinguish a real version string from a shell "command not found" error.
+    // When the binary is absent, shell_exec returns either '' (empty) or a
+    // shell error like "sh: 1: /usr/local/bin/yt-dlp: not found". The
+    // strpos($ver, 'not installed') check handles the 'not installed' string
+    // (used by the ffmpeg probe). The regex catches the shell error form.
+    // The health check (line 2510) uses strpos($version, 'not installed') ===
+    // false to detect "not installed", so this sentinel must be consistent.
+    if ($ver === '' || preg_match('/^sh: \d+: /', $ver) || strpos($ver, 'not found') !== false) {
+        $ver = 'not installed';
+    }
     $GLOBALS['__ytdlp_version'] = $ver;
     if ($version_cache_file) {
+        // Always write the cache so the health check (which re-reads the cache
+        // from disk, not from $GLOBALS) sees the correct 'not installed' sentinel
+        // on subsequent requests. Only write a valid hash when the binary exists —
+        // if md5_file fails (binary missing), write an empty hash so the next
+        // request re-probes (because empty hash !== any valid hash the binary
+        // might have after installation).
         $hash = @md5_file('/usr/local/bin/yt-dlp');
-        // Only write to cache when we successfully read the binary.
-        // If md5_file fails, skip cache write so the next request re-probes
-        // rather than persisting an invalid empty hash that masks binary upgrades.
         if ($hash !== false) {
             @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
+        } elseif ($ver === 'not installed') {
+            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => '', 'exp' => time() + 3600]));
         }
     }
 }
