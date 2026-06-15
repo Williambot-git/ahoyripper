@@ -1482,6 +1482,10 @@ switch ($action) {
                 'error_code' => 'PARSE_ERROR',
                 'request_id' => $request_id,
                 'source_url' => $url,
+                // yt_dlp_version helps users debug whether an old yt-dlp build is the culprit
+                // when parse failures occur. Included here for parity with classified-error
+                // responses (line ~1555) and success responses (line ~1580).
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
