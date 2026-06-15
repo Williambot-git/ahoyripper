@@ -685,3 +685,19 @@ footer a:hover { color: var(--color-accent); }
   .rip-input { min-width: 0; flex: 1 1 0; }
   .format-card { flex: 1 1 150px; }
 }
+
+/* Respect motion preferences — disable animations for users who have
+   configured their system to reduce motion (vestibular disorders, epilepsy,
+   or battery-saving preference). Without this, spinner, progress bar, and
+   hover-lift animations play even when the user has asked the OS to suppress
+   all motion, violating WCAG 2.3.3 (Animation from Interactions). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .format-card:hover {
+    transform: none;
+  }
+}
