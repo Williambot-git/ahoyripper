@@ -780,6 +780,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($format_note) $label .= " {$format_note}";
                 $label .= " {$ext}";
             } else {
+                // height=0 means yt-dlp didn't report a resolution (e.g. audio-video
+                // stream with no declared frame size) — fall back to extension only.
                 $label = strtoupper($ext);
             }
         } elseif ($vcodec !== 'none') {
@@ -789,6 +791,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($fps) $label .= " {$fps}fps";
                 $label .= " {$ext}";
             } else {
+                // height=0 for video-only is malformed yt-dlp metadata — omit resolution.
                 $label = "Video {$ext}";
             }
         } elseif ($acodec !== 'none') {
