@@ -2264,9 +2264,14 @@ switch ($action) {
                         if ($actual_height < $requested_height) {
                             $format_substituted = true;
                         }
-                    } elseif ($hm[1] === '<=' || $hm[1] === '<') {
+                    } elseif ($hm[1] === '<=') {
                         // Requested maximum; actual above it means yt-dlp upgraded
                         if ($actual_height > $requested_height) {
+                            $format_substituted = true;
+                        }
+                    } elseif ($hm[1] === '<') {
+                        // Requested strict maximum; actual at or above it means yt-dlp upgraded
+                        if ($actual_height >= $requested_height) {
                             $format_substituted = true;
                         }
                     } else {
