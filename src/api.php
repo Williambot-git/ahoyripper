@@ -2540,7 +2540,11 @@ switch ($action) {
                 //   form of the command — this becomes two empty adjacent quoted strings
                 //   after runYtdlp() splits on whitespace, which yt-dlp interprets as
                 //   a null/empty template and suppresses all progress output.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // --socket-timeout: yt-dlp's per-connection timeout. Set to 10s so PHP's
+                // outer 15s timeout always fires first, cleanly producing a SOURCE_TIMEOUT
+                // classification. Without this, yt-dlp uses its own default (~20s) which
+                // can outlast the 15s PHP process limit and produce CONNECTION_FAILED.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
