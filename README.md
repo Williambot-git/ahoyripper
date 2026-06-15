@@ -618,6 +618,112 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 
 ---
 
+## FAQ
+
+### General
+
+**Q: What is AhoyRipper?**
+AhoyRipper is a free, browser-based tool for downloading video and audio from the internet. It streams media directly through our servers — nothing is stored on our infrastructure. No signup, no tracking, no ads.
+
+**Q: How is this different from a browser extension or desktop app?**
+AhoyRipper runs entirely in your browser. There's nothing to install — just open the page and paste a link. Your IP address is hidden behind our servers, which can help when a site blocks your connection.
+
+**Q: What platforms are supported?**
+Every platform that [yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) — currently 1872+ sites. The supported platforms table above lists the most popular ones.
+
+**Q: Is there a daily limit?**
+The free tier allows 5 rips per day (each `info` or `download` API call counts as one rip). The quota resets at midnight UTC. Get [AhoyVPN](https://ahoyvpn.com) for unlimited rips.
+
+**Q: Does AhoyRipper store my downloaded files?**
+No. Files are streamed directly from the source to your browser. Nothing is stored on our servers — the download happens entirely between you and the source platform.
+
+---
+
+### Downloads
+
+**Q: Why did my download fail?**
+Common reasons:
+- **GEOBLOCKED** — The video is not available in our server's region. Use AhoyVPN to route through an unblocked country.
+- **LOGIN_REQUIRED** — The video requires a platform account. See the cookies section to sign in.
+- **AGE_RESTRICTED** — YouTube requires age verification. Pass your browser cookies to enable this.
+- **SOURCE_TIMEOUT** — The source site is slow or overloaded. Try audio-only (fastest) or a lower resolution.
+- **DOWNLOAD_TIMEOUT** — The file is very large. Try a smaller format or audio-only.
+- **VPN blocks** — Many sites (YouTube, TikTok, etc.) block VPN exit IPs. If you get repeated `SOURCE_FORBIDDEN` errors, try a different VPN server location.
+
+**Q: I got a "Format unavailable" error but the video exists.**
+The format you selected (e.g. 1080p60fps) may not exist in that combination. Try the next available quality down, or use the `best` format for the highest quality available.
+
+**Q: My download started but the file is empty or corrupt.**
+This is usually a server-side issue (the source returned an empty file). Try a different format — if the same error persists across formats, the source may be temporarily having issues.
+
+**Q: The audio is out of sync with the video.**
+This happens when yt-dlp has to merge separate video and audio streams. Try a "combined" format (a single file with both video and audio) if available — these don't require merging and are less prone to sync issues.
+
+**Q: Can I download an entire playlist?**
+Yes — paste the playlist URL directly. Pass `--yes-playlist` by adding it to the format field (e.g. `best --yes-playlist`). Note: each video in the playlist counts as one rip.
+
+---
+
+### Authentication & Cookies
+
+**Q: Why do some videos say "Login required"?**
+Some content (age-restricted YouTube videos, private Instagram posts, etc.) requires an active platform session. See [Passing cookies to yt-dlp](#passing-cookies-to-yt-dlp) to export your browser session and enable access.
+
+**Q: How do I export cookies?**
+1. Install a cookie exporter extension (e.g. "Export Cookies" for Chrome/Edge, or "cookies.txt" for Firefox).
+2. Log into the platform in your browser.
+3. Export the cookies in Netscape format and save the file.
+4. Mount it into AhoyRipper as described in the [cookies section](#passing-cookies-to-yt-dlp).
+
+**Q: Do cookies expire?**
+Yes. Cookies have built-in expiration dates set by each platform. Update your cookies file periodically — expired cookies cause `LOGIN_REQUIRED` errors.
+
+---
+
+### Quality & Formats
+
+**Q: What's the difference between format types?**
+- **Combined** (`bestvideo+bestaudio` or single file) — Contains both video and audio. Best for watching on a device.
+- **Video-only** — Video stream without audio. Requires a separate audio track or a media player that can merge them.
+- **Audio-only** — Audio stream only. Smallest file size, ideal for music or podcasts.
+
+**Q: Why are some formats grouped together (e.g. "bestvideo+bestaudio")?**
+YouTube and some other platforms serve video and audio as separate streams. AhoyRipper shows them as a combined option for convenience, but they're actually merged at download time using ffmpeg.
+
+**Q: What does "quality tier" mean?**
+The quality tier (`quality` field in the API) ranks formats by their quality level: 4K > 1080p > 720p > 480p > 360p > audio-only (320kbps > 256kbps > 192kbps > 128kbps). The `sort=quality` option orders formats by this tier rather than by raw resolution height.
+
+**Q: What does "format substitution" mean?**
+When you request a format that's not available (e.g. 1080p60fps doesn't exist), yt-dlp silently substitutes the nearest available alternative. AhoyRipper detects this via ffprobe and shows the `X-Format-Substituted` header so you know what you actually received vs. what you requested.
+
+**Q: What's the largest file I can download?**
+There is no hard size limit, but downloads are subject to the server timeout (5 minutes by default). Very large files (feature films, 4K content) may exceed this. Try audio-only or a lower resolution if downloads timeout.
+
+---
+
+### Rate Limits & Quotas
+
+**Q: I hit my daily limit. How do I get more?**
+Get [AhoyVPN](https://ahoyvpn.com) — it includes an unlimited AhoyRipper API key that bypasses the daily cap entirely.
+
+**Q: Can I use the API directly with my own tool?**
+Yes. The API is documented in the [API section](#api) above. Use your AhoyVPN unlimited key in the `Authorization: Bearer` header for unlimited access.
+
+---
+
+### Privacy & Security
+
+**Q: Do you log what I download?**
+Request logs are kept temporarily for operational debugging (typically ≤7 days). No media content is stored. Your IP address is partially masked in logs for privacy.
+
+**Q: My employer/school network is blocking video sites. Can AhoyRipper help?**
+Yes — your request goes through our servers, not directly to the video platform. As long as ahoyripper.com is accessible from your network, downloads should work.
+
+**Q: Is using AhoyRipper legal?**
+AhoyRipper is a tool. What you do with it is your responsibility. Do not use it to download content you don't have the right to access. Respect copyright and platform terms of service.
+
+---
+
 ## Environment Variables
 
 | Variable | Default | Description |
