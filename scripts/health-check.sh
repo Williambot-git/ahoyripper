@@ -17,12 +17,12 @@ echo ""
 
 # 1. HTTP response for health endpoint
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${API}?action=check" 2>/dev/null || echo "000")
-echo "[1/4] Health endpoint HTTP status: $HTTP_STATUS"
+echo "[1/5] Health endpoint HTTP status: $HTTP_STATUS"
 if [[ "$HTTP_STATUS" != "200" ]]; then
   echo "FAIL — check endpoint returned $HTTP_STATUS (expected 200)"
   exit 1
 fi
-echo "[1/4] ✓ Health endpoint reachable"
+echo "[1/5] ✓ Health endpoint reachable"
 
 # 2. Health response fields
 HEALTH_JSON=$(curl -s "${API}?action=health" 2>/dev/null || echo "{}")
@@ -32,7 +32,7 @@ for field in status server_time request_id yt_dlp_version ffmpeg_version; do
     exit 1
   fi
 done
-echo "[2/4] ✓ Health response contains all required fields"
+echo "[2/5] ✓ Health response contains all required fields"
 
 # 3. yt-dlp binary check via health probe
 # The API enforces origin checks (Referer must be from ahoyripper.com or ahoyvpn.com).
@@ -40,17 +40,27 @@ echo "[2/4] ✓ Health response contains all required fields"
 PROBE_JSON=$(curl -s "${API}?action=health&probe=1" \
   -H "Referer: https://ahoyripper.com/" 2>/dev/null || echo "{}")
 if echo "$PROBE_JSON" | grep -q '"yt_dlp_probe"'; then
-  echo "[3/4] ✓ yt-dlp probe endpoint available"
+  echo "[3/5] ✓ yt-dlp probe endpoint available"
 else
-  echo "[3/4] ⚠ yt-dlp probe not tested (network may be restricted)"
+  echo "[3/5] ⚠ yt-dlp probe not tested (network may be restricted)"
 fi
 
-# 4. ffmpeg binary
+# 4. yt-dlp binary check
+if command -v yt-dlp >/dev/null 2>&1; then
+  YTDLP_VERSION=$(yt-dlp --version 2>&1 | head -1)
+  echo "[4/5] ✓ yt-dlp: $YTDLP_VERSION"
+else
+  echo "FAIL — yt-dlp not found in PATH"
+  exit 1
+fi
+
+# 5. ffmpeg binary
 if command -v ffmpeg >/dev/null 2>&1; then
   FFMPEG_VERSION=$(ffmpeg -version 2>&1 | head -1)
-  echo "[4/4] ✓ ffmpeg: $FFMPEG_VERSION"
+  echo "[5/5] ✓ ffmpeg: $FFMPEG_VERSION"
 else
-  echo "[4/4] ⚠ ffmpeg: not found in PATH"
+  echo "FAIL — ffmpeg not found in PATH"
+  exit 1
 fi
 
 echo ""
