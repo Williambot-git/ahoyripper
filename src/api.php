@@ -1548,6 +1548,7 @@ switch ($action) {
                 'DOWNLOAD_EMPTY' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
                 'DOWNLOAD_CANCELLED' => 499,
+                'MISSING_URL' => 400, 'MISSING_FORMAT' => 400,
                 'FORMAT_UNAVAILABLE' => 422,
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
                 'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
