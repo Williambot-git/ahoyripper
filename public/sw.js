@@ -30,6 +30,23 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => cache.addAll(STATIC_ASSETS))
+      .catch((err) => {
+        // Log the failure for debugging, but do not throw — a failed install
+        // prevents the SW from activating and blocks all subsequent updates.
+        // Surface the error so it's visible in DevTools > Service Workers.
+        console.warn('[SW] Install failed to cache some assets:', err);
+        // Let the SW activate even if caching partially failed — the browser
+        // will serve from network for any assets not in the cache.
+      })
+      // Also clean up stale caches from previous versions immediately so the
+      // activate event doesn't need to wait. This runs alongside the cache
+      // install and doesn't block activation.
+      .then(() => caches.keys())
+      .then((names) => Promise.all(
+        names
+          .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE && n !== SHELL_CACHE)
+          .map((n) => caches.delete(n))
+      ))
   );
   // Do NOT skipWaiting here — let the frontend decide when to activate.
   // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
