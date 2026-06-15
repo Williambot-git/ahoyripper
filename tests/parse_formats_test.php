@@ -138,6 +138,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
     $uploader = clean($data['uploader'] ?? '');
+    $uploader_url = isset($data['uploader_url']) && $data['uploader_url'] !== ''
+        ? (string)$data['uploader_url']
+        : null;
     $platform = clean($data['extractor_key'] ?? '');
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
@@ -299,6 +302,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         'thumbnail' => $thumbnail,
         'duration' => $duration,
         'uploader' => $uploader,
+        'uploader_url' => $uploader_url,
         'platform' => $platform,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
