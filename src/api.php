@@ -1981,6 +1981,8 @@ switch ($action) {
                     'error_code' => 'DOWNLOAD_TIMEOUT',
                     'retry_after' => $retry_ts,
                     'request_id' => $request_id,
+                    'source_url' => $url,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 ]);
                 exit;
             }
