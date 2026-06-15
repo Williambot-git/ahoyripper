@@ -98,7 +98,8 @@ self.addEventListener('fetch', (event) => {
   // API calls — never cache (must always be live).
   if (url.pathname.startsWith('/src/api.php')) return;
 
-  // Google Fonts — cache with network fallback.
+  // Google Fonts — cache with network fallback and offline fallback.
+  // Falls back to cache when network is unavailable (e.g. offline, airplane mode).
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -110,7 +111,9 @@ self.addEventListener('fetch', (event) => {
             caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
           }
           return response;
-        });
+        }).catch(() => caches.match(request))
+        // If both network and cache miss fail, return nothing — the browser
+        // will use its own font fallback, keeping the page legible.
       })
     );
     return;
