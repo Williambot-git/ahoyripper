@@ -14,6 +14,8 @@ services:
       - AHOY_USER_AGENT=${AHOY_USER_AGENT:-}
       - COOKIES_PATH=${COOKIES_PATH:-}
       - QUOTA_DAILY=${QUOTA_DAILY:-5}
+      - YTDLP_TIMEOUT=${YTDLP_TIMEOUT:-45}
+      - YTDLP_DOWNLOAD_TIMEOUT=${YTDLP_DOWNLOAD_TIMEOUT:-300}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
