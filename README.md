@@ -601,7 +601,10 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 
 ### Still not working?
 
-1. Update yt-dlp: `pip install -U yt-dlp`
+1. Update yt-dlp: Re-run `scripts/install-deps.sh` (the script detects the current install method and updates accordingly), or manually replace the binary:
+   ```
+   curl -L -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && chmod +x /usr/local/bin/yt-dlp
+   ```
 2. Try a different format (audio-only often works when video fails)
 3. Try a different video from the same platform (rules out site-wide blocks)
 4. Check [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — the platform may have added/changed its API
@@ -752,7 +755,7 @@ The default key is only suitable for local development — never deploy with it 
 ## Requirements
 
 - Ubuntu 22.04+ (or any Linux with apt)
-- yt-dlp (pip install yt-dlp)
+- yt-dlp (standalone binary — see `scripts/install-deps.sh` for the automated install/update script)
 - ffmpeg
 - PHP 8.x + php-fpm + php-mbstring + php-curl
 - Nginx
