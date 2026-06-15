@@ -481,6 +481,33 @@ else
 fi
 
 echo ""
+echo "==> Checking nginx-docker.conf includes security.txt (RFC 9116)... "
+if grep -q "location = /.well-known/security.txt" deploy/nginx-docker.conf; then
+    echo "  ✓ nginx-docker.conf has security.txt location"
+else
+    echo "  ✗ nginx-docker.conf missing security.txt location (RFC 9116 compliance)"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking nginx-docker.conf includes .well-known/ directory location... "
+if grep -q "location /.well-known/" deploy/nginx-docker.conf; then
+    echo "  ✓ nginx-docker.conf has .well-known/ directory location"
+else
+    echo "  ✗ nginx-docker.conf missing .well-known/ directory location"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking security.txt MIME type in nginx-docker.conf (text/plain per RFC 9116)... "
+if grep -A 3 "location = /.well-known/security.txt" deploy/nginx-docker.conf | grep -q 'Content-Type text/plain'; then
+    echo "  ✓ security.txt served as text/plain (RFC 9116)"
+else
+    echo "  ✗ security.txt missing Content-Type text/plain (browsers/scanners expect text/plain)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking Reporting-Endpoints header in nginx-docker.conf server-level..."
 # nginx-docker.conf must have Reporting-Endpoints at server level (not just in the
 # CSP Reporting API location block) so the modern Reporting API works for server-level
