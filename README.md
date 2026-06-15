@@ -214,7 +214,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "ext": "m4a",
       "filesize_mb": 2.0,
       "height": null,
-      "quality": null,
+      "quality": 128,
       "fps": null,
       "tbr": 128,
       "abr": 128,
