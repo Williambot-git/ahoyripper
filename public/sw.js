@@ -8,9 +8,17 @@
  * The SW is scoped to '/' so it intercepts all requests under the
  * root — including /src/api.php calls, which will fail offline as
  * expected (the API is never cached).
+ *
+ * Cache versioning: CACHE_VERSION is replaced at deploy time by
+ * the scripts/generate-sw-version.php script (run by install-deps.sh
+ * or any CI/CD pipeline). It is set to the short git commit hash
+ * (e.g. 'a3f9b2c') so that any code change bumps the cache version,
+ * triggering SW reinstall and fresh asset caching for all PWA users.
+ * If the replacement fails (e.g. running outside a git repo or the
+ * script wasn't run), the fallback 'unversioned' string ensures the
+ * SW still installs and functions — it simply won't auto-update.
  */
-
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = '9f5681a';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 

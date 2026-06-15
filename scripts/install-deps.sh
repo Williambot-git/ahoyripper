@@ -143,3 +143,13 @@ echo "==> All deps installed."
 echo "  - yt-dlp: $(yt-dlp --version 2>&1 | head -1)"
 echo "  - ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
 echo "  - PHP: $(php -v 2>&1 | head -1)"
+
+echo "==> Generating PWA service worker cache version..."
+# Replace {{CACHE_VERSION}} in sw.js with the current git commit hash.
+# This bumps the SW cache version on every deploy so PWA users fetch fresh assets.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if php "$SCRIPT_DIR/generate-sw-version.php"; then
+    echo "  SW cache version updated."
+else
+    echo "  ! SW version update skipped (not in git repo or script not found — non-fatal)."
+fi
