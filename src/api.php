@@ -630,12 +630,13 @@ function classifyYtdlpError($raw_err) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
 
-    // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+    // "process timed out" is produced by the PHP-side timeout in runYtdlp() (api.php).
     // Distinct from connection-level "timed out" which implies a network failure.
-    // Uses INFO_TIMEOUT (configurable via YTDLP_TIMEOUT env var, default 45s).
-    // This means the server reached the source but the source was too slow to respond
-    // within the allowed window. Return 504 so the client distinguishes it from
-    // CONNECTION_FAILED (502) which implies a network or DNS issue on our end.
+    // The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT (configurable
+    // via YTDLP_TIMEOUT env var, default 45s) and terminates the yt-dlp process.
+    // This means the server reached the source but it was too slow to respond within
+    // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
+    // (502) which implies a network or DNS issue on our end.
     if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
     }
@@ -1719,6 +1720,18 @@ switch ($action) {
                 fclose($dl_fp);
                 http_response_code(429);
                 header('Retry-After: ' . max(1, $dl_reset_ts - time()));
+                // Include download rate-limit headers so clients can distinguish this
+                // from the per-minute rate limit without parsing the error body.
+                // Mirrors the X-DL-RateLimit-* family set on successful responses.
+                header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                header('X-DL-RateLimit-Remaining: 0');
+                header('X-DL-RateLimit-Reset: ' . $dl_reset_ts);
+                header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                // Standard X-RateLimit-* family for generic API consumers.
+                header('X-RateLimit-Limit: ' . $dl_rate_limit);
+                header('X-RateLimit-Remaining: 0');
+                header('X-RateLimit-Reset: ' . $dl_reset_ts);
+                header('X-RateLimit-Window: ' . $dl_rate_window);
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
