@@ -2210,13 +2210,26 @@ switch ($action) {
         // Run ffprobe on the actual file to get real codec and resolution metadata,
         // then compare against the requested format_id to determine if substitution occurred.
         // Only flag substitution when it materially changes the quality the user selected.
+        //
+        // Skip ffprobe entirely for audio-only formats — there is no video stream to
+        // probe. Since ffprobe uses -select_streams v:0, it will always return zero
+        // streams for audio files, so the substitution check can never fire. Avoiding
+        // the unnecessary proc_open + ffprobe call saves ~50-100ms per audio download.
+        // yt-dlp never substitutes audio-only formats (bitrate is a tier, not a codec),
+        // so no substitution detection is needed for these cases.
         $actual_height = null;
         $actual_width = null;
         $actual_video_codec = null;
         $format_substituted = false;
         $substituted_label = null;
         $ffprobe_bin = '/usr/bin/ffprobe';
-        if (is_file($actual_file) && is_executable($ffprobe_bin)) {
+        // Probe only when there is a video stream to check: skip for audio-only
+        // format IDs (bestaudio, any vcodec=none) and bare audio codecs.
+        $is_audio_only_format = ($acodec !== 'none' && $vcodec === 'none');
+        $is_bare_audio_id = strpos($format_id, 'bestaudio') !== false
+            || preg_match('/^(140|141|251|250|249|171|172|18|139)$/', $format_id);
+        if (!$is_audio_only_format && !$is_bare_audio_id
+            && is_file($actual_file) && is_executable($ffprobe_bin)) {
             // JSON probe — video stream only, no audio needed for substitution check.
             // Exit code 0 is required; ffprobe returns non-zero for unreadable files.
             $probe_cmd = [
