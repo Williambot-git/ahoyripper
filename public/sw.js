@@ -18,7 +18,7 @@
  * script wasn't run), the fallback 'unversioned' string ensures the
  * SW still installs and functions — it simply won't auto-update.
  */
-const CACHE_VERSION = '9f5681a';
+const CACHE_VERSION = '{{CACHE_VERSION}}';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 
