@@ -2612,10 +2612,10 @@ switch ($action) {
             }
         }
 
+        $sys = getSystemMetrics();
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
 
-        $sys = getSystemMetrics();
         $out = [
             'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
@@ -2630,6 +2630,10 @@ switch ($action) {
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_ttl_seconds' => $ffmpeg_cache_ttl,
+            // System metrics are fetched once by getSystemMetrics() above — do not
+            // re-read /proc here. The function checks /tmp for disk space (where
+            // logs and caches live in containerized deployments) rather than the
+            // root partition, which is the correct location for this application's health.
             'server_uptime_seconds' => $sys['server_uptime_seconds'],
             'load_avg' => $sys['load_avg'],
             'memory_available_pct' => $sys['memory_available_pct'],
@@ -2685,35 +2689,11 @@ switch ($action) {
         // omitted from the response (not null, absent) so the response shape
         // is stable and clients can distinguish "probe disabled" from errors.
 
-        // System resource metrics (Linux-only, gracefully omitted on other platforms)
-        // Uptime — first line of /proc/uptime is uptime in seconds (format: "X.Y Y")
-        $uptime_bytes = @file_get_contents('/proc/uptime');
-        if ($uptime_bytes !== false) {
-            $parts = preg_split('/\s+/', trim($uptime_bytes));
-            if (isset($parts[0]) && is_numeric($parts[0])) {
-                $out['server_uptime_seconds'] = (int)floor((float)$parts[0]);
-            }
-        }
-        if (function_exists('sys_getloadavg')) {
-            $load = sys_getloadavg();
-            if ($load !== false) {
-                $out['load_avg'] = array_map(fn($v) => round($v, 2), $load);
-            }
-        }
-
-        $meminfo = @file_get_contents('/proc/meminfo');
-        if ($meminfo) {
-            // Match "MemAvailable:" (available since kernel 3.14) or fall back to MemFree
-            if (preg_match('/MemAvailable:\s+(\d+)\s+kB/', $meminfo, $avail_m) &&
-                preg_match('/MemTotal:\s+(\d+)\s+kB/', $meminfo, $total_m)) {
-                $out['memory_available_pct'] = round(($avail_m[1] / $total_m[1]) * 100, 1);
-            }
-        }
-
-        $free = @disk_free_space('/');
-        if ($free !== false) {
-            $out['disk_free_gb'] = round($free / (1024 * 1024 * 1024), 2);
-        }
+        // System metrics (uptime, load, memory, disk) were fetched once by
+        // getSystemMetrics() at the start of the health case — use those values
+        // directly. The disk_free_gb from getSystemMetrics() uses /tmp (where
+        // logs and caches live), which is the correct partition for this app's
+        // health check rather than the root partition.
 
         // Rate-limit headers for the health endpoint — signals to clients that
         // this endpoint is not subject to download rate limiting (X-DL-RateLimit
