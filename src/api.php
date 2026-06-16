@@ -2400,7 +2400,12 @@ switch ($action) {
             // back to JSON so the error response has the correct Content-Type.
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to read downloaded file.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+            echo json_encode([
+                'error' => 'Failed to read downloaded file.',
+                'request_id' => $request_id,
+                'source_url' => $url,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         while (!feof($fp) && !connection_aborted()) {
