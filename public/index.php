@@ -127,31 +127,61 @@ header('X-Request-ID: ' . $page_request_id);
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "AhoyRipper",
-    "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
-    "url": "https://ahoyripper.com",
-    "applicationCategory": "MultimediaApplication",
-    "operatingSystem": "Any",
-    "browserRequirements": "Requires JavaScript and a modern web browser.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/OnlineOnly",
-      "seller": {
-        "@type": "Organization",
-        "name": "AhoyVPN"
-      }
-    },
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://ahoyripper.com/?url={searchTerms}"
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "AhoyRipper",
+        "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
+        "url": "https://ahoyripper.com",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and a modern web browser.",
+        "softwareVersion": "1.0.0",
+        "author": {
+          "@type": "Organization",
+          "name": "AhoyVPN",
+          "url": "https://ahoyvpn.com"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/OnlineOnly",
+          "seller": {
+            "@type": "Organization",
+            "name": "AhoyVPN"
+          }
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://ahoyripper.com/?url={searchTerms}"
+          },
+          "query-input": "required name=searchTerms"
+        }
       },
-      "query-input": "required name=searchTerms"
-    }
+      {
+        "@type": "SoftwareApplication",
+        "name": "AhoyRipper",
+        "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
+        "url": "https://ahoyripper.com",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "softwareVersion": "1.0.0",
+        "author": {
+          "@type": "Organization",
+          "name": "AhoyVPN",
+          "url": "https://ahoyvpn.com"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/OnlineOnly"
+        }
+      }
+    ]
   }
   </script>
 

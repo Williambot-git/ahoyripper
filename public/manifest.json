@@ -41,7 +41,16 @@
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Rip a Video",
+      "short_name": "Rip Video",
+      "description": "Download video or audio from any supported platform",
+      "url": "/?utm_source=homescreen&utm_medium=shortcut",
+      "icons": [{ "src": "/favicon-180.png", "sizes": "180x180" }]
     }
   ]
 }
