@@ -136,26 +136,47 @@ docker compose down && docker compose up -d
 
 ```
 ahoyripper/
-├── public/
-│   ├── index.php          # Main page
-│   └── robots.txt         # SEO + AI-crawler blocking
+├── public/                      # Web root (served by nginx)
+│   ├── index.php               # Main page
+│   ├── manifest.json           # PWA manifest (installable web app)
+│   ├── sw.js                    # Service worker (PWA offline support)
+│   ├── robots.txt               # SEO + AI-crawler blocking
+│   ├── 404.html                 # Custom 404 error page
+│   ├── sitemap.xml              # XML sitemap for search engines
+│   ├── opensearch.xml           # OpenSearch description (browser search)
+│   ├── og-image.png             # Open Graph social share image
+│   ├── og-image.svg             # SVG source for og-image
+│   ├── favicon.ico              # Favicon (legacy browsers)
+│   ├── favicon.svg              # Favicon (vector)
+│   ├── favicon-180.png          # Apple Touch icon (180×180)
+│   ├── favicon-512.png          # PWA icon (512×512)
+│   ├── favicon-512.svg          # SVG source for PWA icon
+│   ├── AhoyMonthly.png          # Brand art
+│   ├── AhoyMonthly_transparent.png
+│   └── .well-known/
+│       └── security.txt         # RFC 9116 security contact
 ├── src/
-│   ├── style.css          # CSS (AhoyVPN brand)
-│   └── api.php            # yt-dlp API (info, download)
+│   ├── api.php                  # yt-dlp API (info, download, health)
+│   └── style.css                # CSS (AhoyVPN dark theme)
 ├── deploy/
-│   ├── nginx.conf         # Nginx config (production)
-│   └── nginx-docker.conf  # Nginx config (Docker)
+│   ├── nginx.conf               # Nginx config (production, VPS)
+│   └── nginx-docker.conf        # Nginx config (Docker standalone)
 ├── scripts/
-│   └── install-deps.sh    # Dependency installer
+│   ├── install-deps.sh          # Dependency installer + yt-dlp updater
+│   ├── health-check.sh          # Deployment health verification script
+│   └── generate-sw-version.php  # PWA SW cache version generator
 ├── tests/
-│   ├── run.sh                 # Unified test runner (runs all suites)
-│   ├── sanity.sh             # Shell-based sanity / regression checks
-│   ├── api_test.php          # Unit tests for standalone API functions
-│   └── parse_formats_test.php # Unit tests for parseFormats()
-├── docker-compose.yml
-├── Dockerfile
-├── README.md
-└── LICENSE
+│   ├── run.sh                   # Unified test runner (runs all suites)
+│   ├── sanity.sh                # Shell-based sanity / regression checks
+│   ├── api_test.php             # Unit tests for standalone API functions
+│   └── parse_formats_test.php   # Unit tests for parseFormats()
+├── .env.example                 # Environment variable template (Docker)
+├── .dockerignore                # Docker build context exclusions
+├── CHANGELOG.md                 # Project version history
+├── docker-compose.yml           # Docker Compose configuration
+├── Dockerfile                   # Docker image definition
+├── README.md                    # This file
+└── LICENSE                      # GPL-3.0 license
 ```
 
 > **Note:** `robots.txt` lives in `public/` and is also served at the root by nginx — do not place a separate `robots.txt` at the project root.
