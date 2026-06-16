@@ -1283,7 +1283,7 @@ switch ($action) {
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
-                    'retry_after' => $reset_timestamp,
+                    'retry_after' => max(1, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
                 ]);
                 exit;
@@ -1841,7 +1841,7 @@ switch ($action) {
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
-                    'retry_after' => $reset_timestamp,
+                    'retry_after' => max(1, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
                 ]);
                 exit;
@@ -2033,7 +2033,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
-                    'retry_after' => $retry_ts,
+                    'retry_after' => max(1, (int)($retry_ts - time())),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
