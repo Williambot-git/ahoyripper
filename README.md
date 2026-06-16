@@ -310,7 +310,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 ### Download a format
 ```
-GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>
+GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>&playlist=<0|1>
 Authorization: Bearer ***
 ```
 
@@ -592,7 +592,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 ### Still stuck?
 
 - **VPN-related blocks**: Many sites (YouTube, TikTok, etc.) block requests from VPN exit nodes. If you get repeated `SOURCE_FORBIDDEN` or `CONNECTION_FAILED` errors, try switching to a different VPN server location.
-- **Playlist URLs**: Use the direct video URL, not the playlist page. Pass `--yes-playlist` to yt-dlp to fetch playlists — note this counts as one rip per video in the playlist.
+- **Playlist URLs**: Use the playlist URL and pass `&playlist=1` on the download endpoint. Note this counts as one rip per video in the playlist.
 - **Instagram private posts**: Requires a valid Instagram session cookie. See [Passing cookies to yt-dlp](#passing-cookies-to-yt-dlp).
 - **TikTok without watermark**: Use the TikTok app to copy the link — the official share link gives the cleanest URL. Watermark removal depends on TikTok's current implementation.
 - **SoundCloud**: Public tracks work out of the box. Private tracks or tracks behind login walls require cookies.
@@ -687,7 +687,7 @@ This is usually a server-side issue (the source returned an empty file). Try a d
 This happens when yt-dlp has to merge separate video and audio streams. Try a "combined" format (a single file with both video and audio) if available — these don't require merging and are less prone to sync issues.
 
 **Q: Can I download an entire playlist?**
-Yes — paste the playlist URL directly. Pass `--yes-playlist` by adding it to the format field (e.g. `best --yes-playlist`). Note: each video in the playlist counts as one rip.
+Yes — paste the playlist URL and add `&playlist=1` to the download URL (e.g. `?action=download&url=...&format=best&playlist=1`). Each video in the playlist counts as one rip.
 
 ---
 

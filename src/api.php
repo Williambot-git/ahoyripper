@@ -1959,12 +1959,19 @@ switch ($action) {
         // to cleanly terminate the process and emit a classified DOWNLOAD_TIMEOUT error.
         // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's timeout
         // and produce an unclassified error instead of DOWNLOAD_TIMEOUT.
+        // --playlist: controls whether to download a playlist (all videos) or a single
+        // video. yt-dlp treats --yes-playlist and --no-playlist as mutually exclusive
+        // flags; the last one wins. Pass --no-playlist by default (playlist=0, the
+        // default) so single-video URLs always get one video. Pass --yes-playlist when
+        // playlist=1 is explicitly requested. Note: passing --yes-playlist via the
+        // format field does NOT work — playlist flags must appear BEFORE the URL.
+        $playlist = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
         $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
-            '--no-playlist',
+            $playlist,
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
