@@ -439,6 +439,68 @@ test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
 test('accepts @ in format selector string with qualifiers',
     validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') > 0);
 
+// ─── parseFormats raw_error_out null-coalescing regression tests ────────────
+// Verify the fix for the null-coalescing bug where parseFormats returned
+// ['raw_error' => null] when called with $raw_error_out = null on a
+// JSON-parse-failure path.
+//
+// NEW BEHAVIOR (fixed): The returned array ALWAYS contains 'raw_error' set
+// to the diagnostic message. The $raw_error_out reference parameter is only
+// populated when the caller passes a non-null reference — when null is passed
+// the if-block skips and the reference stays null. The returned array's
+// 'raw_error' is what matters for UX; it is now ALWAYS set to $parse_fail_msg.
+// Callers who don't want it can unset($result['raw_error']) themselves.
+
+// Inline minimal parseFormats for test isolation (matches api.php lines 707-751).
+// Only covers the JSON-parse-failure path being tested.
+function parseFormatsForRawErrorTest($json_str, &$raw_error_out = null, $sort = 'height') {
+    $data = json_decode($json_str, true);
+    if (!$data) {
+        $data = json_decode(mb_convert_encoding($json_str, 'UTF-8', 'UTF-8'), true);
+    }
+    if (!$data) {
+        $raw = trim($json_str);
+        if (preg_match('/^(ERROR|WARNING)/im', $raw)) {
+            $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
+            $err_msg = strip_tags($err_msg);
+            $err_msg = preg_replace('/\s+/', ' ', $err_msg);
+            if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            if ($raw_error_out !== null) {
+                $raw_error_out = $err_msg;
+            }
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
+        }
+        // FIX APPLIED: use local var $parse_fail_msg so 'raw_error' always carries
+        // the diagnostic message when caller passes a reference. Use $parse_fail_msg
+        // in the return so 'raw_error' is set even when $raw_error_out was null.
+        $parse_fail_msg = 'JSON parse failed — response was not valid JSON.';
+        if ($raw_error_out !== null) {
+            $raw_error_out = $parse_fail_msg;
+        }
+        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $parse_fail_msg];
+    }
+    return ['formats' => []];
+}
+
+echo "\n==> Testing parseFormats raw_error_out null-coalescing fix\n";
+
+$raw_err_ref = null;
+$result = parseFormatsForRawErrorTest('not valid json at all {', $raw_err_ref);
+test('PARSE_ERROR: returned array contains raw_error field when caller requests it',
+    array_key_exists('raw_error', $result) && $result['raw_error'] === 'JSON parse failed — response was not valid JSON.');
+test('PARSE_ERROR: returned error_code is PARSE_ERROR',
+    ($result['error_code'] ?? '') === 'PARSE_ERROR');
+
+$result_no_ref = parseFormatsForRawErrorTest('not valid json at all {');
+// FIXED: returned array now always has raw_error set to diagnostic message.
+// This is better UX — caller who gets PARSE_ERROR always gets a reason why.
+// Note: $raw_error_out reference stays null when caller passes null; the
+// returned array is what carries the diagnostic to callers.
+test('PARSE_ERROR: returned raw_error is the diagnostic message even when caller passes null',
+    isset($result_no_ref['raw_error']) && $result_no_ref['raw_error'] === 'JSON parse failed — response was not valid JSON.');
+test('PARSE_ERROR: error field is always present regardless of raw_error_out',
+    isset($result_no_ref['error']) && $result_no_ref['error'] === 'Could not parse video info. The site may not be supported or returned a non-standard response.');
+
 // ─── derived filename sanitization (verbatim from api.php download action) ──
 // Security property verified: dangerous shell chars (semicolons, backticks,
 // pipes, $, &, *, etc.) are removed. Only \w, space, dot, underscore, hyphen

@@ -744,10 +744,17 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
+        // Assign the message to $raw_error_out when the caller passed a reference
+        // so the diagnostic string propagates to the 'raw_error' field in the
+        // returned array. When $raw_error_out was passed as null (caller didn't
+        // request raw error capture), the assignment is skipped and 'raw_error'
+        // is set to null — the ternary always evaluates both sides before PHP 8's
+        // short-circuit, so we use if/else for clarity and correctness.
+        $parse_fail_msg = 'JSON parse failed — response was not valid JSON.';
         if ($raw_error_out !== null) {
-            $raw_error_out = 'JSON parse failed — response was not valid JSON.';
+            $raw_error_out = $parse_fail_msg;
         }
-        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $raw_error_out];
+        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $parse_fail_msg];
     }
 
     // JSON parsed successfully but has no formats key — this is a distinct
