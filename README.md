@@ -342,23 +342,30 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 }
 ```
 
-**Download error responses** (any of these may be returned when the rip itself fails):
+**Download error responses** (any of these may be returned — from pre-rip validation failures like missing URLs/keys, to source-site errors like geo-blocking or timeouts, through to rip-time failures like empty files or cancelled transfers):
 
 | Code | `error_code` | Meaning |
 |------|--------------|---------|
+| `401` | `INVALID_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
+| `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
 | `422` | `MISSING_URL` | No URL was provided on the download request. |
 | `422` | `MISSING_FORMAT` | No format was selected on the download request. |
 | `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
+| `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `401` | `LOGIN_REQUIRED` | Video requires login or subscription |
 | `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `404` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
+| `404` | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
+| `422` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
 | `429` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
 | `403` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) — try a different format or use AhoyVPN |
 | `404` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted |
 | `502` | `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues |
 | `502` | `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error |
+| `502` | `SSL_ERROR` | SSL/TLS error when connecting to the source — try again or use AhoyVPN |
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `502` | `CONNECTION_FAILED` | Could not connect to the source |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
