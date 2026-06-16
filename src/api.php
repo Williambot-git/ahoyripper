@@ -749,13 +749,16 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // with no fallback, or a site that returned non-standard JSON).
     // Return a classified PARSE_ERROR so the client shows a specific message.
     if (!array_key_exists('formats', $data)) {
+        $no_formats_msg = 'No formats returned — site may be unsupported or returned non-standard metadata.';
         if ($raw_error_out !== null) {
-            $raw_error_out = 'No formats returned — site may be unsupported or returned non-standard metadata.';
+            $raw_error_out = $no_formats_msg;
         }
         return [
             'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
             'error_code' => 'PARSE_ERROR',
-            'raw_error' => $raw_error_out,
+            // Use the computed message when caller didn't pass $raw_error_out (null).
+            // Mirrors the pattern used in the JSON-parse-failure case above.
+            'raw_error' => $raw_error_out ?? $no_formats_msg,
         ];
     }
 
