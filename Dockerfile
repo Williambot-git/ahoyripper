@@ -20,9 +20,9 @@ RUN apt-get update && apt-get install -y \
     # Install yt-dlp as a standalone binary (no Python dependency needed).
     # The binary is the recommended installation method per yt-dlp docs and
     # avoids pip installation complexity, reduces image size, and is faster.
-    && curl -L -o /usr/local/bin/yt-dlp \
+    && curl -fL -o /usr/local/bin/yt-dlp \
         https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    && curl -L -o /tmp/SHA2-256SUMS \
+    && curl -fL -o /tmp/SHA2-256SUMS \
         https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS \
     # sha256sum exits 0 when the checksum matches, 1 when it doesn't, and 2
     # when the checksum file itself couldn't be read. yt-dlp publishes the full
