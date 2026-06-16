@@ -1658,7 +1658,7 @@ switch ($action) {
             ]);
             exit;
         }
-// yt-dlp format selectors use characters like [ ] + = ~ * for conditional
+        // yt-dlp format selectors use characters like [ ] + = ~ * for conditional
         // selection and output template merging (e.g. "bestvideo[height>=720]+bestaudio").
         // yt-dlp output templates use %(name)s and %(name)0d escape sequences
         // for dynamic filenames. Block shell metacharacters that could be
@@ -1667,7 +1667,7 @@ switch ($action) {
         // for output template expansion; single-quote for fallback priority like 22/18;
         // asterisk for glob patterns like bestvideo*). Safe when passed as array
         // element to proc_open with bypass_shell=true, bypassing the shell entirely).
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\[\\]+\/-~()*%@!\'"]+$/', $format_id)) {
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\[\\]+\/-~()*%@!\'\"]+$/', $format_id)) {
             http_response_code(400);
             logRequest('download', 400, ['reason' => 'invalid_format_id']);
             echo json_encode([
