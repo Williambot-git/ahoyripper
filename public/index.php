@@ -31,6 +31,11 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 // header, but the PHP layer mirrors it here so it is present regardless of how
 // index.php is served (PHP built-in server, reverse proxy bypass, etc.).
 header('X-Content-Type-Options: nosniff');
+// Referrer-Policy: when AhoyRipper links out to third-party CDNs (YouTube thumbnails,
+// Twitter video, TikTok covers, etc.), only send the origin (not the full URL)
+// to those destinations. Prevents video URLs from leaking as referrer data to
+// third-party servers. Mirrors the header set by nginx and api.php.
+header('Referrer-Policy: strict-origin-when-cross-origin');
 // Request correlation ID — enables cross-layer log correlation (nginx, PHP, browser).
 header('X-Request-ID: ' . $page_request_id);
 ?>
