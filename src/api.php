@@ -2460,7 +2460,11 @@ switch ($action) {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Cache-Control: no-cache');
-        header('Connection: close');
+        // Connection: close is intentionally NOT set — the check endpoint is a
+        // lightweight JSON ping meant for frequent calls (Docker healthchecks every
+        // 10s, load-balancer probes). Closing the connection forces a new TCP
+        // handshake on every request, negating keep-alive pooling benefits.
+        // See lines 323-328 for the full rationale.
         // Suppress X-Powered-By at the PHP layer for defense-in-depth parity
         // with nginx's fastcgi_hide_header. The check action bypasses the top-of-
         // script header block by sending its own response, so this must be set here.
