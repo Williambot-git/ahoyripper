@@ -763,6 +763,20 @@ The default key is only suitable for local development — never deploy with it 
 
 ---
 
+## Security
+
+AhoyRipper follows [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) (security.txt). A machine-readable security contact is available at:
+
+```
+https://ahoyripper.com/.well-known/security.txt
+```
+
+**Responsible disclosure:** If you discover a security vulnerability, please report it to `security@ahoyripper.com`. Include a description of the issue and any relevant details. You can expect a response within 48–72 hours on business days.
+
+**Scope:** Reports are accepted for the AhoyRipper application, its API, and infrastructure. Do not attempt to exploit vulnerabilities for research purposes — report only.
+
+---
+
 ## Legal
 
 For personal use only. Respect copyright. This tool is provided as-is. DMCA requests: dmca@ahoyvpn.com
