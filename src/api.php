@@ -1705,8 +1705,12 @@ switch ($action) {
         // ─── Download rate limiting (atomic via flock) ───
         $dl_rate_limit = 10; // download requests per minute
         $dl_rate_window = 60;
+        // Separate file from the request rate limiter to prevent the download
+        // action's write (which runs after the request gate check) from wiping
+        // the request gate's counter and causing spurious rate-limit hits.
+        $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
 
-        $dl_fp = fopen($rate_file, 'c+');
+        $dl_fp = fopen($dl_rate_file, 'c+');
         if (!$dl_fp) {
             http_response_code(503);
             header('Retry-After: 5');
