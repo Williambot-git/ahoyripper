@@ -62,11 +62,40 @@ else
         # Last resort: download the standalone binary directly.
         # The explicit || exit 1 ensures a failed download (network error, 404, etc.)
         # does not silently proceed with a stale or missing binary.
-        curl -L -o /usr/local/bin/yt-dlp \
-            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-            || { echo "  ! Standalone binary download failed (network or server error)."; exit 1; }
-        [ -s /usr/local/bin/yt-dlp ] || { echo "  ! Downloaded file is empty or missing."; exit 1; }
+        # Verify the SHA256 checksum against yt-dlp's published SHA2-256SUMS file
+        # to ensure the binary is authentic and has not been tampered with.
+        echo "  Downloading SHA2-256SUMS for binary verification..."
+        if ! curl -fL -o /tmp/SHA2-256SUMS_install \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS; then
+            echo "  ! SHA2-256SUMS download failed — cannot verify binary integrity."
+            exit 1
+        fi
+        YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS_install 2>/dev/null | awk '{print $1}')
+        if [ -z "$YT_DLP_HASH" ]; then
+            echo "  ! yt-dlp hash not found in SHA2-256SUMS — cannot verify binary."
+            rm -f /tmp/SHA2-256SUMS_install
+            exit 1
+        fi
+        echo "  Hash: $YT_DLP_HASH"
+        echo "  Downloading yt-dlp standalone binary..."
+        if ! curl -fL -o /usr/local/bin/yt-dlp \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp; then
+            echo "  ! Standalone binary download failed (network or server error)."
+            rm -f /tmp/SHA2-256SUMS_install
+            exit 1
+        fi
+        [ -s /usr/local/bin/yt-dlp ] || { echo "  ! Downloaded file is empty or missing."; rm -f /tmp/SHA2-256SUMS_install; exit 1; }
         chmod +x /usr/local/bin/yt-dlp
+        # Verify the binary against the published SHA256 checksum.
+        # sha256sum exits 0 on match, 1 on mismatch, 2 if the checksum file couldn't be read.
+        # A mismatch means the binary was corrupted or tampered with — fail hard.
+        echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c - || {
+            echo "  ! SHA256 mismatch — binary may be corrupted or tampered with."
+            rm -f /usr/local/bin/yt-dlp /tmp/SHA2-256SUMS_install
+            exit 1
+        }
+        echo "  SHA256 verified."
+        rm -f /tmp/SHA2-256SUMS_install
         # Verify the binary is actually executable and runs without error.
         # A corrupt download (partial file, wrong binary) fails here before proceeding.
         if ! yt-dlp --version > /dev/null 2>&1; then
@@ -102,10 +131,33 @@ if command -v yt-dlp &>/dev/null; then
         fi
         # If pip reinstall didn't fix it, grab the standalone binary
         if ! yt-dlp --version &>/dev/null; then
-            echo "  Installing standalone yt-dlp binary..."
-            curl -L -o /usr/local/bin/yt-dlp \
-                https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-                2>/dev/null && chmod +x /usr/local/bin/yt-dlp
+            echo "  Installing standalone yt-dlp binary (with SHA256 verification)..."
+            # Download SHA2-256SUMS for integrity check
+            if ! curl -fL -o /tmp/SHA2-256SUMS_update \
+                https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS; then
+                echo "  ! SHA2-256SUMS download failed — cannot verify binary."
+                exit 1
+            fi
+            YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS_update 2>/dev/null | awk '{print $1}')
+            if [ -z "$YT_DLP_HASH" ]; then
+                echo "  ! yt-dlp hash not found in SHA2-256SUMS."
+                rm -f /tmp/SHA2-256SUMS_update
+                exit 1
+            fi
+            if ! curl -fL -o /usr/local/bin/yt-dlp \
+                https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp; then
+                echo "  ! Standalone binary download failed."
+                rm -f /tmp/SHA2-256SUMS_update
+                exit 1
+            fi
+            chmod +x /usr/local/bin/yt-dlp
+            echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c - || {
+                echo "  ! SHA256 mismatch — binary may be corrupted or tampered with."
+                rm -f /usr/local/bin/yt-dlp /tmp/SHA2-256SUMS_update
+                exit 1
+            }
+            echo "  SHA256 verified."
+            rm -f /tmp/SHA2-256SUMS_update
         fi
     elif pip show yt-dlp &>/dev/null; then
         # pip-installed — use pip to upgrade (pip-installed yt-dlp ignores --self-update)
@@ -114,11 +166,32 @@ if command -v yt-dlp &>/dev/null; then
         # standalone binary — download the latest release directly from GitHub
         # rather than relying on self-update, which has known edge-case failures
         # with pinned/dev versions and is unnecessary since we control the binary.
-        echo "  Updating standalone yt-dlp binary..."
-        curl -L -o /usr/local/bin/yt-dlp \
-            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-            2>/dev/null && chmod +x /usr/local/bin/yt-dlp
-        echo "  Updated to: $(yt-dlp --version 2>&1 | head -1)"
+        echo "  Updating standalone yt-dlp binary (with SHA256 verification)..."
+        if ! curl -fL -o /tmp/SHA2-256SUMS_upd \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS; then
+            echo "  ! SHA2-256SUMS download failed — cannot verify binary."
+            exit 1
+        fi
+        YT_DLP_HASH=$(grep 'yt-dlp$' /tmp/SHA2-256SUMS_upd 2>/dev/null | awk '{print $1}')
+        if [ -z "$YT_DLP_HASH" ]; then
+            echo "  ! yt-dlp hash not found in SHA2-256SUMS."
+            rm -f /tmp/SHA2-256SUMS_upd
+            exit 1
+        fi
+        if ! curl -fL -o /usr/local/bin/yt-dlp \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp; then
+            echo "  ! Standalone binary download failed."
+            rm -f /tmp/SHA2-256SUMS_upd
+            exit 1
+        fi
+        chmod +x /usr/local/bin/yt-dlp
+        echo "$YT_DLP_HASH  /usr/local/bin/yt-dlp" | sha256sum --strict -c - || {
+            echo "  ! SHA256 mismatch — binary may be corrupted or tampered with."
+            rm -f /usr/local/bin/yt-dlp /tmp/SHA2-256SUMS_upd
+            exit 1
+        }
+        echo "  SHA256 verified. Updated to: $(yt-dlp --version 2>&1 | head -1)"
+        rm -f /tmp/SHA2-256SUMS_upd
     fi
 fi
 
