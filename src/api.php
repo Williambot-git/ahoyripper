@@ -17,11 +17,12 @@ date_default_timezone_set('UTC');
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
-// Suppress the "PHP/x.y.z" Server header — it leaks the PHP version to
-// clients and is of no practical use. This complements server-level
-// server_tokens off in nginx (which hides nginx's version), completing
-// the version-hiding stack for both layers.
-header('X-Powered-By: PHP');
+// Remove the "PHP/x.y.z" Server header that PHP-FPM adds automatically.
+// header_remove() is idempotent — safe to call even when no such header was set.
+// This complements server_tokens off in nginx, completing the version-hiding
+// stack for both layers. Using remove() rather than setting a generic replacement
+// value (e.g. "WebServer") ensures no version information leaks at all.
+header_remove('X-Powered-By');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
@@ -2491,17 +2492,14 @@ switch ($action) {
         // 10s, load-balancer probes). Closing the connection forces a new TCP
         // handshake on every request, negating keep-alive pooling benefits.
         // See lines 323-328 for the full rationale.
-        // Suppress X-Powered-By at the PHP layer for defense-in-depth parity
-        // with nginx's fastcgi_hide_header. The check action bypasses the top-of-
-        // script header block by sending its own response, so this must be set here.
-        header_remove('X-Powered-By');
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. api.php sets these globally but
         // the 'check' action sends its own response via echo+break and therefore
         // bypasses that block — repeat them here so check responses are fully
         // hardened (especially important since this endpoint is used by Docker
         // healthchecks and load-balancer probes that may route around the normal
-        // nginx security-header stack).
+        // nginx security-header stack). X-Powered-By is already removed at the
+        // top of the script, so no need to repeat it here.
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
