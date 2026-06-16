@@ -2504,6 +2504,60 @@ switch ($action) {
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
+    // Returns server system metrics: uptime (seconds), load avg (1-min avg from
+    // /proc/loadavg), memory available (%), disk free GB. Each field is null on
+    // failure so the health endpoint degrades gracefully on restricted containers.
+    function getSystemMetrics() {
+        $metrics = [
+            'server_uptime_seconds' => null,
+            'load_avg' => null,
+            'memory_available_pct' => null,
+            'disk_free_gb' => null,
+        ];
+        // Uptime: /proc/uptime is text file, first token is seconds.
+        // Falls back to PHP's $_SERVER['REQUEST_TIME'] (relative to request, not boot).
+        @[$up] = explode(' ', @file_get_contents('/proc/uptime') ?: '', 2);
+        if ($up !== null) {
+            $metrics['server_uptime_seconds'] = (int)floor((float)$up);
+        }
+        // Load avg: /proc/loadavg has three values (1/5/15 min). Use 1-min for responsiveness.
+        @[$l1] = explode(' ', @file_get_contents('/proc/loadavg') ?: '', 1);
+        if ($l1 !== null) {
+            $metrics['load_avg'] = (float)$l1;
+        }
+        // Memory: /proc/meminfo. Parse "MemAvailable:" (available, not just free).
+        // Not all kernels have MemAvailable; fall back to MemFree if unavailable.
+        $mem_content = @file_get_contents('/proc/meminfo') ?: '';
+        if ($mem_content) {
+            $avail = $total = null;
+            foreach (explode("\n", $mem_content) as $line) {
+                if (preg_match('/^(MemAvailable|MemTotal|MemFree):\s+(\d+)/', $line, $m)) {
+                    $kb = (int)$m[2];
+                    if ($m[1] === 'MemAvailable') {
+                        $avail = $kb;
+                    } elseif ($m[1] === 'MemTotal') {
+                        $total = $kb;
+                    } elseif ($m[1] === 'MemFree') {
+                        // Only used as last-resort fallback when MemAvailable is absent.
+                        if ($avail === null) {
+                            $avail = $kb;
+                        }
+                    }
+                }
+            }
+            if ($total !== null && $total > 0 && $avail !== null) {
+                $metrics['memory_available_pct'] = round(($avail / $total) * 100, 1);
+            }
+        }
+        // Disk: check the /tmp partition (where logs and caches live) rather than
+        // root — a separate /tmp mount is common in containerized deployments.
+        $df = @disk_free_space('/tmp');
+        if ($df !== false) {
+            $metrics['disk_free_gb'] = round($df / (1024 ** 3), 2);
+        }
+        return $metrics;
+    }
+
     case 'progress':
     case 'health': {
         // Health/progress — full system status with resource metrics.
@@ -2549,6 +2603,7 @@ switch ($action) {
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
 
+        $sys = getSystemMetrics();
         $out = [
             'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
             'server_time' => date('c'),
@@ -2563,10 +2618,10 @@ switch ($action) {
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_ttl_seconds' => $ffmpeg_cache_ttl,
-            'server_uptime_seconds' => null,
-            'load_avg' => null,
-            'memory_available_pct' => null,
-            'disk_free_gb' => null,
+            'server_uptime_seconds' => $sys['server_uptime_seconds'],
+            'load_avg' => $sys['load_avg'],
+            'memory_available_pct' => $sys['memory_available_pct'],
+            'disk_free_gb' => $sys['disk_free_gb'],
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
