@@ -1393,6 +1393,7 @@ switch ($action) {
             $ytdlp_cmd[] = COOKIES_PATH;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
+            '--no-warnings',
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
@@ -1977,6 +1978,7 @@ switch ($action) {
             $ytdlp_cmd[] = COOKIES_PATH;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
+            '--no-warnings',
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
