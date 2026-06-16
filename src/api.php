@@ -2012,7 +2012,12 @@ switch ($action) {
                 }
             }
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to start download process.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+            echo json_encode([
+                'error' => 'Failed to start download process.',
+                'error_code' => 'PROC_OPEN_FAILED',
+                'request_id' => $request_id,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -2191,6 +2196,7 @@ switch ($action) {
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'request_id' => $request_id,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ]);
             exit;
         }
