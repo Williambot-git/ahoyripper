@@ -28,9 +28,10 @@ function test($name, $condition) {
 
 function clean($s) {
     // Return 'Unknown' for null or empty string only.
-    // NOTE: do NOT treat integer 0 as 'Unknown' — height=0 is a valid value
-    // (audio-only formats in yt-dlp metadata sometimes report height=0).
-    // Converting 0 to 'Unknown' corrupts labels like "Video 0p" or "0kbps m4a".
+    // Integer 0 is NOT treated as Unknown — it is a valid numeric value that
+    // appears in yt-dlp metadata (e.g., height=0 for audio-only formats).
+    // Passing 0 through as '0' (string) keeps the UI consistent and prevents
+    // silent label corruption (e.g., "0kbps m4a" would become "Unknown kbps m4a").
     if ($s === null || $s === '') return 'Unknown';
     return (string)$s;
 }

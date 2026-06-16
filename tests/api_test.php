@@ -589,7 +589,7 @@ test('rejects object',
 // string in this context and should map to 'Unknown' alongside null and ''.
 
 function cleanForTest($s) {
-    if ($s === null || $s === '' || $s === 0) return 'Unknown';
+    if ($s === null || $s === '') return 'Unknown';
     return (string)$s;
 }
 
@@ -599,8 +599,8 @@ test('clean(null) returns "Unknown"',
     cleanForTest(null) === 'Unknown');
 test('clean("") returns "Unknown"',
     cleanForTest('') === 'Unknown');
-test('clean(0) returns "Unknown" (not "0")',
-    cleanForTest(0) === 'Unknown');
+test('clean(0) returns "0" (valid numeric — audio-only formats report height=0)',
+    cleanForTest(0) === '0');
 test('clean("valid string") passes through unchanged',
     cleanForTest('Rick Astley') === 'Rick Astley');
 test('clean(42) numeric non-zero becomes string "42"',
