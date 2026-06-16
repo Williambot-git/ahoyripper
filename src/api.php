@@ -2674,7 +2674,12 @@ switch ($action) {
                 // outer 15s timeout always fires first, cleanly producing a SOURCE_TIMEOUT
                 // classification. Without this, yt-dlp uses its own default (~20s) which
                 // can outlast the 15s PHP process limit and produce CONNECTION_FAILED.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // --no-update: suppress the "yt-dlp version is older than 90 days"
+                // warning that yt-dlp emits to stderr before any command output.
+                // Without this, the warning pollutes $probe_err and can corrupt
+                // the JSON parse when combined 2>&1 — the warning text appears
+                // ahead of the JSON, making the response unparseable.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --progress-template "" --no-update -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
