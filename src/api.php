@@ -2280,16 +2280,49 @@ switch ($action) {
             $probe_out = '';
             $probe_err = '';
             $probe_exit = 0;
+            $probe_start = time();
+            $probe_timeout = 10; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
             if ($probe_proc) {
                 fclose($probe_pipes[0]);
                 unset($probe_pipes[0]);
                 stream_set_timeout($probe_pipes[1], 5);
                 stream_set_timeout($probe_pipes[2], 5);
-                $probe_out = stream_get_contents($probe_pipes[1]);
-                $probe_err = stream_get_contents($probe_pipes[2]);
-                foreach ($probe_pipes as $p) { if ($p) fclose($p); }
-                $probe_exit = proc_close($probe_proc);
+                while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
+                    // Outer timeout: ffprobe that takes >10s is hung on a malformed/corrupt
+                    // file. Terminate it rather than letting proc_close() block indefinitely.
+                    if ((time() - $probe_start) > $probe_timeout) {
+                        proc_terminate($probe_proc, 9);
+                        $probe_exit = -1;
+                        foreach ($probe_pipes as $p) { if ($p) fclose($p); }
+                        $probe_pipes = null;
+                        break;
+                    }
+                    $read = [];
+                    if (!feof($probe_pipes[1])) $read[] = $probe_pipes[1];
+                    if (!feof($probe_pipes[2])) $read[] = $probe_pipes[2];
+                    if (empty($read)) break;
+                    $w = $e = null;
+                    $changed = @stream_select($read, $w, $e, 1, 0);
+                    if ($changed === false || $changed === 0) { usleep(100000); continue; }
+                    foreach ($read as $p) {
+                        if ($p === $probe_pipes[1]) {
+                            $s = fread($p, 8192);
+                            if ($s === false || $s === '') { if (feof($probe_pipes[1])) { fclose($probe_pipes[1]); $probe_pipes[1] = null; } continue; }
+                            $probe_out .= $s;
+                        } elseif ($p === $probe_pipes[2]) {
+                            $s = fread($p, 8192);
+                            if ($s === false || $s === '') { if (feof($probe_pipes[2])) { fclose($probe_pipes[2]); $probe_pipes[2] = null; } continue; }
+                            $probe_err .= $s;
+                        }
+                    }
+                    if ($probe_pipes[1] === null && $probe_pipes[2] === null) break;
+                }
+                if ($probe_pipes !== null) {
+                    foreach ($probe_pipes as $p) { if ($p) fclose($p); }
+                    $probe_pipes = null;
+                    $probe_exit = ($probe_proc !== null) ? proc_close($probe_proc) : -1;
+                }
             }
             if ($probe_exit === 0 && $probe_out) {
                 $probe = @json_decode($probe_out, true);
