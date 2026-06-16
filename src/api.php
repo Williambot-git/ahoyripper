@@ -657,7 +657,14 @@ function classifyYtdlpError($raw_err) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
     }
 
-    if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|(?<!Process )timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+    // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
+    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above) and NOT followed by
+    // " after" (PHP timeout format: "Process timed out after 45s"). The negative
+    // lookahead (?!) at word boundary rejects "Process timed out" at the word level
+    // rather than relying solely on the (?<!Process ) lookbehind, making the intent
+    // explicit and robust against future variations of the PHP timeout message.
+    // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
+    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
