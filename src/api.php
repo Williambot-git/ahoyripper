@@ -519,25 +519,24 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
     fclose($pipes[0]);
     unset($pipes[0]);
 
-    // No per-iter stream_set_timeout — the global (time() - $start) > $timeout
-    // check at the top of the loop is the authoritative timeout mechanism.
-    // stream_set_timeout would set a per-fread read timeout on the pipe fd,
-    // but when it fires (fread returns false), the current code does not break
-    // the loop — it only closes the pipe and continues when feof is also true.
-    // Since feof is not set until the process actually closes the pipe, a
-    // stream_set_timeout expiry causes the loop to stall indefinitely waiting
-    // for data on a pipe that will never produce more. The global timeout
-    // (enforced below) is the correct and sufficient timeout mechanism.
-    // Setting to 0 (infinite) makes the intent unambiguous.
+    // Use hrtime(true) for sub-second timeout precision. time() has only 1-second
+    // resolution — a 15s timeout can fire at t=15.999s, adding nearly a full extra
+    // second of latency to every timed-out health probe. hrtime(true) returns
+    // nanoseconds on Linux (converted to a float here), giving true sub-second
+    // accuracy so the process is terminated within milliseconds of the target timeout.
+    // stream_set_timeout (set below) is intentionally left at 0 (infinite) — the
+    // global hrtime() check is the authoritative timeout; stream_set_timeout would
+    // stall the loop on spurious expiry since feof is not set until the process
+    // closes its pipes, causing indefinite hangs.
     stream_set_timeout($pipes[1], 0);
     stream_set_timeout($pipes[2], 0);
 
     $stdout = '';
     $stderr = '';
-    $start = time();
+    $start = hrtime(true);
 
     while (!feof($pipes[1]) || !feof($pipes[2])) {
-        if ($timeout > 0 && (time() - $start) > $timeout) {
+        if ($timeout > 0 && (hrtime(true) - $start) / 1e9 > $timeout) {
             proc_terminate($proc, 9);
             $stderr .= "\nProcess timed out after {$timeout}s";
             $exit = -1; // convention: -1 = timeout
