@@ -107,7 +107,7 @@ docker compose up -d
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AHOY_USER_AGENT` | *(yt-dlp default)* | Custom User-Agent string for yt-dlp requests. Defaults to a modern Chrome UA. Change this if the source site blocks the default. |
+| `AHOY_USER_AGENT` | `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36` | Custom User-Agent string for yt-dlp requests. yt-dlp defaults to `python-requests/X.Y.Z` which is trivially blocked by anti-bot measures — this overrides it with a modern Chrome UA. Override via `AHOY_USER_AGENT` env var in docker-compose or cloud dashboard to mimic a different browser. |
 | `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key granting unlimited daily quota. **Change this in production** — generate a secure value with `openssl rand -hex 32`. |
 | `QUOTA_DAILY` | `5` | Daily rip limit for unauthenticated users. Set to a positive integer to increase or decrease the free quota. `-1` or `0` effectively disables the free tier (users must provide a valid `AHOY_UNLIMITED_KEY`). |
 | `YTDLP_TIMEOUT` | `45` | Per-request timeout (seconds) for yt-dlp metadata/info operations. Covers the initial metadata fetch and format list retrieval. Increase if the source site is slow to respond or if fetching info for very long videos (e.g. multi-hour livestreams) times out. |
