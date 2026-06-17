@@ -1422,12 +1422,12 @@ switch ($action) {
         } else {
             fclose($pipes[0]);
             unset($pipes[0]);
-            stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > INFO_TIMEOUT is authoritative
+            stream_set_timeout($pipes[1], 0);  // Infinite — global (hrtime(true) - $start) / 1e9 > INFO_TIMEOUT is authoritative
             stream_set_timeout($pipes[2], 0);  // Timeout fires only when child process stalls; feof() stays false until proc closes pipe
             $out = $err = '';
-            $start = time();
+            $start = hrtime(true);
             while (!feof($pipes[1]) || !feof($pipes[2])) {
-                if ((time() - $start) > INFO_TIMEOUT) {
+                if ((hrtime(true) - $start) / 1e9 > INFO_TIMEOUT) {
                     proc_terminate($proc, 9);
                     $err .= "\nProcess timed out after " . INFO_TIMEOUT . "s";
                     $exit = -1;
@@ -2051,17 +2051,17 @@ switch ($action) {
             exit;
         }
 
-        $start = time();
+        $start = hrtime(true);
         $timeout = DOWNLOAD_TIMEOUT; // configurable via YTDLP_DOWNLOAD_TIMEOUT env var (default 300s)
         $proc_killed = false;
         $proc_stdout = '';
         $proc_stderr = '';
 
-        stream_set_timeout($pipes[1], 0);  // Infinite — global (time() - $start) > $timeout is authoritative
+        stream_set_timeout($pipes[1], 0);  // Infinite — global (hrtime(true) - $start) / 1e9 > $timeout is authoritative
         stream_set_timeout($pipes[2], 0);  // Timeout fires only when child process stalls; feof() stays false until proc closes pipe
 
         while (true) {
-            if ($timeout > 0 && (time() - $start) > $timeout) {
+            if ($timeout > 0 && (hrtime(true) - $start) / 1e9 > $timeout) {
                 // Clean up process handle before exit to avoid zombie processes.
                 // proc_terminate sends SIGKILL; setting $proc = null is the sentinel
                 // that prevents the post-loop proc_close() from running on an
@@ -2297,7 +2297,7 @@ switch ($action) {
             $probe_out = '';
             $probe_err = '';
             $probe_exit = 0;
-            $probe_start = time();
+            $probe_start = hrtime(true);
             $probe_timeout = 10; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
             if ($probe_proc) {
@@ -2308,7 +2308,7 @@ switch ($action) {
                 while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
                     // Outer timeout: ffprobe that takes >10s is hung on a malformed/corrupt
                     // file. Terminate it rather than letting proc_close() block indefinitely.
-                    if ((time() - $probe_start) > $probe_timeout) {
+                    if ((hrtime(true) - $probe_start) / 1e9 > $probe_timeout) {
                         proc_terminate($probe_proc, 9);
                         $probe_exit = -1;
                         foreach ($probe_pipes as $p) { if ($p) fclose($p); }
