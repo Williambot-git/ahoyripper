@@ -1375,11 +1375,16 @@ switch ($action) {
         // to cleanly terminate the process and emit a classified SOURCE_TIMEOUT error.
         // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's
         // timeout and produce an unclassified CONNECTION_FAILED instead of SOURCE_TIMEOUT.
+        // --playlist: mirrors the download action — pass the user's explicit playlist
+        // preference so the info action behaves consistently with the download action.
+        // When playlist=1, --yes-playlist fetches info for all videos in a playlist.
+        // When playlist=0/absent, --no-playlist fetches info for the single video.
         $socket_timeout = max(1, INFO_TIMEOUT - 5);
+        $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
         $ytdlp_cmd = [
             '/usr/local/bin/yt-dlp',
             '--dump-json',
-            '--no-playlist',
+            $playlist_flag,
             '--skip-download',
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
