@@ -2531,14 +2531,16 @@ switch ($action) {
         // Detect client abort AFTER the loop — feof() exits when the client disconnects,
         // so connection_aborted() here catches the abort cleanly. An aborted transfer
         // means the client gave up; no quota is burned since no usable file was received.
+        // NOTE: Connection: close was already sent before the streaming loop (line 2496).
+        // The server will close the connection immediately after the last chunk is sent.
+        // Sending a JSON error body after binary data on a half-closed connection is
+        // at best a protocol violation and at worst causes the JSON to be received as
+        // trailing garbage by proxies or clients that don't close immediately. Skip
+        // the JSON response — the client already received partial binary data and any
+        // retry logic should be handled by the caller, not the server.
         if (connection_aborted()) {
             if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
             logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
-            echo json_encode([
-                'error' => 'Download cancelled by client.',
-                'error_code' => 'DOWNLOAD_CANCELLED',
-                'request_id' => $request_id,
-            ]);
             exit;
         }
         // Shutdown function handles unlink; call it explicitly on success
