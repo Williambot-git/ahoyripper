@@ -1647,6 +1647,9 @@ switch ($action) {
         $parsed['request_id'] = $request_id;
         $parsed['source_url'] = $url;
         $parsed['yt_dlp_version'] = $GLOBALS['__ytdlp_version'] ?? null;
+        // api_version was previously missing from the info response but present on
+        // check and health endpoints — add it for consistent API surface metadata.
+        $parsed['api_version'] = AHOYRIPPER_VERSION;
         header('Cache-Control: no-cache');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
