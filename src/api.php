@@ -2445,6 +2445,12 @@ switch ($action) {
         }
         header('Content-Disposition: ' . $disposition);
         header('Cache-Control: no-cache');
+        // Accept-Ranges: none — this response is a full-file download with no seeking.
+        // Explicitly disabling range requests prevents proxies and browser caches from
+        // attempting to resume or partial-fetch the download, which could corrupt the
+        // streamed file delivery. The PHP layer already disables output buffering and
+        // sends Content-Length, making range requests unnecessary and potentially harmful.
+        header('Accept-Ranges: none');
         // X-Format-Substituted: set when ffprobe detects the downloaded file differs
         // materially from what was requested (different resolution or container).
         // The frontend uses this to show "Downloaded 720p (requested 1080p — not available)"
