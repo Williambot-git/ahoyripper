@@ -1243,7 +1243,9 @@ switch ($action) {
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
             // Defaults to 5 when the env var is absent or zero/negative.
-            $daily_limit = max(1, (int)getenv('QUOTA_DAILY') ?: 5);
+            // Use ?? (null coalescing) so QUOTA_DAILY=0 correctly disables the free tier
+            // rather than falling through to the default of 5 (0 is falsy but not null).
+            $daily_limit = max(1, (int)(getenv('QUOTA_DAILY') ?? false) ?: 5);
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
@@ -1805,7 +1807,9 @@ switch ($action) {
             // Defaults to 5 when the env var is absent or zero/negative.
             // Mirrors the same constant used in the info action so both actions
             // enforce the same daily limit regardless of which endpoint is called.
-            $daily_limit = max(1, (int)getenv('QUOTA_DAILY') ?: 5);
+            // Use ?? (null coalescing) so QUOTA_DAILY=0 correctly disables the free tier
+            // rather than falling through to the default of 5 (0 is falsy but not null).
+            $daily_limit = max(1, (int)(getenv('QUOTA_DAILY') ?? false) ?: 5);
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);

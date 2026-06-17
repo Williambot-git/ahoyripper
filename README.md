@@ -614,7 +614,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 |----------|-------------|
 | YouTube | Age-restricted videos require authentication/cookies |
 | TikTok | Some videos may be geo-restricted or require login |
-| Spotify | Requires `--cookies-from-browser` or `--cookies` for full access — non-authenticated requests have limited metadata access |
+| Spotify | Requires `--cookies` (file path) for full access — non-authenticated requests have limited metadata access. See the cookie setup section above. |
 | Netflix + streaming sites | DRM-protected content cannot be ripped |
 
 ### Verify connectivity with the health probe
