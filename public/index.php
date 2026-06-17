@@ -130,12 +130,13 @@ header('X-Request-ID: ' . $page_request_id);
     "@graph": [
       {
         "@type": "WebApplication",
+        "@id": "https://ahoyripper.com/#webapplication",
         "name": "AhoyRipper",
         "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
         "url": "https://ahoyripper.com",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
-        "browserRequirements": "Requires JavaScript and a modern web browser.",
+        "browserRequirements": "Requires JavaScript. WebAssembly support and media codecs (H.264, VP9, Opus) required for full functionality.",
         "softwareVersion": "1.0.0",
         "author": {
           "@type": "Organization",
@@ -163,12 +164,14 @@ header('X-Request-ID: ' . $page_request_id);
       },
       {
         "@type": "SoftwareApplication",
+        "@id": "https://ahoyripper.com/#softwareapplication",
         "name": "AhoyRipper",
         "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
         "url": "https://ahoyripper.com",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "softwareVersion": "1.0.0",
+        "image": "https://ahoyripper.com/og-image.png",
         "author": {
           "@type": "Organization",
           "name": "AhoyVPN",
