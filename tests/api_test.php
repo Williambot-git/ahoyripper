@@ -386,9 +386,16 @@ test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
 // adaptive format selection, ! for stream negation)
 // Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/~()%@!)
 // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
+// Note: angle brackets `<` are valid yt-dlp selector operators (e.g. [height<1080]).
+// They are safe in format_id since proc_open uses bypass_shell=true (no shell expansion).
+// The derived filename sanitization (separate from format_id) rejects all shell metacharacters
+// including `<` when sanitizing the download filename, so this test is not applicable here.
 
 function validateFormatId($format_id) {
-    return preg_match('/^[a-zA-Z0-9_.,<>=\\[\\]+\\/-~()*%@!\'"]+$/', $format_id);
+    // Character class allows: alphanum, underscore, dot, comma,
+    // yt-dlp selector chars (<>=![]+-/~()%@!), and quote chars for output templates.
+    // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\"]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
