@@ -1991,6 +1991,7 @@ switch ($action) {
             '/usr/local/bin/yt-dlp',
             '-f', $format_id,
             '-o', $out_template,
+            '--force-overwrites',
             $playlist,
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
