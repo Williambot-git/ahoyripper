@@ -2555,7 +2555,6 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        header('Cache-Control: no-cache');
         // Connection: close is intentionally NOT set — the check endpoint is a
         // lightweight JSON ping meant for frequent calls (Docker healthchecks every
         // 10s, load-balancer probes). Closing the connection forces a new TCP
