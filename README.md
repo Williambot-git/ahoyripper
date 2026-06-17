@@ -19,7 +19,7 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 ## Supported Platforms
 
-AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
+AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms-reference). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
 
 For the full extractor list:
 
@@ -464,7 +464,7 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 
 ---
 
-## Supported Platforms
+## Supported Platforms Reference
 
 AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1872+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
 
