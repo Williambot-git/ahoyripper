@@ -211,7 +211,6 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "uploader": "Channel Name",
   "uploader_url": "https://www.youtube.com/channel/...",
   "platform": "YouTube",
-  "source_url": "https://www.youtube.com/watch?v=..."
   "derived_filename": "Video_Title",
   "formats": [
     {
@@ -250,7 +249,9 @@ The `source_url` field in the info response is the exact URL that was ripped —
     }
   ],
   "sort_applied": "height",
-  "yt_dlp_version": "2026.03.17"
+  "source_url": "https://www.youtube.com/watch?v=...",
+  "yt_dlp_version": "2026.03.17",
+  "api_version": "1.0.0"
 }
 ```
 
