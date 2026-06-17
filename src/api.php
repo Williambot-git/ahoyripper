@@ -1182,12 +1182,9 @@ switch ($action) {
         // Get video info + formats
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
 
-        // Check URL length first — reject pathologically long strings before
-        // doing expensive URL format validation. This fails fast on abuse and
-        // avoids burning a daily quota increment on obviously invalid requests.
-        // The MAX_URL_LEN constant covers all normal video URLs with tracking params.
-        // Uses MAX_URL_LEN so the
-        // error_code is INVALID_URL, matching the frontend error hint map.
+        // Validate URL — rejects missing, malformed, private-IP, non-HTTPS, and
+        // over-long URLs. Returns the sanitized URL string on success, or false
+        // on any validation failure (the helper sends its own error response).
         $url = $validation('info');
         if ($url === false) {
             exit;
@@ -1200,17 +1197,6 @@ switch ($action) {
         $raw_sort = $_GET['sort'] ?? 'height';
         $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality'];
         $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
-
-        if (strlen($url) > MAX_URL_LEN) {
-            http_response_code(400);
-            logRequest('info', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-            echo json_encode([
-                'error' => 'URL is too long. Please paste a shorter link.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
-            exit;
-        }
 
         // ─── Check for unlimited API key ───
         // Prefer Authorization: Bearer header (keeps key out of URLs and server logs).

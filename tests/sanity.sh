@@ -351,6 +351,20 @@ fi
 echo "  ✓ download case logs 'download' action for daily limit"
 
 echo ""
+echo "==> Checking info action does not duplicate MAX_URL_LEN check (validation is in helper)..."
+# The $validation() helper already enforces MAX_URL_LEN internally.
+# The info case must NOT have its own redundant strlen($url) > MAX_URL_LEN block
+# after calling $validation() — that would produce a duplicate 400 response for
+# the same failure, leaving the second block permanently dead code.
+INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
+if echo "$INFO_CASE" | grep -q "strlen(\$url) > MAX_URL_LEN"; then
+    echo "  ✗ info case has redundant strlen(\$url) > MAX_URL_LEN after \$validation() call"
+    echo "    (the helper enforces this; the duplicate block is dead code)"
+    exit 1
+fi
+echo "  ✓ info case delegates MAX_URL_LEN check to \$validation() helper (no duplicate)"
+
+echo ""
 echo "==> Checking timeout handlers do not call proc_close() directly (double-close guard)..."
 # Timeout blocks must set $proc = null instead of calling proc_close($proc) directly,
 # so the post-loop proc_close() can detect the already-closed handle via the null sentinel.
