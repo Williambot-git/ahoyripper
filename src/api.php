@@ -171,6 +171,10 @@ if ($is_rate_limited) {
             header('X-RateLimit-Remaining: 0');
             header('X-RateLimit-Reset: ' . $reset_timestamp);
             header('X-RateLimit-Window: ' . $rate_window);
+            header('X-DL-RateLimit-Limit: ' . $rate_limit);
+            header('X-DL-RateLimit-Remaining: 0');
+            header('X-DL-RateLimit-Reset: ' . $reset_timestamp);
+            header('X-DL-RateLimit-Window: ' . $rate_window);
             header('Retry-After: ' . max(1, $reset_timestamp - time()));
             // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
             // not a daily quota hit — allows the UI to distinguish the two cases without
@@ -1295,7 +1299,7 @@ switch ($action) {
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
-                header('X-DailyLimit-Window: daily');
+                header('X-DailyLimit-Window: 86400');
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free rips per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
@@ -1322,7 +1326,7 @@ switch ($action) {
             header('X-DailyLimit-Limit: ' . $daily_limit);
             header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
-            header('X-DailyLimit-Window: daily');
+            header('X-DailyLimit-Window: 86400');
         } else {
             // Unlimited-key holder — quota does not apply, signal this to the
             // client with -1 so it can hide the "N free rips/day" UI element.
@@ -1857,7 +1861,7 @@ switch ($action) {
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
-                header('X-DailyLimit-Window: daily');
+                header('X-DailyLimit-Window: 86400');
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free rips per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
@@ -1888,7 +1892,7 @@ switch ($action) {
             header('X-DailyLimit-Limit: ' . $daily_limit);
             header('X-DailyLimit-Remaining: ' . $daily_remaining);
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
-            header('X-DailyLimit-Window: daily');
+            header('X-DailyLimit-Window: 86400');
         } else {
             // Unlimited-key holder — quota does not apply, signal this to the
             // client with -1 so it can hide the "N free rips/day" UI element.
