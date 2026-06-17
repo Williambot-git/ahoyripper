@@ -33,6 +33,13 @@ function clean($s) {
     // Passing 0 through as '0' (string) keeps the UI consistent and prevents
     // silent label corruption (e.g., "0kbps m4a" would become "Unknown kbps m4a").
     if ($s === null || $s === '') return 'Unknown';
+    // Reject arrays and objects — yt-dlp metadata is always scalar (string, int,
+    // float, or null). An array in a format label field (e.g. from an unexpected
+    // extractor field) would become the literal string "Array" via (string) cast,
+    // corrupting the API response silently. Return 'Unknown' instead.
+    if (is_array($s) || is_object($s)) return 'Unknown';
+    // No htmlspecialchars — API outputs JSON, not HTML.
+    // Type coercion to string is sufficient.
     return (string)$s;
 }
 
@@ -43,6 +50,18 @@ test('clean("") returns "Unknown"',
     clean('') === 'Unknown');
 test('clean(42) returns "42" (non-zero numeric)',
     clean(42) === '42');
+test('clean(0) returns "0" (zero is valid, not unknown)',
+    clean(0) === '0');
+
+echo "\n==> Testing clean() — array and object rejection\n";
+test('clean(array) returns "Unknown" (not "Array")',
+    clean(['video', 'mp4']) === 'Unknown');
+test('clean(associative array) returns "Unknown"',
+    clean(['ext' => 'mp4', 'height' => 720]) === 'Unknown');
+test('clean(object) returns "Unknown" (not "Array")',
+    clean((object)['ext' => 'mp4']) === 'Unknown');
+test('clean(stdClass) returns "Unknown"',
+    clean(json_decode('{"ext":"mp4"}')) === 'Unknown');
 
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
