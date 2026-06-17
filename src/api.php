@@ -2352,11 +2352,16 @@ switch ($action) {
                         if ($actual_height >= $requested_height) {
                             $format_substituted = true;
                         }
-                    } else {
-                        // Exact match (no operator); any difference is substitution
+                    } elseif ($hm[1] === null) {
+                        // Exact match (no operator, e.g. "22" or "bestvideo[height=720]");
+                        // $requested_height was set from the captured \d+, so any difference is substitution.
                         if ($actual_height !== $requested_height) {
                             $format_substituted = true;
                         }
+                    } else {
+                        // Unrecognized operator — flag as substituted to be safe.
+                        // This future-proofs against new yt-dlp format selectors.
+                        $format_substituted = true;
                     }
                 }
                 // Also flag substitution when the actual stream height is suspiciously
