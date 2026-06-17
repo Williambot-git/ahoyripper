@@ -790,6 +790,9 @@ function escapeHtml(s) {
         // Pass the browser's language preference so yt-dlp can request localized
         // metadata (titles, descriptions) from the source platform.
         dlHeaders['Accept-Language'] = navigator.language || 'en-US';
+        // Forward page_request_id so the API and server logs can correlate
+        // the download request with the browser's page view.
+        dlHeaders['X-Request-ID'] = PAGE_REQUEST_ID;
         card.classList.add('downloading');
         setLoading(true);
 
@@ -1024,6 +1027,9 @@ function escapeHtml(s) {
       // request localized metadata from the source platform. Without this,
       // yt-dlp always gets English regardless of the user's actual locale.
       headers['Accept-Language'] = navigator.language || 'en-US';
+      // Forward page_request_id so API responses and server-side logs can be
+      // correlated with the browser's page view when users report issues.
+      headers['X-Request-ID'] = PAGE_REQUEST_ID;
       const sort = sortSelect ? sortSelect.value : 'height';
       const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + '&sort=' + encodeURIComponent(sort), {
         headers,
