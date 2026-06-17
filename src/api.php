@@ -2574,6 +2574,7 @@ switch ($action) {
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
+        header('Cache-Control: no-cache');
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
