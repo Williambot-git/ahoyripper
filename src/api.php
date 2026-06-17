@@ -175,7 +175,7 @@ if ($is_rate_limited) {
             header('X-DL-RateLimit-Remaining: 0');
             header('X-DL-RateLimit-Reset: ' . $reset_timestamp);
             header('X-DL-RateLimit-Window: ' . $rate_window);
-            header('Retry-After: ' . max(1, $reset_timestamp - time()));
+            header('Retry-After: ' . max(0, $reset_timestamp - time()));
             // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
             // not a daily quota hit — allows the UI to distinguish the two cases without
             // parsing the error message. The daily-quota 429 block (when $daily_limit is
@@ -188,7 +188,7 @@ if ($is_rate_limited) {
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => 'https://ahoyvpn.com',
-                'retry_after' => max(1, (int)($reset_timestamp - time())),
+                'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
@@ -1306,7 +1306,7 @@ switch ($action) {
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
-                    'retry_after' => max(1, (int)($reset_timestamp - time())),
+                    'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
                 ]);
                 exit;
@@ -1768,7 +1768,7 @@ switch ($action) {
                 flock($dl_fp, LOCK_UN);
                 fclose($dl_fp);
                 http_response_code(429);
-                header('Retry-After: ' . max(1, $dl_reset_ts - time()));
+                header('Retry-After: ' . max(0, $dl_reset_ts - time()));
                 // Include download rate-limit headers so clients can distinguish this
                 // from the per-minute rate limit without parsing the error body.
                 // Mirrors the X-DL-RateLimit-* family set on successful responses.
@@ -1876,7 +1876,7 @@ switch ($action) {
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
-                    'retry_after' => max(1, (int)($reset_timestamp - time())),
+                    'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
                 ]);
                 exit;
