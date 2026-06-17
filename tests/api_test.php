@@ -664,6 +664,7 @@ test('rejects object',
 
 function cleanForTest($s) {
     if ($s === null || $s === '') return 'Unknown';
+    if (is_array($s) || is_object($s)) return 'Unknown';
     return (string)$s;
 }
 
@@ -679,6 +680,12 @@ test('clean("valid string") passes through unchanged',
     cleanForTest('Rick Astley') === 'Rick Astley');
 test('clean(42) numeric non-zero becomes string "42"',
     cleanForTest(42) === '42');
+test('clean([1,2]) array returns "Unknown" (not "Array")',
+    cleanForTest([1, 2]) === 'Unknown');
+test('clean([]) empty array returns "Unknown"',
+    cleanForTest([]) === 'Unknown');
+test('clean((object)["a"=>1]) object returns "Unknown" (not "Object")',
+    cleanForTest((object)['a' => 1]) === 'Unknown');
 
 // ─── Test classifyYtdlpError edge cases ────────────────────────────────────────
 // The regex patterns have specific thresholds. Non-matching phrases
