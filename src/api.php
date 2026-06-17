@@ -1032,9 +1032,14 @@ function logRequest($action, $status, $extra = []) {
         }
     }
 
+    // Capture the incoming X-Request-ID from the browser (if any) so server
+    // logs can be correlated with the browser's page-view logs. The browser
+    // sets PAGE_REQUEST_ID on each page load and sends it as the X-Request-ID
+    // request header (available in PHP as HTTP_X_REQUEST_ID).
     $entry = [
         'ts' => date('c'),
         'req_id' => $GLOBALS['__request_id'] ?? '',
+        'client_req_id' => $_SERVER['HTTP_X_REQUEST_ID'] ?? '',
         'action' => $action,
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
         // Strip query string from REQUEST_URI to prevent video URL and API key
