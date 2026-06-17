@@ -293,7 +293,19 @@ if (in_array($action, $internal_actions, true)) {
         // maintenance burden of manually duplicating all security headers here
         // whenever a new header is added to the top-of-script block. In non-FPM
         // SAPIs the function doesn't exist and we fall back to manual headers.
+        //
+        // NOTE: nginx's add_header directives for the /csp-report location block
+        // (Reporting-Endpoints, Report-To, Content-Security-Policy-Report-Only)
+        // are NOT guaranteed to be applied to the response after fastcgi_finish_request()
+        // flushes, since nginx may have already committed its headers. To guarantee
+        // these headers are present in ALL deployments (FPM and non-FPM), they are
+        // set explicitly here in the FPM path alongside the nginx-level headers.
         if (function_exists('fastcgi_finish_request')) {
+            // These location-level nginx headers may be missed after fastcgi_finish_request()
+            // flushes — set them explicitly here to guarantee they're present.
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
             echo json_encode(['status' => 'ok']);
             fastcgi_finish_request();
             exit;
