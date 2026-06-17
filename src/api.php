@@ -2752,9 +2752,27 @@ switch ($action) {
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
-                $GLOBALS['__ytdlp_probe'] = $probe_result
-                    ? ['ok' => true, 'title' => substr($probe_result['title'] ?? '', 0, 80), 'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']
-                    : ['ok' => false, 'error' => trim($probe_err ?: $probe_out), 'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'];
+                if ($probe_result) {
+                    $GLOBALS['__ytdlp_probe'] = [
+                        'ok' => true,
+                        'title' => substr($probe_result['title'] ?? '', 0, 80),
+                        'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                    ];
+                } else {
+                    // Classify the probe error so the client gets a structured error_code
+                    // and human-readable error_msg instead of a raw yt-dlp stderr dump.
+                    // This is consistent with how the info and download actions surface
+                    // classified errors to clients (classifyYtdlpError is already used
+                    // in those paths); the health probe was the only path returning raw text.
+                    $probe_raw_err = trim($probe_err ?: $probe_out);
+                    $probe_classified = classifyYtdlpError($probe_raw_err);
+                    $GLOBALS['__ytdlp_probe'] = [
+                        'ok' => false,
+                        'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
+                        'error_msg' => $probe_classified['msg'] ?? $probe_raw_err,
+                        'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                    ];
+                }
                 if ($probe_cache_file) {
                     @file_put_contents($probe_cache_file, json_encode([
                         'result' => $GLOBALS['__ytdlp_probe'],
