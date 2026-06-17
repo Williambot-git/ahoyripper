@@ -6,6 +6,12 @@
 
 define('AHOYRIPPER_VERSION', '1.0.0');
 
+// Path to yt-dlp binary — configurable via YTDLP_PATH env var so deployments
+// can override the default /usr/local/bin/yt-dlp without editing source.
+// Defined early because the version-probe shell_exec (line ~427) runs before
+// the constants section and needs this value before any other constants exist.
+define('YTDLP_PATH', getenv('YTDLP_PATH') ?: '/usr/local/bin/yt-dlp');
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -409,7 +415,7 @@ if ($version_cache_file && is_readable($version_cache_file)) {
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
         // Hash check: verify the binary hasn't been replaced since we cached it.
         // If the hash doesn't match, the binary was upgraded — invalidate and re-fetch.
-        $current_hash = @md5_file('/usr/local/bin/yt-dlp');
+        $current_hash = @md5_file(YTDLP_PATH);
         // If the binary can't be read, treat the cache as invalid — we can't
         // verify whether the binary was replaced while the cache was expired.
         if ($current_hash === false) {
@@ -424,7 +430,7 @@ if (!$GLOBALS['__ytdlp_version']) {
     // stdout so shell_exec captures it (shell_exec sees only stdout, not the
     // stderr pipe). Without 2>&1, the probe always returns empty and the cache
     // is always stale, causing yt-dlp startup overhead on every single request.
-    $ver = trim(shell_exec('/usr/local/bin/yt-dlp --version 2>&1') ?: '');
+    $ver = trim(shell_exec(YTDLP_PATH . ' --version 2>&1') ?: '');
     // Distinguish a real version string from a shell "command not found" error.
     // When the binary is absent, shell_exec returns either '' (empty) or a
     // shell error like "sh: 1: /usr/local/bin/yt-dlp: not found". The
@@ -443,7 +449,7 @@ if (!$GLOBALS['__ytdlp_version']) {
         // if md5_file fails (binary missing), write an empty hash so the next
         // request re-probes (because empty hash !== any valid hash the binary
         // might have after installation).
-        $hash = @md5_file('/usr/local/bin/yt-dlp');
+        $hash = @md5_file(YTDLP_PATH);
         if ($hash !== false) {
             @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
         } elseif ($ver === 'not installed') {
@@ -497,7 +503,7 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
     // Build the command as an array so bypass_shell works as intended.
     // Shell redirection ('2>&1') is unnecessary — we capture stderr via pipe.
-    $ytdlp_bin = '/usr/local/bin/yt-dlp';
+    $ytdlp_bin = YTDLP_PATH;
     // Split args preserving quoted strings (handles $shell_url = "'https://...'")
     $parts = preg_split('/\s+(?=(?:[^"\']|["\'][^"\']*["\'])*$)/', trim($args));
     $cmd = array_merge([$ytdlp_bin], $parts);
@@ -1403,7 +1409,7 @@ switch ($action) {
         $socket_timeout = max(1, INFO_TIMEOUT - 5);
         $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
         $ytdlp_cmd = [
-            '/usr/local/bin/yt-dlp',
+            YTDLP_PATH,
             '--dump-json',
             $playlist_flag,
             '--skip-download',
@@ -2000,7 +2006,7 @@ switch ($action) {
         $playlist = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
         $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
-            '/usr/local/bin/yt-dlp',
+            YTDLP_PATH,
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrites',
