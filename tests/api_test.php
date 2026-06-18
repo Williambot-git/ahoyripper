@@ -177,8 +177,8 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
     }
-    if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.'];
+    if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'status' => 451];
     }
     // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
@@ -254,6 +254,56 @@ test('detects COPYRIGHT_REMOVED — "content has been removed by"',
 $result = classifyYtdlpError('ERROR: Copyright infringement');
 test('detects COPYRIGHT_REMOVED — "copyright infringement"',
     $result !== null && ($result['code'] ?? '') === 'COPYRIGHT_REMOVED');
+
+// ─── DISALLOWED_CONTENT ───────────────────────────────────────────────────
+
+// SHOULD match DISALLOWED_CONTENT — explicit TOS/legal violation language
+$result = classifyYtdlpError('ERROR: [extractor] content is not allowed due to a terms of service violation');
+test('detects DISALLOWED_CONTENT — "content is not allowed" with "terms of service violation"',
+    ($result['code'] ?? '') === 'DISALLOWED_CONTENT' && ($result['status'] ?? 0) === 451);
+
+$result = classifyYtdlpError('ERROR: This content violates the Terms of Service');
+test('detects DISALLOWED_CONTENT — "violates the Terms of Service"',
+    ($result['code'] ?? '') === 'DISALLOWED_CONTENT');
+
+$result = classifyYtdlpError('ERROR: Terms of service violation for this content');
+test('detects DISALLOWED_CONTENT — "Terms of service violation"',
+    ($result['code'] ?? '') === 'DISALLOWED_CONTENT');
+
+$result = classifyYtdlpError('ERROR: Content is disallowed on legal grounds');
+test('detects DISALLOWED_CONTENT — "disallowed" alone (no tos/terms in lookahead path)',
+    ($result['code'] ?? '') === 'DISALLOWED_CONTENT');
+
+// content-disallowed is the explicit yt-dlp sentinel for legal-blocked content
+$result = classifyYtdlpError('ERROR: [tiktok] content-disallowed');
+test('detects DISALLOWED_CONTENT — "content-disallowed" sentinel',
+    ($result['code'] ?? '') === 'DISALLOWED_CONTENT');
+
+// MUST NOT match DISALLOWED_CONTENT — should fall through to SOURCE_FORBIDDEN (HTTP 403)
+// "disallowed content" as two adjacent words (no violation language) is generic
+$result = classifyYtdlpError('ERROR: [youtube] disallowed content');
+test('does NOT detect DISALLOWED_CONTENT — "disallowed content" (generic, no violation language)',
+    ($result['code'] ?? '') !== 'DISALLOWED_CONTENT');
+
+$result = classifyYtdlpError('ERROR: [youtube] HTTP Error 403: Forbidden');
+test('does NOT detect DISALLOWED_CONTENT — HTTP 403 routes to SOURCE_FORBIDDEN',
+    ($result['code'] ?? '') === 'SOURCE_FORBIDDEN');
+
+$result = classifyYtdlpError('ERROR: [youtube] This content has been removed by the owner');
+test('does NOT detect DISALLOWED_CONTENT — routes to COPYRIGHT_REMOVED',
+    ($result['code'] ?? '') === 'COPYRIGHT_REMOVED');
+
+// "Content not available in your region" — the test file's inline GEOBLOCKED regex
+// ('/geo.*restriction|this video is available in|geo.?restricted/i') does NOT match
+// it, so classifyYtdlpError returns null. The important thing is it does NOT return
+// DISALLOWED_CONTENT — confirming the new regex doesn't over-fire.
+$result = classifyYtdlpError('ERROR: [youtube] Content not available in your region');
+test('does NOT detect DISALLOWED_CONTENT — "content" + "available" + "region" falls through to null',
+    ($result['code'] ?? '') === '');
+
+$result = classifyYtdlpError('ERROR: Authentication required for this content');
+test('does NOT detect DISALLOWED_CONTENT — "content" + "authentication" (no violation)',
+    ($result['code'] ?? '') === 'LOGIN_REQUIRED');
 
 $result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
 test('detects SOURCE_RATE_LIMITED — "too many requests"',

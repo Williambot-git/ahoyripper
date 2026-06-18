@@ -707,8 +707,20 @@ function classifyYtdlpError($raw_err) {
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
     }
-    if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service violation.', 'status' => 451];
+    // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
+    // the source blocks content on legal/TOS grounds — distinct from HTTP 403 which
+    // signals an IP ban (SOURCE_FORBIDDEN). Also catches explicit TOS-violation messages.
+    // The 'disallowed.*content' check is kept separate from 'content.*violat' so that
+    // a plain "disallowed content" (no violation language) is NOT classified here —
+    // it falls through to SOURCE_FORBIDDEN (HTTP 403) if the message contains "content
+    // is not allowed" specifically from yt-dlp, use the content-disallowed sentinel.
+    // Negative lookahead (?!\S+\s+\S+) prevents "disallowed content" (two separate words
+    // where "content" immediately follows "disallowed") from matching — that pattern
+    // fires for generic "disallowed content" errors that should route to SOURCE_FORBIDDEN.
+    // (?<!\bdisallowed\s) prevents "content" preceded by "disallowed " from matching
+    // (same intent as the negative lookahead above, belt-and-suspenders).
+    if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'status' => 451];
     }
     // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
     // yt-dlp emits these when the source returns a non-2xx status. The numeric
