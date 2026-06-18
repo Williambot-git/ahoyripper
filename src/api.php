@@ -1585,8 +1585,10 @@ switch ($action) {
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
+                'action' => 'info',
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
@@ -2037,8 +2039,9 @@ switch ($action) {
             // --progress-template "": suppress ALL progress output to stderr so it doesn't
             // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
             // In array argv form (bypass_shell=true), use json_encode('') which
-            // produces the two-character string "": adjacent empty quoted strings that
-            // yt-dlp interprets as empty.
+            // produces the two-character string "\'\'": adjacent empty quoted strings that
+            // yt-dlp interprets as empty. Note: --no-warnings is still available in
+            // current yt-dlp and could be used as an alternative to --progress-template.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
