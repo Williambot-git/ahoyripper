@@ -1124,6 +1124,20 @@ $validation = function(string $action) use($request_id) {
         ]);
         return false;
     }
+    // Enforce the shared URL length limit so clients get consistent error codes
+    // regardless of which action they call. Uses the shared MAX_URL_LEN constant.
+    // The download action previously duplicated this check here as a workaround;
+    // centralising it in the validation helper ensures both actions are covered.
+    if (strlen($url) > MAX_URL_LEN) {
+        http_response_code(400);
+        logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+        echo json_encode([
+            'error' => 'URL is too long. Please paste a shorter link.',
+            'error_code' => 'INVALID_URL',
+            'request_id' => $request_id,
+        ]);
+        return false;
+    }
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
     if ($action === 'download') {
@@ -1703,18 +1717,6 @@ switch ($action) {
         // The format parameter check is only enforced for download (checked inside helper).
         $url = $validation('download');
         if ($url === false) {
-            exit;
-        }
-        // Enforce the shared URL length limit so clients get consistent error codes
-        // regardless of which action they call. Uses the shared MAX_URL_LEN constant.
-        if (strlen($url) > MAX_URL_LEN) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-            echo json_encode([
-                'error' => 'URL is too long. Please paste a shorter link.',
-                'error_code' => 'INVALID_URL',
-                'request_id' => $request_id,
-            ]);
             exit;
         }
         // yt-dlp format selectors use characters like [ ] + = ~ * for conditional
