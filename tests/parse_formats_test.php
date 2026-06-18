@@ -126,10 +126,6 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR'];
             }
-            if (preg_match('#connection.*fail|dns.*fail|could not connect|i?/o timeout|connection timed out|timed out|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-                if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
-            }
             if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE'];
@@ -138,15 +134,28 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
             }
-            if (preg_match('/disallowed.*content|content.*violat|terms.*violat|violat.*terms/i', $err_lower)) {
+            // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
+            // the source blocks content on legal/TOS grounds. The \bdisallowed\b(?!\\s+content\\b)
+            // negative lookahead prevents "disallowed content" (no violation language) from matching —
+            // it falls through to SOURCE_FORBIDDEN (HTTP 403) instead. The explicit
+            // content-disallow(ed)? sentinel catches yt-dlp's legal-blocked sentinel.
+            if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This content is not available due to a terms of service violation.', 'error_code' => 'DISALLOWED_CONTENT'];
+                return ['error' => 'This content is not available due to a terms of service or legal violation.', 'error_code' => 'DISALLOWED_CONTENT'];
             }
             // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
             // Distinct from connection-level "timed out" which implies a network failure.
             if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'error_code' => 'SOURCE_TIMEOUT'];
+            }
+            // \\b(?!process )timed out\\b — "timed out" as a standalone word, NOT preceded
+            // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookahead (?!)
+            // at word boundary rejects "Process timed out" at the word level.
+            // \\bi?/o timeout\\b — IO timeout as a standalone word (handles "i/o timeout").
+            if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
             }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
             return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
