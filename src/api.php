@@ -2101,7 +2101,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
-                    'retry_after' => max(1, (int)($retry_ts - time())),
+                    'retry_after' => $retry_ts,
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
