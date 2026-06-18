@@ -918,7 +918,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // Use null/empty-string checks instead of empty() to avoid false
             // positives on the literal string "0" (empty("0") === true in PHP).
             $has_desc = $format_description !== null && $format_description !== '';
-            $desc = (!$has_desc || $format_description === 'Unknown')
+            $desc = !$has_desc
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
         } else {
