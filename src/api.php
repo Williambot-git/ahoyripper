@@ -1407,19 +1407,6 @@ switch ($action) {
         // Set a realistic browser User-Agent so yt-dlp's requests are not blocked
         // by anti-bot measures that detect the default python-requests User-Agent.
         // yt-dlp defaults to "python-requests/X.Y.Z" which is trivially blocked.
-        // --progress-template "" suppresses ALL progress output to stderr — without this,
-        // yt-dlp emits progress bars to stderr even during --dump-json (the progress
-        // template is output even when --skip-download is set). This prepends garbage
-        // to the JSON stdout, causing json_decode() to fail and returning a confusing
-        // PARSE_ERROR instead of a properly classified yt-dlp error message.
-        // This applies to ALL yt-dlp versions; no environment variable is needed.
-        // NOTE: when using proc_open with bypass_shell=true (array argv form), an
-        // empty PHP string '' is passed as TWO LITERAL SINGLE-QUOTE CHARS to yt-dlp.
-        // yt-dlp interprets '' (literal quotes) as a template containing quote chars
-        // rather than as an empty template. The correct yt-dlp syntax for an empty
-        // progress template is "" (two adjacent double-quotes, which concatenate to
-        // empty). In the array argv form, use json_encode('') which produces the
-        // two-character string "". This is equivalent to the "" syntax yt-dlp expects.
         // --concurrent-fragments N was removed in yt-dlp 2024.10 (deprecated since 2023.11).
         // yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
         // produces a stderr warning that can pollute the JSON output in the info action
@@ -1441,6 +1428,13 @@ switch ($action) {
             $playlist_flag,
             '--skip-download',
             '--no-progress',
+            // --progress-template "": suppress ALL progress output to stderr.
+            // --no-progress alone is NOT sufficient — yt-dlp emits progress template
+            // output even during --skip-download, which prepends garbage to the JSON
+            // stdout on stderr and causes json_decode() to fail. In array argv form
+            // (bypass_shell=true), use json_encode('') which produces the two-character
+            // string "": adjacent empty quoted strings that yt-dlp interprets as empty.
+            '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
@@ -2040,6 +2034,12 @@ switch ($action) {
             '--force-overwrites',
             $playlist,
             '--no-progress',
+            // --progress-template "": suppress ALL progress output to stderr so it doesn't
+            // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
+            // In array argv form (bypass_shell=true), use json_encode('') which
+            // produces the two-character string "": adjacent empty quoted strings that
+            // yt-dlp interprets as empty.
+            '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
