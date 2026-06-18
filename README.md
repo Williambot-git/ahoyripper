@@ -112,6 +112,8 @@ docker compose up -d
 | `QUOTA_DAILY` | `5` | Daily rip limit for unauthenticated users. Set to a positive integer to increase or decrease the free quota. `-1` or `0` effectively disables the free tier (users must provide a valid `AHOY_UNLIMITED_KEY`). |
 | `YTDLP_TIMEOUT` | `45` | Per-request timeout (seconds) for yt-dlp metadata/info operations. Covers the initial metadata fetch and format list retrieval. Increase if the source site is slow to respond or if fetching info for very long videos (e.g. multi-hour livestreams) times out. |
 | `YTDLP_DOWNLOAD_TIMEOUT` | `300` | Per-request timeout (seconds) for yt-dlp download operations (the actual media file transfer). The default 300s (5 min) accommodates large files on slow connections. Decrease in resource-constrained environments; increase for high-quality 4K/8K downloads on fast connections. |
+| `YTDLP_PATH` | `/usr/local/bin/yt-dlp` | Path to the yt-dlp binary. Override to use a custom-built yt-dlp or a different installation path (e.g. `/usr/bin/yt-dlp`). Changing this also invalidates the yt-dlp version cache so the new binary is probed on the next request. |
+| `FFPROBE_PATH` | `/usr/bin/ffprobe` | Path to the ffprobe binary used for post-download codec/resolution verification. Override to use a custom ffprobe path (e.g. `/usr/local/bin/ffprobe`). Changing this also invalidates the ffmpeg version cache. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
 
