@@ -467,12 +467,15 @@ if (!$GLOBALS['__ytdlp_version']) {
 
 // Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
 // is wasteful and adds latency under load. Tracks hash to invalidate on binary upgrade.
+// Uses FFPROBE_PATH for hash computation to stay consistent with the actual binary used
+// by the post-download verification probe — if FFPROBE_PATH changes, the cache is
+// automatically invalidated because the hash will not match.
 $ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
     if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
-        $current_hash = @md5_file('/usr/bin/ffmpeg');
+        $current_hash = @md5_file(FFPROBE_PATH);
         // If the binary can't be read, treat the cache as invalid — we can't
         // verify whether the binary was replaced while the cache was expired.
         if ($current_hash === false) {
@@ -486,7 +489,7 @@ if (!$GLOBALS['__ffmpeg_version']) {
     $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>&1 | head -1') ?: '');
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
-        $hash = @md5_file('/usr/bin/ffmpeg');
+        $hash = @md5_file(FFPROBE_PATH);
         // Only write to cache when we successfully read the binary.
         // If md5_file fails, skip cache write so the next request re-probes
         // rather than persisting an invalid empty hash that masks binary upgrades.
