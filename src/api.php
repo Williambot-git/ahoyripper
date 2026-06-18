@@ -1202,6 +1202,12 @@ define('DL_RATE_LIMIT', 10);
 // controls download so the two can be tuned independently without compromise.
 define('DOWNLOAD_TIMEOUT', max(1, (int)getenv('YTDLP_DOWNLOAD_TIMEOUT') ?: 300));
 
+// Default daily quota for unauthenticated users (free tier).
+// Override via QUOTA_DAILY env var in .env or docker-compose.
+// Named with _DEFAULT suffix to distinguish from the runtime $daily_limit variable
+// and to signal that this is a compile-time fallback, not the runtime value.
+define('QUOTA_DAILY_DEFAULT', 5);
+
 // ─── ROUTING ────────────────────────────────────────────────
 
 // $unlimited is set in the download case below after reading the API key.
@@ -1327,11 +1333,9 @@ switch ($action) {
             // that a user hitting 5 info calls has no download quota left.
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
-            // Defaults to 5 when the env var is absent. Set to 0 or -1 to disable
-            // the free tier entirely (unlimited-key required).
-            // Use ?? '5' so unset/null env vars fall through to the default 5,
-            // rather than being incorrectly treated as a falsy integer 0.
-            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? '5'));
+            // Defaults to QUOTA_DAILY_DEFAULT (5) when the env var is absent. Set to 0
+            // or -1 to disable the free tier entirely (unlimited-key required).
+            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
@@ -1891,13 +1895,11 @@ switch ($action) {
             // rate-limit gate. Both info and download share the daily-quota file.
             $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
-            // Defaults to 5 when the env var is absent. Set to 0 or -1 to disable
-            // the free tier entirely (unlimited-key required).
+            // Defaults to QUOTA_DAILY_DEFAULT (5) when the env var is absent. Set to 0
+            // or -1 to disable the free tier entirely (unlimited-key required).
             // Mirrors the same constant used in the info action so both actions
             // enforce the same daily limit regardless of which endpoint is called.
-            // Use ?? '5' so unset/null env vars fall through to the default 5,
-            // rather than being incorrectly treated as a falsy integer 0.
-            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? '5'));
+            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
