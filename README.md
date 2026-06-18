@@ -443,6 +443,7 @@ The `source_url` field in the probe result shows the URL that was used for the c
 | `/src/api.php?action=download` | 10 requests | 60 seconds |
 
 Response headers on every API response:
+- `X-Request-ID` — unique per-request correlation ID (16 hex chars); use this when reporting issues to correlate browser, API, and server-side logs
 - `X-RateLimit-Limit` — max requests allowed
 - `X-RateLimit-Remaining` — requests left in window
 - `X-RateLimit-Reset` — Unix timestamp when window resets
