@@ -913,6 +913,27 @@ $ids_asc = array_column($sorted_asc, 'id');
 test('filesize_asc — smallest first (1.5 MB < 10 MB < 50 MB)',
     $ids_asc[0] === 'small' && $ids_asc[1] === 'medium' && $ids_asc[2] === 'large');
 
+// string "Array" (the literal corruption symptom) is passed through as-is
+// This is intentional — the function cannot distinguish "Array" as a string
+// from "Array" as a PHP cast artifact; callers must validate inputs before clean().
+test('clean("Array") passes through as "Array" (no special treatment)',
+    cleanForTest('Array') === 'Array');
+
+echo "\n==> Testing clean() — additional edge cases (float, nested array, object)\n";
+
+test('clean(128.5) float preserved as "128.5"',
+    cleanForTest(128.5) === '128.5');
+test('clean(nested array [[]]) → Unknown',
+    cleanForTest([['a' => 1]]) === 'Unknown');
+test('clean(stdClass object) → Unknown',
+    cleanForTest((object)['f' => 'v']) === 'Unknown');
+test('clean("1080") numeric string preserved as "1080"',
+    cleanForTest('1080') === '1080');
+test('clean("0") string zero preserved as "0"',
+    cleanForTest('0') === '0');
+test('clean(assoc array) → Unknown',
+    cleanForTest(['k' => 'v']) === 'Unknown');
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";
