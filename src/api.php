@@ -1467,6 +1467,14 @@ switch ($action) {
             // string "": adjacent empty quoted strings that yt-dlp interprets as empty.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
+            // --consistency-flags: validate manifest/container consistency during download.
+            // 'org-id' checks that segment URIs contain a consistent publisher ID across
+            // all segments (catches mid-stream URL swaps). 'suffix' verifies that segment
+            // URLs end with a consistent file extension (catches extension substitution).
+            // Both flags are read-only checks that add minimal overhead but provide strong
+            // protection against content-swap and extension-spoofing attacks on manifests.
+            // Available in yt-dlp 2024.09+; silently ignored on older builds.
+            '--consistency-flags', 'org-id+suffix',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ];
@@ -2063,6 +2071,14 @@ switch ($action) {
             // current yt-dlp and could be used as an alternative to --progress-template.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
+            // --consistency-flags: validate manifest/container consistency during download.
+            // 'org-id' checks that segment URIs contain a consistent publisher ID across
+            // all segments (catches mid-stream URL swaps). 'suffix' verifies that segment
+            // URLs end with a consistent file extension (catches extension substitution).
+            // Both flags are read-only checks that add minimal overhead but provide strong
+            // protection against content-swap and extension-spoofing attacks on manifests.
+            // Available in yt-dlp 2024.09+; silently ignored on older builds.
+            '--consistency-flags', 'org-id+suffix',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
         ];
