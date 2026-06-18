@@ -2932,6 +2932,7 @@ switch ($action) {
         // the AhoyRipper origin, providing origin confirmation.
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
+            header('Allow: POST');
             echo json_encode(['error' => 'Method Not Allowed'], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
