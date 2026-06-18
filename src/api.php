@@ -12,6 +12,13 @@ define('AHOYRIPPER_VERSION', '1.0.0');
 // the constants section and needs this value before any other constants exist.
 define('YTDLP_PATH', getenv('YTDLP_PATH') ?: '/usr/local/bin/yt-dlp');
 
+// Path to ffprobe binary — configurable via FFPROBE_PATH env var so deployments
+// can override the default /usr/bin/ffprobe (e.g. to /usr/local/bin/ffprobe).
+// Used for post-download codec/resolution verification in the download action.
+// The ffprobe binary path is also used as the cache-key filename for the ffprobe
+// version cache so that changing FFPROBE_PATH invalidates stale cache entries.
+define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -2295,7 +2302,7 @@ switch ($action) {
         $actual_video_codec = null;
         $format_substituted = false;
         $substituted_label = null;
-        $ffprobe_bin = '/usr/bin/ffprobe';
+        $ffprobe_bin = FFPROBE_PATH;
         // Probe only when there is a video stream to check: skip for audio-only
         // format IDs (bestaudio, any vcodec=none) and bare audio codecs.
         $is_audio_only_format = ($acodec !== 'none' && $vcodec === 'none');

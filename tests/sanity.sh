@@ -542,19 +542,21 @@ else
 fi
 
 echo ""
-echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcement + report-only + API override)..."
-# There are 3 legitimate CSP headers in nginx-docker.conf:
+echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcement + report-only + API override + csp-report location)..."
+# There are 5 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
 #   2. Server-level report-only (add_header ... Content-Security-Policy-Report-Only ...)
 #   3. API-location override (location = /src/api.php block) — intentionally more
 #      restrictive for the JSON API endpoint (no unsafe-inline, no font CDNs).
-# The test checks that there are exactly 3 (not 1 or 4, which would indicate
+#   4. /csp-report location enforcement CSP (location = /csp-report block)
+#   5. /csp-report location report-only CSP
+# The test checks that there are exactly 5 (not 1-4, which would indicate
 # duplicate server-level or spurious entries).
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
-if [ "$CSP_COUNT" -eq 3 ]; then
-    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (enforcement + report-only at server, API override in location)"
+if [ "$CSP_COUNT" -eq 5 ]; then
+    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (enforcement + report-only at server, API override + csp-report location)"
 else
-    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 3: enforcement + report-only + API override)"
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 5: enforcement + report-only at server, API override + csp-report location)"
     exit 1
 fi
 
