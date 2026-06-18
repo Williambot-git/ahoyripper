@@ -134,6 +134,27 @@ done
 echo "  ✓ All required files present"
 
 echo ""
+echo "==> Checking manifest.json is valid JSON... "
+if php -r "json_decode(file_get_contents('public/manifest.json')); exit(json_last_error() !== JSON_ERROR_NONE ? 1 : 0);" 2>/dev/null; then
+    echo "✓ manifest.json is valid JSON"
+else
+    echo "✗ manifest.json is not valid JSON"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking PWA manifest id is URL-based (W3C spec compliance)... "
+# Per W3C Web Manifest spec, 'id' should be a URL matching start_url (not a bare string).
+# A bare string like "ahoyripper" causes PWA installation to fail in some browsers.
+MANIFEST_ID=$(php -r "echo json_decode(file_get_contents('public/manifest.json'))->id ?? '';")
+if echo "$MANIFEST_ID" | grep -q '^/'; then
+    echo "✓ manifest id is URL-based: $MANIFEST_ID"
+else
+    echo "✗ manifest id is not URL-based (got: $MANIFEST_ID — should be '/' or a full URL)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking security headers in api.php..."
 REQUIRED_HEADERS=(
     "X-Content-Type-Options"
