@@ -436,11 +436,18 @@ if [ "$missing" -eq 0 ]; then
 fi
 
 echo ""
-echo "==> Checking Docker nginx.conf CSP includes upgrade-insecure-requests... "
-if grep "Content-Security-Policy" deploy/nginx-docker.conf | grep -q "upgrade-insecure-requests"; then
-    echo "  ✓ Docker nginx.conf CSP includes upgrade-insecure-requests"
+echo "==> Checking ALL Docker nginx.conf CSP enforcement headers include upgrade-insecure-requests... "
+# Every Content-Security-Policy enforcement header (NOT Content-Security-Policy-Report-Only)
+# must include upgrade-insecure-requests for defense-in-depth parity with the PHP layer.
+# Previously the /csp-report location block was missing it even though the comment
+# said it was included. This test uses grep to extract each enforcement CSP header
+# and verifies upgrade-insecure-requests is present in all of them.
+ENFORCEMENT_CSP_COUNT=$(grep -c "^[[:space:]]*add_header Content-Security-Policy " deploy/nginx-docker.conf || true)
+UPGRADE_CSP_COUNT=$(grep "^[[:space:]]*add_header Content-Security-Policy " deploy/nginx-docker.conf | grep -c "upgrade-insecure-requests" || true)
+if [ "$ENFORCEMENT_CSP_COUNT" -gt 0 ] && [ "$ENFORCEMENT_CSP_COUNT" -eq "$UPGRADE_CSP_COUNT" ]; then
+    echo "  ✓ All $ENFORCEMENT_CSP_COUNT enforcement CSP headers include upgrade-insecure-requests"
 else
-    echo "  ✗ Docker nginx.conf CSP missing upgrade-insecure-requests"
+    echo "  ✗ $((ENFORCEMENT_CSP_COUNT - UPGRADE_CSP_COUNT)) enforcement CSP header(s) missing upgrade-insecure-requests"
     exit 1
 fi
 
