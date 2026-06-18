@@ -2764,6 +2764,20 @@ switch ($action) {
             }
         }
 
+        // yt-dlp probe cache — 5-minute TTL so repeated health?probe=1 calls
+        // don't hammer YouTube. Declared early here (before the ffprobe block below)
+        // so the cache-read is adjacent to the ffprobe cache block for clarity.
+        // The actual probe execution lives deeper in the case block where it has
+        // access to the full $out response array and the runYtdlp() function.
+        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
+        $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
+        if ($do_probe && is_readable($probe_cache_file)) {
+            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+            if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+                $GLOBALS['__ytdlp_probe'] = $cached['result'] ?? null;
+            }
+        }
+
         $ffmpeg_cache_ttl = null;
         $ffmpeg_cache_expires_at = null;
         if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
@@ -2772,18 +2786,6 @@ switch ($action) {
                 $exp = $cached['exp'] ?? 0;
                 $ffmpeg_cache_expires_at = date('c', $exp);
                 $ffmpeg_cache_ttl = max(0, $exp - time());
-            }
-        }
-
-        // Populate __ytdlp_probe from cache if available and probe is requested.
-        // This ensures cached probe results are available when the response array
-        // is built below without needing to run the probe again.
-        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
-        $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
-        if ($do_probe && $probe_cache_file && is_readable($probe_cache_file)) {
-            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
-            if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
-                $GLOBALS['__ytdlp_probe'] = $cached['result'] ?? null;
             }
         }
 
