@@ -464,6 +464,11 @@ if ('serviceWorker' in navigator) {
   // downloading the JSON error body as a file when the fetch responds non-200.
   // Set to false in error branches; checked nowhere (safety net for code changes).
   var navigateOnSuccess = true;
+  // Persisted retry_after timestamp from rate-limited responses (Unix seconds).
+  // Used by the retry button to show a live countdown when the user clicks retry
+  // during a rate-limit cooldown period.
+  var retryAfterTs = null;
+  var retryAfterTimer = null;
 
   // ─── Clear stale error state on page load / new interaction ─────────────────
   // Any error displayed from a previous session (e.g. network failure on a prior
@@ -1058,6 +1063,7 @@ function escapeHtml(s) {
             // Append human-readable retry countdown when retry_after is available.
             // DOWNLOAD_TIMEOUT and SOURCE_TIMEOUT include retry_after as a Unix timestamp.
             if (typeof err.retry_after === 'number' && err.retry_after > Date.now() / 1000) {
+              retryAfterTs = err.retry_after;
               var secs = Math.ceil(err.retry_after - Date.now() / 1000);
               if (secs > 60) {
                 var mins = Math.ceil(secs / 60);
@@ -1083,7 +1089,8 @@ function escapeHtml(s) {
             resp.text().then(function(txt) {
               var m = txt.match(/"retry_after"\s*:\s*(\d+)/);
               if (m) {
-                var secs = Math.ceil(parseInt(m[1], 10) - Date.now() / 1000);
+                retryAfterTs = parseInt(m[1], 10);
+                var secs = Math.ceil(retryAfterTs - Date.now() / 1000);
                 if (secs > 0) {
                   if (secs > 60) {
                     var mins = Math.ceil(secs / 60);
@@ -1145,6 +1152,28 @@ function escapeHtml(s) {
       hideError();
       // Only retry if the input still has a URL — otherwise do nothing.
       if (input.value && input.value.startsWith('http')) {
+        // If a retry_after timestamp exists and is still in the future, show a
+        // countdown instead of immediately retrying so the user knows when they
+        // can try again. Clear the stored retry_after to cancel the tick.
+        if (typeof retryAfterTs === 'number' && retryAfterTs > Date.now() / 1000) {
+          var tick = function() {
+            var secs = Math.ceil(retryAfterTs - Date.now() / 1000);
+            if (secs <= 0) {
+              retryAfterTs = null;
+              retryBtn.textContent = 'Try again';
+              retryBtn.classList.remove('visible');
+              retryBtn.disabled = false;
+              return;
+            }
+            retryBtn.textContent = 'Retry in ' + secs + 's';
+            retryBtn.disabled = true;
+            retryAfterTimer = setTimeout(tick, 500);
+          };
+          tick();
+          return;
+        }
+        retryAfterTs = null;
+        if (retryAfterTimer) { clearTimeout(retryAfterTimer); retryAfterTimer = null; }
         fetchInfo();
       }
     });

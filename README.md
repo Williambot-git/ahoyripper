@@ -588,6 +588,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `AGE_RESTRICTED` | Video requires age verification | Sign in to the platform in your browser first, then try |
 | `COPYRIGHT_REMOVED` | Content was removed due to a copyright claim | This content cannot be redistributed |
 | `UNSUPPORTED_SITE` | Site is not in yt-dlp's extractor list | Check [yt-dlp's supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) |
+| `SOURCE_FORBIDDEN` | Source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
 | `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again |
 | `SOURCE_TIMEOUT` | Source site took too long to respond | Try audio-only (fastest) or a lower resolution |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server limit | Try a smaller format or audio-only |
