@@ -2382,6 +2382,7 @@ switch ($action) {
                         $probe_exit = -1;
                         foreach ($probe_pipes as $p) { if ($p) fclose($p); }
                         $probe_pipes = null;
+                        $probe_proc = null;  // sentinel: prevents double proc_close() below
                         break;
                     }
                     $read = [];
