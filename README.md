@@ -261,13 +261,13 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 | Code | Meaning |
 |------|---------|
-| `400` | Invalid URL, missing format on download, or malformed request (`MISSING_FORMAT`, `INVALID_URL`, `INVALID_FORMAT_ID`) |
+| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`), or missing format on download (`MISSING_FORMAT`) |
 | `401` | Invalid API key (`INVALID_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
-| `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content (`error_code` field provides detail) |
-| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body (`RATE_LIMIT_EXCEEDED`, `DAILY_LIMIT`, `SOURCE_RATE_LIMITED`) |
+| `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content. See the `error_code` field for detail. |
+| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body. See classified error codes below. |
 | `502` | Bad gateway — source site or proxy failed (`CONNECTION_FAILED`, `SSL_ERROR`) |
 | `503` | Service temporarily unavailable |
 | `504` | Gateway timeout — source site did not respond in time (`SOURCE_TIMEOUT`) |
