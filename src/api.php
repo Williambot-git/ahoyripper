@@ -1338,7 +1338,7 @@ switch ($action) {
                 logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = strtotime('tomorrow midnight UTC');
-                header('Retry-After: ' . ($reset_timestamp - time()));
+                header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
@@ -1912,7 +1912,7 @@ switch ($action) {
                 logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = strtotime('tomorrow midnight UTC');
-                header('Retry-After: ' . ($reset_timestamp - time()));
+                header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
@@ -2125,11 +2125,11 @@ switch ($action) {
                 // Set to now + the actual $timeout so the client has a consistent
                 // future reset point to count down to regardless of the configured limit.
                 $retry_ts = time() + $timeout;
-                header('Retry-After: ' . $retry_ts);
+                header('Retry-After: ' . max(0, $retry_ts));
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
-                    'retry_after' => $retry_ts,
+                    'retry_after' => max(0, $retry_ts),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
