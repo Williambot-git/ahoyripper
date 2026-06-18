@@ -2519,7 +2519,13 @@ switch ($action) {
         $needs_encoding = preg_match('/[^\x00-\x7F]/', $dl_raw);
         if ($needs_encoding) {
             $encoded = rawurlencode($dl_raw);
-            $disposition = "attachment; filename*=UTF-8''{$encoded}; filename=\"{$dl_raw}\"";
+            // filename= must be ASCII-only per RFC 2616/6266 — percent-encode
+            // non-ASCII bytes so the fallback is safe for all HTTP implementations.
+            // filename*= carries the canonical UTF-8 value per RFC 5987.
+            $ascii_fallback = preg_replace_callback('/[^\x00-\x7F]/', function($m) {
+                return rawurlencode($m[0]);
+            }, $dl_raw);
+            $disposition = "attachment; filename*=UTF-8''{$encoded}; filename=\"{$ascii_fallback}\"";
         } else {
             $disposition = "attachment; filename=\"{$dl_raw}\"";
         }
