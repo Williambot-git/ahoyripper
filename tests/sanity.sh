@@ -171,11 +171,11 @@ else
 fi
 
 echo ""
-echo "==> Checking rate limiting (download endpoint)..."
-if grep -q "dl_rate_limit = 10" src/api.php; then
-    echo "  ✓ Download rate limit (10/min) configured"
+echo "==> Checking download rate limit uses DL_RATE_LIMIT constant (not magic number)..."
+if grep -q "dl_rate_limit = DL_RATE_LIMIT" src/api.php; then
+    echo "  ✓ Download rate limit uses DL_RATE_LIMIT constant"
 else
-    echo "  ✗ Download rate limit not found"
+    echo "  ✗ Download rate limit uses magic number instead of DL_RATE_LIMIT constant"
     exit 1
 fi
 

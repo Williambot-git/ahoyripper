@@ -1175,6 +1175,11 @@ define('MAX_URL_LEN', 2048);
 // yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
 define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
 
+// Download rate limit: max download requests per minute per IP.
+// Kept as a single constant so operators can change the limit in one place
+// rather than hunting for magic numbers throughout the download case.
+define('DL_RATE_LIMIT', 10);
+
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
 // Defaults to 300 seconds (5 minutes) when the env var is absent or zero/negative.
@@ -1772,7 +1777,7 @@ switch ($action) {
         $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
 
         // ─── Download rate limiting (atomic via flock) ───
-        $dl_rate_limit = 10; // download requests per minute
+        $dl_rate_limit = DL_RATE_LIMIT; // download requests per minute
         $dl_rate_window = 60;
         // Separate file from the request rate limiter to prevent the download
         // action's write (which runs after the request gate check) from wiping
