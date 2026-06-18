@@ -768,15 +768,16 @@ done
 echo "  ✓ Health response contains all required fields"
 
 echo ""
-echo "==> Checking JS does not hard-code gap=0 on formatGrid (regression)..."
-# The JS inline style was previously setting formatGrid.style.gap = '0' which
-# overrode the CSS gap value. The CSS .format-grid { gap: 0.75rem; } should
-# be the sole source of truth.
-if grep -q "formatGrid\.style\.gap\s*=\s*'0'" public/index.php; then
-    echo "  ✗ JS sets formatGrid.style.gap = '0' — overrides CSS and removes spacing"
+echo "==> Checking JS does not inline-override formatGrid layout properties (regression)..."
+# The formatGrid element's layout should be driven entirely by CSS (.format-grid rule).
+# JS used to set display/flexDirection/flexWrap inline which could conflict with CSS,
+# and was previously setting formatGrid.style.gap = '0' which overrode the CSS gap value.
+# Verify NONE of these layout properties are set inline on formatGrid.
+if grep -q "formatGrid\.style\.\(display\|flexDirection\|flexWrap\|gap\)\s*=" public/index.php; then
+    echo "  ✗ JS sets inline layout property on formatGrid — CSS should be sole source of truth"
     exit 1
 fi
-echo "  ✓ JS does not hard-code gap=0 on formatGrid"
+echo "  ✓ JS does not inline-override formatGrid layout properties"
 
 echo ""
 echo "==> Checking 503 responses include Retry-After header (rate limit gate)..."
