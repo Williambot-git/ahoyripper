@@ -1217,6 +1217,23 @@ $unlimited = false;
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     header('Allow: GET');
+    // Rate-limit headers on 405: check is not a download action (X-DL-RateLimit=-1)
+    // and has no per-minute ceiling (X-RateLimit-Limit=0). Daily limit is also
+    // inapplicable (-1). Including these on error responses gives API clients
+    // consistent header coverage regardless of which code path they hit.
+    // Mirrors the header set sent on the 200 response for the check action.
+    header('X-DL-RateLimit-Limit: -1');
+    header('X-DL-RateLimit-Remaining: -1');
+    header('X-DL-RateLimit-Reset: -1');
+    header('X-DL-RateLimit-Window: unlimited');
+    header('X-RateLimit-Limit: 0');
+    header('X-RateLimit-Remaining: -1');
+    header('X-RateLimit-Reset: -1');
+    header('X-RateLimit-Window: unlimited');
+    header('X-DailyLimit-Limit: -1');
+    header('X-DailyLimit-Remaining: -1');
+    header('X-DailyLimit-Reset: -1');
+    header('X-DailyLimit-Window: unlimited');
     echo json_encode([
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
