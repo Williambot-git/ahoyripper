@@ -2063,14 +2063,14 @@ switch ($action) {
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrites',
+            '--retries', '3',
             $playlist,
             '--no-progress',
             // --progress-template "": suppress ALL progress output to stderr so it doesn't
             // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
             // In array argv form (bypass_shell=true), use json_encode('') which
             // produces the two-character string "\'\'": adjacent empty quoted strings that
-            // yt-dlp interprets as empty. Note: --no-warnings is still available in
-            // current yt-dlp and could be used as an alternative to --progress-template.
+            // yt-dlp interprets as empty.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             // --consistency-flags: validate manifest/container consistency during download.
