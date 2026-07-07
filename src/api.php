@@ -2856,7 +2856,10 @@ switch ($action) {
                 // platforms (including YouTube) may return different content or block
                 // requests without a proper referer, even for public videos. Using the
                 // video page URL as referer is the correct browser-simulated behavior.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // --user-agent and --consistency-flags are included to match the info
+                // and download yt-dlp commands, ensuring the health probe uses the same
+                // configured UA and consistency checks as actual rip operations.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . escapeshellarg(AHOY_USER_AGENT) . ' --consistency-flags org-id+suffix --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
