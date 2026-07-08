@@ -1390,6 +1390,7 @@ switch ($action) {
             }
             $daily_data['c']++;
             $daily_remaining = max(0, $daily_limit - $daily_data['c']);
+            $info_quota_before_refund = $daily_data['c'];
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
