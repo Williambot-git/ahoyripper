@@ -189,8 +189,17 @@ ahoyripper/
 
 ### Get video info + formats
 ```
-GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|quality>
+GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|quality>&playlist=<0|1>&key=<api_key>
 ```
+
+**Parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `url` | — | **(required)** URL of the video to rip |
+| `sort` | `height` | Format sort order — see table below |
+| `playlist` | `0` | Set to `1` to fetch info for all videos in a playlist (yt-dlp `--yes-playlist`). Each video counts as a separate rip. |
+| `key` | — | AhoyVPN unlimited API key to bypass the daily 5-rip quota |
 
 The `sort` parameter (optional, default `height`) controls format sort order:
 - `height` — quality, highest resolution first (default)
@@ -226,7 +235,6 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "fps": 60,
       "tbr": 2500,
       "abr": null,
-      "format_description": "1280x720 720p60 HDR 10bit",
       "vcodec": "avc1.64001F",
       "acodec": "mp4a.40.2",
       "format_type": "combined",
