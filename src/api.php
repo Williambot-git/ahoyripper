@@ -1865,7 +1865,7 @@ switch ($action) {
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
                     'upgrade_url' => 'https://ahoyvpn.com',
-                    'retry_after' => $dl_reset_ts,
+                    'retry_after' => max(0, (int)($dl_reset_ts - time())),
                     'request_id' => $request_id,
                 ]);
                 exit;

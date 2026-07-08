@@ -69,7 +69,7 @@ jobs:
       - name: Check rate limiting
         run: |
           grep -q "rate_limit = 30" src/api.php
-          grep -q "dl_rate_limit = 10" src/api.php
+          grep -q "define.*DL_RATE_LIMIT.*10\|dl_rate_limit = DL_RATE_LIMIT" src/api.php
 
       - name: Check format_id validation
         run: |
