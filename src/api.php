@@ -2786,8 +2786,13 @@ switch ($action) {
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
 
+        // api_ok: single boolean for trivial uptime checks (monitoring dashboards,
+        // cron health checks, curl | grep api_ok scripts). Mirrors the degraded/ok
+        // status but in boolean form so callers don't need to parse string values.
+        $api_ok = $yt_dlp_ok && $ffmpeg_ok;
         $out = [
-            'status' => ($yt_dlp_ok && $ffmpeg_ok) ? 'ok' : 'degraded',
+            'status' => $api_ok ? 'ok' : 'degraded',
+            'api_ok' => $api_ok,
             'server_time' => date('c'),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
