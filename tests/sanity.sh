@@ -513,6 +513,25 @@ else
     FAILED=1
 fi
 
+echo "==> Checking PWA update banner accessibility attributes..."
+# The update banner must use role="alert" + aria-live="assertive" so that
+# screen readers announce the "Update now" message immediately when it appears.
+# role="status" + aria-live="polite" is for non-urgent status messages only.
+BANNER_LINE=$(grep 'id="update-banner"' public/index.php)
+if echo "$BANNER_LINE" | grep -q 'role="alert"'; then
+    echo "  ✓ PWA update banner uses role=\"alert\" (immediate screen reader announcement)"
+else
+    echo "  ✗ PWA update banner missing role=\"alert\" — screen readers may not announce update"
+    exit 1
+fi
+if echo "$BANNER_LINE" | grep -q 'aria-live="assertive"'; then
+    echo "  ✓ PWA update banner uses aria-live=\"assertive\""
+else
+    echo "  ✗ PWA update banner missing aria-live=\"assertive\""
+    exit 1
+fi
+
+echo ""
 echo "==> Checking og:image meta tag in public/index.php..."
 if grep -q 'meta property="og:image"' public/index.php; then
     echo "  ✓ og:image present in index.php"

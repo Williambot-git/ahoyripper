@@ -216,7 +216,8 @@ header('X-Request-ID: ' . $page_request_id);
 </nav>
 
 <!-- PWA update banner — shown when a new service worker is installed and waiting -->
-<div id="update-banner" class="update-banner" style="display:none" role="status" aria-live="polite">
+<!-- role="alert" + aria-live="assertive" signals screen readers to announce immediately -->
+<div id="update-banner" class="update-banner" style="display:none" role="alert" aria-live="assertive">
   <span>A new version of AhoyRipper is available.</span>
   <button type="button" class="refresh-btn">Update now</button>
 </div>
