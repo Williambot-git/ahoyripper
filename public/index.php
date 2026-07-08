@@ -366,6 +366,13 @@ header('X-Request-ID: ' . $page_request_id);
 </footer>
 
 <script>
+// ─── Progressive enhancement: remove no-js class so .js CSS activates ──
+// The <html class="no-js"> is set server-side so browsers with JS disabled
+// never see JS-dependent styles. When JS is present, we remove it here
+// before any rendering paint so the class swap is invisible to users.
+// This must run before any other script to avoid a FOUC window.
+document.documentElement.classList.remove('no-js');
+
 // ─── PWA Service Worker registration ───────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
