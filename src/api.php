@@ -1140,6 +1140,11 @@ $validation = function(string $action) use($request_id) {
     }
     // Download-only: a format must be selected before downloading.
     // Info action does not require a format parameter.
+    // NOTE: $format_id is returned via $validation_result so it is available in
+    // the caller's scope. Declaring it inside the closure without returning it
+    // would make it unavailable to the download case below (PHP closures do not
+    // leak local variables to the outer scope).
+    $format_id = null;
     if ($action === 'download') {
         $format_id = trim($_GET['format'] ?? '');
         if ($format_id === '') {
@@ -1154,7 +1159,7 @@ $validation = function(string $action) use($request_id) {
             return false;
         }
     }
-    return $url;
+    return [$url, $format_id];
 };
 
 // ─── CONSTANTS ──────────────────────────────────────────────
@@ -1274,12 +1279,13 @@ switch ($action) {
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
 
         // Validate URL — rejects missing, malformed, private-IP, non-HTTPS, and
-        // over-long URLs. Returns the sanitized URL string on success, or false
+        // over-long URLs. Returns [url, format_id] on success, or false
         // on any validation failure (the helper sends its own error response).
-        $url = $validation('info');
-        if ($url === false) {
+        $validation_result = $validation('info');
+        if ($validation_result === false) {
             exit;
         }
+        [$url, $format_id] = $validation_result;
 
         // Read and validate sort parameter — must be declared before parseFormats
         // is called. Controls format ordering: height (default), filesize (largest
@@ -1737,10 +1743,14 @@ switch ($action) {
         // The shared $validation helper is defined before the switch and handles
         // URL validation (missing, invalid) for both info and download actions.
         // The format parameter check is only enforced for download (checked inside helper).
-        $url = $validation('download');
-        if ($url === false) {
+        // Validate URL — rejects missing, malformed, private-IP, non-HTTPS, and
+        // over-long URLs. Returns [url, format_id] on success, or false
+        // on any validation failure (the helper sends its own error response).
+        $validation_result = $validation('download');
+        if ($validation_result === false) {
             exit;
         }
+        [$url, $format_id] = $validation_result;
         // yt-dlp format selectors use characters like [ ] + = ~ * for conditional
         // selection and output template merging (e.g. "bestvideo[height>=720]+bestaudio").
         // yt-dlp output templates use %(name)s and %(name)0d escape sequences
