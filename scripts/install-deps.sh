@@ -12,7 +12,15 @@ fi
 # Detect available pip and install yt-dlp.
 # Check in order of preference, stopping at the first working one.
 echo "==> Updating package lists..."
-apt-get update -qq > /dev/null 2>&1
+# Check exit status explicitly — apt-get update failures (network issues, expired
+# repos, missing GPG keys) must stop the installer before subsequent apt-get
+# install commands run and fail with confusing errors. Showing the error output
+# helps operators diagnose network/repo problems quickly.
+if ! apt-get update -qq 2>&1; then
+    echo "  ! apt-get update failed — check your network and repository configuration."
+    echo "  ! You may need to: update apt sources, check GPG keys, or resolve network issues."
+    exit 1
+fi
 
 echo "==> Checking for pip..."
 PIP_BIN=""
