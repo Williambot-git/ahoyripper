@@ -934,6 +934,19 @@ test('clean("0") string zero preserved as "0"',
 test('clean(assoc array) → Unknown',
     cleanForTest(['k' => 'v']) === 'Unknown');
 
+// ─── Regression: bypass_shell=true means shell escaping is not needed ─────────
+// runYtdlp() uses bypass_shell=true in proc_open, meaning all arguments are
+// passed directly to execve without shell interpretation. Shell escaping
+// functions (escapeshellarg, escapeshellcmd) are not needed in this context
+// and can produce malformed argument strings (e.g. UA strings containing
+// single quotes become misquoted). This is a static sanity check.
+
+$api_src = file_get_contents(__DIR__ . '/../src/api.php');
+// Match actual escapeshellarg() CALLS, not occurrences in comments.
+// The opening parenthesis distinguishes a function call from a mention in prose.
+test('api.php has no escapeshellarg() calls (bypass_shell=true context)',
+    strpos($api_src, 'escapeshellarg(') === false);
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";

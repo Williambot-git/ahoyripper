@@ -2840,14 +2840,11 @@ switch ($action) {
                 // saving bandwidth and keeping the health check lightweight.
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                // --progress-template "": suppress ALL progress output to stderr so it doesn't
-                //   corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
-                //   --no-warnings was removed in yt-dlp 2024.x; --progress-template ""
-                //   is the version-agnostic mechanism that suppresses all progress output.
-                //   NOTE: pass "" (two double quotes) as the template value in the string
-                //   form of the command — this becomes two empty adjacent quoted strings
-                //   after runYtdlp() splits on whitespace, which yt-dlp interprets as
-                //   a null/empty template and suppresses all progress output.
+                // --progress-template '': suppress ALL progress output to stderr so it doesn't
+                // corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
+                // yt-dlp interprets '' (two adjacent single-quotes) as an empty/null progress
+                // template and suppresses all progress output. This is version-agnostic and
+                // works regardless of yt-dlp's --no-warnings deprecation status.
                 // --socket-timeout: yt-dlp's per-connection timeout. Set to 10s so PHP's
                 // outer 15s timeout always fires first, cleanly producing a SOURCE_TIMEOUT
                 // classification. Without this, yt-dlp uses its own default (~20s) which
@@ -2859,7 +2856,13 @@ switch ($action) {
                 // --user-agent and --consistency-flags are included to match the info
                 // and download yt-dlp commands, ensuring the health probe uses the same
                 // configured UA and consistency checks as actual rip operations.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . escapeshellarg(AHOY_USER_AGENT) . ' --consistency-flags org-id+suffix --progress-template "" -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // NOTE: runYtdlp() uses bypass_shell=true, so shell escaping functions
+                // (escapeshellarg, escapeshellcmd) are unnecessary and can produce
+                // malformed output for arguments containing single quotes. Pass arguments
+                // as plain strings — bypass_shell=true ensures direct execve with no
+                // shell interpretation. The '' for --progress-template is passed via
+                // double-quoted PHP string concatenation to avoid PHP single-quote escaping issues.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --consistency-flags org-id+suffix --progress-template ' . "''" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
