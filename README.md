@@ -253,10 +253,13 @@ The `source_url` field in the info response is the exact URL that was ripped —
   ],
   "sort_applied": "height",
   "source_url": "https://www.youtube.com/watch?v=...",
-  "yt_dlp_version": "2026.03.17",
-  "api_version": "1.0.0"
+  "yt_dlp_version": "2026.03.17"
 }
 ```
+
+> **Note:** `api_version` appears only on `action=check` responses (the minimal ping endpoint). It is not present on `action=info` or other endpoints.
+
+
 
 The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_type: "audio"`) and `null` on video formats. The `tbr` (total bitrate, in kbps) is available on most formats and can be used as a proxy for quality when `height` is not available.
 

@@ -505,6 +505,26 @@ else
 fi
 
 echo ""
+echo "==> Checking COEP header in public/index.php..."
+if grep -q 'Cross-Origin-Embedder-Policy.*require-corp' public/index.php; then
+    echo "  ✓ Cross-Origin-Embedder-Policy: require-corp present in index.php"
+else
+    echo "  ✗ Cross-Origin-Embedder-Policy missing from index.php"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking README info response example does not claim api_version (only check endpoint has it)..."
+# The info response JSON example should NOT contain "api_version" — it only
+# appears on action=check. The README example was corrected to remove it.
+if grep -A20 '"sort_applied"' README.md | grep -q '"api_version"'; then
+    echo "  ✗ README info response example still contains api_version (should only be on check endpoint)"
+    exit 1
+else
+    echo "  ✓ README info response example correctly omits api_version"
+fi
+
+echo ""
 echo "==> Checking Permissions-Policy server-level header in nginx-docker.conf..."
 if grep -q 'Permissions-Policy' deploy/nginx-docker.conf; then
     echo "  ✓ Permissions-Policy header present in nginx-docker.conf"
