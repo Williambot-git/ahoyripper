@@ -2842,36 +2842,66 @@ switch ($action) {
                 // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
                 // --skip-download fetches metadata without downloading the full file,
                 // saving bandwidth and keeping the health check lightweight.
+                //
+                // Build the probe command as an explicit array (NOT a shell string) to
+                // avoid breaking AHOY_USER_AGENT which contains parentheses
+                // "(KHTML, like Gecko)" — runYtdlp()'s preg_split tokenizer splits on
+                // unquoted whitespace and would misparse the UA string into separate
+                // tokens, causing yt-dlp to receive a mangled --user-agent argument.
+                // Using bypass_shell=true with a direct array bypasses the shell
+                // entirely so no escaping is needed regardless of UA string content.
+                $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+                $probe_pipes = null;
+                $probe_proc = proc_open([
+                    YTDLP_PATH,
+                    '--dump-json',
+                    '--no-playlist',
+                    '--skip-download',
+                    '--socket-timeout', '10',
+                    '--referer', 'https://www.youtube.com/',
+                    '--user-agent', AHOY_USER_AGENT,
+                    '--progress-template', '', '',
+                    '--',
+                    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                ], $probe_desc, $probe_pipes, '/tmp', [], ['bypass_shell' => true]);
+
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
-                // --progress-template '': suppress ALL progress output to stderr so it doesn't
-                // corrupt the JSON parse (output appears ahead of JSON when combined via 2>&1).
-                // yt-dlp interprets '' (two adjacent single-quotes) as an empty/null progress
-                // template and suppresses all progress output. This is version-agnostic and
-                // works regardless of yt-dlp's --no-warnings deprecation status.
-                // --socket-timeout: yt-dlp's per-connection timeout. Set to 10s so PHP's
-                // outer 15s timeout always fires first, cleanly producing a SOURCE_TIMEOUT
-                // classification. Without this, yt-dlp uses its own default (~20s) which
-                // can outlast the 15s PHP process limit and produce CONNECTION_FAILED.
-                // --referer: send the YouTube video page URL as the referer. Some
-                // platforms (including YouTube) may return different content or block
-                // requests without a proper referer, even for public videos. Using the
-                // video page URL as referer is the correct browser-simulated behavior.
-                // --user-agent is included to match the info and download yt-dlp commands,
-                // ensuring the health probe uses the same configured UA as actual rip operations.
-                // NOTE: runYtdlp() uses bypass_shell=true, so shell escaping functions
-                // (escapeshellarg, escapeshellcmd) are unnecessary and can produce
-                // malformed output for arguments containing single quotes. Pass arguments
-                // as plain strings — bypass_shell=true ensures direct execve with no
-                // shell interpretation. For --progress-template, use "" (two adjacent
-                // double-quote characters) in a double-quoted PHP string — these are
-                // passed as two separate empty-string argv tokens to yt-dlp, which
-                // concatenates them into one empty string (suppressing progress output).
-                // Using '' (two single-quotes) is WRONG: preg_split tokenizes them as
-                // a single two-character token that yt-dlp interprets as the literal
-                // template name ' ' ' instead of an empty template.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --progress-template ' . "\"\"" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
-                $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
+                if ($probe_proc) {
+                    fclose($probe_pipes[0]);
+                    unset($probe_pipes[0]);
+                    $probe_start = hrtime(true);
+                    while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
+                        if ((hrtime(true) - $probe_start) / 1e9 > 15) {
+                            proc_terminate($probe_proc, 9);
+                            $probe_err = "Process timed out after 15s";
+                            break;
+                        }
+                        $r = [$probe_pipes[1], $probe_pipes[2]];
+                        $w = $e = null;
+                        $changed = @stream_select($r, $w, $e, 0, 200000);
+                        if ($changed === false) { break; }
+                        if ($changed === 0) {
+                            usleep(100000);
+                            continue;
+                        }
+                        foreach ($r as $p) {
+                            $chunk = fread($p, 65536);
+                            if ($chunk === false || $chunk === '') { continue; }
+                            if ($p === $probe_pipes[1]) {
+                                $probe_out .= $chunk;
+                            } else {
+                                $probe_err .= $chunk;
+                            }
+                        }
+                        if (feof($probe_pipes[1]) && feof($probe_pipes[2])) { break; }
+                    }
+                    $probe_exit = proc_close($probe_proc);
+                } else {
+                    $probe_err = "proc_open failed";
+                }
+
+                $probe_result = $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
                 if ($probe_result) {
