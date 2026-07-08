@@ -1204,7 +1204,9 @@ function escapeHtml(s) {
     if (thumb) { thumb.src = ''; thumb.hidden = true; }
     if (sub) sub.textContent = '';
     if (plat) plat.hidden = true;
-    if (sortSelect) sortSelect.disabled = true;
+    // Leave sortSelect enabled — the user may want a different sort for the next video.
+    // The sort preference is already persisted to localStorage and will be restored
+    // automatically on the next fetchInfo() call, so re-enabling here is unnecessary.
     input.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
