@@ -1472,14 +1472,6 @@ switch ($action) {
             // string "": adjacent empty quoted strings that yt-dlp interprets as empty.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
-            // --consistency-flags: validate manifest/container consistency during download.
-            // 'org-id' checks that segment URIs contain a consistent publisher ID across
-            // all segments (catches mid-stream URL swaps). 'suffix' verifies that segment
-            // URLs end with a consistent file extension (catches extension substitution).
-            // Both flags are read-only checks that add minimal overhead but provide strong
-            // protection against content-swap and extension-spoofing attacks on manifests.
-            // Available in yt-dlp 2024.09+; silently ignored on older builds.
-            '--consistency-flags', 'org-id+suffix',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ];
@@ -2074,14 +2066,6 @@ switch ($action) {
             // yt-dlp interprets as empty.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
-            // --consistency-flags: validate manifest/container consistency during download.
-            // 'org-id' checks that segment URIs contain a consistent publisher ID across
-            // all segments (catches mid-stream URL swaps). 'suffix' verifies that segment
-            // URLs end with a consistent file extension (catches extension substitution).
-            // Both flags are read-only checks that add minimal overhead but provide strong
-            // protection against content-swap and extension-spoofing attacks on manifests.
-            // Available in yt-dlp 2024.09+; silently ignored on older builds.
-            '--consistency-flags', 'org-id+suffix',
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
         ];
@@ -2854,9 +2838,8 @@ switch ($action) {
                 // platforms (including YouTube) may return different content or block
                 // requests without a proper referer, even for public videos. Using the
                 // video page URL as referer is the correct browser-simulated behavior.
-                // --user-agent and --consistency-flags are included to match the info
-                // and download yt-dlp commands, ensuring the health probe uses the same
-                // configured UA and consistency checks as actual rip operations.
+                // --user-agent is included to match the info and download yt-dlp commands,
+                // ensuring the health probe uses the same configured UA as actual rip operations.
                 // NOTE: runYtdlp() uses bypass_shell=true, so shell escaping functions
                 // (escapeshellarg, escapeshellcmd) are unnecessary and can produce
                 // malformed output for arguments containing single quotes. Pass arguments
@@ -2868,7 +2851,7 @@ switch ($action) {
                 // Using '' (two single-quotes) is WRONG: preg_split tokenizes them as
                 // a single two-character token that yt-dlp interprets as the literal
                 // template name ' ' ' instead of an empty template.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --consistency-flags org-id+suffix --progress-template ' . "\"\"" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --progress-template ' . "\"\"" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
