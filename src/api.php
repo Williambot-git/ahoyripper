@@ -1110,6 +1110,7 @@ $validation = function(string $action) use($request_id) {
             'error_code' => 'MISSING_URL',
             'request_id' => $request_id,
             'source_url' => null,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1121,6 +1122,7 @@ $validation = function(string $action) use($request_id) {
             'error_code' => 'INVALID_URL',
             'request_id' => $request_id,
             'source_url' => $url,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1135,6 +1137,7 @@ $validation = function(string $action) use($request_id) {
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
             'request_id' => $request_id,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1155,6 +1158,7 @@ $validation = function(string $action) use($request_id) {
                 'error_code' => 'MISSING_FORMAT',
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -2949,7 +2953,12 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             header('Allow: POST');
-            echo json_encode(['error' => 'Method Not Allowed'], JSON_INVALID_UTF8_SUBSTITUTE);
+            echo json_encode([
+                'error' => 'Method Not Allowed. Use POST for CSP reports.',
+                'error_code' => 'METHOD_NOT_ALLOWED',
+                'request_id' => $request_id,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
         $raw_body = file_get_contents('php://input');
@@ -2985,6 +2994,7 @@ switch ($action) {
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
             'request_id' => $request_id,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
