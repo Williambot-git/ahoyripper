@@ -1146,7 +1146,7 @@ $validation = function(string $action) use($request_id) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
             echo json_encode([
-                'error' => 'A format must be selected before downloading.',
+                'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
                 'request_id' => $request_id,
                 'source_url' => $url,
