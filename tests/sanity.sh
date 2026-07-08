@@ -532,6 +532,19 @@ else
 fi
 
 echo ""
+echo "==> Checking Rip Another handler does not disable sort dropdown..."
+# The sortSelect is re-enabled by the JS automatically on the next fetchInfo() call
+# (which restores the persisted sort preference from localStorage). Permanently disabling
+# it in the ripAgain handler locks the user out of sort order changes on subsequent rips.
+# Guard against this regression: the disabled attribute must not appear in ripAgain.
+if grep -A 10 "ripAgain.addEventListener" public/index.php | grep -q "sortSelect.disabled"; then
+    echo "  ✗ ripAgain handler sets sortSelect.disabled — sort dropdown locked on subsequent rips"
+    exit 1
+else
+    echo "  ✓ ripAgain handler does not disable sort dropdown"
+fi
+
+echo ""
 echo "==> Checking og:image meta tag in public/index.php..."
 if grep -q 'meta property="og:image"' public/index.php; then
     echo "  ✓ og:image present in index.php"
