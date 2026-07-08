@@ -772,7 +772,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
             $err_msg = strip_tags($err_msg);
             $err_msg = preg_replace('/\s+/', ' ', $err_msg);
-            if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            if (mb_strlen($err_msg, 'UTF-8') > 200) $err_msg = mb_substr($err_msg, 0, 200, 'UTF-8') . '...';
 
             // Classify into actionable categories
             $classified = classifyYtdlpError($err_msg);
@@ -1582,10 +1582,10 @@ switch ($action) {
             $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw_err); // remove control chars
             $err_msg = strip_tags($err_msg); // remove any HTML markup
             $err_msg = preg_replace('/\s+/', ' ', $err_msg); // collapse whitespace
-            if (strlen($err_msg) > 200) $err_msg = substr($err_msg, 0, 200) . '...';
+            if (mb_strlen($err_msg, 'UTF-8') > 200) $err_msg = mb_substr($err_msg, 0, 200, 'UTF-8') . '...';
             $ytdlp_ver = $GLOBALS['__ytdlp_version'];
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
-            logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => substr($err_msg, 0, 100)]);
+            logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => mb_substr($err_msg, 0, 100, 'UTF-8')]);
             http_response_code(422);
             $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
