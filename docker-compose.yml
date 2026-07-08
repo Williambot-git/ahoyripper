@@ -18,6 +18,7 @@ services:
       - YTDLP_DOWNLOAD_TIMEOUT=${YTDLP_DOWNLOAD_TIMEOUT:-300}
       - YTDLP_PATH=${YTDLP_PATH:-}
       - FFPROBE_PATH=${FFPROBE_PATH:-}
+      - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
