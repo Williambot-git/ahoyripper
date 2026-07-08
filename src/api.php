@@ -1659,6 +1659,7 @@ switch ($action) {
                 'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
                 'FILE_TOO_LARGE' => 413,
                 'DOWNLOAD_EMPTY' => 500,
+                'PROC_OPEN_FAILED' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
                 'DOWNLOAD_CANCELLED' => 499,
                 'MISSING_URL' => 400, 'MISSING_FORMAT' => 400,
