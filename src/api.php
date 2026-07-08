@@ -2874,6 +2874,7 @@ switch ($action) {
                     while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
                         if ((hrtime(true) - $probe_start) / 1e9 > 15) {
                             proc_terminate($probe_proc, 9);
+                            $probe_proc = null;  // sentinel: prevents double proc_close() below
                             $probe_err = "Process timed out after 15s";
                             break;
                         }
@@ -2896,7 +2897,8 @@ switch ($action) {
                         }
                         if (feof($probe_pipes[1]) && feof($probe_pipes[2])) { break; }
                     }
-                    $probe_exit = proc_close($probe_proc);
+                    $probe_exit = ($probe_proc !== null) ? proc_close($probe_proc) : -1;
+                    $probe_proc = null;  // reset for next use
                 } else {
                     $probe_err = "proc_open failed";
                 }
