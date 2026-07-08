@@ -379,6 +379,8 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
 | `422` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
+| `500` | `PROC_OPEN_FAILED` | Server error — could not start the download process. Try again shortly. |
+| `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
