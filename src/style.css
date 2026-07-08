@@ -497,6 +497,13 @@ body {
   .format-card {
     min-height: 88px;
   }
+  /* Suppress hover lift on touch devices — translateY(-2px) on tap-ready cards
+     causes accidental taps when scrolling through the format list. The border
+     colour brightening is also omitted since there is no hover state on touch. */
+  .format-card:hover {
+    transform: none;
+    border-color: var(--color-border);
+  }
 }
 .format-ext {
   font-size: 0.75rem;
