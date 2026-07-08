@@ -2860,9 +2860,14 @@ switch ($action) {
                 // (escapeshellarg, escapeshellcmd) are unnecessary and can produce
                 // malformed output for arguments containing single quotes. Pass arguments
                 // as plain strings — bypass_shell=true ensures direct execve with no
-                // shell interpretation. The '' for --progress-template is passed via
-                // double-quoted PHP string concatenation to avoid PHP single-quote escaping issues.
-                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --consistency-flags org-id+suffix --progress-template ' . "''" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
+                // shell interpretation. For --progress-template, use "" (two adjacent
+                // double-quote characters) in a double-quoted PHP string — these are
+                // passed as two separate empty-string argv tokens to yt-dlp, which
+                // concatenates them into one empty string (suppressing progress output).
+                // Using '' (two single-quotes) is WRONG: preg_split tokenizes them as
+                // a single two-character token that yt-dlp interprets as the literal
+                // template name ' ' ' instead of an empty template.
+                $probe_ok = runYtdlp('--dump-json --no-playlist --skip-download --socket-timeout 10 --referer https://www.youtube.com/ --user-agent ' . AHOY_USER_AGENT . ' --consistency-flags org-id+suffix --progress-template ' . "\"\"" . ' -- https://www.youtube.com/watch?v=dQw4w9WgXcQ', $probe_out, $probe_err, $probe_exit, 15);
                 $probe_result = $probe_ok && $probe_exit === 0 && $probe_out
                     ? json_decode($probe_out, true)
                     : null;
