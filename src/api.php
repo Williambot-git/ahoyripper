@@ -2860,7 +2860,7 @@ switch ($action) {
                     '--socket-timeout', '10',
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
-                    '--progress-template', '', '',
+                    '--progress-template', json_encode(''),
                     '--',
                     'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 ], $probe_desc, $probe_pipes, '/tmp', [], ['bypass_shell' => true]);
