@@ -17,6 +17,20 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 ---
 
+## Quick Start
+
+**1. Paste a URL** — Copy any video or audio link and paste it into the input field on the home page.
+
+**2. Click "Rip It"** — Or just press Enter. AhoyRipper fetches the available formats from the server.
+
+**3. Pick a format** — Browse the format cards, sort by quality or file size, then click **Download** next to your preferred option.
+
+The file streams directly to your browser — nothing is stored on the server. Each rip counts toward your daily quota (5 free rips per day, resetting at midnight UTC). Enter an AhoyVPN API key to bypass the limit.
+
+> **Tip:** Append `?url=https://...` to the page URL to pre-load a video link — useful for sharing direct rip links.
+
+---
+
 ## Supported Platforms
 
 AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms-reference). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
