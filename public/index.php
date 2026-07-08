@@ -250,6 +250,10 @@ header('X-Request-ID: ' . $page_request_id);
           spellcheck="false"
         >
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
+        <label class="rip-playlist-toggle">
+          <input type="checkbox" id="playlistToggle" aria-label="Download playlist">
+          <span class="rip-playlist-label">Playlist</span>
+        </label>
         <noscript><p class="rip-noscript-msg">JavaScript is required to use AhoyRipper. Please enable JavaScript in your browser settings.</p></noscript>
       </form>
       <p class="rip-hint">
@@ -653,7 +657,9 @@ if ('serviceWorker' in navigator) {
     // is sent only for the check-fetch; the browser-navigation download needs
     // the key in the URL since it bypasses fetch and can't send custom headers.
     var keyParam = key ? '&key=' + encodeURIComponent(key) : '';
-    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}` + fn + keyParam, key };
+    var plToggle = document.getElementById('playlistToggle');
+    var plParam = (plToggle && plToggle.checked) ? '&playlist=1' : '';
+    return { url: `${API}?action=download&url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatId)}` + fn + keyParam + plParam, key };
   }
 
   function renderFormats(url, data) {
@@ -1042,7 +1048,9 @@ function escapeHtml(s) {
       // correlated with the browser's page view when users report issues.
       headers['X-Request-ID'] = PAGE_REQUEST_ID;
       const sort = sortSelect ? sortSelect.value : 'height';
-      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + '&sort=' + encodeURIComponent(sort), {
+      const playlistToggle = document.getElementById('playlistToggle');
+      const playlistParam = (playlistToggle && playlistToggle.checked) ? '&playlist=1' : '';
+      const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + '&sort=' + encodeURIComponent(sort) + playlistParam, {
         headers,
         signal: AbortSignal.timeout(60000)
       });
