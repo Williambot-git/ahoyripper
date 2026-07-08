@@ -20,8 +20,12 @@ jobs:
 
       - name: Run PHP unit tests
         run: |
-          php tests/api_test.php
-          php tests/parse_formats_test.php
+          # Run the full test suite via the canonical runner.
+          # tests/run.sh runs all three PHP unit test suites (api_test.php,
+          # parse_formats_test.php, playlist_param_test.php) and exits non-zero
+          # if any suite fails. sanity.sh is excluded here because it requires
+          # yt-dlp and ffmpeg installed on the runner (available in Docker only).
+          bash tests/run.sh
 
       - name: Check required files
         run: |
