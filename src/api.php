@@ -1491,8 +1491,9 @@ switch ($action) {
             $ytdlp_cmd[] = '--cookies';
             $ytdlp_cmd[] = COOKIES_PATH;
         }
+        $accept_lang = preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5');
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
+            '--add-header', 'Accept-Language: ' . $accept_lang,
             '--',
             $url,
         ]);
@@ -2091,8 +2092,9 @@ switch ($action) {
             $ytdlp_cmd[] = '--cookies';
             $ytdlp_cmd[] = COOKIES_PATH;
         }
+        $accept_lang = preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5');
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
+            '--add-header', 'Accept-Language: ' . $accept_lang,
             '--',
             $url,
         ]);
