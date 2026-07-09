@@ -21,7 +21,8 @@ define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
 
 // Timeout (seconds) for ffprobe post-download verification. ffprobe should finish
 // in well under 10s for any real file; 10s is generous for large or slow files.
-define('FFPROBE_TIMEOUT', 10);
+// Override via FFPROBE_TIMEOUT env var (e.g. FFPROBE_TIMEOUT=20 in .env).
+define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
