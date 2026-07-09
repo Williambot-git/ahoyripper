@@ -705,6 +705,9 @@ footer a:hover { color: var(--color-accent); }
   transition: background 0.15s;
 }
 .update-banner .refresh-btn:hover { background: #6d28d9; }
+.update-banner .refresh-btn:active { background: #5b21b6; }
+#install-dismiss-btn:hover { background: #4b5563 !important; }
+#install-dismiss-btn:active { background: #374151 !important; }
 
 @media (max-width: 600px) {
   .update-banner { flex-direction: column; text-align: center; gap: 0.5rem; }
