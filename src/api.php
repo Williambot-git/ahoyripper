@@ -1224,9 +1224,10 @@ define('MAX_URL_LEN', 2048);
 define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
 
 // Download rate limit: max download requests per minute per IP.
-// Kept as a single constant so operators can change the limit in one place
-// rather than hunting for magic numbers throughout the download case.
-define('DL_RATE_LIMIT', 10);
+// Override via DL_RATE_LIMIT env var in .env or docker-compose.
+// Named in all-caps to match the env-var convention used throughout this file.
+// When absent or zero/negative, falls back to 10.
+define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 10));
 
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
