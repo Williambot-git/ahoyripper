@@ -90,6 +90,16 @@ header('X-Request-ID: ' . $page_request_id);
        on social media or linked from external sites, since the og:image is the most
        visually prominent element in link previews. It also helps Core Web Vitals. -->
   <meta property="og:image:fetchpriority" content="high">
+  <!-- Preload the og:image so social share previews load instantly.
+       fetchpriority="high" on the preload signals the browser to prioritize
+       this resource early in the page load, meaningfully improving LCP (Largest
+       Contentful Paint) when the page is shared on social media or linked from
+       external sites. Without this, the og:image is discovered only after the
+       HTML is fully parsed and the meta tag is processed — a measurable delay
+       for a visually prominent element. fetchpriority on <link rel="preload">
+       is supported in Chromium 86+ and Firefox 121+; Safari ignores it (no
+       harm, no regression) and falls back to the existing og:image meta tag. -->
+  <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.png">
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://ahoyripper.com">
