@@ -36,13 +36,12 @@ header('X-Content-Type-Options: nosniff');
 // to those destinations. Prevents video URLs from leaking as referrer data to
 // third-party servers. Mirrors the header set by nginx and api.php.
 header('Referrer-Policy: strict-origin-when-cross-origin');
-// COEP: enables SharedArrayBuffer on this origin for future PWA offline features.
-// The HTML page does not directly load cross-origin images in <head> (those are
-// loaded dynamically by JS), so COEP will not break thumbnail display here.
-// Note: COEP is intentionally omitted from api.php because it would block
-// cross-origin thumbnails loaded by the JS frontend via the API responses.
-header('Cross-Origin-Embedder-Policy: require-corp');
-// Request correlation ID — enables cross-layer log correlation (nginx, PHP, browser).
+// COEP is intentionally NOT set on the HTML page: require-corp breaks cross-origin
+// image loads (YouTube thumbnails, TikTok covers, Twitter video cards, etc.) loaded
+// by the JS frontend via fetch(). The same COEP restriction applies to api.php —
+// any SharedArrayBuffer use would require a separate isolated context, not the
+// main page. Omitting COEP here matches api.php's policy and keeps thumbnails working.
+
 header('X-Request-ID: ' . $page_request_id);
 ?>
 <!DOCTYPE html>
