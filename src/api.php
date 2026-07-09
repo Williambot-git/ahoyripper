@@ -556,10 +556,15 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
             proc_terminate($proc, 9);
             $stderr .= "\nProcess timed out after {$timeout}s";
             $exit = -1; // convention: -1 = timeout
-            // Use null sentinel so the post-loop proc_close skips this already-closed
-            // handle. This matches the pattern used in the download action and prevents
-            // double-close risk if runYtdlp is ever refactored to have a post-loop
-            // proc_close alongside this timeout path.
+            // proc_terminate kills the process but leaves its handle open until
+            // proc_close() is called. Close the handle immediately so the descriptor
+            // is not leaked. Setting $proc = null after proc_close() prevents the
+            // post-loop cleanup from attempting a second close on the already-closed
+            // handle (double proc_close on the same descriptor is undefined behavior).
+            // This mirrors the pattern used by the ffprobe probe (line ~2432) and the
+            // health probe (line ~2906): proc_terminate followed immediately by
+            // proc_close, with null sentinel to guard the post-loop cleanup.
+            proc_close($proc);
             $proc = null;
             // Close any remaining open pipes first to release handles.
             foreach ($pipes as $p) { if ($p) fclose($p); }
