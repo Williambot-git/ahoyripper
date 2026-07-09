@@ -18,7 +18,11 @@
  * script wasn't run), the fallback 'unversioned' string ensures the
  * SW still installs and functions — it simply won't auto-update.
  */
-const CACHE_VERSION = '{{CACHE_VERSION}}';
+// '{{CACHE_VERSION}}' is replaced at deploy time by scripts/generate-sw-version.php
+// with the short git commit hash. If the placeholder was not replaced (deploy script
+// ran outside a git repo or failed), use the 'unversioned' sentinel so the SW still
+// installs and functions — it simply won't auto-update until the next deploy.
+const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 
