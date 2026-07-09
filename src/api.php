@@ -2940,7 +2940,12 @@ switch ($action) {
                     '--no-playlist',
                     '--skip-download',
                     '--no-progress',
-                    '--no-warnings',
+                    // NOTE: --no-warnings is deliberately NOT used here. The health probe
+                    // reads $probe_err via classifyYtdlpError() to surface actionable error
+                    // codes (SSL_ERROR, CONNECTION_FAILED, SOURCE_FORBIDDEN, etc.) to callers.
+                    // Suppressing warnings would empty $probe_err and break error classification
+                    // on the health endpoint. --progress-template '' already suppresses yt-dlp
+                    // progress output noise from stderr, so --no-warnings is redundant anyway.
                     '--socket-timeout', '10',
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
