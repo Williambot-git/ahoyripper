@@ -699,7 +699,7 @@ AhoyRipper is a free, browser-based tool for downloading video and audio from th
 AhoyRipper runs entirely in your browser. There's nothing to install — just open the page and paste a link. Your IP address is hidden behind our servers, which can help when a site blocks your connection.
 
 **Q: What platforms are supported?**
-Every platform that [yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) — currently 1872+ sites. The supported platforms table above lists the most popular ones.
+Every platform that [yt-dlp supports](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — currently 1872+ sites. The supported platforms table above lists the most popular ones.
 
 **Q: Is there a daily limit?**
 The free tier allows 5 rips per day (each `info` or `download` API call counts as one rip). The quota resets at midnight UTC. Get [AhoyVPN](https://ahoyvpn.com) for unlimited rips.
