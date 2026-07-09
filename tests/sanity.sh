@@ -54,8 +54,22 @@ if [ "$FAILED_PHP" -eq 1 ]; then
 fi
 echo "  ✓ All PHP syntax OK"
 
-# --no-warnings (plural) is the current recommended yt-dlp flag.
-# The deprecated form is --no-warning (singular).
+# --no-warnings in the info action breaks error classification: yt-dlp emits
+# error messages (GEOBLOCKED, AGE_RESTRICTED, etc.) to stderr, and
+# classifyYtdlpError() reads $proc_stderr to classify failures. Suppressing
+# warnings via --no-warnings would empty stderr and cause all info-action
+# errors to fall through as unclassified YTDLP_ERROR. --no-warnings must NOT
+# appear in the info action's yt-dlp command (it is correctly absent from
+# the download action, where classifyYtdlpError also reads stderr).
+echo ""
+echo "==> Checking --no-warnings is NOT used in the info action..."
+INFO_YTDLP_BLOCK=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
+if echo "$INFO_YTDLP_BLOCK" | grep -qE "'\\-\\-no-warnings',?$" || echo "$INFO_YTDLP_BLOCK" | grep -qE "^\\s*'\\-\\-no-warnings',?$"; then
+    echo "  ✗ --no-warnings found in info action (breaks classifyYtdlpError)"
+    exit 1
+fi
+echo "  ✓ --no-warnings correctly absent from info action"
+
 echo ""
 echo "==> Checking yt-dlp flags in source..."
 if grep -q -- '--no-warning$' src/api.php; then

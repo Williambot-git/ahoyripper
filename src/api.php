@@ -1538,7 +1538,14 @@ switch ($action) {
             $playlist_flag,
             '--skip-download',
             '--no-progress',
-            '--no-warnings',
+            // NOTE: --no-warnings is deliberately NOT used in the info action.
+            // yt-dlp emits its error/warning messages to stderr, and
+            // classifyYtdlpError() reads $proc_stderr to classify failures
+            // (GEOBLOCKED, AGE_RESTRICTED, LOGIN_REQUIRED, etc.).
+            // Suppressing warnings via --no-warnings would empty $proc_stderr
+            // and break error classification on the info action.
+            // yt-dlp progress output is already suppressed via --progress-template '',
+            // so --no-warnings is redundant for that purpose anyway.
             // --progress-template "": suppress ALL progress output to stderr.
             // --no-progress alone is NOT sufficient — yt-dlp emits progress template
             // output even during --skip-download, which prepends garbage to stderr
