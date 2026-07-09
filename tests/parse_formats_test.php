@@ -163,6 +163,22 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         return null;
     }
 
+    // JSON parsed successfully but has no formats key — distinct from a true JSON
+    // parse failure. yt-dlp always includes a formats array; absent means the
+    // extractor returned a partial/empty response (unsupported site, non-standard
+    // metadata). Return a classified PARSE_ERROR so the client shows a specific hint.
+    if (!array_key_exists('formats', $data)) {
+        $no_formats_msg = 'No formats returned — site may be unsupported or returned non-standard metadata.';
+        if ($raw_error_out !== null) {
+            $raw_error_out = $no_formats_msg;
+        }
+        return [
+            'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
+            'error_code' => 'PARSE_ERROR',
+            'raw_error' => $raw_error_out ?? $no_formats_msg,
+        ];
+    }
+
     $title = clean($data['title'] ?? 'Unknown');
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
@@ -242,15 +258,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // format_description is used raw (null/empty = absent, string = present).
         // Only clean format_note (safe string coercion). Never clean format_description —
         // that would turn absent into the literal string "Unknown" and break fallback logic.
-        // Audio-only formats: never prefix resolution; use label directly since
-        // format_description carries no useful resolution context for audio.
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         if ($resolution !== null && $vcodec !== 'none') {
             // Video-containing formats (combined or video-only) get resolution prefix.
             // Use null/empty-string checks instead of empty() to avoid false
             // positives on the literal string "0" (empty("0") === true in PHP).
             $has_desc = $format_description !== null && $format_description !== '';
-            $desc = (!$has_desc || $format_description === 'Unknown')
+            $desc = !$has_desc
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
         } else {
@@ -837,6 +851,29 @@ test('non-error malformed input returns null (not an error array)',
 $result_empty = parseFormats('', $raw_err);
 test('empty string returns null',
     $result_empty === null);
+
+// ─── parseFormats: formats key absent → PARSE_ERROR ─────────────────────────────
+// api.php line 839: when $data parses but has no 'formats' key, return PARSE_ERROR.
+// yt-dlp always includes a formats array; absent means the extractor returned a
+// partial/empty response (unsupported site or non-standard metadata).
+
+echo "\n==> Testing parseFormats() — formats key absent returns PARSE_ERROR\n";
+
+$json_no_formats = json_encode([
+    'title' => 'No Formats Test',
+    'thumbnail' => 'https://example.com/thumb.jpg',
+    'duration' => 60,
+    'uploader' => 'Test Channel',
+    // NO 'formats' key — simulates an unsupported site's partial response
+]);
+$raw_err2 = null;
+$result_no_formats = parseFormats($json_no_formats, $raw_err2);
+test('JSON with no formats key returns PARSE_ERROR (not null)',
+    is_array($result_no_formats) && ($result_no_formats['error_code'] ?? '') === 'PARSE_ERROR');
+test('PARSE_ERROR message is user-facing',
+    strpos($result_no_formats['error'] ?? '', 'Could not parse') !== false);
+test('PARSE_ERROR raw_error falls back to computed message when no output param',
+    ($result_no_formats['raw_error'] ?? '') === 'No formats returned — site may be unsupported or returned non-standard metadata.');
 
 // ─── parseFormats: description field population ──────────────────────────────
 
