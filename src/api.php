@@ -778,22 +778,37 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // Differentiate yt-dlp errors from actual parsing failures
         $raw = trim($json_str);
         if (preg_match('/^(ERROR|WARNING)/im', $raw)) {
-            // yt-dlp returned an error message — surface it clearly
+            // yt-dlp returned an error message — surface it clearly.
+            // Whitespace-normalize the full message first (before truncation), so
+            // classification patterns have the best chance of matching.
             $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
             $err_msg = strip_tags($err_msg);
             $err_msg = preg_replace('/\s+/', ' ', $err_msg);
-            if (mb_strlen($err_msg, 'UTF-8') > 200) $err_msg = mb_substr($err_msg, 0, 200, 'UTF-8') . '...';
 
-            // Classify into actionable categories
+            // Classify on the FULL message — truncation would discard the tail of
+            // long errors that may contain the distinguishing keyword (e.g. "login required"
+            // at byte 300 of a 500-byte message). The classified['msg'] is always short
+            // so it never needs truncation; the user-facing error uses that short message.
             $classified = classifyYtdlpError($err_msg);
             if ($classified) {
+                // raw_error_out: truncated only for the raw diagnostic field — the
+                // classified human-readable message (used in 'error') is always concise.
+                $raw_diag = $err_msg;
+                if (mb_strlen($raw_diag, 'UTF-8') > 200) {
+                    $raw_diag = mb_substr($raw_diag, 0, 200, 'UTF-8') . '...';
+                }
                 if ($raw_error_out !== null) {
-                    $raw_error_out = $err_msg;
+                    $raw_error_out = $raw_diag;
                 }
                 return [
                     'error' => $classified['msg'],
                     'error_code' => $classified['code'],
                 ];
+            }
+            // Unclassified yt-dlp error: use truncated version for the user-facing
+            // message (long raw strings are unreadable); preserve full text in raw_error.
+            if (mb_strlen($err_msg, 'UTF-8') > 200) {
+                $err_msg = mb_substr($err_msg, 0, 200, 'UTF-8') . '...';
             }
             if ($raw_error_out !== null) {
                 $raw_error_out = $err_msg;
