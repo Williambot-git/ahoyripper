@@ -505,6 +505,20 @@ else
 fi
 
 echo ""
+echo "==> Checking X-Powered-By suppression in public/index.php..."
+# index.php must call header_remove('X-Powered-By') to suppress the PHP version
+# header that PHP-FPM adds automatically. This complements server_tokens off
+# in nginx and fastcgi_hide_header in the production nginx.conf (api.php
+# location). Without this, the HTML page leaks the PHP version when served
+# through PHP-FPM even when nginx would otherwise hide it.
+if grep -q "header_remove('X-Powered-By')" public/index.php; then
+    echo "  ✓ X-Powered-By suppressed in index.php"
+else
+    echo "  ✗ header_remove('X-Powered-By') missing from index.php — PHP version leaks"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking COEP header in public/index.php..."
 if grep -q 'Cross-Origin-Embedder-Policy.*require-corp' public/index.php; then
     echo "  ✓ Cross-Origin-Embedder-Policy: require-corp present in index.php"
