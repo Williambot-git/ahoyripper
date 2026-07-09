@@ -2830,6 +2830,7 @@ switch ($action) {
             'server_time' => date('c'),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
+            'api_version' => AHOYRIPPER_VERSION,
             'os' => PHP_OS,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
