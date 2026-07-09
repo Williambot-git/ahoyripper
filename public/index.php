@@ -43,6 +43,14 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // main page. Omitting COEP here matches api.php's policy and keeps thumbnails working.
 
 header('X-Request-ID: ' . $page_request_id);
+// Remove the "PHP/x.y.z" Server header that PHP-FPM adds automatically.
+// header_remove() is idempotent — safe to call even when no such header was set.
+// This complements server_tokens off in nginx, completing the version-hiding
+// stack for both layers. Using remove() rather than setting a generic replacement
+// value (e.g. "WebServer") ensures no PHP version information leaks at all.
+// api.php also calls header_remove('X-Powered-By') for consistency across both
+// entry points — index.php (HTML page) and src/api.php (JSON API).
+header_remove('X-Powered-By');
 ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
