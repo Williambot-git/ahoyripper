@@ -214,7 +214,7 @@ GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|qu
 |-----------|---------|-------------|
 | `url` | — | **(required)** URL of the video to rip |
 | `sort` | `height` | Format sort order — see table below |
-| `playlist` | `0` | Set to `1` to fetch info for all videos in a playlist (yt-dlp `--yes-playlist`). Each video counts as a separate rip. |
+| `playlist` | `0` | Set to `1` to fetch info for all videos in a playlist (`--yes-playlist`). By default (`playlist=0`), `--no-playlist` is passed to yt-dlp so single-video URLs always return one result regardless of whether the URL is part of a playlist. Each video in a playlist counts as a separate rip. |
 | `key` | — | AhoyVPN unlimited API key to bypass the daily 5-rip quota |
 
 The `sort` parameter (optional, default `height`) controls format sort order:
