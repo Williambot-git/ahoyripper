@@ -630,8 +630,19 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access |
 | `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
+| `DOWNLOAD_CANCELLED` | Download was cancelled (tab closed or connection lost) | Your quota was not charged — try again when ready |
+| `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
+| `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
+| `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video |
+| `SOURCE_SERVER_ERROR` | Source site returned HTTP 5xx | Try again shortly |
+| `SOURCE_HTTP_ERROR` | Source site returned an unexpected HTTP error | Try again shortly |
+| `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
+| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
+| `INVALID_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
+| `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
+| `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is unavailable | Try another video |
 
 ### Still stuck?
 
