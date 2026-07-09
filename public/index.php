@@ -320,6 +320,7 @@ header('X-Request-ID: ' . $page_request_id);
             <option value="filesize">Size (largest)</option>
             <option value="filesize_asc">Size (smallest)</option>
             <option value="tbr">Bitrate</option>
+            <option value="quality">Quality tier</option>
           </select>
         </div>
       </div>
