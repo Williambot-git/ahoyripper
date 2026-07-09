@@ -231,6 +231,15 @@ header('X-Request-ID: ' . $page_request_id);
   <button type="button" class="refresh-btn">Update now</button>
 </div>
 
+<!-- PWA install banner — shown when the browser fires the beforeinstallprompt event.
+     Only shown on first visit (persisted in localStorage). Hidden automatically if
+     the app is already installed (navigator.standalone === true on iOS/supported browsers). -->
+<div id="install-banner" class="update-banner" style="display:none" role="alert" aria-live="polite">
+  <span>Install AhoyRipper for faster access and offline support.</span>
+  <button type="button" id="install-btn" class="refresh-btn">Install</button>
+  <button type="button" id="install-dismiss-btn" class="refresh-btn" style="background:#374151" aria-label="Dismiss install prompt">✕</button>
+</div>
+
 <!-- Main -->
 <main>
   <section class="hero">
@@ -382,6 +391,27 @@ header('X-Request-ID: ' . $page_request_id);
 document.documentElement.classList.remove('no-js');
 
 // ─── PWA Service Worker registration ───────────────────────
+var deferredInstallPrompt = null;
+
+// Capture the beforeinstallprompt event so we can show the install banner
+// at the right time (rather than relying on the browser's own install UI).
+window.addEventListener('beforeinstallprompt', function(e) {
+  // Prevent the browser's mini-infobar from appearing.
+  e.preventDefault();
+  // Check if the app is already installed — don't show the banner to users
+  // who have already installed the PWA (navigator.standalone is true on iOS Safari
+  // and some desktop PWAs; the check is imperfect but covers the main cases).
+  if (window.matchMedia('(display-mode: standalone)').matches ||
+      navigator.standalone === true ||
+      localStorage.getItem('ahoyrip_install_dismissed')) {
+    return;
+  }
+  deferredInstallPrompt = e;
+  var banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'flex';
+});
+
+// Show the install prompt when the user clicks "Install".
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js')
@@ -413,6 +443,35 @@ if ('serviceWorker' in navigator) {
       .catch(function(err) {
         console.warn('[SW] registration failed:', err);
       });
+  });
+}
+
+// ─── PWA Install Banner ───────────────────────────────────
+// Wire up the "Install" and "Dismiss" buttons for the PWA install banner.
+// Deferred prompt is captured by the beforeinstallprompt listener above.
+var installBtn = document.getElementById('install-btn');
+var installDismissBtn = document.getElementById('install-dismiss-btn');
+var installBanner = document.getElementById('install-banner');
+
+if (installBtn) {
+  installBtn.addEventListener('click', function() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(function(choice) {
+        // Log the outcome for analytics/debugging.
+        console.info('[PWA] Install prompt outcome:', choice.outcome);
+        deferredInstallPrompt = null;
+        if (installBanner) installBanner.style.display = 'none';
+      });
+    }
+  });
+}
+
+if (installDismissBtn && installBanner) {
+  installDismissBtn.addEventListener('click', function() {
+    installBanner.style.display = 'none';
+    // Remember dismissal so the banner doesn't reappear on the next page visit.
+    try { localStorage.setItem('ahoyrip_install_dismissed', '1'); } catch (e) {}
   });
 }
 
