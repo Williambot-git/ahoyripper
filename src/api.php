@@ -1125,11 +1125,30 @@ function logRequest($action, $status, $extra = []) {
 // DRY helper for URL and format validation. Used by both info and download
 // actions to ensure consistent error codes and log messages.
 // Keep outside the switch so both case blocks can reference it.
-$validation = function(string $action) use($request_id) {
+// Sends X-DailyLimit-* headers with the configured daily limit value.
+// Called on validation errors that occur BEFORE the quota-check gate so clients
+// can always determine the daily-limit configuration from any error response.
+// Uses QUOTA_DAILY env var with QUOTA_DAILY_DEFAULT fallback. Does not attempt
+// to read the quota file since that would require IP-based tracking that is not
+// available at this stage (the quota file is opened only after these early exits).
+$sendDailyLimitHeaders = function(int $limit, ?int $remaining) {
+    header('X-DailyLimit-Limit: ' . $limit);
+    header('X-DailyLimit-Remaining: ' . ($remaining ?? $limit));
+    header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
+    header('X-DailyLimit-Window: 86400');
+};
+
+$validation = function(string $action) use($request_id, $sendDailyLimitHeaders) {
+    // Determine the daily limit from the environment to include in error
+    // responses. This is the configured limit, not the user's remaining quota
+    // (quota tracking is not available at this early validation stage).
+    $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? 5));
+
     $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
     if (!$url) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'missing_url']);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
@@ -1142,6 +1161,7 @@ $validation = function(string $action) use($request_id) {
     if (!isValidUrl($url)) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'invalid_url']);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1158,6 +1178,7 @@ $validation = function(string $action) use($request_id) {
     if (strlen($url) > MAX_URL_LEN) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
@@ -1293,6 +1314,19 @@ $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
 $json_actions = ['info', 'check', 'health', 'progress'];
 if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
+    // info action is subject to daily quota; others (check, health, progress) are not.
+    if ($action === 'info') {
+        $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? 5));
+        header('X-DailyLimit-Limit: ' . $dl);
+        header('X-DailyLimit-Remaining: ' . $dl);
+        header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
+        header('X-DailyLimit-Window: 86400');
+    } else {
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
+    }
     echo json_encode([
         'error' => 'Not acceptable. API only returns application/json.',
         'error_code' => 'NOT_ACCEPTABLE',
@@ -1348,6 +1382,10 @@ switch ($action) {
         if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
             logRequest('info', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
