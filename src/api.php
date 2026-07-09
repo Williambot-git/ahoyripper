@@ -1474,6 +1474,7 @@ switch ($action) {
             $playlist_flag,
             '--skip-download',
             '--no-progress',
+            '--no-warnings',
             // --progress-template "": suppress ALL progress output to stderr.
             // --no-progress alone is NOT sufficient — yt-dlp emits progress template
             // output even during --skip-download, which prepends garbage to the JSON
@@ -2075,6 +2076,7 @@ switch ($action) {
             '--retries', '3',
             $playlist,
             '--no-progress',
+            '--no-warnings',
             // --progress-template "": suppress ALL progress output to stderr so it doesn't
             // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
             // In array argv form (bypass_shell=true), use json_encode('') which
@@ -2859,6 +2861,8 @@ switch ($action) {
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
+                    '--no-progress',
+                    '--no-warnings',
                     '--socket-timeout', '10',
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
