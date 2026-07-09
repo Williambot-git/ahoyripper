@@ -8,7 +8,7 @@
     HTTPS is guaranteed via HSTS preload, so no mixed-content risk.
   -->
   <ShortName>AhoyRipper</ShortName>
-  <Description>Download video and audio from YouTube, TikTok, Twitter, X, SoundCloud, Instagram and 1872+ sites. Free forever, no signup required.</Description>
+  <Description>Download video and audio from YouTube, TikTok, Twitter, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ other platforms. Free forever, no signup required, no ads.</Description>
   <Url type="text/html" method="get" template="https://ahoyripper.com/?url={searchTerms}"/>
   <Url type="application/xhtml+xml" method="get" template="https://ahoyripper.com/?url={searchTerms}"/>
   <Image width="16" height="16" type="image/png">https://ahoyripper.com/favicon-180.png</Image>
