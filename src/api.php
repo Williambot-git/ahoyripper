@@ -1593,6 +1593,7 @@ switch ($action) {
                 'action' => 'info',
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
