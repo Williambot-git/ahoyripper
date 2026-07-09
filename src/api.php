@@ -1631,7 +1631,10 @@ switch ($action) {
                 // Use the same $ip variable declared at the top of the script so the undo
                 // targets the correct daily-quota file regardless of which action ran.
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                if (!$undo_fp) {
+                    // Could not open quota file — skip the refund rather than fail the response.
+                    // Best-effort grace; the user is not charged when the refund mechanism fails.
+                } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
                     if ($undo_raw) {
@@ -1683,7 +1686,10 @@ switch ($action) {
             // could not be parsed; we don't burn the user's daily limit for this.
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                if (!$undo_fp) {
+                    // Could not open quota file — skip the refund rather than fail the response.
+                    // Best-effort grace; the user is not charged when the refund mechanism fails.
+                } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
                     if ($undo_raw) {
@@ -1757,7 +1763,10 @@ switch ($action) {
             $info_quota_before_refund = $daily_data['c'];
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                if (!$undo_fp) {
+                    // Could not open quota file — skip the refund rather than fail the response.
+                    // Best-effort grace; the user is not charged when the refund mechanism fails.
+                } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
                     if ($undo_raw) {
@@ -2190,7 +2199,10 @@ switch ($action) {
             // increment so no refund needed.
             if (!$unlimited && isset($dl_quota_before_refund)) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                if (!$undo_fp) {
+                    // Could not open quota file — skip the refund rather than fail the response.
+                    // Best-effort grace; the user is not charged when the refund mechanism fails.
+                } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
                     if ($undo_raw) {
@@ -2324,7 +2336,10 @@ switch ($action) {
             // to avoid double-refunding. This is the baseline for the at-most-once refund.
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                if (!$undo_fp) {
+                    // Could not open quota file — skip the refund rather than fail the response.
+                    // Best-effort grace; the user is not charged when the refund mechanism fails.
+                } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
                     if ($undo_raw) {
