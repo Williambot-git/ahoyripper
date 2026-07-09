@@ -19,6 +19,10 @@ define('YTDLP_PATH', getenv('YTDLP_PATH') ?: '/usr/local/bin/yt-dlp');
 // version cache so that changing FFPROBE_PATH invalidates stale cache entries.
 define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
 
+// Timeout (seconds) for ffprobe post-download verification. ffprobe should finish
+// in well under 10s for any real file; 10s is generous for large or slow files.
+define('FFPROBE_TIMEOUT', 10);
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -2399,7 +2403,7 @@ switch ($action) {
             $probe_err = '';
             $probe_exit = 0;
             $probe_start = hrtime(true);
-            $probe_timeout = 10; // outer kill timeout — ffprobe should finish in under 10s for any real file
+            $probe_timeout = FFPROBE_TIMEOUT; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
             if ($probe_proc) {
                 fclose($probe_pipes[0]);
@@ -2407,7 +2411,7 @@ switch ($action) {
                 stream_set_timeout($probe_pipes[1], 5);
                 stream_set_timeout($probe_pipes[2], 5);
                 while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
-                    // Outer timeout: ffprobe that takes >10s is hung on a malformed/corrupt
+                    // Outer timeout: ffprobe that takes >FFPROBE_TIMEOUT s is hung on a malformed/corrupt
                     // file. Terminate it rather than letting proc_close() block indefinitely.
                     if ((hrtime(true) - $probe_start) / 1e9 > $probe_timeout) {
                         proc_terminate($probe_proc, 9);
