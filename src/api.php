@@ -2981,7 +2981,6 @@ switch ($action) {
         header('X-DailyLimit-Window: unlimited');
 
         header('Cache-Control: no-cache');
-        header('Connection: close');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
