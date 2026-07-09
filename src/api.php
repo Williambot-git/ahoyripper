@@ -1556,6 +1556,7 @@ switch ($action) {
             // that yt-dlp concatenates to one empty string.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
+            '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ];
