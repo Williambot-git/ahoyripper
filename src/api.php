@@ -1482,10 +1482,12 @@ switch ($action) {
             '--no-warnings',
             // --progress-template "": suppress ALL progress output to stderr.
             // --no-progress alone is NOT sufficient — yt-dlp emits progress template
-            // output even during --skip-download, which prepends garbage to the JSON
-            // stdout on stderr and causes json_decode() to fail. In array argv form
-            // (bypass_shell=true), use json_encode('') which produces the two-character
-            // string "": adjacent empty quoted strings that yt-dlp interprets as empty.
+            // output even during --skip-download, which prepends garbage to stderr
+            // and can cause json_decode() to fail on the stdout JSON. The
+            // --progress-template '' (empty template) suppresses this regardless of
+            // --no-warnings. In array argv form (bypass_shell=true), use
+            // json_encode('') which produces two adjacent empty-quoted strings
+            // that yt-dlp concatenates to one empty string.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', 'https://ahoyripper.com/',
@@ -2082,12 +2084,16 @@ switch ($action) {
             '--retries', '3',
             $playlist,
             '--no-progress',
-            '--no-warnings',
             // --progress-template "": suppress ALL progress output to stderr so it doesn't
             // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
             // In array argv form (bypass_shell=true), use json_encode('') which
-            // produces the two-character string "\'\'": adjacent empty quoted strings that
-            // yt-dlp interprets as empty.
+            // produces the two adjacent empty-quoted strings that yt-dlp concatenates
+            // to one empty string, suppressing all progress output.
+            // NOTE: --no-warnings is deliberately NOT used in the download action —
+            // yt-dlp emits its error/warning messages to stderr, and classifyYtdlpError()
+            // needs that stderr to classify failures (GEOBLOCKED, AGE_RESTRICTED, etc.).
+            // --no-progress alone only suppresses the progress bar, not progress template
+            // noise that would otherwise prepend garbage to stderr before error messages.
             '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
