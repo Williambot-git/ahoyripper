@@ -2271,6 +2271,7 @@ switch ($action) {
                 // future reset point to count down to regardless of the configured limit.
                 $retry_ts = time() + $timeout;
                 header('Retry-After: ' . max(0, $retry_ts));
+                header('X-Request-ID: ' . $request_id);
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
@@ -2417,13 +2418,14 @@ switch ($action) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
+            header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-            ]);
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -2437,13 +2439,14 @@ switch ($action) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
+            header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-            ]);
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
 
@@ -2695,6 +2698,7 @@ switch ($action) {
             // back to JSON so the error response has the correct Content-Type.
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
+            header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
                 'request_id' => $request_id,
