@@ -1162,7 +1162,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     // Determine the daily limit from the environment to include in error
     // responses. This is the configured limit, not the user's remaining quota
     // (quota tracking is not available at this early validation stage).
-    $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? 5));
+    $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
 
     $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
     if (!$url) {
@@ -1336,7 +1336,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     http_response_code(406);
     // info action is subject to daily quota; others (check, health, progress) are not.
     if ($action === 'info') {
-        $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? 5));
+        $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
         header('X-DailyLimit-Limit: ' . $dl);
         header('X-DailyLimit-Remaining: ' . $dl);
         header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
@@ -1358,6 +1358,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
 }
 
 switch ($action) {
+// ─── Daily download quota (free tier limit, skip if unlimited key) ───
     case 'info': {
         // Get video info + formats
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
