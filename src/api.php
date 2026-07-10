@@ -78,49 +78,68 @@ header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/c
 // Also used by the rate-limit gate below.
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-// Anti-hotlinking: validate origin for API requests.
-// All legitimate traffic arrives as a browser navigation to the AhoyRipper page
-// (which then calls the API via fetch from JS) — such calls always carry a referer.
-// Cross-site resource loads (IMG embeds, iframes) won't have a referer set by the
-// browser. Requests with no referer cannot be from the legitimate single-page app
-// flow, so they are blocked. This also blocks direct API calls (curl, Postman, etc.)
-// that lack a browser-context referer.
+// Anti-hotlinking: validate Origin header for API requests.
 //
-// Security note: if the fix ever needs to allow direct-API callers (non-browser clients),
-// switch to validating the Origin header instead of Referer — Origin is always set by
-// browsers on same-site fetch requests and CORS preflight requests.
+// All legitimate browser traffic arrives via the AhoyRipper SPA (which calls the
+// API via window.fetch) — such calls always carry an Origin header. This is more
+// reliable than Referer because Origin is never stripped by privacy tools
+// (Safari ITP, uBlock Origin, corporate proxies, privacy browsers). Referer is
+// frequently absent in these contexts, causing false 403s for legitimate users.
 //
-// Allowed origins for browser-based API calls (SPA fetches land here with proper referer).
+// Origin is set by browsers on:
+//   - All cross-origin fetch() calls (including same-site fetches in some browsers)
+//   - All CORS preflight requests (OPTIONS)
+// Unlike Referer, it is not removed by privacy tools or proxies.
+//
+// This blocks direct API calls (curl, Postman, etc.) that lack a browser-context
+// Origin header. Allowed origins cover both the bare domain and www subdomain
+// for ahoyripper.com and ahoyvpn.com.
+//
+// $allowed_origins is intentionally case-sensitive — the Origin header is always
+// lowercase per the Fetch spec, but normalizing with strtolower() guards against
+// unexpected uppercase variants from non-standard clients.
 $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $blocked = false;
 $block_reason = '';
 
-if ($referer) {
-    $ref_parts = @parse_url($referer);
-    // Guard against malformed URLs that cause parse_url to return false/null
-    if (!is_array($ref_parts)) {
-        $ref_parts = [];
+if ($origin !== '') {
+    // Guard against Origin manipulation attacks: validate it is a syntactically
+    // valid origin before comparison. parse_url on the Origin value is safe
+    // since Origin is always just scheme://host[:port] with no path, query, or
+    // fragment. An attacker controlling the Origin header (via a malicious page)
+    // could set any value, but restricting to known origins still prevents
+    // abuse of this endpoint from unexpected origins.
+    // Note: parse_url returns false only for deeply malformed strings; a
+    // synthetic Origin like "null" or "https://evil.com" parses fine, so we
+    // rely on the allowlist comparison below to block those cases.
+    $origin_parts = @parse_url($origin);
+    // Guard against parse_url returning false/null for unexpected input
+    if (!is_array($origin_parts)) {
+        $origin_parts = [];
     }
-    $ref_origin = ($ref_parts['scheme'] ?? '') . '://' . ($ref_parts['host'] ?? '');
-    if (!in_array(strtolower($ref_origin), array_map('strtolower', $allowed_origins), true)) {
+    $origin_host = ($origin_parts['scheme'] ?? '') . '://' . ($origin_parts['host'] ?? '');
+    // Normalize both sides for comparison: strtolower on both the incoming
+    // origin and the allowlist so the comparison is case-insensitive.
+    if (!in_array(strtolower($origin_host), array_map('strtolower', $allowed_origins), true)) {
         $blocked = true;
         $block_reason = 'invalid_origin';
     }
 } else {
-    // No referer — request did not originate from the AhoyRipper page.
+    // No Origin header — request did not originate from the AhoyRipper page.
     // This blocks direct API calls (curl, tools) and cross-site embeds.
+    // Exception: action=check is exempt (used by monitoring probes, Docker HEALTHCHECK).
     $blocked = true;
-    $block_reason = 'missing_referer';
+    $block_reason = 'missing_origin';
 }
 
 if ($blocked) {
     // Exempt the check action (zero-dependency monitoring ping used by Docker
-    // HEALTHCHECK and external probes that cannot send a browser Referer header).
+    // HEALTHCHECK and external probes that cannot send a browser Origin header).
     // info/download remain fully protected — monitoring tools should use action=check.
     if ($action !== 'check') {
-        logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
-        error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
+        logRequest('origin_block', 403, ['reason' => $block_reason, 'origin' => $origin]);
+        error_log("AhoyRipper: blocked request ($block_reason) from origin: " . ($origin ?: '(none)'));
         http_response_code(403);
         echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
