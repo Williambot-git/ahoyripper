@@ -491,7 +491,11 @@ if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     }
 }
 if (!$GLOBALS['__ffmpeg_version']) {
-    $ffmpeg_ver = trim(shell_exec('ffmpeg -version 2>&1 | head -1') ?: '');
+    // Use FFPROBE_PATH (not hardcoded 'ffmpeg') so the version probe matches
+    // the binary whose hash is used as the cache key. If FFPROBE_PATH points
+    // to a non-standard location (e.g. /usr/local/bin/ffprobe on macOS), the
+    // version and hash now correctly reference the same binary.
+    $ffmpeg_ver = trim(shell_exec(FFPROBE_PATH . ' -version 2>&1 | head -1') ?: '');
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
         $hash = @md5_file(FFPROBE_PATH);
