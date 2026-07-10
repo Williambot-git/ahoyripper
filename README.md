@@ -463,6 +463,40 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 }
 ```
 
+A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` with a classified `error_code` and human-readable `error_msg`:
+
+```json
+{
+  "status": "degraded",
+  "server_time": "2026-05-21T16:00:00+00:00",
+  "request_id": "a3f1b2c9d4e5f678",
+  "app_version": "1.0.0",
+  "os": "Linux",
+  "yt_dlp_version": "2026.03.17",
+  "ffmpeg_version": "ffmpeg version 6.x",
+  "yt_dlp_ok": true,
+  "ffmpeg_ok": true,
+  "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
+  "yt_dlp_cache_ttl_seconds": 542,
+  "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
+  "ffmpeg_cache_ttl_seconds": 542,
+  "yt_dlp_probe_cache_expires_at": "2026-05-21T16:05:00+00:00",
+  "yt_dlp_probe_cache_ttl_seconds": 180,
+  "server_uptime_seconds": 86400,
+  "yt_dlp_probe": {
+    "ok": false,
+    "error_code": "SOURCE_FORBIDDEN",
+    "error_msg": "The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.",
+    "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
+  "load_avg": [0.15, 0.08, 0.05],
+  "memory_available_pct": 72.4,
+  "disk_free_gb": 48.2
+}
+```
+
+`yt_dlp_probe.error_code` uses the same classified error codes as the `info` and `download` endpoints (e.g. `SOURCE_FORBIDDEN`, `SSL_ERROR`, `CONNECTION_FAILED`, `SOURCE_TIMEOUT`, `PROBE_FAILED`). See the [error codes table](#error-codes) for the full list and their meanings.
+
 `server_uptime_seconds` is Linux-only — available on servers, omitted in Docker containers or non-Linux environments.
 
 `yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes; `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds` surface the cache expiration so monitoring dashboards can track when the cached result will be refreshed.
