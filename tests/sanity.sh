@@ -828,7 +828,7 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 5 times legitimately:
+# COOP and CORP each appear 6 times legitimately:
 #   - 1 at server level for static HTML assets
 #   - 1 in /src/api.php location block for the API endpoint
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
@@ -836,14 +836,18 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #     location blocks that define their own add_header (nginx behaviour).
 #   - 1 in /.well-known/ location block for security.txt and similar files.
 #   - 1 in /og-image.png location block for cache headers on the social share image.
+#   - 1 in /50x.html location block for PHP-FPM error pages (502/504) and
+#     limit_req burst rejections (503) — defense-in-depth so error pages have the
+#     same hardening as normal responses; this location bypasses PHP so headers
+#     must be set at nginx level.
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 5 ] && [ "$CORP_COUNT" -eq 5 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + API location + /csp-report location + /.well-known/ + /og-image.png)"
+if [ "$COOP_COUNT" -eq 6 ] && [ "$CORP_COUNT" -eq 6 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + API location + /csp-report location + /.well-known/ + /og-image.png + /50x.html)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 5), CORP appears $CORP_COUNT times (expected 5)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 6), CORP appears $CORP_COUNT times (expected 6)"
     exit 1
 fi
 
