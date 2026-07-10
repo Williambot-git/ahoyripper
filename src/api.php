@@ -233,6 +233,14 @@ header('X-RateLimit-Limit: ' . $rate_limit);
 header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
 header('X-RateLimit-Reset: ' . $reset);
 header('X-RateLimit-Window: ' . $rate_window);
+// X-DL-* mirrors the X-RateLimit-* headers for download-specific monitoring.
+// Set unconditionally so download responses always carry these headers regardless
+// of whether the rate limit was hit. Inside the 429 block (lines 192-196) they
+// are also set to 0/-1 sentinel values for over-limit responses.
+header('X-DL-RateLimit-Limit: ' . $rate_limit);
+header('X-DL-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+header('X-DL-RateLimit-Reset: ' . $reset);
+header('X-DL-RateLimit-Window: ' . $rate_window);
 
 // Periodic cleanup of stale rate files and cache entries.
 // Proactively removes expired entries from /tmp to prevent indefinite accumulation
