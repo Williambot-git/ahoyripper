@@ -1566,7 +1566,12 @@ switch ($action) {
             '--dump-json',
             $playlist_flag,
             '--skip-download',
-            '--no-progress',
+            // --progress-template false: suppress all progress output (replaces the
+            // deprecated --no-progress flag). yt-dlp emits progress template noise
+            // even during --skip-download which would prepend garbage to stderr
+            // and corrupt json_decode on stdout. The empty-string form (below) is an
+            // alternative; 'false' is the canonical modern yt-dlp syntax for this.
+            '--progress-template', 'false',
             // NOTE: --no-warnings is deliberately NOT used in the info action.
             // yt-dlp emits its error/warning messages to stderr, and
             // classifyYtdlpError() reads $proc_stderr to classify failures
@@ -1576,14 +1581,6 @@ switch ($action) {
             // yt-dlp progress output is already suppressed via --progress-template '',
             // so --no-warnings is redundant for that purpose anyway.
             // --progress-template "": suppress ALL progress output to stderr.
-            // --no-progress alone is NOT sufficient — yt-dlp emits progress template
-            // output even during --skip-download, which prepends garbage to stderr
-            // and can cause json_decode() to fail on the stdout JSON. The
-            // --progress-template '' (empty template) suppresses this regardless of
-            // --no-warnings. In array argv form (bypass_shell=true), use
-            // json_encode('') which produces two adjacent empty-quoted strings
-            // that yt-dlp concatenates to one empty string.
-            '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
@@ -2187,18 +2184,12 @@ switch ($action) {
             '--force-overwrites',
             '--retries', '3',
             $playlist,
-            '--no-progress',
-            // --progress-template "": suppress ALL progress output to stderr so it doesn't
-            // corrupt the stderr parse (classifyYtdlpError reads from $proc_stderr).
-            // In array argv form (bypass_shell=true), use json_encode('') which
-            // produces the two adjacent empty-quoted strings that yt-dlp concatenates
-            // to one empty string, suppressing all progress output.
-            // NOTE: --no-warnings is deliberately NOT used in the download action —
-            // yt-dlp emits its error/warning messages to stderr, and classifyYtdlpError()
-            // needs that stderr to classify failures (GEOBLOCKED, AGE_RESTRICTED, etc.).
-            // --no-progress alone only suppresses the progress bar, not progress template
-            // noise that would otherwise prepend garbage to stderr before error messages.
-            '--progress-template', json_encode(''),
+            // --progress-template false: suppress all progress output (replaces the
+            // deprecated --no-progress flag). yt-dlp emits progress template noise
+            // to stderr during download which would corrupt classifyYtdlpError parsing.
+            // Using 'false' (the canonical modern yt-dlp syntax) is cleaner than the
+            // empty-string form and semantically identical (suppress all progress).
+            '--progress-template', 'false',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -3017,17 +3008,19 @@ switch ($action) {
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
-                    '--no-progress',
+                    // --progress-template false: suppress all progress output (replaces the
+                    // deprecated --no-progress flag). yt-dlp emits progress template noise
+                    // to stderr even during --skip-download which would corrupt json_decode
+                    // on stdout. Using 'false' (the canonical modern yt-dlp syntax) is
+                    // semantically identical to the empty-string form but cleaner.
+                    '--progress-template', 'false',
                     // NOTE: --no-warnings is deliberately NOT used here. The health probe
                     // reads $probe_err via classifyYtdlpError() to surface actionable error
                     // codes (SSL_ERROR, CONNECTION_FAILED, SOURCE_FORBIDDEN, etc.) to callers.
-                    // Suppressing warnings would empty $probe_err and break error classification
-                    // on the health endpoint. --progress-template '' already suppresses yt-dlp
-                    // progress output noise from stderr, so --no-warnings is redundant anyway.
+                    // Suppressing warnings would empty $probe_err and break error classification.
                     '--socket-timeout', '10',
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
-                    '--progress-template', json_encode(''),
                     '--',
                     'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 ], $probe_desc, $probe_pipes, '/tmp', [], ['bypass_shell' => true]);
