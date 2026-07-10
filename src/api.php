@@ -3136,6 +3136,21 @@ switch ($action) {
         // inaccurate when the server simply doesn't know that action name.
         logRequest($action ?: 'unknown', 404, ['reason' => 'unknown_action']);
         http_response_code(404);
+        // Rate-limit headers for consistency with the rest of the API.
+        // Unknown actions are not rate-limited actions (info/download), so use -1
+        // sentinel values to signal "no limit applies" to generic API consumers.
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        header('X-RateLimit-Limit: 0');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
         echo json_encode([
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
