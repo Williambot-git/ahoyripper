@@ -2402,8 +2402,15 @@ switch ($action) {
                 // Unclassified error — $err_classified is null; use 422 as safe default.
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
+                // Truncate the user-facing error message to match the ~200-char ceiling used
+                // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
+                // The full raw error is preserved in 'raw_error' for diagnostics.
+                $user_err = $proc_err ?: "exit code $actual_exit";
+                if (mb_strlen($user_err, 'UTF-8') > 200) {
+                    $user_err = mb_substr($user_err, 0, 200, 'UTF-8') . '...';
+                }
                 $resp = [
-                    'error' => "Download failed" . ($proc_err ? ": $proc_err" : " (exit code $actual_exit)."),
+                    'error' => "Download failed" . ($proc_err ? ": $user_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
                     'source_url' => $url,
