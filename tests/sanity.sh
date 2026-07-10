@@ -1002,4 +1002,14 @@ fi
 echo "  ✓ All parseFormats unit tests passed"
 
 echo ""
+echo "==> Running playlist_param_test.php (playlist flag resolution)..."
+php tests/playlist_param_test.php
+PLAYLIST_RESULT=$?
+if [ $PLAYLIST_RESULT -ne 0 ]; then
+    echo "  ✗ playlist_param_test.php failed"
+    exit 1
+fi
+echo "  ✓ playlist_param_test.php passed"
+
+echo ""
 echo "All sanity checks passed."
