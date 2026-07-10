@@ -1334,6 +1334,13 @@ $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
 $json_actions = ['info', 'check', 'health', 'progress'];
 if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
+    // Consistent with the METHOD_NOT_ALLOWED (405) response: include all
+    // rate-limit headers so API clients always get complete header coverage
+    // regardless of which early-exit code path they hit.
+    header('X-RateLimit-Limit: 0');
+    header('X-RateLimit-Remaining: -1');
+    header('X-RateLimit-Reset: -1');
+    header('X-RateLimit-Window: unlimited');
     // info action is subject to daily quota; others (check, health, progress) are not.
     if ($action === 'info') {
         $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
