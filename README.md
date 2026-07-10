@@ -453,6 +453,8 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "ffmpeg_cache_ttl_seconds": 542,
+  "yt_dlp_probe_cache_expires_at": "2026-05-21T16:05:00+00:00",
+  "yt_dlp_probe_cache_ttl_seconds": 180,
   "server_uptime_seconds": 86400,
   "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)", "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
   "load_avg": [0.15, 0.08, 0.05],
@@ -463,11 +465,9 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 
 `server_uptime_seconds` is Linux-only — available on servers, omitted in Docker containers or non-Linux environments.
 
-`yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes.
+`yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes; `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds` surface the cache expiration so monitoring dashboards can track when the cached result will be refreshed.
 
-The `source_url` field in the probe result shows the URL that was used for the connectivity check (`https://www.youtube.com/watch?v=dQw4w9WgXcQ`). When `ok` is `true`, `title` contains the video title (truncated to 80 characters). When `ok` is `false`, `error_code` contains the classified error code (e.g. `SOURCE_RATE_LIMITED`, `CONNECTION_FAILED`) and `error_msg` contains the human-readable message; `source_url` still shows which URL failed.
-
-`load_avg` requires Linux. `memory_available_pct` reads `/proc/meminfo`. `disk_free_gb` uses `disk_free_space()`. Cache fields reflect internal version-caching TTLs (1 hour).
+`yt_dlp_cache_expires_at` / `yt_dlp_cache_ttl_seconds` track the yt-dlp version cache (1-hour TTL). `ffmpeg_cache_expires_at` / `ffmpeg_cache_ttl_seconds` track the ffmpeg version cache (1-hour TTL). `yt_dlp_probe_cache_expires_at` / `yt_dlp_probe_cache_ttl_seconds` track the yt-dlp connectivity probe cache (5-minute TTL).
 
 `action=csp-report` receives [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) violation reports from browsers. Nginx is configured with a `report-uri /src/api.php?action=csp-report` directive in the CSP-Report-Only header, so violations (e.g., mixed content, inline script attempts) are logged to `error_log` rather than silently ignored. The report body is sanitized before logging — video URLs and referrers are omitted. This endpoint returns `200 OK` to all POST requests so browsers do not retry.
 

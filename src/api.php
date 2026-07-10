@@ -2914,6 +2914,20 @@ switch ($action) {
             }
         }
 
+        // yt-dlp probe cache — 5-minute TTL (same TTL constant as the write below).
+        // Surface the expiration so monitoring dashboards can track when the cached
+        // probe result will be refreshed without needing to read the cache file directly.
+        $probe_cache_ttl = null;
+        $probe_cache_expires_at = null;
+        if ($probe_cache_file && is_readable($probe_cache_file)) {
+            $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+            if ($cached && is_array($cached)) {
+                $exp = $cached['exp'] ?? 0;
+                $probe_cache_expires_at = date('c', $exp);
+                $probe_cache_ttl = max(0, $exp - time());
+            }
+        }
+
         $sys = getSystemMetrics();
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
@@ -2938,6 +2952,8 @@ switch ($action) {
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
             'ffmpeg_cache_ttl_seconds' => $ffmpeg_cache_ttl,
+            'yt_dlp_probe_cache_expires_at' => $probe_cache_expires_at,
+            'yt_dlp_probe_cache_ttl_seconds' => $probe_cache_ttl,
             // System metrics are fetched once by getSystemMetrics() above — do not
             // re-read /proc here. The function checks /tmp for disk space (where
             // logs and caches live in containerized deployments) rather than the
