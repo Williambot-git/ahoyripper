@@ -858,6 +858,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // Surface it in the info response so the UI can display "From: YouTube" to confirm
     // the URL was parsed by the correct extractor.
     $platform = clean($data['extractor_key'] ?? '');
+    // webpage_url is the canonical video page URL (e.g. https://www.youtube.com/watch?v=...).
+    // This is the URL the user originally submitted (after HTTPS normalization by yt-dlp).
+    // Exposing it enables API consumers to correlate info responses with the originating
+    // URL without requiring the client to track it separately across requests.
+    $video_url = isset($data['webpage_url']) && is_string($data['webpage_url'])
+        ? $data['webpage_url']
+        : null;
     // uploader_url is the URL to the video/channel page (e.g. YouTube channel URL).
     // Return null when absent so API consumers can distinguish "no URL provided" from
     // empty string — both clean() to 'Unknown' but uploader_url should be null.
@@ -1062,6 +1069,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     return [
         'title' => $title,
         'thumbnail' => $thumbnail,
+        'url' => $video_url,
         'duration' => $duration,
         'uploader' => $uploader,
         'uploader_url' => $uploader_url,
