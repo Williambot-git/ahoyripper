@@ -11,6 +11,7 @@
   "orientation": "any",
   "lang": "en-US",
   "dir": "ltr",
+  "categories": ["utilities", "multimedia"],
   "icons": [
     {
       "src": "/favicon-180.png",
