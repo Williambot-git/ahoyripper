@@ -1671,7 +1671,7 @@ switch ($action) {
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
                     // Only decrement if it's the current day's record
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -1725,7 +1725,7 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
