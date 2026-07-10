@@ -250,6 +250,17 @@ else
 fi
 
 echo ""
+echo "==> Checking gzip compression in nginx-docker.conf..."
+# gzip must be enabled in nginx-docker.conf for efficient bandwidth use.
+# Without it, JSON API responses and text assets are sent uncompressed.
+if grep -q "^    gzip on;" deploy/nginx-docker.conf; then
+    echo "  ✓ gzip compression enabled in nginx-docker.conf"
+else
+    echo "  ✗ gzip compression missing from nginx-docker.conf (add 'gzip on;' in server block)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking www redirect order in nginx-docker.conf (ahoyvpn before ahoyripper)..."
 # The www.ahoyvpn.com redirect must appear BEFORE www.ahoyripper.com.
 # If ahoyripper.com comes first, the www.ahoyvpn.com check never fires and
