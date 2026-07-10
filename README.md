@@ -284,7 +284,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
 }
 ```
 
-> **Note:** `api_version` appears only on `action=check` responses (the minimal ping endpoint). It is not present on `action=info` or other endpoints.
+> **Note:** `api_version` appears on `action=check` and `action=info` responses. It is omitted from `action=download`, `action=health`, and other endpoints to keep those responses focused on their specific purpose.
 
 
 
