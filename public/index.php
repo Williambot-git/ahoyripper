@@ -8,7 +8,7 @@
 $jsEnabled = isset($_COOKIE['js']) || isset($_GET['js']);
 $default_url = $_GET['url'] ?? '';
 
-$VERSION = '1.0.0';
+$VERSION = require __DIR__ . '/../src/version.php';
 
 // Generate a request correlation ID — mirrors the X-Request-ID added by api.php
 // and nginx for every API response. With this present on the HTML page too, all

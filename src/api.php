@@ -4,7 +4,7 @@
  * Handles: info extraction, format listing, and download serving
  */
 
-define('AHOYRIPPER_VERSION', '1.0.0');
+define('AHOYRIPPER_VERSION', require __DIR__ . '/version.php');
 
 // Path to yt-dlp binary — configurable via YTDLP_PATH env var so deployments
 // can override the default /usr/local/bin/yt-dlp without editing source.
