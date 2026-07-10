@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+#!/usr/bin/php
 <?php
 /**
  * Generate SW cache version for AhoyRipper PWA service worker.
