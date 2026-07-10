@@ -533,12 +533,12 @@ else
 fi
 
 echo ""
-echo "==> Checking COEP header in public/index.php..."
-if grep -q 'Cross-Origin-Embedder-Policy.*require-corp' public/index.php; then
-    echo "  ✓ Cross-Origin-Embedder-Policy: require-corp present in index.php"
+echo "==> Checking COEP is NOT set in public/index.php (intentional — require-corp breaks cross-origin thumbnails)..."
+if grep -q 'Cross-Origin-Embedder-Policy' public/index.php; then
+    echo "  ✗ Cross-Origin-Embedder-Policy should NOT be set — require-corp breaks YouTube/TikTok/Twitter thumbnails loaded via fetch()"
+    exit 1
 else
-    echo "  ✗ Cross-Origin-Embedder-Policy missing from index.php"
-    FAILED=1
+    echo "  ✓ COEP intentionally absent (require-corp would block cross-origin thumbnails)"
 fi
 
 echo "==> Checking PWA update banner accessibility attributes..."
@@ -578,7 +578,7 @@ if grep -q 'meta property="og:image"' public/index.php; then
     echo "  ✓ og:image present in index.php"
 else
     echo "  ✗ og:image missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo "==> Checking og:title meta tag in public/index.php..."
@@ -586,7 +586,7 @@ if grep -q 'meta property="og:title"' public/index.php; then
     echo "  ✓ og:title present in index.php"
 else
     echo "  ✗ og:title missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo "==> Checking og:description meta tag in public/index.php..."
@@ -594,7 +594,7 @@ if grep -q 'meta property="og:description"' public/index.php; then
     echo "  ✓ og:description present in index.php"
 else
     echo "  ✗ og:description missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo "==> Checking og:url meta tag in public/index.php..."
@@ -602,7 +602,7 @@ if grep -q 'meta property="og:url"' public/index.php; then
     echo "  ✓ og:url present in index.php"
 else
     echo "  ✗ og:url missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo "==> Checking Twitter Card meta tags in public/index.php..."
@@ -610,7 +610,7 @@ if grep -q 'meta name="twitter:card"' public/index.php && grep -q 'meta name="tw
     echo "  ✓ Twitter Card meta tags present in index.php"
 else
     echo "  ✗ Twitter Card meta tags missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo "==> Checking canonical URL in public/index.php..."
@@ -618,7 +618,7 @@ if grep -q 'link rel="canonical"' public/index.php; then
     echo "  ✓ canonical URL present in index.php"
 else
     echo "  ✗ canonical URL missing from index.php"
-    FAILED=1
+    exit 1
 fi
 
 echo ""
