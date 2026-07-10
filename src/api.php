@@ -1300,15 +1300,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     header('Allow: GET');
     // Rate-limit headers on 405: check is not a download action (X-DL-RateLimit=-1)
-    // and has no per-minute ceiling (X-RateLimit-Limit=0). Daily limit is also
-    // inapplicable (-1). Including these on error responses gives API clients
-    // consistent header coverage regardless of which code path they hit.
+    // and has no per-minute ceiling (X-RateLimit=-1, not 0). -1 is the sentinel for
+    // "no rate limit applies" — 0 means "rate limit exhausted" which is wrong here.
+    // Daily limit is also inapplicable (-1). Including these on error responses gives
+    // API clients consistent header coverage regardless of which code path they hit.
     // Mirrors the header set sent on the 200 response for the check action.
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
     header('X-DL-RateLimit-Window: unlimited');
-    header('X-RateLimit-Limit: 0');
+    header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
     header('X-RateLimit-Window: unlimited');
@@ -1337,7 +1338,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     // Consistent with the METHOD_NOT_ALLOWED (405) response: include all
     // rate-limit headers so API clients always get complete header coverage
     // regardless of which early-exit code path they hit.
-    header('X-RateLimit-Limit: 0');
+    header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
     header('X-RateLimit-Window: unlimited');
