@@ -2719,6 +2719,7 @@ switch ($action) {
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
                     'request_id' => $request_id,
+                    'source_url' => $url,
                 ]);
                 exit;
             }
