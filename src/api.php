@@ -2795,6 +2795,10 @@ switch ($action) {
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
         header('Cache-Control: no-cache');
+        // yt_dlp_version is always present on API responses (info, check, health,
+        // download, and all error responses) so clients can correlate any response
+        // with the installed yt-dlp build. check has no yt-dlp dependency, but
+        // including the field costs nothing and keeps the API surface consistent.
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
@@ -2802,6 +2806,7 @@ switch ($action) {
             'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
