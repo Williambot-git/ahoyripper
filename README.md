@@ -355,6 +355,15 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 
 > **Note:** The free tier allows 5 total rips per day (each call to the info or download API counts as one rip). Switching the sort order re-fetches the format list and counts as an additional rip. Unlimited-key holders have no daily cap.
 
+**Quota response headers** — on every download response, the API surfaces the current quota state via HTTP headers so clients can display remaining rips without parsing the response body:
+
+| Header | Description |
+|--------|-------------|
+| `X-DailyLimit-Limit` | Daily rip limit for this key (e.g. `5`) |
+| `X-DailyLimit-Remaining` | Rips remaining after this request |
+| `X-DailyLimit-Reset` | Unix timestamp when the quota resets (midnight UTC) |
+| `X-DailyLimit-Window` | Reset window in seconds (`86400`) |
+
 **Download error response (422 with classified error):**
 ```json
 {
