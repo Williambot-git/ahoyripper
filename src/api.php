@@ -916,7 +916,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $acodec = clean($f['acodec'] ?? 'none');
         $fps = isset($f['fps']) && $f['fps'] !== null ? (int)(float)$f['fps'] : null;
         $language = clean($f['language'] ?? '');
-        $format_description = $f['format_description'] ?? '';
+        $format_description = clean($f['format_description'] ?? '');
         $abr = isset($f['abr']) ? (int)$f['abr'] : null;
 
         // Build label
@@ -965,9 +965,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         $resolution = ($width > 0 && $height > 0) ? ($width . 'x' . $height) : null;
         if ($resolution !== null && $vcodec !== 'none') {
             // Video-containing formats (combined or video-only) get resolution prefix.
-            // Use null/empty-string checks instead of empty() to avoid false
+            // Use null/empty-string/'Unknown' checks instead of empty() to avoid false
             // positives on the literal string "0" (empty("0") === true in PHP).
-            $has_desc = $format_description !== null && $format_description !== '';
+            // 'Unknown' is clean()'s sentinel for absent/malformed values (null, '',
+            // arrays, objects) — treat it the same as absent so the format_note fallback
+            // fires when clean() normalizes a missing description to 'Unknown'.
+            $has_desc = $format_description !== null && $format_description !== '' && $format_description !== 'Unknown';
             $desc = !$has_desc
                 ? trim("{$resolution} " . ($format_note ?: $label))
                 : trim("{$resolution} {$format_description}");
