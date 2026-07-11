@@ -1219,6 +1219,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
+            $sendDailyLimitHeaders($daily_limit, null);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
