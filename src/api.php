@@ -2313,6 +2313,32 @@ switch ($action) {
                 // Use glob pattern — $out_file was never set in this scope.
                 // $out_base was set above and holds the safe base name.
                 foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+                // Refund daily quota since the download never started successfully.
+                // Only refund when the baseline was set (proc_open was attempted after
+                // quota increment). Unlimited-key holders ($unlimited=true) skip
+                // increment so no refund needed.
+                if (!$unlimited && isset($dl_quota_before_refund)) {
+                    $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                    if (!$undo_fp) {
+                        // Could not open quota file — skip the refund rather than fail the response.
+                    } elseif (flock($undo_fp, LOCK_EX)) {
+                        $undo_raw = fread($undo_fp, 4096);
+                        $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
+                        if ($undo_raw) {
+                            $decoded = json_decode($undo_raw, true);
+                            if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                        }
+                        if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                            $undo_data['c']--;
+                            ftruncate($undo_fp, 0);
+                            rewind($undo_fp);
+                            fwrite($undo_fp, json_encode($undo_data));
+                            fflush($undo_fp);
+                        }
+                        flock($undo_fp, LOCK_UN);
+                        fclose($undo_fp);
+                    }
+                }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
                 // retry_after: Unix timestamp when the download can be retried.
