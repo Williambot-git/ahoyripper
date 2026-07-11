@@ -891,7 +891,7 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 6 times legitimately:
+# COOP and CORP each appear 8 times legitimately:
 #   - 1 at server level for static HTML assets
 #   - 1 in /src/api.php location block for the API endpoint
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
@@ -903,14 +903,20 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #     limit_req burst rejections (503) — defense-in-depth so error pages have the
 #     same hardening as normal responses; this location bypasses PHP so headers
 #     must be set at nginx level.
+#   - 1 in the specific `location = /` block (root HTML page) — added for
+#     defense-in-depth so the root page has explicit headers regardless of how
+#     nginx processes the request.
+#   - 1 in the `location /` catch-all block for any request not handled by a
+#     more-specific location — also defense-in-depth so unhandled paths always
+#     return hardened responses.
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 6 ] && [ "$CORP_COUNT" -eq 6 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + API location + /csp-report location + /.well-known/ + /og-image.png + /50x.html)"
+if [ "$COOP_COUNT" -eq 8 ] && [ "$CORP_COUNT" -eq 8 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + API location + /csp-report + /.well-known/ + /og-image.png + /50x.html + location = / + location /)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 6), CORP appears $CORP_COUNT times (expected 6)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 8), CORP appears $CORP_COUNT times (expected 8)"
     exit 1
 fi
 
