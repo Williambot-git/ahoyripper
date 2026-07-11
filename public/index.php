@@ -10,6 +10,14 @@ $default_url = $_GET['url'] ?? '';
 
 $VERSION = require __DIR__ . '/../src/version.php';
 
+// Derive the canonical base URL from the request so reverse-proxy and multi-instance
+// deployments generate correct self-referencing URLs without hardcoding a hostname.
+// HTTPS is assumed: nginx redirects HTTP→HTTPS and the application requires TLS.
+$BASE_URL = (
+    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+    ? 'https' : 'http'
+) . '://' . htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'ahoyripper.com', ENT_QUOTES, 'UTF-8');
+
 // Generate a request correlation ID — mirrors the X-Request-ID added by api.php
 // and nginx for every API response. With this present on the HTML page too, all
 // three layers (nginx access log, PHP error log, and browser client) can be
@@ -81,7 +89,7 @@ header_remove('X-Powered-By');
   <link rel="search" type="application/opensearchdescription+xml" title="AhoyRipper" href="/opensearch.xml">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="https://ahoyripper.com">
+  <link rel="canonical" href="<?= $BASE_URL ?>">
 
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
@@ -110,7 +118,7 @@ header_remove('X-Powered-By');
   <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.png">
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="https://ahoyripper.com">
+  <meta property="og:url" content="<?= $BASE_URL ?>">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -159,10 +167,10 @@ header_remove('X-Powered-By');
     "@graph": [
       {
         "@type": "WebApplication",
-        "@id": "https://ahoyripper.com/#webapplication",
+        "@id": "<?= $BASE_URL ?>/#webapplication",
         "name": "AhoyRipper",
         "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
-        "url": "https://ahoyripper.com",
+        "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript. WebAssembly support and media codecs (H.264, VP9, Opus) required for full functionality.",
@@ -193,10 +201,10 @@ header_remove('X-Powered-By');
       },
       {
         "@type": "SoftwareApplication",
-        "@id": "https://ahoyripper.com/#softwareapplication",
+        "@id": "<?= $BASE_URL ?>/#softwareapplication",
         "name": "AhoyRipper",
         "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
-        "url": "https://ahoyripper.com",
+        "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "softwareVersion": "<?= $VERSION ?>",
