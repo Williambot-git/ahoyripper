@@ -2250,6 +2250,7 @@ switch ($action) {
             }
             http_response_code(500);
             header('Cache-Control: no-cache');
+            header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
