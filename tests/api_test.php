@@ -947,6 +947,16 @@ $api_src = file_get_contents(__DIR__ . '/../src/api.php');
 test('api.php has no escapeshellarg() calls (bypass_shell=true context)',
     strpos($api_src, 'escapeshellarg(') === false);
 
+// ─── Timing-safe API key comparison ──────────────────────────────────────────────
+// API key comparison must use hash_equals() for constant-time comparison to prevent
+// timing side-channel attacks. PHP's ===/!== short-circuits on first mismatched
+// character — response-time measurements could reveal key prefix characters.
+$api_src = file_get_contents(__DIR__ . '/../src/api.php');
+test('api.php uses hash_equals() for API key comparison (info action)',
+    strpos($api_src, 'hash_equals(AHOY_UNLIMITED_KEY, $api_key)') !== false);
+test('api.php uses hash_equals() for API key comparison (download action)',
+    substr_count($api_src, 'hash_equals(AHOY_UNLIMITED_KEY, $api_key)') >= 2);
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";

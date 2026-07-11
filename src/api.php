@@ -1449,7 +1449,11 @@ switch ($action) {
         // Reject invalid (non-null, non-matching) keys early so they don't burn
         // a daily quota hit. Null keys and empty-string tokens fall through and
         // are treated as unauthenticated (quota applies normally).
-        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+        // Use hash_equals() for timing-safe comparison to prevent timing side-channel
+        // attacks. PHP's !== short-circuits on first mismatched character — an
+        // attacker's response-time measurements could reveal how many prefix characters
+        // of the key are correct.
+        if ($api_key !== null && !hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
             logRequest('info', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
             header('X-DailyLimit-Limit: -1');
@@ -1463,7 +1467,7 @@ switch ($action) {
             ]);
             exit;
         }
-        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
+        $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
 
         // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         // Key must be read BEFORE this point so $unlimited is available for the
@@ -1951,7 +1955,11 @@ switch ($action) {
         // Reject invalid (non-null, non-matching) keys early so they don't burn
         // a daily quota hit. Null keys and empty-string tokens fall through and
         // are treated as unauthenticated (quota applies normally).
-        if ($api_key !== null && $api_key !== AHOY_UNLIMITED_KEY) {
+        // Use hash_equals() for timing-safe comparison to prevent timing side-channel
+        // attacks. PHP's !== short-circuits on first mismatched character — an
+        // attacker's response-time measurements could reveal how many prefix characters
+        // of the key are correct.
+        if ($api_key !== null && !hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
             logRequest('download', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
             echo json_encode([
@@ -1961,7 +1969,7 @@ switch ($action) {
             ]);
             exit;
         }
-        $unlimited = ($api_key === AHOY_UNLIMITED_KEY);
+        $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
 
         // ─── Download rate limiting (atomic via flock) ───
         $dl_rate_limit = DL_RATE_LIMIT; // download requests per minute
