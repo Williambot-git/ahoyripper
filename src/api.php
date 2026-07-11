@@ -3003,6 +3003,7 @@ switch ($action) {
             'status' => $api_ok ? 'ok' : 'degraded',
             'api_ok' => $api_ok,
             'server_time' => date('c'),
+            'server_time_unix' => time(),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
