@@ -1228,6 +1228,26 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
+        // Validate format_id character-class — reject shell metacharacters that could
+        // survive into proc_open args even with bypass_shell=true (e.g. whitespace
+        // tokens, command substitutions, glob patterns). yt-dlp selectors and merge
+        // syntax (bestvideo[height>=720]+bestaudio, 18/22, etc.) are all alphanumeric
+        // plus the safe chars in the character class below. This mirrors the validation
+        // already present in the download action (line ~1888) and is checked here so the
+        // info action fails fast with INVALID_FORMAT_ID before wasting any yt-dlp cycles.
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'"]+$/', $format_id)) {
+            http_response_code(400);
+            logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
+            $sendDailyLimitHeaders($daily_limit, null);
+            echo json_encode([
+                'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
+                'error_code' => 'INVALID_FORMAT_ID',
+                'request_id' => $request_id,
+                'source_url' => $url,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
+            return false;
+        }
     }
     return [$url, $format_id];
 };
