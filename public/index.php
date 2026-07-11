@@ -166,7 +166,7 @@ header_remove('X-Powered-By');
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript. WebAssembly support and media codecs (H.264, VP9, Opus) required for full functionality.",
-        "softwareVersion": "1.0.0",
+        "softwareVersion": "<?= $VERSION ?>",
         "author": {
           "@type": "Organization",
           "name": "AhoyVPN",
@@ -199,7 +199,7 @@ header_remove('X-Powered-By');
         "url": "https://ahoyripper.com",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
-        "softwareVersion": "1.0.0",
+        "softwareVersion": "<?= $VERSION ?>",
         "image": "https://ahoyripper.com/og-image.png",
         "author": {
           "@type": "Organization",
