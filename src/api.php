@@ -24,6 +24,12 @@ define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
 // Override via FFPROBE_TIMEOUT env var (e.g. FFPROBE_TIMEOUT=20 in .env).
 define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 
+// TTL (seconds) for the yt-dlp connectivity probe cache in the health endpoint.
+// PROBE_CACHE_TTL (5 minutes) prevents hammering YouTube with repeated health checks while
+// keeping the probe result fresh enough to detect real outages. Not configurable via
+// env var — increase the constant directly if longer TTL is ever needed.
+define('PROBE_CACHE_TTL', 300);
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -2946,9 +2952,9 @@ switch ($action) {
             }
         }
 
-        // yt-dlp probe cache — 5-minute TTL so repeated health?probe=1 calls
-        // don't hammer YouTube. Declared early here (before the ffprobe block below)
-        // so the cache-read is adjacent to the ffprobe cache block for clarity.
+        // yt-dlp probe cache — TTL controlled by PROBE_CACHE_TTL constant so repeated
+        // health?probe=1 calls don't hammer YouTube. Declared early here (before the
+        // ffprobe block below) so the cache-read is adjacent to the ffprobe block for clarity.
         // The actual probe execution lives deeper in the case block where it has
         // access to the full $out response array and the runYtdlp() function.
         $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
@@ -2971,7 +2977,7 @@ switch ($action) {
             }
         }
 
-        // yt-dlp probe cache — 5-minute TTL (same TTL constant as the write below).
+        // yt-dlp probe cache — TTL controlled by PROBE_CACHE_TTL constant.
         // Surface the expiration so monitoring dashboards can track when the cached
         // probe result will be refreshed without needing to read the cache file directly.
         $probe_cache_ttl = null;
@@ -3025,7 +3031,7 @@ switch ($action) {
         // Running a real YouTube probe adds ~1-3s of latency per uncached health check
         // (proc_open + yt-dlp startup + network round-trip). The probe is useful when
         // a client wants to verify end-to-end connectivity, but adds unnecessary overhead
-        // for routine load checks. The probe result is cached for 5 minutes regardless.
+        // for routine load checks. The probe result is cached per PROBE_CACHE_TTL regardless.
         if ($do_probe) {
             // Only run the probe if the cache did not already populate __ytdlp_probe
             // (the cache-read above set $GLOBALS['__ytdlp_probe'] when a cached result existed).
@@ -3132,7 +3138,7 @@ switch ($action) {
                 if ($probe_cache_file) {
                     @file_put_contents($probe_cache_file, json_encode([
                         'result' => $GLOBALS['__ytdlp_probe'],
-                        'exp' => time() + 300, // 5 min TTL
+                        'exp' => time() + PROBE_CACHE_TTL,
                     ]));
                 }
             }
