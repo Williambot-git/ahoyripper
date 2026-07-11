@@ -171,8 +171,6 @@ ahoyripper/
 │   ├── favicon-180.png          # Apple Touch icon (180×180)
 │   ├── favicon-512.png          # PWA icon (512×512)
 │   ├── favicon-512.svg          # SVG source for PWA icon
-│   ├── AhoyMonthly.png          # Brand art
-│   ├── AhoyMonthly_transparent.png
 │   └── .well-known/
 │       └── security.txt         # RFC 9116 security contact
 ├── src/
