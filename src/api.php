@@ -1255,6 +1255,15 @@ define('COOKIES_PATH', getenv('COOKIES_PATH') ?: '');
 // consistent error codes (INVALID_URL) regardless of which action they call.
 define('MAX_URL_LEN', 2048);
 
+// Configurable timeout for the health probe (lightweight yt-dlp metadata fetch).
+// Override via HEALTH_PROBE_TIMEOUT env var (e.g. HEALTH_PROBE_TIMEOUT=20 in .env).
+// Defaults to 15 seconds. The probe is a simple --dump-json --skip-download call
+// on a known-short video (Rick Astley), so 15s is plenty. A shorter timeout keeps
+// the /health endpoint responsive under load. The yt-dlp --socket-timeout flag
+// is set to half this value so the inner connection timeout fires before the outer
+// PHP-side loop timeout, producing a clean CONNECTION_TIMEOUT classification.
+define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15));
+
 // Configurable timeout for the info action (metadata fetch).
 // Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
 // Defaults to 45 seconds when the env var is absent or zero/negative.
@@ -2990,7 +2999,8 @@ switch ($action) {
             // (the cache-read above set $GLOBALS['__ytdlp_probe'] when a cached result existed).
             if (!isset($GLOBALS['__ytdlp_probe'])) {
                 // Use a fast, stable YouTube video for the probe — short, public,
-                // unlikely to be geo-restricted. Timeout of 15s keeps health responsive.
+                // unlikely to be geo-restricted. Timeout is controlled by HEALTH_PROBE_TIMEOUT
+                // (default 15s) to keep the health endpoint responsive.
                 // --skip-download fetches metadata without downloading the full file,
                 // saving bandwidth and keeping the health check lightweight.
                 //
@@ -3018,7 +3028,7 @@ switch ($action) {
                     // reads $probe_err via classifyYtdlpError() to surface actionable error
                     // codes (SSL_ERROR, CONNECTION_FAILED, SOURCE_FORBIDDEN, etc.) to callers.
                     // Suppressing warnings would empty $probe_err and break error classification.
-                    '--socket-timeout', '10',
+                    '--socket-timeout', (string)floor(HEALTH_PROBE_TIMEOUT / 2),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
                     '--',
@@ -3032,10 +3042,10 @@ switch ($action) {
                     unset($probe_pipes[0]);
                     $probe_start = hrtime(true);
                     while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
-                        if ((hrtime(true) - $probe_start) / 1e9 > 15) {
+                        if ((hrtime(true) - $probe_start) / 1e9 > HEALTH_PROBE_TIMEOUT) {
                             proc_terminate($probe_proc, 9);
                             $probe_proc = null;  // sentinel: prevents double proc_close() below
-                            $probe_err = "Process timed out after 15s";
+                            $probe_err = "Process timed out after " . HEALTH_PROBE_TIMEOUT . "s";
                             break;
                         }
                         $r = [$probe_pipes[1], $probe_pipes[2]];
