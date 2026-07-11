@@ -3098,7 +3098,7 @@ switch ($action) {
                     // reads $probe_err via classifyYtdlpError() to surface actionable error
                     // codes (SSL_ERROR, CONNECTION_FAILED, SOURCE_FORBIDDEN, etc.) to callers.
                     // Suppressing warnings would empty $probe_err and break error classification.
-                    '--socket-timeout', (string)floor(HEALTH_PROBE_TIMEOUT / 2),
+                    '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
                     '--',
