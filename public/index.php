@@ -129,6 +129,12 @@ header_remove('X-Powered-By');
        served through a reverse proxy, CDN, or alternative deployment that might
        strip or not propagate the HTTP header. Same policy as the nginx directive. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://ahoyripper.com; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report; report-uri /csp-report;">
+  <!-- worker-src 'self' is also set in the nginx HTTP header (deploy/nginx.conf).
+       The meta tag above serves as a fallback when the HTTP header is stripped
+       or not propagated (e.g. reverse proxy, CDN). Nginx's header is authoritative;
+       the meta tag is defense-in-depth. worker-src is critical for ServiceWorker
+       and SharedWorker instantiation — without it, browsers may block SW creation
+       if they only see the meta-tag CSP. -->
   <!-- Permissions-Policy: Disable camera, microphone, geolocation, and interest-cohort
        telemetry. Mirrors the header set by api.php and nginx. -->
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
