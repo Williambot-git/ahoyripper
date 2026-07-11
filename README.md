@@ -595,7 +595,7 @@ Run `yt-dlp --list-extractors` locally, or see the [yt-dlp supported sites list]
 
 ### Platform categories
 
-**Video platforms:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, Netflix, Disney+, Paramount+, Peacock, HBO Max/Max, Amazon Prime Video, Hulu, and more.
+**Video platforms:** YouTube, X/Twitter, Facebook, Vimeo, TikTok, Instagram, Telegram, Dailymotion, Twitch, Kick, Rumble, Bilibili, Niconico, Netflix, Disney+, Paramount+, Peacock, HBO Max/Max, Amazon Prime Video, Hulu, and more.
 
 **Audio platforms:** SoundCloud, Bandcamp, Spotify (requires auth), Apple Music, Deezer, Mixcloud, Audiomack, and more.
 
