@@ -2256,6 +2256,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2296,6 +2297,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -2400,6 +2402,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -2424,6 +2427,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
@@ -2449,6 +2453,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2470,6 +2475,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2728,6 +2734,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
