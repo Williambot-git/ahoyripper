@@ -793,17 +793,23 @@ else
 fi
 
 echo ""
-echo "==> Checking enforcement CSP in nginx-docker.conf includes report-uri /csp-report..."
-# The enforcement CSP (first CSP header, not the Report-Only variant) must include
-# 'report-uri /csp-report;' so the browser sends violation reports to the handler.
-# The report-only header is separate (not enforced by the browser) — only the
-# enforcement policy triggers actual violation reports.
-CSP_ENF=$(grep "add_header Content-Security-Policy" deploy/nginx-docker.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
-if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
-    echo "  ✓ Enforcement CSP includes report-uri /csp-report"
+echo "==> Checking enforcement CSP in nginx-docker.conf includes report-to csp-report..."
+# The enforcement CSP uses 'report-to csp-report' (Reporting API, Chromium 94+).
+# 'report-uri' belongs only in the Report-Only header for Safari/older Firefox.
+# If report-uri is in the enforcement CSP alongside report-to, modern browsers may
+# prefer report-uri and bypass the modern Reporting API endpoint.
+CSP_ENF=$(grep "add_header Content-Security-Policy\ " deploy/nginx-docker.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
+if echo "$CSP_ENF" | grep -q "report-to csp-report;"; then
+    echo "  ✓ Enforcement CSP includes report-to csp-report"
 else
-    echo "  ✗ Enforcement CSP missing report-uri /csp-report — violation reports won't be sent"
+    echo "  ✗ Enforcement CSP missing report-to csp-report — modern browsers won't report violations"
     exit 1
+fi
+if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
+    echo "  ✗ Enforcement CSP should not include report-uri (use Report-Only header instead)"
+    exit 1
+else
+    echo "  ✓ Enforcement CSP does not contain report-uri (correctly separated to Report-Only)"
 fi
 
 echo ""
@@ -813,6 +819,24 @@ if grep -q "location = /csp-report" deploy/nginx.conf; then
 else
     echo "  ✗ /csp-report location missing in nginx.conf (report-uri /csp-report won't resolve)"
     exit 1
+fi
+
+echo ""
+echo "==> Checking enforcement CSP in nginx.conf includes report-to csp-report..."
+# The enforcement CSP uses 'report-to csp-report' (Reporting API, Chromium 94+).
+# 'report-uri' belongs only in the Report-Only header for Safari/older Firefox.
+CSP_ENF=$(grep "add_header Content-Security-Policy\ " deploy/nginx.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
+if echo "$CSP_ENF" | grep -q "report-to csp-report;"; then
+    echo "  ✓ Enforcement CSP includes report-to csp-report"
+else
+    echo "  ✗ Enforcement CSP missing report-to csp-report — modern browsers won't report violations"
+    exit 1
+fi
+if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
+    echo "  ✗ Enforcement CSP should not include report-uri (use Report-Only header instead)"
+    exit 1
+else
+    echo "  ✓ Enforcement CSP does not contain report-uri (correctly separated to Report-Only)"
 fi
 
 echo ""
