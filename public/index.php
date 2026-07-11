@@ -601,6 +601,11 @@ if (installDismissBtn && installBanner) {
         if (rem <= 2) {
           el.classList.add('low');
         }
+        if (rem === 0) {
+          el.classList.add('exhausted');
+        } else {
+          el.classList.remove('exhausted');
+        }
         if (rem === 0 && upgradeEl) {
           upgradeEl.textContent = 'upgrade now';
           upgradeEl.style.fontWeight = '700';
@@ -1079,6 +1084,13 @@ function escapeHtml(s) {
           el.classList.add('low');
         } else {
           el.classList.remove('low');
+        }
+        // Fully exhausted: distinct visual state (darker red, faster pulse)
+        // signals the user must take action (upgrade or wait) right now.
+        if (Number(rem) === 0) {
+          el.classList.add('exhausted');
+        } else {
+          el.classList.remove('exhausted');
         }
         // When quota is exhausted, make the upgrade link more prominent
         if (upgradeEl) {

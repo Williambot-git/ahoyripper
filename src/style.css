@@ -205,6 +205,13 @@ body {
   color: var(--color-error);
   animation: quota-warn 2s ease-in-out infinite;
 }
+/* Exhausted: quota is at 0 — user must upgrade or wait until midnight UTC.
+   Distinct from .low (1–2 remaining) to make the fully-exhausted state
+   immediately obvious without requiring the user to read the number. */
+.quota-count.exhausted {
+  color: #b91c1c; /* Darker red than --color-error for stronger urgency */
+  animation: quota-exhausted 1.2s ease-in-out infinite;
+}
 .quota-limit {
   font-weight: 600;
   color: var(--color-text);
@@ -214,6 +221,12 @@ body {
 @keyframes quota-warn {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.05); }
+}
+/* Sharper, faster pulse for the fully-exhausted state to signal
+   that immediate action (upgrade or wait) is required. */
+@keyframes quota-exhausted {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
 }
 .quota-upgrade-link {
   font-weight: 500;
