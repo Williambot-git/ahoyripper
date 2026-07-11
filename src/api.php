@@ -2310,6 +2310,7 @@ switch ($action) {
                 // future reset point to count down to regardless of the configured limit.
                 $retry_ts = time() + $timeout;
                 header('Retry-After: ' . max(0, $retry_ts));
+                header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
@@ -2467,6 +2468,7 @@ switch ($action) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
+            header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
@@ -2489,6 +2491,7 @@ switch ($action) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
             http_response_code(500);
+            header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
