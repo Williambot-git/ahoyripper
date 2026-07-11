@@ -169,6 +169,34 @@ else
 fi
 
 echo ""
+echo "==> Checking PWA manifest icons use valid W3C 'purpose' values... "
+# Per W3C Web Manifest spec, 'purpose' must be a space-separated set of only
+# "any", "maskable", or "badge" — never a combined string like "any maskable".
+# This test catches that specific violation and future regressions.
+MANIFEST_PATH="$PROJECT_ROOT/public/manifest.json"
+VALID_PURPOSES="^(any|maskable|badge)( (any|maskable|badge))*$"
+INVALID_COUNT=0
+while IFS= read -r icon_json; do
+    # Extract purpose field from this icon block
+    purpose=$(echo "$icon_json" | php -r "echo json_decode(file_get_contents('php://stdin'))->purpose ?? 'any';")
+    if ! echo "$purpose" | grep -Eq "$VALID_PURPOSES"; then
+        echo "  ✗ Invalid purpose='$purpose' — must be 'any', 'maskable', or 'badge' (or space-separated combo)"
+        INVALID_COUNT=$((INVALID_COUNT + 1))
+    fi
+done < <(php -r '
+    $manifest = json_decode(file_get_contents("'"$MANIFEST_PATH"'"), true);
+    foreach ($manifest["icons"] ?? [] as $icon) {
+        echo json_encode($icon) . "\n";
+    }
+')
+if [ "$INVALID_COUNT" -eq 0 ]; then
+    echo "  ✓ All icon purpose values are W3C-compliant"
+else
+    echo "  ✗ $INVALID_COUNT icon(s) have invalid purpose value(s)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking security headers in api.php..."
 REQUIRED_HEADERS=(
     "X-Content-Type-Options"
