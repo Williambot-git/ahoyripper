@@ -339,6 +339,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
+| `PROC_OPEN_FAILED` | Server error — could not start the download process. The server may be restarting or overloaded. | Try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
