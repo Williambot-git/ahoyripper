@@ -299,7 +299,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content. See the `error_code` field for detail. |
-| `429` | Rate limit exceeded — see `Retry-After` header and `upgrade_url` in response body. See classified error codes below. |
+| `429` | Rate limit exceeded — see `Retry-After` header, `upgrade_url`, and `retry_after` (Unix timestamp) in the response body. See classified error codes below. |
 | `502` | Bad gateway — source site or proxy failed (`CONNECTION_FAILED`, `SSL_ERROR`) |
 | `503` | Service temporarily unavailable |
 | `504` | Gateway timeout — source site did not respond in time (`SOURCE_TIMEOUT`) |
@@ -311,7 +311,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
-| `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded | Wait a minute and try again, or upgrade to an unlimited API key |
+| `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded. The response includes `retry_after` (Unix timestamp) and `upgrade_url` (AhoyVPN upsell link). | Wait a minute and try again, or upgrade to an unlimited API key |
 | `INVALID_KEY` | The API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
@@ -395,7 +395,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 | `422` | `MISSING_URL` | No URL was provided on the download request. |
 | `422` | `MISSING_FORMAT` | No format was selected on the download request. |
 | `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
-| `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. |
+| `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. The response body also includes `retry_after` (Unix timestamp), `daily_limit` (integer), and `upgrade_url` (AhoyVPN upsell link). |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
