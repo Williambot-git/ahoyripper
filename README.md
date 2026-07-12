@@ -568,10 +568,6 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 | [Vimeo](https://vimeo.com) | Video | |
 | [Reddit](https://reddit.com) | Video + Audio | |
 | [VK](https://vk.com) | Video + Audio | |
-| [Pornhub](https://pornhub.com) | Video + Audio | Adult content |
-| [xHamster](https://xhamster.com) | Video + Audio | Adult content |
-| [Xnxx](https://xnxx.com) | Video + Audio | Adult content |
-| [xvideos](https://xvideos.com) | Video + Audio | Adult content |
 | [Dailymotion](https://dailymotion.com) | Video | |
 | [Twitch](https://twitch.tv) | Video + Audio | VODs, clips |
 | [Kick](https://kick.com) | Video + Audio | |
