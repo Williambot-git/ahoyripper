@@ -1627,9 +1627,9 @@ switch ($action) {
             // (GEOBLOCKED, AGE_RESTRICTED, LOGIN_REQUIRED, etc.).
             // Suppressing warnings via --no-warnings would empty $proc_stderr
             // and break error classification on the info action.
-            // yt-dlp progress output is already suppressed via --progress-template '',
+            // yt-dlp progress output is already suppressed via --progress-template false,
             // so --no-warnings is redundant for that purpose anyway.
-            // --progress-template "": suppress ALL progress output to stderr.
+            // --progress-template false: suppress ALL progress output to stderr.
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
