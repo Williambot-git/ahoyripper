@@ -2006,6 +2006,13 @@ switch ($action) {
                 header('X-RateLimit-Remaining: 0');
                 header('X-RateLimit-Reset: ' . $dl_reset_ts);
                 header('X-RateLimit-Window: ' . $dl_rate_window);
+                // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
+                // not a daily quota hit — allows the UI to distinguish the two cases without
+                // parsing the error message. The daily-quota 429 block sends the real values.
+                header('X-DailyLimit-Limit: -1');
+                header('X-DailyLimit-Remaining: -1');
+                header('X-DailyLimit-Reset: -1');
+                header('X-DailyLimit-Window: unlimited');
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
