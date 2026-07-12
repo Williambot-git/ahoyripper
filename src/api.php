@@ -2262,7 +2262,7 @@ switch ($action) {
             '-o', $out_template,
             '--force-overwrites',
             '--retries', '3',
-            $playlist, $playlist_val,
+            '--playlist', $playlist_val,
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // to stderr during download which would corrupt classifyYtdlpError parsing.
