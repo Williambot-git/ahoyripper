@@ -1916,26 +1916,6 @@ switch ($action) {
             exit;
         }
         [$url, $format_id] = $validation_result;
-        // yt-dlp format selectors use characters like [ ] + = ~ * for conditional
-        // selection and output template merging (e.g. "bestvideo[height>=720]+bestaudio").
-        // yt-dlp output templates use %(name)s and %(name)0d escape sequences
-        // for dynamic filenames. Block shell metacharacters that could be
-        // dangerous in proc_open calls: $ ` ; | & < > \ and whitespace.
-        // Allow alphanum, _ . , - + [ ] < = > * ~ ( ) % @ ' (parentheses and percent
-        // for output template expansion; single-quote for fallback priority like 22/18;
-        // asterisk for glob patterns like bestvideo*). Safe when passed as array
-        // element to proc_open with bypass_shell=true, bypassing the shell entirely).
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\[\\]+\/-~()*%@!\'"]+$/', $format_id)) {
-            http_response_code(400);
-            logRequest('download', 400, ['reason' => 'invalid_format_id']);
-            echo json_encode([
-                'error' => 'Invalid format ID.',
-                'error_code' => 'INVALID_FORMAT_ID',
-                'request_id' => $request_id,
-                'source_url' => $url,
-            ]);
-            exit;
-        }
 
 // ─── Check for unlimited API key ───
         // Prefer Authorization: Bearer *** (keeps key out of URLs and server logs).
