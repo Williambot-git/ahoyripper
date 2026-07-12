@@ -3041,6 +3041,7 @@ switch ($action) {
             'server_time_unix' => time(),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
+            'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
             'os' => PHP_OS,
             'yt_dlp_version' => $version,
