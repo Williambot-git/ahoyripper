@@ -656,11 +656,12 @@ function clean($s) {
     // Passing 0 through as '0' (string) keeps the UI consistent and prevents
     // silent label corruption (e.g., "0kbps m4a" would become "Unknown kbps m4a").
     if ($s === null || $s === '') return 'Unknown';
-    // Reject arrays and objects — yt-dlp metadata is always scalar (string, int,
-    // float, or null). An array in a format label field (e.g. from an unexpected
-    // extractor field) would become the literal string "Array" via (string) cast,
-    // corrupting the API response silently. Return 'Unknown' instead.
-    if (is_array($s) || is_object($s)) return 'Unknown';
+    // Reject booleans, arrays and objects — yt-dlp metadata is always scalar
+    // (string, int, float, or null). A boolean in a format label field would
+    // become "1" or "" (empty string) via (string) cast, corrupting the label
+    // silently. An array/object would become the literal string "Array", also
+    // corrupting the API response. Return 'Unknown' for all of these.
+    if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;
