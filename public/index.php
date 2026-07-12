@@ -96,8 +96,8 @@ header_remove('X-Powered-By');
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
   <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ sites. Free, no signup, no ads — just paste a link.">
   <meta property="og:site_name" content="AhoyRipper">
-  <meta property="og:image" content="https://ahoyripper.com/og-image.png">
-  <meta property="og:image:secure_url" content="https://ahoyripper.com/og-image.png">
+  <meta property="og:image" content="<?= $BASE_URL ?>/og-image.png">
+  <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -115,7 +115,7 @@ header_remove('X-Powered-By');
        for a visually prominent element. fetchpriority on <link rel="preload">
        is supported in Chromium 86+ and Firefox 121+; Safari ignores it (no
        harm, no regression) and falls back to the existing og:image meta tag. -->
-  <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.png">
+  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png">
   <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
@@ -127,7 +127,7 @@ header_remove('X-Powered-By');
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Rip any video or audio from YouTube, TikTok, X, Instagram, Reddit & 1872+ platforms. Free, fast, no signup needed — just paste a link.">
-  <meta name="twitter:image" content="https://ahoyripper.com/og-image.png">
+  <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.png">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
   <meta name="twitter:image:alt" content="AhoyRipper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
@@ -208,7 +208,7 @@ header_remove('X-Powered-By');
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "softwareVersion": "<?= $VERSION ?>",
-        "image": "https://ahoyripper.com/og-image.png",
+        "image": "<?= $BASE_URL ?>/og-image.png",
         "author": {
           "@type": "Organization",
           "name": "AhoyVPN",
@@ -241,7 +241,7 @@ header_remove('X-Powered-By');
     <span>AhoyRipper</span>
   </a>
   <div class="ahoy-nav-links">
-    <a href="https://ahoyripper.com">AhoyRipper</a>
+    <a href="<?= $BASE_URL ?>">AhoyRipper</a>
     <a href="https://ahoyvpn.com" target="_blank" rel="noopener">AhoyVPN</a>
   </div>
 </nav>
