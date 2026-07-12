@@ -497,6 +497,13 @@ body {
   text-decoration: none;
   color: var(--color-text);
   cursor: pointer;
+  /* touch-action: manipulation disables the double-tap zoom gesture on this
+     element specifically, preventing accidental zoom during rapid card taps on
+     mobile without affecting pinch-zoom elsewhere on the page. This is the
+     correct value for interactive controls — it suppresses only the 300-350ms
+     delay of double-tap, not pinch-zoom. Complements the existing
+     (hover: none) and (pointer: coarse) mobile touch-target sizing below. */
+  touch-action: manipulation;
 }
 .format-card:hover {
   border-color: var(--color-accent);
