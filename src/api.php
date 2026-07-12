@@ -1104,7 +1104,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
         // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
-            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+            $cmp = ($a['height'] ?? 0) <=> ($b['height'] ?? 0);
         }
         if ($cmp === 0) {
             $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
@@ -1629,14 +1629,16 @@ switch ($action) {
         // timeout and produce an unclassified CONNECTION_FAILED instead of SOURCE_TIMEOUT.
         // --playlist: mirrors the download action — pass the user's explicit playlist
         // preference so the info action behaves consistently with the download action.
-        // When playlist=1, --yes-playlist fetches info for all videos in a playlist.
-        // When playlist=0/absent, --no-playlist fetches info for the single video.
-        $socket_timeout = max(1, INFO_TIMEOUT - 5);
-        $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
+        // When playlist=1, --playlist true fetches info for all videos in a playlist.
+        // When playlist=0/absent, --playlist false fetches info for the single video.
+        // yt-dlp 2024.02.07+ accepts --playlist true/false (replacing deprecated
+        // --yes-playlist/--no-playlist flags). Using the modern form here.
+        $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--playlist' : '--playlist';
+        $playlist_value = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
         $ytdlp_cmd = [
             YTDLP_PATH,
             '--dump-json',
-            $playlist_flag,
+            $playlist_flag, $playlist_value,
             '--skip-download',
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
@@ -2239,20 +2241,20 @@ switch ($action) {
         // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's timeout
         // and produce an unclassified error instead of DOWNLOAD_TIMEOUT.
         // --playlist: controls whether to download a playlist (all videos) or a single
-        // video. yt-dlp treats --yes-playlist and --no-playlist as mutually exclusive
-        // flags; the last one wins. Pass --no-playlist by default (playlist=0, the
-        // default) so single-video URLs always get one video. Pass --yes-playlist when
-        // playlist=1 is explicitly requested. Note: passing --yes-playlist via the
-        // format field does NOT work — playlist flags must appear BEFORE the URL.
-        $playlist = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--yes-playlist' : '--no-playlist';
-        $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
+        // video. yt-dlp 2024.02.07+ accepts --playlist true/false (replacing the
+        // deprecated --yes-playlist/--no-playlist flags). The modern form is used here.
+        // Pass --playlist false by default (playlist=0, the default) so single-video
+        // URLs always get one video. Pass --playlist true when playlist=1 is explicitly
+        // requested. Note: passing --yes-playlist via the format field does NOT work —
+        // playlist flags must appear BEFORE the URL.
+        $playlist_val = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
         $ytdlp_cmd = [
             YTDLP_PATH,
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrites',
             '--retries', '3',
-            $playlist,
+            $playlist, $playlist_val,
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // to stderr during download which would corrupt classifyYtdlpError parsing.
@@ -3114,7 +3116,7 @@ switch ($action) {
                 $probe_proc = proc_open([
                     YTDLP_PATH,
                     '--dump-json',
-                    '--no-playlist',
+                    '--playlist', 'false',
                     '--skip-download',
                     // --progress-template false: suppress all progress output (replaces the
                     // deprecated --no-progress flag). yt-dlp emits progress template noise
