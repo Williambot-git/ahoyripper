@@ -1635,6 +1635,10 @@ switch ($action) {
         // --yes-playlist/--no-playlist flags). Using the modern form here.
         $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--playlist' : '--playlist';
         $playlist_value = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
+        // yt-dlp per-connection timeout: PHP-side INFO_TIMEOUT is the outer limit,
+        // yt-dlp's --socket-timeout is the inner limit. Set to INFO_TIMEOUT - 5s so
+        // PHP always fires first and classifies as SOURCE_TIMEOUT rather than CONNECTION_FAILED.
+        $socket_timeout = max(1, INFO_TIMEOUT - 5);
         $ytdlp_cmd = [
             YTDLP_PATH,
             '--dump-json',
@@ -2248,6 +2252,10 @@ switch ($action) {
         // requested. Note: passing --yes-playlist via the format field does NOT work —
         // playlist flags must appear BEFORE the URL.
         $playlist_val = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
+        // yt-dlp per-connection timeout: PHP-side DOWNLOAD_TIMEOUT is the outer limit,
+        // yt-dlp's --socket-timeout is the inner limit. Set to DOWNLOAD_TIMEOUT - 15s so
+        // PHP always fires first and classifies as DOWNLOAD_TIMEOUT rather than CONNECTION_FAILED.
+        $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
             YTDLP_PATH,
             '-f', $format_id,
