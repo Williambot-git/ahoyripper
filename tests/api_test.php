@@ -123,7 +123,7 @@ test('rejects space in URL (invalid URL)',
 // - GEOBLOCKED requires "geo restriction" OR "this video is available in" (not just "is available in")
 // - LOGIN_REQUIRED requires "login required" OR "this video requires login" (not "requires authentication")
 
-function classifyYtdlpError($raw_err) {
+function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
         return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.'];
@@ -199,6 +199,21 @@ function classifyYtdlpError($raw_err) {
             return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
         }
         return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
+    }
+    // yt-dlp exit codes carry semantic meaning that supplements text classification.
+    // Exit code 1 is the most common error code — it means "there was a problem" but often
+    // carries no descriptive stderr text (just "error" or empty). Fall back to it only
+    // after all specific text-pattern checks above have been exhausted.
+    // Text-based matches take absolute precedence — a geo-blocked video that also produces
+    // exit code 1 still returns GEOBLOCKED (451), not FORMAT_UNAVAILABLE (422).
+    if ($exit_code !== null && $exit_code !== 0) {
+        if ($exit_code === 1) {
+            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
+        }
+        // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
+        if ($exit_code >= 2) {
+            return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'status' => 422];
+        }
     }
     return null;
 }
@@ -440,6 +455,46 @@ test('detects SOURCE_SERVER_ERROR — HTTP 503',
 $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
 test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
     $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
+
+// ─── exit-code classification (new in this patch) ─────────────────────────────
+// Text-based matches take absolute precedence over exit-code fallbacks.
+// A geo-blocked error that also exits with code 1 still returns GEOBLOCKED.
+
+$result = classifyYtdlpError('error', 1);
+test('exit code 1 with generic stderr → FORMAT_UNAVAILABLE (fallback)',
+    $result !== null && ($result['code'] ?? '') === 'FORMAT_UNAVAILABLE');
+
+$result = classifyYtdlpError('', 1);
+test('exit code 1 with empty stderr → FORMAT_UNAVAILABLE (fallback)',
+    $result !== null && ($result['code'] ?? '') === 'FORMAT_UNAVAILABLE');
+
+$result = classifyYtdlpError('ERROR: [youtube] This video is available in United States. Use --geo-bypass', 1);
+test('exit code 1 with geo-blocked text → GEOBLOCKED (text wins over exit code)',
+    $result !== null && ($result['code'] ?? '') === 'GEOBLOCKED');
+
+$result = classifyYtdlpError('ERROR: [youtube] This video is private', 1);
+test('exit code 1 with private-video text → PRIVATE_VIDEO (text wins over exit code)',
+    $result !== null && ($result['code'] ?? '') === 'PRIVATE_VIDEO');
+
+$result = classifyYtdlpError('error', 2);
+test('exit code 2 with generic stderr → YTDLP_ERROR (serious error)',
+    $result !== null && ($result['code'] ?? '') === 'YTDLP_ERROR');
+
+$result = classifyYtdlpError('error', 99);
+test('exit code ≥2 with generic stderr → YTDLP_ERROR (upper bound)',
+    $result !== null && ($result['code'] ?? '') === 'YTDLP_ERROR');
+
+$result = classifyYtdlpError('connection failed', 1);
+test('exit code 1 with connection-failed text → CONNECTION_FAILED (text wins)',
+    $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
+
+$result = classifyYtdlpError('error', 0);
+test('exit code 0 → null (success, no error classification)',
+    $result === null);
+
+$result = classifyYtdlpError('error', null);
+test('exit code null → null (backward-compatible, text-only path)',
+    $result === null);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
 // Regex: '/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/' (tilde for output templates,

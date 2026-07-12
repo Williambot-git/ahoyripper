@@ -683,7 +683,7 @@ function clean($s) {
 //   502 — Bad Gateway (connection/SSL failures)
 //   413 — Payload Too Large (file exceeds server limit)
 //   422 — Unprocessable Entity (format unavailable — client chose invalid option)
-function classifyYtdlpError($raw_err) {
+function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
         return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
@@ -787,6 +787,21 @@ function classifyYtdlpError($raw_err) {
         }
         // Other HTTP errors — surface the status but give a generic message.
         return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
+    }
+    // yt-dlp exit codes carry semantic meaning that supplements text classification.
+    // Exit code 1 is the most common error code — it means "there was a problem" but often
+    // carries no descriptive stderr text (just "error" or empty). Fall back to it only
+    // after all specific text-pattern checks above have been exhausted.
+    // Text-based matches take absolute precedence — a geo-blocked video that also produces
+    // exit code 1 still returns GEOBLOCKED (451), not FORMAT_UNAVAILABLE (422).
+    if ($exit_code !== null && $exit_code !== 0) {
+        if ($exit_code === 1) {
+            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
+        }
+        // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
+        if ($exit_code >= 2) {
+            return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'status' => 422];
+        }
     }
     return null;
 }
@@ -2426,7 +2441,7 @@ switch ($action) {
             $proc_err = strip_tags($proc_err);
             $proc_err = preg_replace('/\s+/', ' ', $proc_err);
             if (strlen($proc_err) > 200) $proc_err = substr($proc_err, 0, 200) . '...';
-            $err_classified = classifyYtdlpError($proc_err);
+            $err_classified = classifyYtdlpError($proc_err, $actual_exit);
 
             // Refund daily quota for any download failure — classified or not.
             // Whether the error is GEOBLOCKED (content unavailable) or an unexpected
@@ -3172,7 +3187,7 @@ switch ($action) {
                     // classified errors to clients (classifyYtdlpError is already used
                     // in those paths); the health probe was the only path returning raw text.
                     $probe_raw_err = trim($probe_err ?: $probe_out);
-                    $probe_classified = classifyYtdlpError($probe_raw_err);
+                    $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit);
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
