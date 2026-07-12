@@ -681,6 +681,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `DOWNLOAD_CANCELLED` | Download was cancelled (tab closed or connection lost) | Your quota was not charged — try again when ready |
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
+| `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
 | `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video |
 | `SOURCE_SERVER_ERROR` | Source site returned HTTP 5xx | Try again shortly |
 | `SOURCE_HTTP_ERROR` | Source site returned an unexpected HTTP error | Try again shortly |
