@@ -480,9 +480,13 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 ```json
 {
   "status": "degraded",
+  "api_ok": true,
   "server_time": "2026-05-21T16:00:00+00:00",
+  "server_time_unix": 1747843200,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
+  "api_version": "1.0.0",
+  "php_version": "8.2.0",
   "os": "Linux",
   "yt_dlp_version": "2026.03.17",
   "ffmpeg_version": "ffmpeg version 6.x",
