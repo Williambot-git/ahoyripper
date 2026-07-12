@@ -12,6 +12,7 @@
   "lang": "en-US",
   "dir": "ltr",
   "categories": ["utilities", "multimedia"],
+  "handle_links": "preferred",
   "icons": [
     {
       "src": "/favicon-512.png",
