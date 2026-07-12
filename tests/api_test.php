@@ -456,7 +456,7 @@ function validateFormatId($format_id) {
     // Character class allows: alphanum, underscore, dot, comma,
     // yt-dlp selector chars (<>=![]+-/~()%@!), and quote chars for output templates.
     // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
-    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\"]+$/', $format_id);
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\\-""]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -506,6 +506,16 @@ test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
     validateFormatId('best/@max') > 0);
 test('accepts @ in format selector string with qualifiers',
     validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') > 0);
+test('accepts hyphen in format ID (Crunchyroll-style with episode numbers)',
+    validateFormatId('COC-7-SHORT-1') > 0);
+test('accepts hyphen in resolution+codec format IDs',
+    validateFormatId('720p-h265') > 0);
+test('accepts hyphen as standalone character',
+    validateFormatId('-test') > 0);
+test('accepts trailing hyphen in format ID',
+    validateFormatId('test-') > 0);
+test('accepts multiple hyphens in format ID',
+    validateFormatId('a-b-c') > 0);
 
 // ─── parseFormats raw_error_out null-coalescing regression tests ────────────
 // Verify the fix for the null-coalescing bug where parseFormats returned

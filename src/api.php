@@ -1259,7 +1259,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         // plus the safe chars in the character class below. This mirrors the validation
         // already present in the download action (line ~1888) and is checked here so the
         // info action fails fast with INVALID_FORMAT_ID before wasting any yt-dlp cycles.
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'"]+$/', $format_id)) {
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\\-""]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
             $sendDailyLimitHeaders($daily_limit, null);
