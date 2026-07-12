@@ -283,7 +283,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
 }
 ```
 
-> **Note:** `api_version` appears on `action=check` and `action=info` responses. It is omitted from `action=download`, `action=health`, and other endpoints to keep those responses focused on their specific purpose.
+> **Note:** `api_version` appears on `action=check`, `action=info`, `action=download`, and `action=health` responses — consistent across all endpoints so API consumers always have the version.
 
 
 
@@ -442,15 +442,19 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 }
 ```
 
-`php_version` and `api_version` are only present on `action=check` (a minimal ping endpoint) — they are omitted from `action=health` to keep that response focused on system-resource metrics. `app_version` is present on both.
+`php_version` and `api_version` are present on `action=check` and `action=health`. Both `app_version` and `api_version` are present on all endpoints for full API surface metadata.
 
 `action=health` returns full system status:
 ```
 {
   "status": "ok",
+  "api_ok": true,
   "server_time": "2026-05-21T16:00:00+00:00",
+  "server_time_unix": 1747843200,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
+  "api_version": "1.0.0",
+  "php_version": "8.2.0",
   "os": "Linux",
   "yt_dlp_version": "2026.03.17",
   "ffmpeg_version": "ffmpeg version 6.x",
