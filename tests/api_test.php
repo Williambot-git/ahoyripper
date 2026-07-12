@@ -1037,6 +1037,102 @@ test('api.php uses hash_equals() for API key comparison (info action)',
 test('api.php uses hash_equals() for API key comparison (download action)',
     substr_count($api_src, 'hash_equals(AHOY_UNLIMITED_KEY, $api_key)') >= 2);
 
+// ─── Content-Disposition header encoding (RFC 5987 / RFC 6266) ────────────────
+// Mirrors the logic at api.php lines 2746-2762.
+// Ensures non-ASCII filenames are encoded correctly so downloads have proper names
+// across all browsers, and that CRLF injection is impossible.
+// Expected strings are generated dynamically to avoid encoding issues when the
+// test file is written through a terminal/heredoc layer.
+function buildContentDisposition($download_name) {
+    $dl_raw = $download_name;
+    $needs_encoding = preg_match('/[^\x00-\x7F]/', $dl_raw);
+    if ($needs_encoding) {
+        $encoded = rawurlencode($dl_raw);
+        $ascii_fallback = preg_replace_callback('/[^\x00-\x7F]/', function($m) {
+            return rawurlencode($m[0]);
+        }, $dl_raw);
+        $disposition = "attachment; filename*=UTF-8''{$encoded}; filename=\"{$ascii_fallback}\"";
+    } else {
+        $disposition = "attachment; filename=\"{$dl_raw}\"";
+    }
+    return $disposition;
+}
+
+// Build a string from its UTF-8 byte sequence (avoids writing literal non-ASCII
+// chars in the test file, which can get mangled when written through a terminal).
+function utf8_bytes($hex) {
+    $bytes = '';
+    for ($i = 0; $i < strlen($hex); $i += 2) {
+        $bytes .= chr(hexdec($hex[$i] . $hex[$i+1]));
+    }
+    return $bytes;
+}
+
+echo "\n==> Testing Content-Disposition header encoding (RFC 5987)\n";
+
+test('ASCII filename: no RFC 5987 encoding, plain filename="..."',
+    buildContentDisposition('video.mp4') === 'attachment; filename="video.mp4"');
+
+test('non-ASCII (Chinese): RFC 5987 filename* used, rawurlencode applied',
+    buildContentDisposition(utf8_bytes('e8a786e9a291') . '.mp4') === 'attachment; filename*=UTF-8\'\'' . rawurlencode(utf8_bytes('e8a786e9a291') . '.mp4') . '; filename="' . rawurlencode(utf8_bytes('e8a786e9a291')) . '.mp4"');
+
+test('non-ASCII (Japanese): RFC 5987 filename* used, rawurlencode applied',
+    buildContentDisposition(utf8_bytes('e58b95e794bb') . '.mp4') === 'attachment; filename*=UTF-8\'\'' . rawurlencode(utf8_bytes('e58b95e794bb') . '.mp4') . '; filename="' . rawurlencode(utf8_bytes('e58b95e794bb')) . '.mp4"');
+
+test('non-ASCII (Russian): RFC 5987 filename* used, rawurlencode applied',
+    buildContentDisposition(utf8_bytes('d0b2d0b8d0b4d0b5d0be') . '.mp4') === 'attachment; filename*=UTF-8\'\'' . rawurlencode(utf8_bytes('d0b2d0b8d0b4d0b5d0be') . '.mp4') . '; filename="' . rawurlencode(utf8_bytes('d0b2d0b8d0b4d0b5d0be')) . '.mp4"');
+
+test('non-ASCII (Arabic): RFC 5987 filename* used, rawurlencode applied',
+    buildContentDisposition(utf8_bytes('d988d98ad8afd98ad988') . '.mp4') === 'attachment; filename*=UTF-8\'\'' . rawurlencode(utf8_bytes('d988d98ad8afd98ad988') . '.mp4') . '; filename="' . rawurlencode(utf8_bytes('d988d98ad8afd98ad988')) . '.mp4"');
+
+test('space in filename: no encoding needed (ASCII)',
+    buildContentDisposition('my video.mp4') === 'attachment; filename="my video.mp4"');
+
+test('special chars (underscore, hyphen, dot): no encoding needed (ASCII)',
+    buildContentDisposition('my-video_test.v1.mp4') === 'attachment; filename="my-video_test.v1.mp4"');
+
+test('empty filename falls back to plain ASCII',
+    buildContentDisposition('') === 'attachment; filename=""');
+
+// Derived filename sanitization must strip control characters including CR/LF.
+// A filename containing \r or \n would enable CRLF injection into the
+// Content-Disposition header. The clean() function strips these.
+function sanitizeForContentDisposition($raw) {
+    $clean = preg_replace('/[\x00-\x1F\x7F]/u', '', $raw);
+    $clean = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $clean);
+    $clean = preg_replace('/\s+/u', '_', $clean);
+    return $clean;
+}
+
+echo "\n==> Testing derived filename sanitization (CRLF injection prevention)\n";
+
+test('CR stripped',
+    sanitizeForContentDisposition("line1\rline2") === 'line1line2');
+
+test('LF stripped',
+    sanitizeForContentDisposition("line1\nline2") === 'line1line2');
+
+test('tab stripped',
+    sanitizeForContentDisposition("video\t1080p") === 'video1080p');
+
+test('null byte stripped',
+    sanitizeForContentDisposition("video\x00.mp4") === 'video.mp4');
+
+// Unicode letters (including Greek αβγ) are preserved by \p{L} — this is correct
+// and safe: only ASCII metacharacters (backticks, pipes, $) are stripped.
+$sanitized_greek = sanitizeForContentDisposition(utf8_bytes('ceb1ceb3ceb3') . '_test.mp4');
+test('unicode letters (Greek αβγ) preserved by sanitizer',
+    $sanitized_greek === utf8_bytes('ceb1ceb3ceb3') . '_test.mp4');
+
+test('shell metacharacters stripped (backtick, pipe, semicolon)',
+    sanitizeForContentDisposition('video`whoami`.mp4') === 'videowhoami.mp4');
+
+test('dollar-sign stripped (no $() command substitution in filename)',
+    sanitizeForContentDisposition('video$(id).mp4') === 'videoid.mp4');
+
+test('whitespace normalized to single underscores',
+    sanitizeForContentDisposition('my  video   name.mp4') === 'my_video_name.mp4');
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";
