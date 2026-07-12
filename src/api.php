@@ -723,6 +723,8 @@ function classifyYtdlpError($raw_err) {
     // Distinct from connection-level "timed out" which implies a network failure.
     // The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT (configurable
     // via YTDLP_TIMEOUT env var, default 45s) and terminates the yt-dlp process.
+    // INFO_TIMEOUT (controlled by YTDLP_TIMEOUT) limits the info action;
+    // DOWNLOAD_TIMEOUT (controlled by YTDLP_DOWNLOAD_TIMEOUT) limits the download action.
     // This means the server reached the source but it was too slow to respond within
     // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
     // (502) which implies a network or DNS issue on our end.
@@ -1746,6 +1748,11 @@ switch ($action) {
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
             logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => mb_substr($err_msg, 0, 100, 'UTF-8')]);
             http_response_code(422);
+            // retry_after: Unix timestamp when the info request can be retried.
+            // Set to now + INFO_TIMEOUT so the client has a consistent future reset
+            // point matching the server's actual timeout window.
+            $retry_ts = time() + INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
@@ -1753,6 +1760,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'retry_after' => max(0, $retry_ts),
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
