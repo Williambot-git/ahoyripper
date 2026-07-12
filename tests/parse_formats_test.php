@@ -37,7 +37,7 @@ function clean($s) {
     // float, or null). An array in a format label field (e.g. from an unexpected
     // extractor field) would become the literal string "Array" via (string) cast,
     // corrupting the API response silently. Return 'Unknown' instead.
-    if (is_array($s) || is_object($s)) return 'Unknown';
+    if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;
@@ -62,6 +62,12 @@ test('clean(object) returns "Unknown" (not "Array")',
     clean((object)['ext' => 'mp4']) === 'Unknown');
 test('clean(stdClass) returns "Unknown"',
     clean(json_decode('{"ext":"mp4"}')) === 'Unknown');
+
+echo "\n==> Testing clean() — boolean rejection\n";
+test('clean(true) returns "Unknown" (not "1")',
+    clean(true) === 'Unknown');
+test('clean(false) returns "Unknown" (not "")',
+    clean(false) === 'Unknown');
 
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
