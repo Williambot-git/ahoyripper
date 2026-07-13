@@ -1916,6 +1916,7 @@ switch ($action) {
                 // when a classified error (GEOBLOCKED, LOGIN_REQUIRED, etc.) is returned.
                 // Included in success responses; add it here for parity on error responses.
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ];
             if (!empty($parsed['error_code'])) {
                 $resp['error_code'] = $parsed['error_code'];
