@@ -557,7 +557,7 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
     if (!$proc) {
         $exit = -1;
-        // distiguish the two most common proc_open failure modes:
+        // distinguish the two most common proc_open failure modes:
         // 1. Binary missing or not executable → "yt-dlp not found"
         // 2. Permission denied or other syscall failure → "proc_open failed"
         // Setting $stderr here means callers that check it after a false return
@@ -1646,7 +1646,7 @@ switch ($action) {
         // When playlist=0/absent, --playlist false fetches info for the single video.
         // yt-dlp 2024.02.07+ accepts --playlist true/false (replacing deprecated
         // --yes-playlist/--no-playlist flags). Using the modern form here.
-        $playlist_flag = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? '--playlist' : '--playlist';
+        // --playlist is always passed (value differs: 'true' vs 'false')
         $playlist_value = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
         // yt-dlp per-connection timeout: PHP-side INFO_TIMEOUT is the outer limit,
         // yt-dlp's --socket-timeout is the inner limit. Set to INFO_TIMEOUT - 5s so
@@ -1655,7 +1655,7 @@ switch ($action) {
         $ytdlp_cmd = [
             YTDLP_PATH,
             '--dump-json',
-            $playlist_flag, $playlist_value,
+            '--playlist', $playlist_value,
             '--skip-download',
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
