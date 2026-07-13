@@ -81,7 +81,13 @@ header_remove('X-Powered-By');
        iOS crops square icons to a rounded shape; SVG source produces blurry
        results at the sizes iOS applies. A 180x180 PNG is optimal for iPhone. -->
   <link rel="apple-touch-icon" href="/favicon-180.png">
-  <meta name="referrer" content="no-referrer">
+  <!-- Referrer-Policy: prevent referrer from being sent to any destination when
+       navigating away from AhoyRipper (third-party CDNs for thumbnails, video covers,
+       etc.). The HTTP header is set at the server level via nginx/api.php, but this
+       meta tag ensures the policy is also enforced for the HTML document itself and
+       as defense-in-depth when served through a reverse proxy that may strip headers.
+       Using http-equiv (not name) — this is the correct standard form for Referrer-Policy. -->
+  <meta http-equiv="Referrer-Policy" content="no-referrer">
 
   <!-- OpenSearch — lets browsers add ahoyripper.com as a searchable engine
        (e.g. Firefox's URL bar shows "Search AhoyRipper" after the file is served).
