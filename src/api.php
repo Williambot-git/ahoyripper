@@ -557,6 +557,19 @@ function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
 
     if (!$proc) {
         $exit = -1;
+        // distiguish the two most common proc_open failure modes:
+        // 1. Binary missing or not executable → "yt-dlp not found"
+        // 2. Permission denied or other syscall failure → "proc_open failed"
+        // Setting $stderr here means callers that check it after a false return
+        // get a specific message (e.g. "yt-dlp not found") instead of an empty
+        // string that would produce a generic "yt-dlp error: " with no useful detail.
+        if (!is_file($ytdlp_bin)) {
+            $stderr = 'yt-dlp not found: ' . $ytdlp_bin;
+        } elseif (!is_executable($ytdlp_bin)) {
+            $stderr = 'yt-dlp not executable: ' . $ytdlp_bin;
+        } else {
+            $stderr = 'proc_open failed for: ' . $ytdlp_bin;
+        }
         return false;
     }
 
