@@ -850,14 +850,6 @@ function escapeHtml(s) {
     card.setAttribute('data-label', escapeHtml(f.label || f.ext));
     card.setAttribute('data-filename', escapeHtml(data.derived_filename || ''));
     card.setAttribute('role', 'button');
-    // aria-label describes the format type (Video/Audio/Video Only) so screen
-    // readers can announce it without needing to parse the card's innerHTML.
-    card.setAttribute('aria-label', badgeLabel + ' format');
-    // role="button" makes the intent explicit to assistive technologies.
-    // keyboard activation is handled via keydown (Enter/Space) below.
-    // The href="#" with preventDefault() replaces the previous href="#" approach
-    // which caused a scroll-to-top on Enter press before the click handler ran.
-
     var badgeColor = 'var(--color-accent)';
     var badgeLabel = 'Video';
     if (f.vcodec === 'none') {
@@ -867,6 +859,13 @@ function escapeHtml(s) {
       badgeColor = '#a855f7';
       badgeLabel = 'Video Only';
     }
+    // aria-label describes the format type (Video/Audio/Video Only) so screen
+    // readers can announce it without needing to parse the card's innerHTML.
+    card.setAttribute('aria-label', badgeLabel + ' format');
+    // role="button" makes the intent explicit to assistive technologies.
+    // keyboard activation is handled via keydown (Enter/Space) below.
+    // The href="#" with preventDefault() replaces the previous href="#" approach
+    // which caused a scroll-to-top on Enter press before the click handler ran.
 
     var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
     var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
