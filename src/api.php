@@ -2700,6 +2700,38 @@ switch ($action) {
             }
         }
 
+        // Refund daily quota if ffprobe verification failed — the file was downloaded
+        // successfully but ffprobe could not verify the codec/resolution (e.g. ffprobe
+        // timed out on a corrupt file, or the binary was not executable). Since the
+        // substitution-detection info is lost, the user effectively received the same
+        // outcome as if no ffprobe had run (no substitution notice shown). Refunding
+        // is the consistent choice: we refund on all yt-dlp failures regardless of
+        // classified/unclassified status, so ffprobe failures (which are outside the
+        // user's control) deserve the same treatment.
+        // Skip when: ffprobe succeeded ($probe_exit === 0), audio-only (no probe ran),
+        // or user is unlimited-key holder ($unlimited=true — never had quota incremented).
+        $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
+        if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
+            $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+            if ($undo_fp && flock($undo_fp, LOCK_EX)) {
+                $undo_raw = fread($undo_fp, 4096);
+                $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
+                if ($undo_raw) {
+                    $decoded = json_decode($undo_raw, true);
+                    if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                }
+                if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                    $undo_data['c']--;
+                    ftruncate($undo_fp, 0);
+                    rewind($undo_fp);
+                    fwrite($undo_fp, json_encode($undo_data));
+                    fflush($undo_fp);
+                }
+                flock($undo_fp, LOCK_UN);
+                fclose($undo_fp);
+            }
+        }
+
         $mime = 'application/octet-stream';
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $detected = $finfo->file($actual_file);
