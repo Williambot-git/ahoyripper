@@ -123,6 +123,12 @@ test('rejects IPv4-mapped IPv6 ::ffff:127.0.0.1 (SSRF gap — loopback in IPv6 w
     isValidUrl('https://[::ffff:127.0.0.1]/internal') === false);
 test('accepts IPv4-mapped IPv6 ::ffff:8.8.8.8 (public IPv4 wrapped in IPv6 — should pass)',
     isValidUrl('https://[::ffff:8.8.8.8]/') !== false);
+test('rejects bare unbracketed IPv6 (2001:db8::1) — FILTER_VALIDATE_URL rejects unbracketed IPv6',
+    isValidUrl('https://2001:db8::1/') === false);
+test('rejects IPv6 documentation address 2001:db8::1 (RESERVED range — RFC 3849)',
+    isValidUrl('https://[2001:db8::1]/') === false);
+test('rejects IPv6 documentation address 2001:0db8:0001 (RESERVED range — RFC 3849)',
+    isValidUrl('https://[2001:0db8:0001::1]/') === false);
 test('rejects ftp scheme',
     isValidUrl('ftp://example.com/file.mp4') === false);
 test('rejects javascript: scheme',
