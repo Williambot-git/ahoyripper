@@ -1503,7 +1503,9 @@ switch ($action) {
                 exit;
             }
             $daily_data['c']++;
-            $daily_remaining = max(0, $daily_limit - $daily_data['c']);
+            // Refund guard: if proc_open fails below, we decrement here to reverse
+            // the increment. This is the pre-refund baseline — must stay in sync
+            // with the refund block that runs on info failure.
             $info_quota_before_refund = $daily_data['c'];
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
@@ -1514,10 +1516,11 @@ switch ($action) {
             $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips.
-            // Use the remaining count calculated AFTER the increment so the value
-            // reflects the number of rips available AFTER this request's quota hit.
+            // Show how many rips remain AFTER this request: limit minus the new count,
+            // plus one so the count is from the user's perspective (c=5 after the
+            // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . $daily_remaining);
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: 86400');
         } else {
@@ -1874,7 +1877,7 @@ switch ($action) {
         // Surface daily quota state in the JSON body for client UI — mirrors the
         // X-DailyLimit-* headers set above so clients can read quota from either.
         // -1 sentinel values signal "not applicable" (unlimited-key holder).
-        $parsed['quota_remaining'] = isset($daily_remaining) ? $daily_remaining : -1;
+        $parsed['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $daily_data['c'] + 1) : -1;
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
         $parsed['quota_reset'] = $unlimited ? -1 : strtotime('tomorrow midnight UTC');
         header('Cache-Control: no-cache');
@@ -2099,7 +2102,6 @@ switch ($action) {
                 exit;
             }
             $daily_data['c']++;
-            $daily_remaining = max(0, $daily_limit - $daily_data['c']);
             // Refund guard: if proc_open fails below, we decrement here to reverse
             // the increment. This is the pre-refund baseline — must stay in sync
             // with the refund block that runs on download failure.
@@ -2113,10 +2115,11 @@ switch ($action) {
             $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips.
-            // Use the remaining count calculated AFTER the increment so the value
-            // reflects the number of rips available AFTER this request's quota hit.
+            // Show how many rips remain AFTER this request: limit minus the new count,
+            // plus one so the count is from the user's perspective (c=5 after the
+            // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . $daily_remaining);
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: 86400');
         } else {

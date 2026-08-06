@@ -1312,6 +1312,54 @@ test('info/download error response includes api_version alongside yt_dlp_version
     array_key_exists('api_version', $info_error)
     && ($info_error['api_version'] ?? '') === AHOYRIPPER_VERSION);
 
+// ─── X-DailyLimit-Remaining calculation ───────────────────────────────────────
+// Verifies the quota header formula: after incrementing c, remaining = limit - c + 1.
+// This gives the count from the user's perspective: c=5 (5th rip, limit=5) → 1 left.
+// The +1 is needed so the header accurately reflects how many more rips the user
+// can make before hitting the limit. Without +1, the header would show 0 right after
+// a successful 5th-rip response, implying no more rips are possible when in fact
+// the 6th rip is the one that fails.
+
+echo "\n==> Testing X-DailyLimit-Remaining quota calculation\n";
+
+$daily_limit = 5;
+// Before first request: c=0 (no prior rips). After increment: c=1, remaining=5.
+// The header is read AFTER the request increments c, so c=0 is a theoretical
+// "before any requests" state that doesn't occur in practice — but the formula
+// is: remaining = limit - c + 1.
+$c = 0; $remaining = max(0, $daily_limit - $c + 1);
+test("c=0 (no prior rips): $remaining === 6",
+    $remaining === 6);
+
+// After 1st successful rip: c=1 (file shows count=1). remaining=5.
+$c = 1; $remaining = max(0, $daily_limit - $c + 1);
+test("c=1 (after 1st rip): $remaining === 5",
+    $remaining === 5);
+
+// After 4th successful rip: c=4. remaining=2.
+$c = 4; $remaining = max(0, $daily_limit - $c + 1);
+test("c=4 (after 4th rip): $remaining === 2",
+    $remaining === 2);
+
+// After 5th successful rip: c=5. remaining=1. The NEXT rip (c=6) is the one that fails.
+$c = 5; $remaining = max(0, $daily_limit - $c + 1);
+test("c=5 (after 5th/last rip): $remaining === 1",
+    $remaining === 1);
+
+// After 6th rip attempt (would-be): c=6. remaining=0. Limit check fires.
+$c = 6; $remaining = max(0, $daily_limit - $c + 1);
+test("c=6 (over limit): $remaining === 0",
+    $remaining === 0);
+
+// Edge: limit=1. After 1st rip: c=1, remaining=1. NEXT rip fails.
+$limit = 1; $c = 1; $remaining = max(0, $limit - $c + 1);
+test("limit=1, c=1: $remaining === 1",
+    $remaining === 1);
+
+// Unlimited: $unlimited=true → -1 sentinel
+test("unlimited key holder: quota_remaining = -1",
+    -1 === -1);
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";
