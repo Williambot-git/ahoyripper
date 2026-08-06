@@ -325,7 +325,11 @@ The `source_url` field in the info response is the exact URL that was ripped —
   ],
   "sort_applied": "height",
   "source_url": "https://www.youtube.com/watch?v=...",
-  "yt_dlp_version": "2026.03.17"
+  "yt_dlp_version": "2026.03.17",
+  "api_version": "1.0.0",
+  "quota_remaining": 4,
+  "quota_limit": 5,
+  "quota_reset": 1749254400
 }
 ```
 
