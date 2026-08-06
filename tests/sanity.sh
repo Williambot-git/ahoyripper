@@ -225,6 +225,15 @@ else
 fi
 
 echo ""
+echo "==> Checking og:image:alt is present in index.php (SEO accessibility)... "
+if grep -q 'og:image:alt.*yt-dlp\|og:image:alt.*platforms\|og:image:alt.*SoundCloud' public/index.php; then
+    echo "  ✓ og:image:alt present (accessibility + SEO best practice)"
+else
+    echo "  ✗ og:image:alt missing (screen readers and non-visual clients can't describe og:image)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking rate limiting (info endpoint)..."
 if grep -q "rate_limit = 30" src/api.php; then
     echo "  ✓ Info rate limit (30/min) configured"
