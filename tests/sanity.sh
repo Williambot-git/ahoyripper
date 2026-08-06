@@ -685,14 +685,15 @@ else
 fi
 
 echo ""
-echo "==> Checking README info response example does not claim api_version (only check endpoint has it)..."
-# The info response JSON example should NOT contain "api_version" — it only
-# appears on action=check. The README example was corrected to remove it.
+echo "==> Checking README info response example includes api_version (present on all endpoints)..."
+# The info response JSON example SHOULD contain "api_version" — api_version
+# is present on ALL endpoints (check, info, download, health) per api.php.
+# This was updated from an older incorrect check that claimed only check had it.
 if grep -A20 '"sort_applied"' README.md | grep -q '"api_version"'; then
-    echo "  ✗ README info response example still contains api_version (should only be on check endpoint)"
-    exit 1
+    echo "  ✓ README info response example correctly includes api_version (present on all endpoints)"
 else
-    echo "  ✓ README info response example correctly omits api_version"
+    echo "  ✗ README info response example is missing api_version (should be present on all endpoints)"
+    exit 1
 fi
 
 echo ""
