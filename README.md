@@ -474,6 +474,7 @@ The `filename` param (optional) sets the downloaded file's name. Only alphanumer
 ```
 GET /src/api.php?action=check          # lightweight internal ping (Docker healthcheck-safe)
 GET /src/api.php?action=health         # full system status with resource metrics
+GET /src/api.php?action=progress        # alias for health (same response shape)
 GET /src/api.php?action=health&probe=1 # include live yt-dlp connectivity probe
 POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)"
 ```
