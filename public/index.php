@@ -1265,6 +1265,51 @@ function escapeHtml(s) {
       if (sortSelect && data.sort_applied) {
         sortSelect.value = data.sort_applied;
       }
+      // Read quota state from the JSON body (quota_remaining, quota_limit,
+      // quota_reset) surfaced by the info endpoint alongside the X-DailyLimit-*
+      // headers. This ensures the quota display is updated on the SUCCESS path
+      // even when headers are unavailable or cross-origin restrictions apply.
+      // The unlimited-key sentinel is -1 for all three fields.
+      if (data && typeof data.quota_remaining === 'number') {
+        var qel = document.getElementById('quotaDisplay');
+        var qlimEl = document.getElementById('quotaLimit');
+        var qlabelEl = document.getElementById('quotaLabel');
+        var qupgradeEl = document.getElementById('quotaUpgrade');
+        if (qel) {
+          // Only show non-negative values; -1 means "not applicable" (unlimited).
+          qel.textContent = data.quota_remaining >= 0 ? data.quota_remaining : '';
+          if (data.quota_remaining <= 2 && data.quota_remaining >= 0) {
+            qel.classList.add('low');
+          } else {
+            qel.classList.remove('low');
+          }
+          if (data.quota_remaining === 0) {
+            qel.classList.add('exhausted');
+          } else {
+            qel.classList.remove('exhausted');
+          }
+        }
+        if (qlimEl) {
+          qlimEl.textContent = (data.quota_limit > 0) ? '/' + data.quota_limit : '';
+        }
+        // Unlimited-key holders get -1: hide the entire quota UI row.
+        if (data.quota_remaining === -1 && qlabelEl) {
+          qlabelEl.style.display = 'none';
+          if (qel) qel.style.display = 'none';
+          if (qlimEl) qlimEl.style.display = 'none';
+        }
+        if (qupgradeEl) {
+          if (data.quota_remaining <= 0 && data.quota_remaining !== -1) {
+            qupgradeEl.textContent = 'upgrade now';
+            qupgradeEl.style.fontWeight = '700';
+            qupgradeEl.style.color = 'var(--color-error)';
+          } else {
+            qupgradeEl.textContent = 'get unlimited';
+            qupgradeEl.style.fontWeight = '500';
+            qupgradeEl.style.color = '';
+          }
+        }
+      }
       renderFormats(url, data);
 
     } catch (e) {
