@@ -2108,6 +2108,8 @@ switch ($action) {
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
                     'request_id' => $request_id,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
                 ]);
                 exit;
             }
