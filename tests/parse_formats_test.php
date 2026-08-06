@@ -150,7 +150,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This content is not available due to a terms of service or legal violation.', 'error_code' => 'DISALLOWED_CONTENT'];
             }
-            // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+            // "process timed out" is produced by PHP-side timeout in the inline
+            // proc_open timeout handler (api.php).
             // Distinct from connection-level "timed out" which implies a network failure.
             if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;

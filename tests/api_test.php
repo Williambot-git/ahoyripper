@@ -190,7 +190,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
-    // "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+    // "process timed out" is produced by PHP-side timeout in the inline
+    // proc_open timeout handler (api.php).
     // Distinct from connection-level "timed out" which implies a network failure.
     if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
@@ -384,8 +385,8 @@ test('detects CONNECTION_FAILED — "(timed out after 30s)" (standalone timed ou
     $result !== null && ($result['code'] ?? '') === 'CONNECTION_FAILED');
 
 // The SOURCE_TIMEOUT check must NOT be shadowed by the CONNECTION_FAILED
-// "timed out" alternative. "Process timed out" is emitted by the PHP-side
-// timeout handler (runYtdlp), not the source site — it should map to 504
+// "Process timed out" is emitted by the PHP-side
+// timeout handler (inline proc_open), not the source site — it should map to 504
 // SOURCE_TIMEOUT, not 502 CONNECTION_FAILED. The negative lookbehind
 // (?<!Process |at byte) in the CONNECTION_FAILED regex prevents "Process "
 // or "at byte " + "timed out" from being matched as standalone "timed out".
@@ -988,7 +989,8 @@ test('PHP code injection attempt falls back to height',
     sortNormalize('height<?php exec($_GET["x"])') === 'height');
 
 // ─── classifyYtdlpError — SOURCE_TIMEOUT (new in caretaking [260530-1334]) ─
-// "process timed out" is produced by PHP-side timeout in runYtdlp() (api.php).
+// "process timed out" is produced by PHP-side timeout in the inline
+// proc_open timeout handler (api.php).
 // It means the server reached the source but the source was too slow to respond
 // within the allowed window. Distinct from CONNECTION_FAILED (network-level).
 // Must return 504 so the client distinguishes server-side stall from network failure.
@@ -1047,7 +1049,7 @@ test('clean(assoc array) → Unknown',
     cleanForTest(['k' => 'v']) === 'Unknown');
 
 // ─── Regression: bypass_shell=true means shell escaping is not needed ─────────
-// runYtdlp() uses bypass_shell=true in proc_open, meaning all arguments are
+// The API uses bypass_shell=true in proc_open, meaning all arguments are
 // passed directly to execve without shell interpretation. Shell escaping
 // functions (escapeshellarg, escapeshellcmd) are not needed in this context
 // and can produce malformed argument strings (e.g. UA strings containing

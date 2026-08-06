@@ -547,144 +547,6 @@ if (!$GLOBALS['__ffmpeg_version']) {
     }
 }
 
-// runYtdlp runs yt-dlp with the given arguments and captures stdout/stderr.
-// $timeout = max seconds (0 = no limit). The referer is always set to
-// ahoyripper.com to avoid leaking the user's video URL to source sites.
-function runYtdlp($args, &$stdout, &$stderr, &$exit, $timeout = 0) {
-    // Defensive cap: even if a caller passes an unbounded timeout, cap it at 5 minutes
-    // to prevent runaway processes. yt-dlp downloads are bounded by the format
-    // selection; a 5-minute metadata-only operation covers all reasonable cases.
-    static $MAX_YTDLP_TIMEOUT = 300;
-    if ($timeout <= 0 || $timeout > $MAX_YTDLP_TIMEOUT) {
-        $timeout = $MAX_YTDLP_TIMEOUT;
-    }
-
-    // Build the command as an array so bypass_shell works as intended.
-    // Shell redirection ('2>&1') is unnecessary — we capture stderr via pipe.
-    $ytdlp_bin = YTDLP_PATH;
-    // Split args preserving quoted strings (handles $shell_url = "'https://...'")
-    $parts = preg_split('/\s+(?=(?:[^"\']|["\'][^"\']*["\'])*$)/', trim($args));
-    $cmd = array_merge([$ytdlp_bin], $parts);
-    $desc = [
-        0 => ['pipe', 'r'],
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
-    ];
-    $pipes = null;
-    $proc = proc_open($cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
-
-    if (!$proc) {
-        $exit = -1;
-        // distinguish the two most common proc_open failure modes:
-        // 1. Binary missing or not executable → "yt-dlp not found"
-        // 2. Permission denied or other syscall failure → "proc_open failed"
-        // Setting $stderr here means callers that check it after a false return
-        // get a specific message (e.g. "yt-dlp not found") instead of an empty
-        // string that would produce a generic "yt-dlp error: " with no useful detail.
-        if (!is_file($ytdlp_bin)) {
-            $stderr = 'yt-dlp not found: ' . $ytdlp_bin;
-        } elseif (!is_executable($ytdlp_bin)) {
-            $stderr = 'yt-dlp not executable: ' . $ytdlp_bin;
-        } else {
-            $stderr = 'proc_open failed for: ' . $ytdlp_bin;
-        }
-        return false;
-    }
-
-    // Close stdin immediately — yt-dlp doesn't need interactive input
-    // and an unclosed stdin pipe can cause the process to hang
-    fclose($pipes[0]);
-    unset($pipes[0]);
-
-    // Use hrtime(true) for sub-second timeout precision. time() has only 1-second
-    // resolution — a 15s timeout can fire at t=15.999s, adding nearly a full extra
-    // second of latency to every timed-out health probe. hrtime(true) returns
-    // nanoseconds on Linux (converted to a float here), giving true sub-second
-    // accuracy so the process is terminated within milliseconds of the target timeout.
-    // stream_set_timeout (set below) is intentionally left at 0 (infinite) — the
-    // global hrtime() check is the authoritative timeout; stream_set_timeout would
-    // stall the loop on spurious expiry since feof is not set until the process
-    // closes its pipes, causing indefinite hangs.
-    stream_set_timeout($pipes[1], 0);
-    stream_set_timeout($pipes[2], 0);
-
-    $stdout = '';
-    $stderr = '';
-    $start = hrtime(true);
-
-    while (!feof($pipes[1]) || !feof($pipes[2])) {
-        if ($timeout > 0 && (hrtime(true) - $start) / 1e9 > $timeout) {
-            proc_terminate($proc, 9);
-            $stderr .= "\nProcess timed out after {$timeout}s";
-            $exit = -1; // convention: -1 = timeout
-            // proc_terminate kills the process but leaves its handle open until
-            // proc_close() is called. Close the handle immediately so the descriptor
-            // is not leaked. Setting $proc = null after proc_close() prevents the
-            // post-loop cleanup from attempting a second close on the already-closed
-            // handle (double proc_close on the same descriptor is undefined behavior).
-            // This mirrors the pattern used by the ffprobe probe (line ~2432) and the
-            // health probe (line ~2906): proc_terminate followed immediately by
-            // proc_close, with null sentinel to guard the post-loop cleanup.
-            proc_close($proc);
-            $proc = null;
-            // Close any remaining open pipes first to release handles.
-            foreach ($pipes as $p) { if ($p) fclose($p); }
-            $pipes = null;
-            // $stderr is already populated with the timeout message (line 508 above).
-            // The $stdout reference parameter is intentionally left empty on timeout
-            // since there is no valid JSON to parse from a timed-out process.
-            return false;
-        }
-        $read = [];
-        if (!feof($pipes[1])) $read[] = $pipes[1];
-        if (!feof($pipes[2])) $read[] = $pipes[2];
-        if (empty($read)) break;
-        $w = $e = null;
-        $changed = @stream_select($read, $w, $e, 1, 0);
-        if ($changed === false) {
-            // stream_select error — log and continue to avoid blocking on spurious failure
-            usleep(100000);
-            continue;
-        }
-        if ($changed === 0) {
-            usleep(100000);
-            continue;
-        }
-        foreach ($read as $p) {
-            if ($p === $pipes[1]) {
-                $s = fread($p, 8192);
-                if ($s === false || $s === '') {
-                    if (feof($pipes[1])) {
-                        fclose($pipes[1]);
-                        $pipes[1] = null;
-                    }
-                    continue;
-                }
-                $stdout .= $s;
-            } elseif ($p === $pipes[2]) {
-                $s = fread($p, 8192);
-                if ($s === false || $s === '') {
-                    if (feof($pipes[2])) {
-                        fclose($pipes[2]);
-                        $pipes[2] = null;
-                    }
-                    continue;
-                }
-                $stderr .= $s;
-            }
-        }
-        // Exit when both pipes are closed
-        if ($pipes[1] === null && $pipes[2] === null) break;
-    }
-
-    foreach ($pipes as $p) { if ($p) fclose($p); }
-    $pipes = null;
-    // Only call proc_close if $proc is still open (null sentinel means timeout
-    // handler already closed it to avoid double-close).
-    $exit = ($proc !== null) ? proc_close($proc) : -1;
-    return true;
-}
-
 // Sanitize string for JSON output
 function clean($s) {
     // Return 'Unknown' for null or empty string only.
@@ -750,7 +612,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
 
-    // "process timed out" is produced by the PHP-side timeout in runYtdlp() (api.php).
+    // "process timed out" is produced by the PHP-side timeout in the inline
+    // proc_open timeout handler (api.php).
     // Distinct from connection-level "timed out" which implies a network failure.
     // The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT (configurable
     // via YTDLP_TIMEOUT env var, default 45s) and terminates the yt-dlp process.
@@ -3082,7 +2945,7 @@ switch ($action) {
         // health?probe=1 calls don't hammer YouTube. Declared early here (before the
         // ffprobe block below) so the cache-read is adjacent to the ffprobe block for clarity.
         // The actual probe execution lives deeper in the case block where it has
-        // access to the full $out response array and the runYtdlp() function.
+        // access to the full $out response array.
         $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
         $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
         if ($do_probe && is_readable($probe_cache_file)) {
@@ -3172,7 +3035,7 @@ switch ($action) {
                 //
                 // Build the probe command as an explicit array (NOT a shell string) to
                 // avoid breaking AHOY_USER_AGENT which contains parentheses
-                // "(KHTML, like Gecko)" — runYtdlp()'s preg_split tokenizer splits on
+                // "(KHTML, like Gecko)" — preg_split-based argument tokenizers split on
                 // unquoted whitespace and would misparse the UA string into separate
                 // tokens, causing yt-dlp to receive a mangled --user-agent argument.
                 // Using bypass_shell=true with a direct array bypasses the shell
