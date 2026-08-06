@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
         php-mbstring \
         php-curl \
         php-json \
+        php-xml \
+        php-gd \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     # Install yt-dlp as a standalone binary (no Python dependency needed).
