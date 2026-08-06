@@ -88,6 +88,23 @@ header_remove('X-Powered-By');
        as defense-in-depth when served through a reverse proxy that may strip headers.
        Using http-equiv (not name) — this is the correct standard form for Referrer-Policy. -->
   <meta http-equiv="Referrer-Policy" content="no-referrer">
+  <!-- format-detection: prevent mobile browsers from auto-linking phone numbers
+      , email addresses, and physical addresses. AhoyRipper's primary interaction
+       is URL input — auto-linking phone numbers creates accidental click-to-call
+       links that interfere with the UX. Disable across all content types. -->
+  <meta name="format-detection" content="telephone=no, email=no, address=no">
+  <!-- application-name: used by Windows 7+ taskbar jump list and Start menu tile
+       when a user pins the site. Identifies the app independently of the page title.
+       Mirrors the app name from manifest.json. -->
+  <meta name="application-name" content="AhoyRipper">
+  <!-- msapplication-* tiles: Windows 8+ Start screen pinned-site tiles.
+       msapplication-tilecolor sets the background color (matches theme-color).
+       msapplication-tileimage is the 144x144 PNG tile icon (scaled by Windows).
+       msapplication-navbutton-color styles the back button in the tile interface.
+       These are read by Windows to render the pinned site tile. -->
+  <meta name="msapplication-tilecolor" content="#0f0f0f">
+  <meta name="msapplication-tileimage" content="<?= $BASE_URL ?>/favicon-144.png">
+  <meta name="msapplication-navbutton-color" content="#0f0f0f">
 
   <!-- OpenSearch — lets browsers add ahoyripper.com as a searchable engine
        (e.g. Firefox's URL bar shows "Search AhoyRipper" after the file is served).
