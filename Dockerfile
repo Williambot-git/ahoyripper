@@ -22,10 +22,18 @@ RUN apt-get update && apt-get install -y \
     # Install yt-dlp as a standalone binary (no Python dependency needed).
     # The binary is the recommended installation method per yt-dlp docs and
     # avoids pip installation complexity, reduces image size, and is faster.
-    && curl -fL -o /usr/local/bin/yt-dlp \
-        https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    && curl -fL -o /tmp/SHA2-256SUMS \
-        https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS \
+    # YTDLP_VERSION defaults to 'latest' for automatic updates.
+    # Pin to a specific version (e.g. '2024.08.06') for reproducible builds.
+    && YTDLP_VERSION="${YTDLP_VERSION:-latest}" \
+    && if [ "$YTDLP_VERSION" = "latest" ]; then \
+        YT_DLP_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"; \
+        YT_DLP_SUMS_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS"; \
+    else \
+        YT_DLP_URL="https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP_VERSION}/yt-dlp"; \
+        YT_DLP_SUMS_URL="https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP_VERSION}/SHA2-256SUMS"; \
+    fi \
+    && curl -fL -o /usr/local/bin/yt-dlp "$YT_DLP_URL" \
+    && curl -fL -o /tmp/SHA2-256SUMS "$YT_DLP_SUMS_URL" \
     # sha256sum exits 0 when the checksum matches, 1 when it doesn't, and 2
     # when the checksum file itself couldn't be read. yt-dlp publishes the full
     # SHA2-256SUMS file (not individual .sha256 files). Extract the line for
@@ -57,8 +65,18 @@ RUN apt-get update && apt-get install -y \
 # Capture and expose the version for build-time debugging and image inspection.
 # Note: command substitution $(yt-dlp --version) produces empty string on failure
 # (not an error), so we check the exit code explicitly via a subshell.
+# When YTDLP_VERSION is pinned (not 'latest'), also verify the installed version
+# matches the expected version — a mismatch means the release tag was renamed or
+# the download URL is stale.
 RUN (yt-dlp --version && echo "yt-dlp version: $(yt-dlp --version)") || \
-    { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; }
+    { echo "ERROR: yt-dlp installation failed or binary is non-executable"; exit 1; } \
+    && if [ "$YTDLP_VERSION" != "latest" ] && [ -n "$YTDLP_VERSION" ]; then \
+        installed="$(yt-dlp --version)" || installed=""; \
+        if [ "$installed" != "$YTDLP_VERSION" ]; then \
+            echo "ERROR: yt-dlp version mismatch — expected '$YTDLP_VERSION', got '$installed'"; \
+            exit 1; \
+        fi \
+    fi
 
 WORKDIR /app
 

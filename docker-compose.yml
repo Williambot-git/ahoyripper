@@ -19,6 +19,13 @@ services:
       - HEALTH_PROBE_TIMEOUT=${HEALTH_PROBE_TIMEOUT:-15}
       - FFPROBE_TIMEOUT=${FFPROBE_TIMEOUT:-10}
       - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
+      # YTDLP_VERSION: yt-dlp release version to install.
+      # Use 'latest' (default) to always use the newest release for automatic updates.
+      # Pin to a specific version (e.g. '2024.08.06') for reproducible builds and
+      # to avoid unexpected breaking changes. The Docker build verifies the SHA256
+      # checksum and validates the installed version matches the pinned version.
+      # See: https://github.com/yt-dlp/yt-dlp/releases
+      - YTDLP_VERSION=${YTDLP_VERSION:-latest}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/src/api.php?action=check"]
