@@ -2989,17 +2989,6 @@ switch ($action) {
             }
         }
 
-        $ffmpeg_cache_ttl = null;
-        $ffmpeg_cache_expires_at = null;
-        if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
-            $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
-            if ($cached && is_array($cached)) {
-                $exp = $cached['exp'] ?? 0;
-                $ffmpeg_cache_expires_at = date('c', $exp);
-                $ffmpeg_cache_ttl = max(0, $exp - time());
-            }
-        }
-
         // yt-dlp probe cache — TTL controlled by PROBE_CACHE_TTL constant.
         // Surface the expiration so monitoring dashboards can track when the cached
         // probe result will be refreshed without needing to read the cache file directly.
