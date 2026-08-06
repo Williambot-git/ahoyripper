@@ -32,6 +32,52 @@ The file streams directly to your browser — nothing is stored on the server. E
 
 ---
 
+## Quick Examples
+
+All API calls require a `Referer: https://ahoyripper.com` header (browser requests already include this; add it explicitly when using `curl`).
+
+### Get video info and format list
+
+```bash
+curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ" \
+  -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
+```
+
+Response includes `formats[]` with `id`, `label`, `description`, `filesize_mb`, `height`, `quality`, `ext`, `vcodec`, `acodec`, and `format_type` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), or `&sort=quality`.
+
+### Download a specific format
+
+Pick a format `id` from the info response (e.g. `bestaudio[ext=m4a]`) and pass it to the download action:
+
+```bash
+# Stream download to file
+curl -s -X GET "https://ahoyripper.com/src/api.php?action=download&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&format=bestaudio%5Bext%3Dm4a%5D" \
+  -H "Referer: https://ahoyripper.com/" \
+  -o video.m4a
+```
+
+### With an API key (unlimited quota)
+
+```bash
+# Pass key via Authorization header (preferred — keeps key out of logs)
+curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Referer: https://ahoyripper.com/"
+
+# Or via query parameter (key appears in server URLs)
+curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&key=YOUR_API_KEY" \
+  -H "Referer: https://ahoyripper.com/"
+```
+
+### Health check
+
+```bash
+curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
+# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
+```
+
+---
+
 ## Supported Platforms
 
 AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms-reference). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
