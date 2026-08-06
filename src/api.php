@@ -1961,6 +1961,12 @@ switch ($action) {
         // api_version was previously missing from the info response but present on
         // check and health endpoints — add it for consistent API surface metadata.
         $parsed['api_version'] = AHOYRIPPER_VERSION;
+        // Surface daily quota state in the JSON body for client UI — mirrors the
+        // X-DailyLimit-* headers set above so clients can read quota from either.
+        // -1 sentinel values signal "not applicable" (unlimited-key holder).
+        $parsed['quota_remaining'] = isset($daily_remaining) ? $daily_remaining : -1;
+        $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
+        $parsed['quota_reset'] = $unlimited ? -1 : strtotime('tomorrow midnight UTC');
         header('Cache-Control: no-cache');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
