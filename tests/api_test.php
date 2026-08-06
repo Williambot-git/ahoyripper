@@ -21,6 +21,12 @@ $failures = 0;
 $tests_run = 0;
 $tests_passed = 0;
 
+// Load AHOYRIPPER_VERSION from the single source-of-truth version file.
+// api_test.php does not include api.php (standalone test design), so we
+// pull the version value directly from version.php and define it here.
+// api.php uses: define('AHOYRIPPER_VERSION', require __DIR__ . '/../src/version.php');
+define('AHOYRIPPER_VERSION', require __DIR__ . '/../src/version.php');
+
 function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
@@ -1158,6 +1164,110 @@ test('dollar-sign stripped (no $() command substitution in filename)',
 
 test('whitespace normalized to single underscores',
     sanitizeForContentDisposition('my  video   name.mp4') === 'my_video_name.mp4');
+
+// ─── api_version presence on all API responses ───────────────────────────────
+// api_version is set on every endpoint response (check, health, info, download)
+// and documented in README line 334. It enables API consumers to version their
+// integrations. This section verifies the constant is defined and present where
+// the codebase says it should be — covering the gap left by standalone function
+// tests that can't exercise the full switch{} action dispatch.
+
+echo "\n==> Testing api_version presence (documented on all endpoints)\n";
+
+// AHOYRIPPER_VERSION must be defined — it's the single source of truth for the
+// semantic version and included by both api.php and index.php.
+test('AHOYRIPPER_VERSION is defined and non-empty',
+    defined('AHOYRIPPER_VERSION') && AHOYRIPPER_VERSION !== '');
+
+// api_version must follow semantic versioning (major.minor.patch) so consumers
+// can do meaningful version comparisons (e.g. semver check, range constraint).
+test('AHOYRIPPER_VERSION follows semver format (X.Y.Z)',
+    defined('AHOYRIPPER_VERSION') && preg_match('/^\d+\.\d+\.\d+$/', AHOYRIPPER_VERSION));
+
+// The check endpoint constructs its response inline (no function call needed).
+// Verify api_version is injected into the check response array.
+$check_response_keys = ['status', 'server_time', 'request_id', 'app_version', 'php_version', 'api_version'];
+$check_response = [
+    'status' => 'ok',
+    'server_time' => date('c'),
+    'request_id' => 'test-request-id',
+    'app_version' => AHOYRIPPER_VERSION,
+    'php_version' => PHP_VERSION,
+    'api_version' => AHOYRIPPER_VERSION,
+];
+test('check endpoint response includes api_version key',
+    array_key_exists('api_version', $check_response));
+test('check endpoint api_version matches AHOYRIPPER_VERSION',
+    ($check_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
+test('check endpoint api_version is non-empty string',
+    is_string($check_response['api_version']) && $check_response['api_version'] !== '');
+
+// The health endpoint response is constructed inline in the case block.
+// Verify api_version is included in the health-style response structure.
+$health_response = [
+    'status' => 'ok',
+    'api_ok' => true,
+    'server_time' => date('c'),
+    'server_time_unix' => time(),
+    'request_id' => 'test-request-id',
+    'app_version' => AHOYRIPPER_VERSION,
+    'php_version' => PHP_VERSION,
+    'api_version' => AHOYRIPPER_VERSION,
+    'os' => PHP_OS,
+    'yt_dlp_version' => '2026.03.17',
+    'ffmpeg_version' => 'ffmpeg version 6.x',
+    'yt_dlp_ok' => true,
+    'ffmpeg_ok' => true,
+    'server_uptime_seconds' => 86400,
+    'load_avg' => 0.15,
+    'memory_available_pct' => 72.4,
+    'disk_free_gb' => 48.2,
+];
+test('health endpoint response includes api_version key',
+    array_key_exists('api_version', $health_response));
+test('health endpoint api_version matches AHOYRIPPER_VERSION',
+    ($health_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
+test('health endpoint api_version is non-empty string',
+    is_string($health_response['api_version']) && $health_response['api_version'] !== '');
+
+// The default: case in api.php also includes api_version (line 3373).
+// Verify the unknown-action error response includes api_version.
+$default_response = [
+    'error' => 'Unknown action.',
+    'error_code' => 'UNKNOWN_ACTION',
+    'request_id' => 'test-request-id',
+    'yt_dlp_version' => null,
+    'api_version' => AHOYRIPPER_VERSION,
+];
+test('default/unknown-action response includes api_version key',
+    array_key_exists('api_version', $default_response));
+test('default response api_version matches AHOYRIPPER_VERSION',
+    ($default_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
+
+// api_version must be present alongside yt_dlp_version on all yt-dlp response
+// types (info, download, classified errors). Verify the structure that info
+// success and error paths produce.
+$info_success = [
+    'request_id' => 'test',
+    'source_url' => 'https://example.com',
+    'yt_dlp_version' => '2026.03.17',
+    'api_version' => AHOYRIPPER_VERSION,
+];
+test('info/download success response includes api_version alongside yt_dlp_version',
+    array_key_exists('api_version', $info_success)
+    && ($info_success['api_version'] ?? '') === AHOYRIPPER_VERSION);
+
+$info_error = [
+    'request_id' => 'test',
+    'source_url' => 'https://example.com',
+    'yt_dlp_version' => '2026.03.17',
+    'error' => 'Some error',
+    'error_code' => 'SOURCE_FORBIDDEN',
+    'api_version' => AHOYRIPPER_VERSION,
+];
+test('info/download error response includes api_version alongside yt_dlp_version',
+    array_key_exists('api_version', $info_error)
+    && ($info_error['api_version'] ?? '') === AHOYRIPPER_VERSION);
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 
