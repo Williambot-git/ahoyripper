@@ -1327,6 +1327,12 @@ define('COOKIES_PATH', getenv('COOKIES_PATH') ?: '');
 // consistent error codes (INVALID_URL) regardless of which action they call.
 define('MAX_URL_LEN', 2048);
 
+// Shared constant: maximum filename length in characters for user-supplied filenames.
+// Enforced during filename sanitization so that excessively long filenames are truncated
+// to a safe length before being passed to yt-dlp. yt-dlp itself also enforces a
+// reasonable limit internally, but setting it here gives us a predictable ceiling.
+define('MAX_FILENAME_LEN', 80);
+
 // Configurable timeout for the health probe (lightweight yt-dlp metadata fetch).
 // Override via HEALTH_PROBE_TIMEOUT env var (e.g. HEALTH_PROBE_TIMEOUT=20 in .env).
 // Defaults to 15 seconds. The probe is a simple --dump-json --skip-download call
@@ -2213,7 +2219,7 @@ switch ($action) {
             // Validate trimmed result — a filename that trims to empty is invalid.
             // Check this AFTER sanitization so inputs like "   " fall through to fallback.
             $trimmed = trim($download_filename);
-            if (strlen($trimmed) === 0 || strlen($trimmed) > 80) {
+            if (strlen($trimmed) === 0 || strlen($trimmed) > MAX_FILENAME_LEN) {
                 $download_filename = 'ahoyrip';
             } else {
                 $download_filename = $trimmed;

@@ -439,6 +439,21 @@ fi
 echo "  ✓ info case delegates MAX_URL_LEN check to \$validation() helper (no duplicate)"
 
 echo ""
+echo "==> Checking filename length uses MAX_FILENAME_LEN constant (not magic number)..."
+# The filename sanitization block must use MAX_FILENAME_LEN, not a bare 80.
+# Using a constant prevents future regressions where the magic number is changed
+# in one place but not another.
+if grep -q "strlen(\$trimmed) > 80" src/api.php; then
+    echo "  ✗ Magic number 80 found in filename sanitization (use MAX_FILENAME_LEN)"
+    exit 1
+fi
+if ! grep -q "define.*MAX_FILENAME_LEN" src/api.php; then
+    echo "  ✗ MAX_FILENAME_LEN constant is not defined"
+    exit 1
+fi
+echo "  ✓ Filename length uses MAX_FILENAME_LEN constant"
+
+echo ""
 echo "==> Checking timeout handlers do not call proc_close() directly (double-close guard)..."
 # Timeout blocks must set $proc = null instead of calling proc_close($proc) directly,
 # so the post-loop proc_close() can detect the already-closed handle via the null sentinel.
@@ -891,32 +906,27 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 9 times legitimately:
-#   - 1 at server level for static HTML assets
+# COOP and CORP each appear 8 times legitimately:
+#   - 1 at server level (base hardening for all responses)
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
 #     own headers because server-level add_header directives are NOT inherited by
 #     location blocks that define their own add_header (nginx behaviour).
-#   - 1 in the specific `location = /` block (root HTML page) — added for
-#     defense-in-depth so the root page has explicit headers regardless of how
-#     nginx processes the request.
-#   - 1 in the first `location /` block (static assets directory — /src/, /public/, etc.)
-#   - 1 in /.well-known/ location block for security.txt and similar files.
-#   - 1 in /og-image.png location block for cache headers on the social share image.
+#   - 1 in `location /` block (root HTML and static assets)
+#   - 1 in /.well-known/security.txt location block for security.txt and similar files.
+#   - 1 in /404.html location block for not-found responses (defense-in-depth)
 #   - 1 in /50x.html location block for PHP-FPM error pages (502/504) and
-#     limit_req burst rejections (503) — defense-in-depth so error pages have the
-#     same hardening as normal responses; this location bypasses PHP so headers
-#     must be set at nginx level.
+#     limit_req burst rejections (503) — bypasses PHP so headers must be at nginx level.
 #   - 1 in /src/api.php location block for the API endpoint
-#   - 1 in the second `location /` catch-all block (end of file) — defense-in-depth
+#   - 1 in the catch-all regex location block (ico|png|jpg|... etc) — defense-in-depth
 #     so unhandled paths always return hardened responses.
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 9 ] && [ "$CORP_COUNT" -eq 9 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + first location / + /.well-known/ + /og-image.png + /50x.html + /src/api.php + second location /)"
+if [ "$COOP_COUNT" -eq 8 ] && [ "$CORP_COUNT" -eq 8 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location / + /.well-known/ + /og-image.png + /50x.html + /src/api.php + second location /)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 9), CORP appears $CORP_COUNT times (expected 9)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 8), CORP appears $CORP_COUNT times (expected 8)"
     exit 1
 fi
 
