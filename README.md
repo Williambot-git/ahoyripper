@@ -393,13 +393,21 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 ### Download a format
 ```
-GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>&playlist=<0|1>
+GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>&playlist=<0|1>&key=<api_key>
 Authorization: Bearer ***
 ```
 
-The `format_id` comes from the `id` field in the info response. The API reads the key from the `Authorization: Bearer` header (preferred — keeps the key out of URLs and server logs). A `key` query parameter is also accepted for backwards compatibility but is discouraged.
+**Parameters:**
 
-The `filename` param (optional) sets the downloaded file's name. Only alphanumeric, spaces, dots, underscores, and hyphens are allowed; everything else is stripped. Falls back to `ahoyrip.<ext>` if omitted or empty.
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `url` | — | **(required)** URL of the video to rip |
+| `format` | — | **(required)** Format ID from the info response (e.g. `18`, `22`, `bestvideo[height>=720]+bestaudio`) |
+| `filename` | `ahoyrip.<ext>` | Custom output filename (alphanumeric, spaces, dots, underscores, hyphens only) |
+| `playlist` | `0` | Set to `1` to download all videos in a playlist (`--playlist true`). Each video counts as a separate rip. |
+| `key` | — | AhoyVPN unlimited API key to bypass the daily 5-rip quota |
+
+The `format_id` comes from the `id` field in the info response. The API reads the key from the `Authorization: Bearer` header (preferred — keeps the key out of URLs and server logs). A `key` query parameter is also accepted for backwards compatibility but is discouraged.
 
 > **Note:** The free tier allows 5 total rips per day (each call to the info or download API counts as one rip). Switching the sort order re-fetches the format list and counts as an additional rip. Unlimited-key holders have no daily cap.
 
