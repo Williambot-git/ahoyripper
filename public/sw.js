@@ -39,26 +39,31 @@ const STATIC_ASSETS = [
 
 // ─── Install: pre-cache static assets ────────────────────────────────────────
 self.addEventListener('install', (event) => {
+  // Split into two independent promises so stale cache cleanup always runs
+  // regardless of whether addAll() succeeds, fails partially, or throws.
+  // Using Promise.all (rather than sequential .then chains) means install
+  // resolves only when both operations complete — but the SW still activates
+  // even if one of the two rejects (waitUntil accepts an array of promises;
+  // a rejected promise in the array causes the event to reject, but since we
+  // catch and handle errors internally, activation still proceeds normally).
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
-      .catch((err) => {
-        // Log the failure for debugging, but do not throw — a failed install
-        // prevents the SW from activating and blocks all subsequent updates.
-        // Surface the error so it's visible in DevTools > Service Workers.
-        console.warn('[SW] Install failed to cache some assets:', err);
-        // Let the SW activate even if caching partially failed — the browser
-        // will serve from network for any assets not in the cache.
-      })
-      // Also clean up stale caches from previous versions immediately so the
-      // activate event doesn't need to wait. This runs alongside the cache
-      // install and doesn't block activation.
-      .then(() => caches.keys())
-      .then((names) => Promise.all(
-        names
-          .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE && n !== SHELL_CACHE)
-          .map((n) => caches.delete(n))
-      ))
+    Promise.all([
+      // Cache static assets — errors are caught so they don't block activation.
+      caches.open(STATIC_CACHE)
+        .then((cache) => cache.addAll(STATIC_ASSETS))
+        .catch((err) => {
+          console.warn('[SW] Install failed to cache some assets:', err);
+          // SW still activates even if caching failed — the network is the fallback.
+        }),
+      // Clean up stale caches from previous versions immediately so the
+      // activate event doesn't need to wait. Runs independently of caching.
+      caches.keys()
+        .then((names) => Promise.all(
+          names
+            .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE && n !== SHELL_CACHE)
+            .map((n) => caches.delete(n))
+        ))
+    ])
   );
   // Do NOT skipWaiting here — let the frontend decide when to activate.
   // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
