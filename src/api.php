@@ -128,7 +128,13 @@ if ($blocked) {
         logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
         error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
         http_response_code(403);
-        echo json_encode(['error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.', 'error_code' => 'FORBIDDEN_ORIGIN', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode([
+            'error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.',
+            'error_code' => 'FORBIDDEN_ORIGIN',
+            'request_id' => $request_id,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'api_version' => AHOYRIPPER_VERSION,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 }
@@ -214,6 +220,8 @@ if ($is_rate_limited) {
                 'upgrade_url' => 'https://ahoyvpn.com',
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -1418,7 +1426,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
         'request_id' => $request_id,
-    ]);
+        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        'api_version' => AHOYRIPPER_VERSION,
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
@@ -1458,6 +1468,8 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'request_id' => $request_id,
         'received_accept' => $accept,
         'hint' => 'Send Accept: */* or Accept: application/json',
+        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        'api_version' => AHOYRIPPER_VERSION,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
@@ -1520,7 +1532,9 @@ switch ($action) {
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
                 'request_id' => $request_id,
-            ]);
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
@@ -1589,7 +1603,9 @@ switch ($action) {
                     'daily_limit' => $daily_limit,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
-                ]);
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             $daily_data['c']++;
@@ -2021,7 +2037,9 @@ switch ($action) {
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
                 'request_id' => $request_id,
-            ]);
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
@@ -2179,7 +2197,9 @@ switch ($action) {
                     'daily_limit' => $daily_limit,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'request_id' => $request_id,
-                ]);
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             $daily_data['c']++;
