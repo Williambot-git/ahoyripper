@@ -3239,12 +3239,27 @@ switch ($action) {
                     @file_put_contents($probe_cache_file, json_encode([
                         'result' => $GLOBALS['__ytdlp_probe'],
                         'exp' => time() + PROBE_CACHE_TTL,
+                        'cached_at' => time(),
                     ]));
                 }
             }
             // Always include probe result in response when ?probe=1 is set,
             // whether it came from cache or was just computed.
-            $out['yt_dlp_probe'] = $GLOBALS['__ytdlp_probe'];
+            // Add probe_age_seconds so clients can determine how stale a cached
+            // result is without reading the cache file directly.
+            if (isset($GLOBALS['__ytdlp_probe'])) {
+                $probe_result = $GLOBALS['__ytdlp_probe'];
+                if (is_readable($probe_cache_file)) {
+                    $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+                    if ($cached && isset($cached['cached_at'])) {
+                        $probe_result['probe_age_seconds'] = max(0, time() - (int)$cached['cached_at']);
+                    }
+                }
+                if (!isset($probe_result['probe_age_seconds'])) {
+                    $probe_result['probe_age_seconds'] = 0; // freshly computed
+                }
+                $out['yt_dlp_probe'] = $probe_result;
+            }
         }
         // When no probe is requested, the yt_dlp_probe field is intentionally
         // omitted from the response (not null, absent) so the response shape
