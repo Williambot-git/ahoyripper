@@ -390,7 +390,8 @@ if (in_array($action, $internal_actions, true)) {
 
 // Only allow HTTPS URLs and block private IP ranges to prevent SSRF attacks.
 // yt-dlp accepts file:// URLs directly, so we restrict to HTTP(S) and reject
-// private ranges (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x) and IPv6 loopback.
+// private ranges (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x), IPv6
+// private/loopback/link-local ranges, and IPv4-mapped IPv6 (::ffff:192.168.x.x).
 function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
@@ -421,10 +422,19 @@ function isValidUrl($url) {
         $host = null;
     }
     // If the host resolved to an IP address, validate it is not private/reserved.
-    // This catches both bare IPs and IPv6 loopback/link-local stripped of brackets.
+    // This catches bare IPs and IPv6 loopback/link-local stripped of brackets.
     if ($host !== null && filter_var($host, FILTER_VALIDATE_IP) !== false) {
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
             return false;
+        }
+        // IPv4-mapped IPv6 addresses (::ffff:192.168.x.x) pass the filter above
+        // because FILTER_FLAG_NO_PRIV_RANGE only checks the IPv6 portion.
+        // Extract the embedded IPv4 and validate it separately for private ranges.
+        if (str_starts_with($host, '::ffff:')) {
+            $mapped = substr($host, 7);
+            if (filter_var($mapped, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
         }
     }
     return true;
