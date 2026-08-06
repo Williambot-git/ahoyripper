@@ -29,6 +29,19 @@ User-agent: YouBot
 User-agent: PinterestBot
 Disallow: /
 
+# Twitter/X crawler — respects robots.txt but user-agent string varies.
+# Twitterbot is Twitter's official crawler; *bot covers future variants.
+User-agent: Twitterbot
+Disallow: /
+
+# Snapchat crawler
+User-agent: Snapbot
+Disallow: /
+
+# Reddit crawler — can generate high server load if left unblocked.
+User-agent: reddit
+Disallow: /
+
 # AhoyBot is our own crawler — allow it to crawl the site normally so our
 # own SEO and indexing pipelines work correctly.
 User-agent: AhoyBot
