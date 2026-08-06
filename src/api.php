@@ -419,6 +419,33 @@ function isValidUrl($url) {
     // parse_url with PHP_URL_HOST returns IPv6 addresses in bracketed form.
     // filter_var with FILTER_VALIDATE_IP rejects bracketed strings, so we must
     // strip the brackets before passing the host to the validator.
+    // Helper: returns false if the IP is private, reserved, or multicast.
+    // For IPv4-mapped IPv6 (::ffff:x.x.x.x), validates the embedded IPv4.
+    $isPublicIp = function(string $ip): bool {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+        // IPv4-mapped IPv6 addresses (::ffff:192.168.x.x) pass the filter above
+        // because FILTER_FLAG_NO_PRIV_RANGE only checks the IPv6 portion.
+        // Extract the embedded IPv4 and validate it separately for private ranges.
+        if (str_starts_with($ip, '::ffff:')) {
+            $mapped = substr($ip, 7);
+            if (filter_var($mapped, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
+        }
+        // FILTER_FLAG_NO_RES_RANGE does NOT block multicast IPs (224.0.0.0/4).
+        // Block them explicitly — multicast addresses cannot be routed and are
+        // never valid targets for outbound HTTP requests.
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+            $octets = array_map('intval', explode('.', $ip));
+            if ($octets[0] >= 224 && $octets[0] <= 239) {
+                return false; // IPv4 multicast (224.0.0.0/4)
+            }
+        }
+        return true;
+    };
+
     if (filter_var($parsed, FILTER_VALIDATE_IP) !== false) {
         // Host is a bare IP (no brackets)
         $host = $parsed;
@@ -426,23 +453,27 @@ function isValidUrl($url) {
         // Host is a bracketed IP like [::1] or [fe80::1] — extract the bare IP
         $host = substr($parsed, 1, -1);
     } else {
-        // Host is a domain name — skip IP validation (domains don't fail FILTER_VALIDATE_IP)
-        $host = null;
-    }
-    // If the host resolved to an IP address, validate it is not private/reserved.
-    // This catches bare IPs and IPv6 loopback/link-local stripped of brackets.
-    if ($host !== null && filter_var($host, FILTER_VALIDATE_IP) !== false) {
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-            return false;
+        // Host is a domain name — resolve it and validate each resolved IP.
+        // This prevents SSRF via DNS rebinding (e.g. localhost resolving to 127.0.0.1
+        // or an attacker controlling DNS to point a domain at a private IP).
+        // Domains that don't resolve are rejected.
+        $resolved = @gethostbynamel($parsed);
+        if ($resolved === false || empty($resolved)) {
+            return false; // Cannot resolve — reject
         }
-        // IPv4-mapped IPv6 addresses (::ffff:192.168.x.x) pass the filter above
-        // because FILTER_FLAG_NO_PRIV_RANGE only checks the IPv6 portion.
-        // Extract the embedded IPv4 and validate it separately for private ranges.
-        if (str_starts_with($host, '::ffff:')) {
-            $mapped = substr($host, 7);
-            if (filter_var($mapped, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        // Validate every IP the domain resolves to. Reject if ANY is private/reserved/multicast.
+        foreach ($resolved as $ip) {
+            if (!$isPublicIp($ip)) {
                 return false;
             }
+        }
+        return true;
+    }
+    // If the host resolved to an IP address, validate it is not private/reserved/multicast.
+    // This catches bare IPs and IPv6 loopback/link-local stripped of brackets.
+    if ($host !== null && filter_var($host, FILTER_VALIDATE_IP) !== false) {
+        if (!$isPublicIp($host)) {
+            return false;
         }
     }
     return true;
