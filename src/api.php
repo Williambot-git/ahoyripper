@@ -586,7 +586,25 @@ if (!$GLOBALS['__ffmpeg_version']) {
     // the binary whose hash is used as the cache key. If FFPROBE_PATH points
     // to a non-standard location (e.g. /usr/local/bin/ffprobe on macOS), the
     // version and hash now correctly reference the same binary.
-    $ffmpeg_ver = trim(shell_exec(FFPROBE_PATH . ' -version 2>&1 | head -1') ?: '');
+    // Use proc_open array form (bypass_shell=true) instead of shell_exec with a
+    // pipe — consistent with the shell-escaping approach used throughout the rest
+    // of this file. The pipe (| head -1) is unnecessary since ffprobe's version
+    // string is always on the first line of stdout; we read exactly one line.
+    $ffprobe_ver_cmd = [FFPROBE_PATH, '-version'];
+    $ffprobe_ver_proc = proc_open($ffprobe_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ffprobe_ver_pipes, null, [], ['bypass_shell' => true]);
+    $ffmpeg_ver = '';
+    if ($ffprobe_ver_proc) {
+        fclose($ffprobe_ver_pipes[0]);
+        unset($ffprobe_ver_pipes[0]);
+        // Read only the first line (version string is always line 1).
+        $first_line = fgets($ffprobe_ver_pipes[1]);
+        if ($first_line !== false) {
+            $ffmpeg_ver = trim($first_line);
+        }
+        fclose($ffprobe_ver_pipes[1]);
+        fclose($ffprobe_ver_pipes[2]);
+        proc_close($ffprobe_ver_proc);
+    }
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
         $hash = @md5_file(FFPROBE_PATH);
