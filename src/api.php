@@ -1215,11 +1215,15 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         // Validate format_id character-class — reject shell metacharacters that could
         // survive into proc_open args even with bypass_shell=true (e.g. whitespace
         // tokens, command substitutions, glob patterns). yt-dlp selectors and merge
-        // syntax (bestvideo[height>=720]+bestaudio, 18/22, etc.) are all alphanumeric
-        // plus the safe chars in the character class below. This mirrors the validation
-        // already present in the download action (line ~1888) and is checked here so the
-        // info action fails fast with INVALID_FORMAT_ID before wasting any yt-dlp cycles.
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\\-""]+$/', $format_id)) {
+        // syntax (bestvideo[height>=720]+bestaudio, 18/22, etc.) are alphanumeric
+        // plus: _ . , / + - ~ < > = ! [ ] ( ) * % ' "
+        // The character class below is intentionally strict: no shell metacharacters
+        // including ; ` { } | @ or embedded spaces. The hyphen range \- is escaped
+        // properly to avoid creating a range from ASCII 45(-) to 126(~) which would
+        // accidentally include ; ` { } | . This mirrors the validation already
+        // present in the download action and is checked here so the info action fails
+        // fast with INVALID_FORMAT_ID before wasting any yt-dlp cycles.
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
             $sendDailyLimitHeaders($daily_limit, null);
@@ -1520,10 +1524,6 @@ switch ($action) {
                 exit;
             }
             $daily_data['c']++;
-            // Refund guard: if proc_open fails below, we decrement here to reverse
-            // the increment. This is the pre-refund baseline — must stay in sync
-            // with the refund block that runs on info failure.
-            $info_quota_before_refund = $daily_data['c'];
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
@@ -1531,6 +1531,11 @@ switch ($action) {
             flock($daily_fp, LOCK_UN);
             fclose($daily_fp);  // explicitly close to release lock without waiting for GC
             $daily_fp = null;
+            // Refund guard baseline: captured AFTER the increment is persisted so
+            // the classified-error refund block can detect whether the quota file
+            // was modified by another request since this increment (prevents
+            // double-refund when concurrent requests hit different error paths).
+            $info_quota_before_refund = $daily_data['c'];
 
             // Surface daily quota state so the client can display remaining rips.
             // Show how many rips remain AFTER this request: limit minus the new count,
