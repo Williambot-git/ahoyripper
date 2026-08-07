@@ -16,7 +16,7 @@ define('AHOYRIPPER_VERSION', require __DIR__ . '/version.php');
 
 // Path to yt-dlp binary — configurable via YTDLP_PATH env var so deployments
 // can override the default /usr/local/bin/yt-dlp without editing source.
-// Defined early because the version-probe shell_exec (line ~427) runs before
+// Defined early because the version-probe proc_open (line ~533) runs before
 // the constants section and needs this value before any other constants exist.
 define('YTDLP_PATH', getenv('YTDLP_PATH') ?: '/usr/local/bin/yt-dlp');
 
@@ -529,19 +529,37 @@ if ($version_cache_file && is_readable($version_cache_file)) {
     }
 }
 if (!$GLOBALS['__ytdlp_version']) {
-    // Note: yt-dlp outputs version to stdout (not stderr) — redirect stderr to
-    // stdout so shell_exec captures it (shell_exec sees only stdout, not the
-    // stderr pipe). Without 2>&1, the probe always returns empty and the cache
-    // is always stale, causing yt-dlp startup overhead on every single request.
-    $ver = trim(shell_exec(YTDLP_PATH . ' --version 2>&1') ?: '');
-    // Distinguish a real version string from a shell "command not found" error.
-    // When the binary is absent, shell_exec returns either '' (empty) or a
-    // shell error like "sh: 1: /usr/local/bin/yt-dlp: not found". The
-    // strpos($ver, 'not installed') check handles the 'not installed' string
-    // (used by the ffmpeg probe). The regex catches the shell error form.
-    // The health check (line 2510) uses strpos($version, 'not installed') ===
-    // false to detect "not installed", so this sentinel must be consistent.
-    if ($ver === '' || preg_match('/^sh: \d+: /', $ver) || strpos($ver, 'not found') !== false) {
+    // Use proc_open with bypass_shell=true to read yt-dlp's version without
+    // shell metacharacters. The previous shell_exec(YTDLP_PATH . ' --version 2>&1')
+    // used a shell pipe (2>&1) — inconsistent with the proc_open approach used
+    // throughout the rest of the file. yt-dlp 2024.02.07+ outputs version to
+    // stdout; stderr contains non-version info. Reading only stdout is sufficient.
+    // If the binary is absent, proc_open returns false and $ver stays empty.
+    $ver = '';
+    $ytdlp_ver_cmd = [YTDLP_PATH, '--version'];
+    $ytdlp_ver_proc = proc_open($ytdlp_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ytdlp_ver_pipes, null, [], ['bypass_shell' => true]);
+    if ($ytdlp_ver_proc) {
+        fclose($ytdlp_ver_pipes[0]);
+        unset($ytdlp_ver_pipes[0]);
+        // Read only the first line (version string is always line 1).
+        $first_line = fgets($ytdlp_ver_pipes[1]);
+        if ($first_line !== false) {
+            $ver = trim($first_line);
+        }
+        fclose($ytdlp_ver_pipes[1]);
+        fclose($ytdlp_ver_pipes[2]);
+        proc_close($ytdlp_ver_proc);
+    }
+    // Distinguish a real version string from a missing binary.
+    // When the binary is absent, proc_open returns false (proc never started)
+    // and $ver stays empty. Unlike the shell error form that shell_exec produced
+    // ("sh: 1: /usr/local/bin/yt-dlp: not found"), proc_open with bypass_shell
+    // does not generate a shell error message — the absence is indicated by
+    // $ver === '' alone. The strpos($ver, 'not installed') check handles the
+    // sentinel string (used by the ffmpeg probe). The health check (line 2510)
+    // uses strpos($version, 'not installed') === false to detect "not installed",
+    // so this sentinel must be consistent.
+    if ($ver === '' || strpos($ver, 'not installed') !== false) {
         $ver = 'not installed';
     }
     $GLOBALS['__ytdlp_version'] = $ver;
