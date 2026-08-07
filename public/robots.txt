@@ -12,11 +12,16 @@ User-agent: CCBot
 User-agent: ChatGPT-User
 User-agent: ClaudeBot
 User-agent: Claudebot
+User-agent: CohereBot
+User-agent: Cometbot
 User-agent: Diffbot
 User-agent: FacebookBot
 User-agent: Google-Extended
 User-agent: GPTBot
+User-agent: GoogleOther
+User-agent: GrokBot
 User-agent: ImagesiftBot
+User-agent: KenjinBot
 User-agent: Meta-ExternalAgent
 User-agent: Meta-ExternalFetcher
 User-agent: Omgilibot
