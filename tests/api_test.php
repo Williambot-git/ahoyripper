@@ -199,34 +199,34 @@ test('accepts public IP 8.8.8.8 (global — no private/reserved ranges)',
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.'];
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
-        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.'];
+        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
     }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
     if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
-        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.'];
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
-        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.'];
+        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'status' => 404];
     }
     if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
-        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.'];
+        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'status' => 404];
     }
     if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
-        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.'];
+        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'status' => 451];
     }
     if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
-        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.'];
+        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'status' => 410];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
-        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.'];
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
     }
     if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
-        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.'];
+        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'status' => 403];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
@@ -243,13 +243,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // lookahead (?!) at word boundary is explicit and robust against variations.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.'];
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
     if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
-        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.'];
+        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
     }
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
-        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.'];
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
     }
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
         return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'status' => 451];
@@ -569,6 +569,119 @@ test('exit code 0 → null (success, no error classification)',
 $result = classifyYtdlpError('error', null);
 test('exit code null → null (backward-compatible, text-only path)',
     $result === null);
+
+// ─── status field verification ───────────────────────────────────────────────
+// classifyYtdlpError() returns ['code' => ..., 'msg' => ..., 'status' => N]
+// for errors that map to a specific HTTP response code. The 'status' field
+// drives the HTTP status code sent to the client — verifying it is essential
+// to ensure error classification produces the correct API behavior.
+// Only codes that set a status field are tested here; codes without a status
+// field return null (not tested — absence of field is the expected behavior).
+
+echo "\n==> Testing classifyYtdlpError() status field\n";
+
+$result = classifyYtdlpError('ERROR: This video is geo restricted');
+test('GEOBLOCKED status is 451',
+    ($result['status'] ?? null) === 451);
+
+$result = classifyYtdlpError('ERROR: This video is private');
+test('PRIVATE_VIDEO status is 403',
+    ($result['status'] ?? null) === 403);
+
+$result = classifyYtdlpError('ERROR: Authentication required');
+test('LOGIN_REQUIRED status is 401',
+    ($result['status'] ?? null) === 401);
+
+$result = classifyYtdlpError('ERROR: Login required to view this content');
+test('LOGIN_REQUIRED status is 401 (login required variant)',
+    ($result['status'] ?? null) === 401);
+
+$result = classifyYtdlpError('ERROR: https://example.com is not a supported URL');
+test('UNSUPPORTED_SITE status is 404',
+    ($result['status'] ?? null) === 404);
+
+$result = classifyYtdlpError('ERROR: Playlist does not exist');
+test('PLAYLIST_MISSING status is 404',
+    ($result['status'] ?? null) === 404);
+
+$result = classifyYtdlpError('ERROR: Copyright infringement');
+test('COPYRIGHT_REMOVED status is 451',
+    ($result['status'] ?? null) === 451);
+
+$result = classifyYtdlpError('ERROR: Too many requests');
+test('SOURCE_RATE_LIMITED status is 429',
+    ($result['status'] ?? null) === 429);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
+test('SOURCE_RATE_LIMITED status is 429 (HTTP error variant)',
+    ($result['status'] ?? null) === 429);
+
+$result = classifyYtdlpError('ERROR: Video is age restricted');
+test('AGE_RESTRICTED status is 403',
+    ($result['status'] ?? null) === 403);
+
+$result = classifyYtdlpError('ERROR: Certificate has expired');
+test('SSL_ERROR status is 502',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: SSL error');
+test('SSL_ERROR status is 502 (short form)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: Process timed out after 45s');
+test('SOURCE_TIMEOUT status is 504',
+    ($result['status'] ?? null) === 504);
+
+$result = classifyYtdlpError('ERROR: Connection failed');
+test('CONNECTION_FAILED status is 502',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: File is larger than 2GB limit');
+test('FILE_TOO_LARGE status is 413',
+    ($result['status'] ?? null) === 413);
+
+$result = classifyYtdlpError('ERROR: Requested format not available');
+test('FORMAT_UNAVAILABLE status is 422',
+    ($result['status'] ?? null) === 422);
+
+$result = classifyYtdlpError('ERROR: This content violates the Terms of Service');
+test('DISALLOWED_CONTENT status is 451',
+    ($result['status'] ?? null) === 451);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
+test('SOURCE_FORBIDDEN status is 403',
+    ($result['status'] ?? null) === 403);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 404: Not Found');
+test('SOURCE_NOT_FOUND status is 404',
+    ($result['status'] ?? null) === 404);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
+test('SOURCE_SERVER_ERROR status is 502 (HTTP 500 variant)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
+test('SOURCE_SERVER_ERROR status is 502 (HTTP 503 variant)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
+test('SOURCE_HTTP_ERROR (non-standard HTTP) status is 502',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: This video has been removed');
+test('VIDEO_UNAVAILABLE status is 410',
+    ($result['status'] ?? null) === 410);
+
+// Codes that set a status field are tested above.
+// This confirms that text-only variants (without HTTP error patterns)
+// also carry status — which is the correct current behavior.
+$result = classifyYtdlpError('ERROR: This video requires login');
+test('LOGIN_REQUIRED (login-required phrase) has status 401',
+    ($result['status'] ?? null) === 401);
+
+$result = classifyYtdlpError('ERROR: This content violates the Terms of Service');
+test('DISALLOWED_CONTENT (TOS variant) has status 451',
+    ($result['status'] ?? null) === 451);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
 // Regex: '/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/' (tilde for output templates,
