@@ -371,6 +371,7 @@ header_remove('X-Powered-By');
             <option value="filesize_asc">Size (smallest)</option>
             <option value="tbr">Bitrate</option>
             <option value="quality">Quality tier</option>
+            <option value="audio_quality">Audio quality</option>
           </select>
         </div>
       </div>

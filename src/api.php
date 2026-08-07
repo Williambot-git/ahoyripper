@@ -759,7 +759,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
 }
 
 // Parse yt-dlp output to extract formats
-// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality' — validated by caller
+// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality' — validated by caller
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);
     if (!$data) {
@@ -1041,17 +1041,35 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             return $type_cmp;
         }
         // Same type group — sort by the caller's selected key.
-        if ($sort === 'filesize') {
-            $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
-        } elseif ($sort === 'filesize_asc') {
-            $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
-        } elseif ($sort === 'tbr') {
-            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
-        } elseif ($sort === 'quality') {
-            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
-        } else {
-            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
-        }
+// audio_quality: for audio-only ripping — audio formats sorted by quality tier
+// descending (320 > 256 > 192 > 128 > 96 > 64 > 48 kbps), video formats pushed
+// to the end so audio formats dominate the sorted list when this option is chosen.
+// Within the audio group, secondary sort is by tbr (bitrate) descending.
+if ($sort === 'audio_quality') {
+    // type_group 2 = audio-only, 1 = video-only, 0 = combined
+    $ag = $a['type_group'] <=> $b['type_group'];
+    if ($ag !== 0) {
+        // Audio formats first (type_group 2), video/combined after
+        return $ag;
+    }
+    // Same type group — primary: quality tier desc, secondary: tbr desc
+    $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
+    if ($cmp === 0) {
+        $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+    }
+    return $cmp;
+}
+if ($sort === 'filesize') {
+    $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+} elseif ($sort === 'filesize_asc') {
+    $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
+} elseif ($sort === 'tbr') {
+    $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+} elseif ($sort === 'quality') {
+    $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
+} else {
+    $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+}
         // Secondary: within same type group, sort by height descending for consistency.
         // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
         // smoother formats appear first within the same resolution tier.
@@ -1417,7 +1435,7 @@ switch ($action) {
         // first), filesize_asc (smallest first), tbr, or quality.
         // Invalid values fall back to 'height'.
         $raw_sort = $_GET['sort'] ?? 'height';
-        $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality'];
+        $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'];
         $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
 
         // ─── Check for unlimited API key ───
