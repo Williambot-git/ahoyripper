@@ -30,6 +30,12 @@ define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 // env var — increase the constant directly if longer TTL is ever needed.
 define('PROBE_CACHE_TTL', 300);
 
+// Default daily quota for unauthenticated users (free tier).
+// Override via QUOTA_DAILY env var in .env or docker-compose.
+// Named with _DEFAULT suffix to distinguish from the runtime $daily_limit variable
+// and to signal that this is a compile-time fallback, not the runtime value.
+define('QUOTA_DAILY_DEFAULT', 5);
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -1276,12 +1282,6 @@ define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 10));
 // than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
 // controls download so the two can be tuned independently without compromise.
 define('DOWNLOAD_TIMEOUT', max(1, (int)getenv('YTDLP_DOWNLOAD_TIMEOUT') ?: 300));
-
-// Default daily quota for unauthenticated users (free tier).
-// Override via QUOTA_DAILY env var in .env or docker-compose.
-// Named with _DEFAULT suffix to distinguish from the runtime $daily_limit variable
-// and to signal that this is a compile-time fallback, not the runtime value.
-define('QUOTA_DAILY_DEFAULT', 5);
 
 // ─── ROUTING ────────────────────────────────────────────────
 
