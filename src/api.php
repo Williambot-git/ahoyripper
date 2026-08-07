@@ -71,6 +71,16 @@ header('X-Request-ID: ' . $request_id);
 
 // Make request ID available to logRequest via a static global
 $GLOBALS['__request_id'] = $request_id;
+// Echo back the browser-sent X-Request-ID so clients can confirm receipt and
+// correlate their local error events with server-side log entries. The browser
+// generates this ID on page load and sends it with every API request — echoing
+// it back lets the client verify the server received the correct ID for the
+// request. If the browser sent no ID (direct API call, non-browser client), this
+// is simply empty and the server-generated $request_id above is the authoritative ID.
+$client_req_id = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
+if ($client_req_id !== '') {
+    header('X-Request-ID: ' . $client_req_id);
+}
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 // Note: COEP removed — require-corp breaks cross-origin image loads (e.g. thumbnails
