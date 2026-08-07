@@ -117,7 +117,7 @@ header_remove('X-Powered-By');
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Media Ripper">
-  <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ sites. Free, no signup, no ads — just paste a link.">
+  <meta property="og:description" content="Rip any video or audio from YouTube, TikTok, X, Instagram, Reddit & 1872+ platforms. Free, fast, no signup needed — just paste a link.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="<?= $BASE_URL ?>/og-image.png">
   <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.png">
@@ -158,7 +158,7 @@ header_remove('X-Powered-By');
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.png">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
-  <meta name="twitter:image:alt" content="AhoyRipper - download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
+  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
 
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
        production, but the meta tag ensures CSP is enforced even when the page is
