@@ -58,7 +58,10 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://ahoyripper.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
 header('X-Download-Options: noopen');
-// Prevent AI / crawler indexing and training on API responses.
+// X-Robots-Tag: prevent all API responses from being indexed or crawled.
+// Set globally so info, health, and future actions are all covered.
+// The check and download cases also set this explicitly (in case they are
+// reached before this global block due to code reorganization).
 // Search engines (Google, Bing) and AI training crawlers (CCBot, GPTBot, etc.)
 // all respect X-Robots-Tag. This complements robots.txt which only covers the
 // public page — the API endpoint (which returns JSON) needs its own directive.
