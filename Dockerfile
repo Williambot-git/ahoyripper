@@ -78,10 +78,34 @@ RUN (yt-dlp --version && echo "yt-dlp version: $(yt-dlp --version)") || \
         fi \
     fi
 
+# Create a non-root user and group (www-data) to follow the principle of
+# least privilege. Docker containers should not run as root by default —
+# if compromised, a non-root process has a much smaller blast radius.
+# nginx and php-fpm both support running as a specific user via their configs.
+RUN groupadd --gid 1000 www-data && \
+    useradd --uid 1000 --gid www-data --shell /usr/sbin/nologin \
+        --comment "AhoyRipper web service user" www-data
+
+# Ensure /app and all files are readable by www-data and writable for logs/uploads.
+RUN mkdir -p /app && chown -R www-data:www-data /app
+
 WORKDIR /app
 
 COPY public/ ./public/
 COPY src/ ./src/
+
+# Run as non-root — the image must be built with this user, not root.
+# This prevents the container from gaining root privileges via setuid binaries
+# and reduces the impact of any future container escape vulnerability.
+USER www-data
+
+# Note: php-fpm and nginx configs must reference the www-data user/group.
+# Both Debian's php-fpm pool config and nginx use www-data by default on Debian.
+# The fastcgi_pass socket must be accessible by www-data; php-fpm running as
+# www-data creates the socket with correct permissions. If using a socket path
+# owned by root (e.g. /run/php/php-fpm.sock), either add www-data to the root
+# group or switch to a TCP socket (127.0.0.1:9000) as used in Docker.
+# PHP-FPM socket ownership is handled by the php-fpm configuration itself.
 
 # Configure php-fpm to listen on localhost (avoids socket permission issues in Docker)
 RUN find /etc/php -name "*.conf" -path "*pool.d*" -exec sed -i 's|^listen = .*|listen = 127.0.0.1:9000|' {} \; 2>/dev/null || true
