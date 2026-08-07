@@ -1959,6 +1959,10 @@ switch ($action) {
         if ($api_key !== null && !hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
             logRequest('download', 401, ['reason' => 'invalid_api_key']);
             http_response_code(401);
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
