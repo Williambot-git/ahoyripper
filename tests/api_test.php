@@ -190,6 +190,10 @@ test('rejects bare broadcast IP 255.255.255.255 (reserved range)',
     isValidUrl('https://255.255.255.255/path') === false);
 test('accepts public IP 8.8.8.8 (global — no private/reserved ranges)',
     isValidUrl('https://8.8.8.8/path') !== false);
+test('rejects hostname exceeding RFC 1035 limit (253 chars)',
+    // 250 a's + .com = 254 chars total — exceeds the 253-char limit.
+    // The strlen check fires before DNS resolution, so this is fast.
+    isValidUrl('https://' . str_repeat('a', 250) . '.com/path') === false);
 
 // ─── classifyYtdlpError (verbatim copy from api.php) ────────────────────────
 // Note on regex patterns: some require specific phrasing.

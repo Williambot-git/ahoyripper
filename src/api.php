@@ -442,6 +442,12 @@ function isValidUrl($url) {
     if ($parsed === false || $parsed === null) {
         return false;
     }
+    // Enforce RFC 1035 hostname length limit (253 chars max for full domain,
+    // 63 chars per label). This prevents edge-case parse_url edge cases with
+    // extreme input and aligns with what DNS can actually resolve.
+    if (strlen($parsed) > 253) {
+        return false;
+    }
     // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1) before validation.
     // parse_url with PHP_URL_HOST returns IPv6 addresses in bracketed form.
     // filter_var with FILTER_VALIDATE_IP rejects bracketed strings, so we must
