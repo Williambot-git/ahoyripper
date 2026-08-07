@@ -73,7 +73,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
 
 ```bash
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
-# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
+# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","server_time_unix":1749180000,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
 ```
 
 ### Connectivity probe
@@ -84,7 +84,9 @@ Add `&probe=1` to run an end-to-end yt-dlp connectivity probe and verify that yt
 curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m json.tool
 # {
 #   "status": "ok",
+#   "api_ok": true,
 #   "server_time": "2026-08-06T03:30:00+00:00",
+#   "server_time_unix": 1749180000,
 #   "request_id": "...",
 #   "app_version": "...",
 #   "php_version": "8.2.0",
@@ -94,7 +96,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "yt_dlp_probe": {
 #     "ok": true,
 #     "title": "Rick Astley - Never Gonna Give You Up (Official) (Music...",
-#     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+#     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+#     "probe_age_seconds": 0
 #   },
 #   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
 #   "yt_dlp_probe_cache_ttl_seconds": 300
