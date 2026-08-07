@@ -4,6 +4,14 @@
  * Handles: info extraction, format listing, and download serving
  */
 
+// Production hardening — explicitly disable error display at runtime so that
+// even if php.ini has display_errors=On (a misconfigured production setup),
+// no PHP warnings/notices can leak into API JSON responses.
+// log_errors=On is preserved so errors are still written to error_log.
+error_reporting(0);
+ini_set('display_errors', '0');
+
+// These constants are used throughout the file (yt-dlp path, timeouts, rate limits).
 define('AHOYRIPPER_VERSION', require __DIR__ . '/version.php');
 
 // Path to yt-dlp binary — configurable via YTDLP_PATH env var so deployments
