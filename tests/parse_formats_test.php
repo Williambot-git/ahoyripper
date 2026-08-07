@@ -44,6 +44,11 @@ function clean($s) {
     return (string)$s;
 }
 
+// Shared constant: maximum filename length in characters.
+// Mirrors MAX_FILENAME_LEN from src/api.php to keep the test's inline
+// parseFormats() copy consistent with the canonical source.
+define('MAX_FILENAME_LEN', 80);
+
 echo "\n==> Testing clean() — null and empty string\n";
 test('clean(null) returns "Unknown"',
     clean(null) === 'Unknown');
@@ -197,7 +202,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $platform = clean($data['extractor_key'] ?? '');
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
-    if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
+    if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Use ctype_digit() to catch ALL purely-numeric titles, not just "0".
     $derived_filename = ($raw_fn !== '' && !ctype_digit($raw_fn)) ? $raw_fn : 'ahoyrip';
 

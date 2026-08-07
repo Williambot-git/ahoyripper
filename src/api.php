@@ -856,7 +856,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // meaningful name instead of the generic "ahoyrip.mp4".
     $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
     $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
-    if (strlen($raw_fn) > 80) $raw_fn = substr($raw_fn, 0, 80);
+    if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Fall back to 'ahoyrip' when the title was entirely numeric (e.g. "0", "1080")
     // and all digits were stripped by the sanitization regex above. Also guard
     // against empty string after trim (whitespace-only titles).
