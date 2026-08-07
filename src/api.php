@@ -1832,7 +1832,6 @@ switch ($action) {
                 // HTTP 451: Unavailable For Legal Reasons — specifically for content
                 // blocked by legal demand (TOS violations, court orders, etc.).
                 // Distinct from SOURCE_FORBIDDEN (403) which is an access-control failure.
-                'DISALLOWED_CONTENT' => 451,
             ];
             $err_status = $err_status_map[$parsed['error_code']] ?? 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
