@@ -1275,8 +1275,11 @@ define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
 // Download rate limit: max download requests per minute per IP.
 // Override via DL_RATE_LIMIT env var in .env or docker-compose.
 // Named in all-caps to match the env-var convention used throughout this file.
-// When absent or zero/negative, falls back to 10.
-define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 10));
+// When absent or zero/negative, falls back to 30 — aligned with the nginx
+// limit_req_zone (30r/m in deploy/nginx.conf) so both layers are consistent.
+// nginx comment at line ~28 of nginx.conf states: "this mirrors the PHP-layer
+// rate limit (30 req/min for info/download)" — keep them in sync when tuning.
+define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 30));
 
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
