@@ -71,12 +71,34 @@ fi
 echo "  ✓ --no-warnings correctly absent from info action"
 
 echo ""
-echo "==> Checking yt-dlp flags in source..."
-if grep -q -- '--no-warning$' src/api.php; then
+echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
+# --no-warning (singular): yt-dlp uses --no-warnings (plural).
+# --concurrent-fragments: removed in yt-dlp 2024.10 (deprecated since 2023.11).
+# yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
+# produces a stderr warning that can pollute JSON output in the info action and
+# corrupt error classification in both info and download actions.
+BAD_FLAGS="--concurrent-fragments"
+# --no-warning (singular): yt-dlp uses --no-warnings (plural).
+# \b word-boundary: --no-warning\b matches standalone --no-warning but NOT
+# --no-warnings (word boundary after 'g' since 's' starts new word).
+if grep -q -- '--no-warning\b' src/api.php; then
     echo "  ✗ Deprecated --no-warning flag found (yt-dlp uses --no-warnings plural)"
     exit 1
 fi
-echo "  ✓ No deprecated yt-dlp flags"
+# --concurrent-fragments: removed in yt-dlp 2024.10 (deprecated since 2023.11).
+# yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
+# produces a stderr warning that can pollute JSON output in the info action and
+# corrupt error classification in both info and download actions.
+# Use negative lookahead (?![[:alnum:]]) to match only when the flag is NOT
+# followed by alphanumeric chars (i.e., it's a standalone argument, not
+# embedded in explanatory text like "--concurrent-fragments was removed...").
+for flag in $BAD_FLAGS; do
+    if grep -qE -- "$flag(?![[:alnum:]])" src/api.php; then
+        echo "  ✗ Deprecated/removed yt-dlp flag found: $flag"
+        exit 1
+    fi
+done
+echo "  ✓ No deprecated yt-dlp flags (--no-warning singular, --concurrent-fragments)"
 
 echo ""
 echo "==> Checking old YouTube URL-rewrite age-bypass is NOT present..."
