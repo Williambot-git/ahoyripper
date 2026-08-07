@@ -232,7 +232,8 @@ ahoyripper/
 │   ├── run.sh                   # Unified test runner (runs all suites)
 │   ├── sanity.sh                # Shell-based sanity / regression checks
 │   ├── api_test.php             # Unit tests for standalone API functions
-│   └── parse_formats_test.php   # Unit tests for parseFormats()
+│   ├── parse_formats_test.php   # Unit tests for parseFormats()
+│   └── playlist_param_test.php  # Unit tests for playlist flag resolution
 ├── .env.example                 # Environment variable template (Docker)
 ├── .dockerignore                # Docker build context exclusions
 ├── CHANGELOG.md                 # Project version history
