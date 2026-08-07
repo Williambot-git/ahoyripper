@@ -2457,7 +2457,7 @@ switch ($action) {
             $proc_err = preg_replace('/[\x00-\x1F\x7F]/', '', $proc_err);
             $proc_err = strip_tags($proc_err);
             $proc_err = preg_replace('/\s+/', ' ', $proc_err);
-            if (strlen($proc_err) > 200) $proc_err = substr($proc_err, 0, 200) . '...';
+            if (mb_strlen($proc_err, 'UTF-8') > 200) $proc_err = mb_substr($proc_err, 0, 200, 'UTF-8') . '...';
             $err_classified = classifyYtdlpError($proc_err, $actual_exit);
 
             // Refund daily quota for any download failure — classified or not.
