@@ -1691,7 +1691,10 @@ switch ($action) {
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
                     // Only decrement if it's the current day's record
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
+                    // Guard: only decrement if current day record exists and count > 0.
+                    // Prevents double-refund and race conditions between
+                    // the quota-increment write and this refund read.
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -1751,7 +1754,10 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
+                    // Guard: only decrement if current day record exists and count > 0.
+                    // Prevents double-refund and race conditions between
+                    // the quota-increment write and this refund read.
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -1832,7 +1838,10 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $info_quota_before_refund) {
+                    // Guard: only decrement if current day record exists and count > 0.
+                    // Prevents double-refund and race conditions between
+                    // the quota-increment write and this refund read.
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -2269,7 +2278,10 @@ switch ($action) {
                         $decoded = json_decode($undo_raw, true);
                         if ($decoded && is_array($decoded)) $undo_data = $decoded;
                     }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                    // Guard: only decrement if current day record exists and count > 0.
+                    // Prevents double-refund and race conditions between
+                    // the quota-increment write and this refund read.
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -2330,7 +2342,10 @@ switch ($action) {
                             $decoded = json_decode($undo_raw, true);
                             if ($decoded && is_array($decoded)) $undo_data = $decoded;
                         }
-                        if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                        // Guard: only decrement if current day record exists and count > 0.
+                        // Prevents double-refund and race conditions between
+                        // the quota-increment write and this refund read.
+                        if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                             $undo_data['c']--;
                             ftruncate($undo_fp, 0);
                             rewind($undo_fp);
@@ -2440,7 +2455,10 @@ switch ($action) {
                     // Only decrement if the stored count is at or above our baseline
                     // (meaning proc_open hasn't already decremented). If proc_open
                     // failed and decremented first, our count is already lower — skip.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                    // Guard: only decrement if current day record exists and count > 0.
+                    // Prevents double-refund and race conditions between
+                    // the quota-increment write and this refund read.
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                         $undo_data['c']--;
                         ftruncate($undo_fp, 0);
                         rewind($undo_fp);
@@ -2727,7 +2745,10 @@ switch ($action) {
                     $decoded = json_decode($undo_raw, true);
                     if ($decoded && is_array($decoded)) $undo_data = $decoded;
                 }
-                if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] >= $dl_quota_before_refund) {
+                // Guard: only decrement if current day record exists and count > 0.
+                // Prevents double-refund and race conditions between
+                // the quota-increment write and this refund read.
+                if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
                     $undo_data['c']--;
                     ftruncate($undo_fp, 0);
                     rewind($undo_fp);
