@@ -416,9 +416,9 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
-| `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid. Try another format from the list. |
+| `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout. Try a smaller format or lower resolution. |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | Server error — could not start the download process. The server may be restarting or overloaded. | Try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
@@ -762,7 +762,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `SOURCE_FORBIDDEN` | Source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
 | `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again |
 | `SOURCE_TIMEOUT` | Source site took too long to respond | Try audio-only (fastest) or a lower resolution |
-| `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server limit | Try a smaller format or audio-only |
+| `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable). Try a smaller format or audio-only. |
 | `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Pick a different format from the list |
 | `PARSE_ERROR` | Site returned an unrecognizable response | The site may be temporarily unavailable |
@@ -870,7 +870,7 @@ Common reasons:
 - **LOGIN_REQUIRED** — The video requires a platform account. See the cookies section to sign in.
 - **AGE_RESTRICTED** — YouTube requires age verification. Pass your browser cookies to enable this.
 - **SOURCE_TIMEOUT** — The source site is slow or overloaded. Try audio-only (fastest) or a lower resolution.
-- **DOWNLOAD_TIMEOUT** — The file is very large. Try a smaller format or audio-only.
+- **DOWNLOAD_TIMEOUT** — The file exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). Try a smaller format or audio-only.
 - **VPN blocks** — Many sites (YouTube, TikTok, etc.) block VPN exit IPs. If you get repeated `SOURCE_FORBIDDEN` errors, try a different VPN server location.
 
 **Q: I got a "Format unavailable" error but the video exists.**
