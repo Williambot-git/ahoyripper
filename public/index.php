@@ -616,12 +616,30 @@ if (installDismissBtn && installBanner) {
   // Restore persisted quota from localStorage on page load.
   // Falls back to showing nothing until the first API response arrives,
   // avoiding the stale "5 free rips/day" on returning visitors.
+  // Clears any stale quota from a previous UTC day by comparing the stored
+  // reset timestamp against the current time.
   (function restoreQuota() {
     var el = document.getElementById('quotaDisplay');
     var limEl = document.getElementById('quotaLimit');
     var labelEl = document.getElementById('quotaLabel');
     var upgradeEl = document.getElementById('quotaUpgrade');
     if (!el) return;
+
+    // Detect stale quota: if the stored reset timestamp is in the past,
+    // the stored quota is from a previous UTC day and must be discarded.
+    var storedReset = localStorage.getItem('ahoyrip_quota_reset');
+    if (storedReset !== null) {
+      var resetTs = parseInt(storedReset, 10);
+      if (!isNaN(resetTs) && resetTs <= Date.now() / 1000) {
+        // Reset window has passed — clear all stale quota data.
+        localStorage.removeItem('ahoyrip_quota_remaining');
+        localStorage.removeItem('ahoyrip_quota_limit');
+        localStorage.removeItem('ahoyrip_quota_reset');
+        localStorage.removeItem('ahoyrip_quota_unlimited');
+        return; // Show blank until fresh data arrives from API
+      }
+    }
+
     var stored = localStorage.getItem('ahoyrip_quota_remaining');
     var storedLimit = localStorage.getItem('ahoyrip_quota_limit');
     if (stored !== null) {
@@ -1159,6 +1177,7 @@ function escapeHtml(s) {
         if (Number(rem) === -1) {
           localStorage.setItem('ahoyrip_quota_unlimited', '1');
           localStorage.removeItem('ahoyrip_quota_remaining');
+          localStorage.removeItem('ahoyrip_quota_reset');
         } else {
           var remNum = parseInt(rem, 10);
           var limNum = parseInt(lim, 10);
@@ -1170,6 +1189,12 @@ function escapeHtml(s) {
               localStorage.setItem('ahoyrip_quota_limit', limNum);
             } else {
               localStorage.removeItem('ahoyrip_quota_limit');
+            }
+            // Persist the reset timestamp so restoreQuota() can detect stale
+            // quota from a previous UTC day and clear it before displaying.
+            var resetTs = resp.headers.get('X-DailyLimit-Reset');
+            if (resetTs) {
+              localStorage.setItem('ahoyrip_quota_reset', resetTs);
             }
           }
         }
