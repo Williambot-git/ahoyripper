@@ -325,6 +325,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "id": "22",
       "label": "720p60 HDR mp4",
       "description": "1280x720 720p60 HDR 10bit",
+      "format_description": "720p60 HDR 10bit",
       "ext": "mp4",
       "filesize_mb": 45.2,
       "height": 720,
@@ -336,12 +337,14 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "acodec": "mp4a.40.2",
       "format_type": "combined",
       "type_group": 0,
-      "language": null
+      "language": null,
+      "url": "https://..."
     },
     {
       "id": "140",
       "label": "128kbps m4a",
       "description": "Audio m4a",
+      "format_description": "Audio m4a",
       "ext": "m4a",
       "filesize_mb": 2.0,
       "height": null,
@@ -353,7 +356,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "acodec": "mp4a.40.2",
       "format_type": "audio",
       "type_group": 2,
-      "language": null
+      "language": null,
+      "url": "https://..."
     }
   ],
   "sort_applied": "height",
