@@ -42,6 +42,11 @@ Allow: /
 # but placing it in this general block ensures crawlers that don't match
 # any specific block (and fall through to User-agent: *) cannot crawl /src/.
 User-agent: *
+# RFC 9116 §3 recommends security.txt be accessible to scanners even when
+# general Disallow: rules are in effect. Adding an explicit Allow for the
+# /.well-known/ path ensures security researchers and vulnerability scanners
+# can discover the security policy regardless of other robots rules.
+Allow: /.well-known/security.txt
 Disallow: /src/
 Allow: /
 
