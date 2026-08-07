@@ -76,6 +76,37 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 # {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
 ```
 
+### Connectivity probe
+
+Add `&probe=1` to run an end-to-end yt-dlp connectivity probe and verify that yt-dlp can reach YouTube:
+
+```bash
+curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m json.tool
+# {
+#   "status": "ok",
+#   "server_time": "2026-08-06T03:30:00+00:00",
+#   "request_id": "...",
+#   "app_version": "...",
+#   "php_version": "8.2.0",
+#   "api_version": "...",
+#   "ytdlp_version": "2026.06.02",
+#   "ffmpeg_version": "6.1...",
+#   "yt_dlp_probe": {
+#     "ok": true,
+#     "title": "Rick Astley - Never Gonna Give You Up (Official) (Music...",
+#     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+#   },
+#   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
+#   "yt_dlp_probe_cache_ttl_seconds": 300
+# }
+```
+
+The probe result:
+- `yt_dlp_probe.ok: true` — yt-dlp successfully fetched metadata from YouTube; the server has working outbound connectivity.
+- `yt_dlp_probe.ok: false` with an `error_code` — yt-dlp itself is failing. Check `yt_dlp_version` and `ffmpeg_version` to confirm both are installed.
+
+The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
+
 ---
 
 ## Supported Platforms
