@@ -3215,7 +3215,7 @@ switch ($action) {
                 $probe_proc = proc_open([
                     YTDLP_PATH,
                     '--dump-json',
-                    '--playlist', 'false',
+                    '--no-playlist',
                     '--skip-download',
                     // --progress-template false: suppress all progress output (replaces the
                     // deprecated --no-progress flag). yt-dlp emits progress template noise

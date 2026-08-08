@@ -71,6 +71,17 @@ fi
 echo "  ✓ --no-warnings correctly absent from info action"
 
 echo ""
+echo "==> Checking --playlist false is NOT used in health probe (invalid — use --no-playlist)..."
+# --playlist false is rejected by yt-dlp as "ambiguous option" on yt-dlp 2025+.
+# The correct flag is --no-playlist. This regression was introduced when sanity.sh
+# was added; the health probe used --playlist false until the 2026-08 caretaker run.
+if grep -qE "'--playlist',[[:space:]]*'false'" src/api.php; then
+    echo "  ✗ --playlist false found (yt-dlp rejects this — use --no-playlist instead)"
+    exit 1
+fi
+echo "  ✓ --playlist false absent (uses --no-playlist, as correct)"
+
+echo ""
 echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
 # --concurrent-fragments: removed in yt-dlp 2024.10 (deprecated since 2023.11).
