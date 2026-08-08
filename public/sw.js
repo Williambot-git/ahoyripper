@@ -69,7 +69,7 @@ self.addEventListener('install', (event) => {
   // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
 });
 
-// ─── Message: apply pending update immediately ────────────────────────────────
+// ─── Message: apply pending update immediately ───────────────────────────────
 // Frontend calls registration.waiting.postMessage({type:'SKIP_WAITING'})
 // after displaying an "update available" notice to the user. This ensures
 // the user sees the new version before the page refreshes.
@@ -96,7 +96,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ─── Fetch: serve from cache when offline ────────────────────────────────────
+// ─── Fetch: serve from cache when offline ───────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
