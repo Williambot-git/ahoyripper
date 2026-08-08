@@ -3433,7 +3433,7 @@ switch ($action) {
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
         echo json_encode([
-            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, or ?action=health.',
+            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
             'request_id' => $request_id,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,

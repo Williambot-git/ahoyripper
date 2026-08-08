@@ -43,7 +43,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
   -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
 ```
 
-Response includes `formats[]` with `id`, `label`, `description`, `filesize_mb`, `height`, `quality`, `ext`, `vcodec`, `acodec`, and `format_type` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), or `&sort=quality`.
+Response includes `formats[]` with `id`, `label`, `description`, `filesize_mb`, `height`, `quality`, `ext`, `vcodec`, `acodec`, and `format_type` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
 
 ### Download a specific format
 
@@ -305,6 +305,7 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `filesize_asc` — estimated file size, smallest first
 - `tbr` — bitrate, highest first
 - `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
+- `audio_quality` — audio formats first, then video/combined; within each group sorts by quality tier descending, then tbr descending
 
 The `sort_applied` field (e.g. `"height"`) confirms which sort was applied — useful because the sort is computed server-side and the client renders from the sorted list. The `type_group` field groups formats as the primary sort dimension: `0` = combined (video+audio), `1` = video-only, `2` = audio-only. Formats are always grouped by type first (combined → video-only → audio-only), then sorted within each group by the chosen sort key. For example, with `sort=height` (default): all combined formats appear first sorted by height descending, then all video-only formats sorted by height descending, then all audio-only formats sorted by bitrate descending. The `format_type` field distinguishes `"combined"`, `"video"`, and `"audio"` for display purposes. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
