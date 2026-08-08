@@ -580,8 +580,9 @@ if (installDismissBtn && installBanner) {
     'UNKNOWN_ACTION': 'The requested action is not recognized. Use info, download, check, or health.',
     '403': 'The server understood the request but refused to fulfill it. Try again or use AhoyVPN to change your exit IP.',
     '404': 'The requested resource was not found. The content may have been removed or the URL may be incorrect.',
+    '429': 'Too many requests. The source site is rate-limiting us — please try again in a few minutes.',
+    '502': 'The source site is having issues. Try again in a few minutes.',
     '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
-    '502': 'The server encountered an error. Please try again in a moment.',
     '503': 'Service temporarily unavailable. Please try again shortly.',
   };
 
