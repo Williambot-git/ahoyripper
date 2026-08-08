@@ -950,12 +950,13 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 8 times legitimately:
+# COOP and CORP each appear 11 times legitimately:
 #   - 1 at server level (base hardening for all responses)
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
 #     own headers because server-level add_header directives are NOT inherited by
 #     location blocks that define their own add_header (nginx behaviour).
 #   - 1 in `location /` block (root HTML and static assets)
+#   - 1 in second `location /` block (try_files fallback, added 2026-06)
 #   - 1 in /.well-known/security.txt location block for security.txt and similar files.
 #   - 1 in /404.html location block for not-found responses (defense-in-depth)
 #   - 1 in /50x.html location block for PHP-FPM error pages (502/504) and
@@ -966,17 +967,15 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #   - 1 in the sitemap.xml location — sitemap is a special static file served with
 #     explicit security headers (nginx's add_header inheritance rule requires each
 #     location to declare all headers it needs; HSTS, COOP, CORP, Perm-Policy added here).
-#   - 1 in the static asset regex location (~* \.(...)$) — COOP, CORP, HSTS, Perm-Policy
-#     added here to match the coverage of the server-level headers (nginx add_header
-#     inheritance replaces server-level headers when a location defines add_header).
+#   - 1 in the /og-image.png location block (explicit PNG handling).
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 10 ] && [ "$CORP_COUNT" -eq 10 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location / + /.well-known/ + /og-image.png + /50x.html + /src/api.php + second location / + sitemap.xml + static asset regex)"
+if [ "$COOP_COUNT" -eq 11 ] && [ "$CORP_COUNT" -eq 11 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location / + second location / + /.well-known/ + /og-image.png + /50x.html + /src/api.php + sitemap.xml + static asset regex + catch-all location /)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 10), CORP appears $CORP_COUNT times (expected 10)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 11), CORP appears $CORP_COUNT times (expected 11)"
     exit 1
 fi
 
