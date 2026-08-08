@@ -88,11 +88,13 @@ echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
 # produces a stderr warning that can pollute JSON output in the info action and
 # corrupt error classification in both info and download actions.
-BAD_FLAGS="--concurrent-fragments"
+BAD_FLAGS="concurrent-fragments"
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
-# \b word-boundary: --no-warning\b matches standalone --no-warning but NOT
-# --no-warnings (word boundary after 'g' since 's' starts new word).
-if grep -q -- '--no-warning\b' src/api.php; then
+# \b word boundary after 'g' means `--no-warning\b` matches `--no-warning ` or
+# `--no-warning\n` (end of line) but NOT `--no-warnings` (boundary after 'g' is
+# followed by 's', not a word boundary).
+# -P: PCRE enables \b word boundary; -E (ERE) does not support it.
+if grep -qP -- '--no-warning\b' src/api.php; then
     echo "  ✗ Deprecated --no-warning flag found (yt-dlp uses --no-warnings plural)"
     exit 1
 fi
@@ -100,11 +102,11 @@ fi
 # yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
 # produces a stderr warning that can pollute JSON output in the info action and
 # corrupt error classification in both info and download actions.
-# Use negative lookahead (?![[:alnum:]]) to match only when the flag is NOT
-# followed by alphanumeric chars (i.e., it's a standalone argument, not
-# embedded in explanatory text like "--concurrent-fragments was removed...").
+# Use a negative lookbehind (?<![/]\s) to match the flag ONLY when it appears as
+# actual code, not when it is documented in comments explaining its removal.
+# -P: PCRE is required for lookbehind; -E (ERE) does not support it.
 for flag in $BAD_FLAGS; do
-    if grep -qE -- "$flag(?![[:alnum:]])" src/api.php; then
+    if grep -qP -- "(?<![/]\s)--$flag\b" src/api.php; then
         echo "  ✗ Deprecated/removed yt-dlp flag found: $flag"
         exit 1
     fi
