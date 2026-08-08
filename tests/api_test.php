@@ -1008,6 +1008,32 @@ test('clean(true) boolean returns "Unknown" (not "1")',
 test('clean(false) boolean returns "Unknown" (not "")',
     cleanForTest(false) === 'Unknown');
 
+// ─── MAX_URL_LEN boundary testing ────────────────────────────────────────────
+// MAX_URL_LEN=2048 is the ceiling enforced by validateRequest() before yt-dlp.
+// isValidUrl() has no length limit — length is checked in validateRequest().
+// The behavioral tests below document and verify this design contract.
+
+// isValidUrl() accepts URLs at the MAX_URL_LEN boundary (2048 chars exactly)
+$boundary_url = 'https://example.com/' . str_repeat('a', 2048 - strlen('https://example.com/'));
+test('isValidUrl accepts URL at MAX_URL_LEN boundary (2048 chars)',
+    isValidUrl($boundary_url) !== false);
+
+// isValidUrl() accepts URLs below the MAX_URL_LEN threshold
+$short_url = 'https://example.com/' . str_repeat('a', 2048 - strlen('https://example.com/') - 1);
+test('isValidUrl accepts URL below MAX_URL_LEN (2047 chars)',
+    isValidUrl($short_url) !== false);
+
+// isValidUrl() accepts very short URLs
+test('isValidUrl accepts short YouTube URL',
+    isValidUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ') !== false);
+
+// isValidUrl() is NOT the layer that enforces MAX_URL_LEN — isValidUrl passes
+// very long URLs through, but validateRequest() blocks them before yt-dlp.
+// This test documents the current design contract: isValidUrl validates
+// scheme/private-IP security properties, not URL length.
+test('isValidUrl accepts 5000-char URL (length check done by validateRequest, not isValidUrl)',
+    isValidUrl('https://example.com/' . str_repeat('a', 5000 - strlen('https://example.com/'))) !== false);
+
 // ─── Test classifyYtdlpError edge cases ────────────────────────────────────────
 // The regex patterns have specific thresholds. Non-matching phrases
 // (like "permission denied" or "invalid input") are NOT matched by
