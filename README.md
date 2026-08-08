@@ -210,6 +210,8 @@ docker compose up -d
 | `FFPROBE_TIMEOUT` | `10` | Timeout in seconds for ffprobe post-download verification. ffprobe should finish in well under 10s for any real file; increase this when running on slow storage or with very large files that need extra time for codec probing. |
 | `HEALTH_PROBE_TIMEOUT` | `15` | Timeout in seconds for the health probe (`action=health&probe=1`). The probe is a lightweight `--dump-json` fetch on a known-short video (Rick Astley), so 15s is plenty. Increase if the probe times out on slow networks or under heavy load. |
 | `DL_RATE_LIMIT` | `10` | Download rate limit per IP per minute. Protects the server against burst download activity. The `info` action has a separate limit of 30 requests/min. Both limits are independent. |
+| `YTDLP_PATH` | `/usr/local/bin/yt-dlp` | Path to the yt-dlp binary. Override when yt-dlp is in a non-standard location (e.g. `/usr/bin/yt-dlp` on some systems, or a custom path in a Docker image). Changing this invalidates the yt-dlp version cache. |
+| `FFPROBE_PATH` | `/usr/bin/ffprobe` | Path to the ffprobe binary used for post-download codec/resolution verification. Override when ffprobe is in a non-standard location (e.g. `/usr/local/bin/ffprobe` on macOS). Changing this invalidates the ffprobe version cache. |
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:

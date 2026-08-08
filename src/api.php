@@ -2300,16 +2300,14 @@ switch ($action) {
         // ahoyripper.com referer hides the actual video URL from third-party servers.
         $referer = 'https://ahoyripper.com/';
 
-        // --progress-template "" suppresses ALL progress output to stderr — without this,
-        //   yt-dlp emits progress bars to stderr even during file downloads, which
-        //   pollutes $proc_stderr and can prevent classifyYtdlpError() from matching
-        //   actual error messages correctly (progress bar text prepends the real error).
-        //   yt-dlp interprets '' (literal single-quotes) as template content, not empty.
-        //   Use json_encode('') which produces "" (two adjacent double-quotes) in the
-        //   argv string — same as the correct "" syntax yt-dlp expects for an empty
-        //   progress template.
-        // --concurrent-fragments was removed in yt-dlp 2024.10 — yt-dlp now handles
-        // HLS/DASH fragment concurrency internally.
+        // --progress-template false: yt-dlp accepts 'false' as the canonical modern
+        //   syntax to suppress all progress output to stderr. Without this, yt-dlp
+        //   emits progress bars to stderr even during file downloads, which pollutes
+        //   $proc_stderr and can prevent classifyYtdlpError() from matching actual
+        //   error messages correctly (progress bar text prepends the real error).
+        //   Note: '' (two single-quotes, the empty-string PHP literal form) is NOT
+        //   equivalent — yt-dlp interprets '' as a literal two-character template name,
+        //   not as empty. The 'false' string is the correct and unambiguous choice.
         // --socket-timeout: yt-dlp's per-connection timeout. Set to DOWNLOAD_TIMEOUT - 15s so
         // PHP's process-level timeout (DOWNLOAD_TIMEOUT) is always the outer limit and has time
         // to cleanly terminate the process and emit a classified DOWNLOAD_TIMEOUT error.
