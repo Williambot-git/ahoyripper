@@ -1229,6 +1229,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'request_id' => $request_id,
             'source_url' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'api_version' => AHOYRIPPER_VERSION,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1242,6 +1243,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'api_version' => AHOYRIPPER_VERSION,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1259,6 +1261,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'api_version' => AHOYRIPPER_VERSION,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1281,6 +1284,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -1305,6 +1309,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -1817,6 +1822,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_ts),
             ];
             if ($raw_err) {
@@ -1866,6 +1872,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
@@ -3377,6 +3384,7 @@ switch ($action) {
                 'error_code' => 'METHOD_NOT_ALLOWED',
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
