@@ -649,6 +649,28 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 - `X-DailyLimit-Reset` — Unix timestamp of the next daily reset (midnight UTC)
 - `X-DailyLimit-Window` — always `daily` (unlimited-key holders see `unlimited`)
 
+### Download Response Headers
+
+When `action=download` succeeds (HTTP 200), the response includes binary file data with these headers:
+
+| Header | Description |
+|--------|-------------|
+| `Content-Type` | Detected MIME type of the downloaded file (e.g. `video/mp4`, `audio/mpeg`, `audio/webm`). Determined by `fileinfo` on the actual downloaded file, not assumed from the requested format. |
+| `Content-Length` | Exact byte size of the file. Clients can use this to display download progress, validate the transfer completed, or estimate time remaining. |
+| `Content-Disposition` | `attachment; filename="<name>.<ext>"` with RFC 5987 UTF-8 encoding for non-ASCII filenames. The filename is derived from the `filename` query parameter (sanitized), or `ahoyrip.<ext>` if not provided. |
+| `Accept-Ranges: none` | Explicitly disables resume / partial-fetch range requests. The download is always a full-file transfer. |
+| `Transfer-Encoding: identity` | Suppresses PHP's automatic chunked transfer encoding for binary streams, ensuring raw bytes are sent with the declared `Content-Length`. |
+| `X-Content-Type-Options: nosniff` | Prevents browsers from MIME-sniffing the response away from the declared `Content-Type`. |
+| `X-Download-Options: noopen` | Prevents the file from automatically opening in the browser context (forces a save dialog). |
+| `X-Format-Substituted` | Set only when ffprobe detected the downloaded file differs materially from what was requested (different resolution, codec, or container). The value is the actual quality label (e.g. `720p` or `1280x720 vp9`). Absent on all normal downloads — only present when yt-dlp silently substituted a format. |
+| `X-DL-RateLimit-Limit` | Download-specific rate limit (10/min). |
+| `X-DL-RateLimit-Remaining` | Download requests remaining in the current window. |
+| `X-DL-RateLimit-Reset` | Unix timestamp when the download rate limit window resets. |
+| `X-RateLimit-*` | Shared rate-limit headers (same values as `X-DL-RateLimit-*`). |
+| `X-DailyLimit-*` | Daily quota headers for non-unlimited users (same pattern as `info`). |
+
+On `action=download` failure (any non-200 status), the response is always JSON with the standard error shape — the binary download headers above are never sent on error responses.
+
 ---
 
 ## Supported Platforms Reference
