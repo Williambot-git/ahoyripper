@@ -53,6 +53,10 @@ date_default_timezone_set('UTC');
 
 // CORS headers for API access
 header('Content-Type: application/json; charset=utf-8');
+// Date: RFC 9110 §6.5.1 requires origin servers to send a Date header on all responses.
+// The header is used by API consumers to reconcile server clock, validate cached responses,
+// and correlate request timing across distributed systems.
+header('Date: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 // Remove the "PHP/x.y.z" Server header that PHP-FPM adds automatically.

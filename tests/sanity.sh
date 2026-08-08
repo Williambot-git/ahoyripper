@@ -232,6 +232,7 @@ fi
 echo ""
 echo "==> Checking security headers in api.php..."
 REQUIRED_HEADERS=(
+    "Date"
     "X-Content-Type-Options"
     "X-Frame-Options"
     "Strict-Transport-Security"
