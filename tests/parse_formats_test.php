@@ -332,6 +332,25 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
 
     // Sort: combined formats first, then by selected sort key
     usort($formats, function($a, $b) use ($sort) {
+        // ── audio_quality: audio-first ordering ─────────────────────────────────
+        // audio formats (type_group=2) come BEFORE video/combined (type_group=0,1).
+        // Within each group, sort by quality tier descending, then tbr descending.
+        if ($sort === 'audio_quality') {
+            // type_group: 0=combined, 1=video-only, 2=audio-only.
+            // Audio (2) should come FIRST — negate the spaceship so higher wins.
+            $ag = $b['type_group'] <=> $a['type_group'];
+            if ($ag !== 0) {
+                return $ag;
+            }
+            // Same type group — primary: quality tier desc, secondary: tbr desc
+            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
+            if ($cmp === 0) {
+                $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+            }
+            return $cmp;
+        }
+
+        // ── standard sort: type_group primary, then sort key ───────────────────
         $type_cmp = $a['type_group'] <=> $b['type_group'];
         if ($type_cmp !== 0) {
             return $type_cmp;
@@ -983,6 +1002,51 @@ $result_zero_desc = parseFormats($json_zero_desc);
 $zero_desc_text = $result_zero_desc['formats'][0]['description'] ?? '';
 test('description uses "0" format_description (not treated as empty/falsy)',
     strpos($zero_desc_text, '0') !== false);
+
+// ─── parseFormats: audio_quality sort — audio formats come first ─────────────────
+
+echo "\n==> Testing parseFormats() — audio_quality sort (audio-first ordering)\n";
+
+$fmt_audio_320 = makeFormat([
+    'format_id' => 'audio_320', 'vcodec' => 'none', 'acodec' => 'mp4a.40.2',
+    'ext' => 'm4a', 'tbr' => 320, 'abr' => 320,
+]);
+$fmt_audio_128 = makeFormat([
+    'format_id' => 'audio_128', 'vcodec' => 'none', 'acodec' => 'mp4a.40.2',
+    'ext' => 'm4a', 'tbr' => 128, 'abr' => 128,
+]);
+$fmt_video_720 = makeFormat([
+    'format_id' => 'video_720', 'vcodec' => 'avc1', 'acodec' => 'mp4a.40.2',
+    'ext' => 'mp4', 'height' => 720, 'fps' => 30, 'tbr' => 3000,
+]);
+$fmt_combined_1080 = makeFormat([
+    'format_id' => 'combined_1080', 'vcodec' => 'avc1', 'acodec' => 'mp4a.40.2',
+    'ext' => 'mp4', 'height' => 1080, 'fps' => 60, 'tbr' => 6000,
+]);
+
+// With audio_quality sort, audio formats (type_group=2) must come FIRST.
+// The sort uses $b['type_group'] <=> $a['type_group'] (reversed) so higher
+// type_group values (audio=2) sort before lower ones (combined=0, video=1).
+$json_mixed = makeJson('Audio Sort Test', [
+    $fmt_video_720, $fmt_audio_128, $fmt_combined_1080, $fmt_audio_320,
+]);
+$result_mixed = parseFormats($json_mixed, $unused_err, 'audio_quality');
+$ids = array_column($result_mixed['formats'], 'id');
+
+test('audio_quality: audio formats appear before video formats',
+    in_array('audio_320', $ids, true) && in_array('audio_128', $ids, true)
+    && in_array('video_720', $ids, true) && in_array('combined_1080', $ids, true)
+    && array_search('audio_320', $ids) < array_search('video_720', $ids)
+    && array_search('audio_320', $ids) < array_search('combined_1080', $ids));
+
+test('audio_quality: 320kbps audio appears before 128kbps audio',
+    array_search('audio_320', $ids) < array_search('audio_128', $ids));
+
+// With default 'height' sort, combined (type_group=0) comes before audio (type_group=2).
+$result_height = parseFormats($json_mixed, $unused_err, 'height');
+$ids_height = array_column($result_height['formats'], 'id');
+test('height sort: combined formats still come first (type_group 0 before 2)',
+    array_search('combined_1080', $ids_height) < array_search('audio_320', $ids_height));
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 

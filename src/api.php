@@ -1072,9 +1072,29 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     }
 
     // Sort: combined formats first, then by the caller's selected sort key.
-    // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality' — validated by the
-    // caller before being passed in, so no additional validation is needed here.
+    // $sort is one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality',
+    // 'audio_quality' — validated by the caller before being passed in, so no
+    // additional validation is needed here.
     usort($formats, function($a, $b) use ($sort) {
+        // ── audio_quality: audio-first ordering ─────────────────────────────────
+        // audio formats (type_group=2) come BEFORE video/combined (type_group=0,1).
+        // Within each group, sort by quality tier descending, then tbr descending.
+        if ($sort === 'audio_quality') {
+            // type_group: 0=combined, 1=video-only, 2=audio-only.
+            // Audio (2) should come FIRST — negate the spaceship so higher wins.
+            $ag = $b['type_group'] <=> $a['type_group'];
+            if ($ag !== 0) {
+                return $ag;
+            }
+            // Same type group — primary: quality tier desc, secondary: tbr desc
+            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
+            if ($cmp === 0) {
+                $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+            }
+            return $cmp;
+        }
+
+        // ── standard sort: type_group primary, then sort key ───────────────────
         // type_group: 0=combined, 1=video-only, 2=audio-only — used as primary
         // sort key for 'quality' sort so video formats always appear before audio
         // regardless of their quality number (e.g. 720p video-only = 720 sorts
@@ -1087,35 +1107,17 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             return $type_cmp;
         }
         // Same type group — sort by the caller's selected key.
-// audio_quality: for audio-only ripping — audio formats sorted by quality tier
-// descending (320 > 256 > 192 > 128 > 96 > 64 > 48 kbps), video formats pushed
-// to the end so audio formats dominate the sorted list when this option is chosen.
-// Within the audio group, secondary sort is by tbr (bitrate) descending.
-if ($sort === 'audio_quality') {
-    // type_group 2 = audio-only, 1 = video-only, 0 = combined
-    $ag = $a['type_group'] <=> $b['type_group'];
-    if ($ag !== 0) {
-        // Audio formats first (type_group 2), video/combined after
-        return $ag;
-    }
-    // Same type group — primary: quality tier desc, secondary: tbr desc
-    $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
-    if ($cmp === 0) {
-        $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
-    }
-    return $cmp;
-}
-if ($sort === 'filesize') {
-    $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
-} elseif ($sort === 'filesize_asc') {
-    $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
-} elseif ($sort === 'tbr') {
-    $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
-} elseif ($sort === 'quality') {
-    $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
-} else {
-    $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
-}
+        if ($sort === 'filesize') {
+            $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+        } elseif ($sort === 'filesize_asc') {
+            $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
+        } elseif ($sort === 'tbr') {
+            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+        } elseif ($sort === 'quality') {
+            $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
+        } else {
+            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
+        }
         // Secondary: within same type group, sort by height descending for consistency.
         // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
         // smoother formats appear first within the same resolution tier.
