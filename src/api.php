@@ -2123,7 +2123,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                ]);
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             $dl_data['c']++;
