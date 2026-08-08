@@ -1,5 +1,18 @@
 FROM debian:bookworm-slim
 
+# OCI image labels — standard container metadata for docker inspect, orchestration
+# platforms (Kubernetes, Docker Swarm), and vulnerability scanners (Trivy, Grype).
+# org.opencontainers.* labels are the OCI distribution-spec convention and are
+# read by most container tooling. com.ahoyripper.* is the project-specific namespace.
+LABEL org.opencontainers.image.title="AhoyRipper" \
+      org.opencontainers.image.description="Free online media ripper — download video and audio from YouTube, TikTok, X/Twitter, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ platforms via yt-dlp." \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.source="https://github.com/Williambot-git/ahoyripper" \
+      org.opencontainers.image.authors="AhoyVPN <support@ahoyvpn.com>" \
+      org.opencontainers.image.licenses="MIT" \
+      com.ahoyripper.version="1.0.0" \
+      com.ahoyripper.homepage="https://ahoyripper.com"
+
 # Fail fast: exit immediately on any command failure.
 # This ensures that a partial package installation (e.g. disk-space exhaustion,
 # network error mid-download, or a package not found) stops the build before
