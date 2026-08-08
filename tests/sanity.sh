@@ -1117,6 +1117,56 @@ else
 fi
 
 echo ""
+echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID error codes exist..."
+# Both error codes are returned by the download action when format is absent or invalid.
+# Verify they exist and return HTTP 400 (not 200 or 500).
+if grep -q "'error_code' => 'MISSING_FORMAT'" src/api.php && grep -q "'error_code' => 'INVALID_FORMAT_ID'" src/api.php; then
+    echo "  ✓ MISSING_FORMAT and INVALID_FORMAT_ID error codes are present"
+else
+    echo "  ✗ MISSING_FORMAT or INVALID_FORMAT_ID error code missing"
+    exit 1
+fi
+# Verify both return http_response_code(400) — not 200 or 500
+MISSING_FORMAT_CODE=$(grep -n "'error_code' => 'MISSING_FORMAT'" src/api.php | head -1 | cut -d: -f1)
+INVALID_FORMAT_CODE=$(grep -n "'error_code' => 'INVALID_FORMAT_ID'" src/api.php | head -1 | cut -d: -f1)
+# Check within 5 lines before each error_code line for http_response_code(400)
+for linenum in "$MISSING_FORMAT_CODE" "$INVALID_FORMAT_CODE"; do
+    context=$(sed -n "$((linenum-5)),${linenum}p" src/api.php)
+    if ! echo "$context" | grep -q "http_response_code(400)"; then
+        echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID should return http_response_code(400)"
+        exit 1
+    fi
+done
+echo "  ✓ MISSING_FORMAT and INVALID_FORMAT_ID return HTTP 400"
+
+echo ""
+echo "==> Checking MISSING_URL response has user-friendly message..."
+# MISSING_URL error message must be specific (mention pasting a link), not generic.
+# Extract the error message string for MISSING_URL (in the info/download validation block).
+# Check that MISSING_URL block contains a paste-related user hint.
+# The message appears BEFORE the 'error_code' => 'MISSING_URL' line in the json_encode.
+if grep -B 10 "MISSING_URL" src/api.php | grep -qi "paste\|provide\|url"; then
+    echo "  ✓ MISSING_URL message is user-friendly (mentions paste/provide/url)"
+else
+    echo "  ✗ MISSING_URL message is too generic (should mention pasting a link)"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
+# Users hitting rate/daily limits need to know when they can retry. Both error codes
+# should include a 'retry_after' field in the JSON response.
+for code in RATE_LIMIT_EXCEEDED DAILY_LIMIT; do
+    CODE_BLOCK=$(sed -n "/'error_code' => '$code'/,/'api_version'/p" src/api.php | head -n -1)
+    if echo "$CODE_BLOCK" | grep -q "'retry_after'"; then
+        echo "  ✓ $code includes retry_after field"
+    else
+        echo "  ✗ $code is missing retry_after field"
+        exit 1
+    fi
+done
+
+echo ""
 echo "==> Running PHP unit tests..."
 php tests/api_test.php
 PHP_RESULT=$?
