@@ -1659,14 +1659,15 @@ switch ($action) {
         // to cleanly terminate the process and emit a classified SOURCE_TIMEOUT error.
         // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's
         // timeout and produce an unclassified CONNECTION_FAILED instead of SOURCE_TIMEOUT.
-        // --playlist: mirrors the download action — pass the user's explicit playlist
-        // preference so the info action behaves consistently with the download action.
-        // When playlist=1, --playlist true fetches info for all videos in a playlist.
-        // When playlist=0/absent, --playlist false fetches info for the single video.
-        // yt-dlp 2024.02.07+ accepts --playlist true/false (replacing deprecated
-        // --yes-playlist/--no-playlist flags). Using the modern form here.
-        // --playlist is always passed (value differs: 'true' vs 'false')
-        $playlist_value = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
+        // --no-playlist / --yes-playlist: mirrors the download action — pass the user's
+        // explicit playlist preference so the info action behaves consistently with download.
+        // When playlist=1, --yes-playlist fetches info for all videos in a playlist.
+        // When playlist=0/absent, --no-playlist fetches info for the single video.
+        // NOTE: yt-dlp does NOT support --playlist true/false (yt-dlp rejects --playlist
+        // with any value as ambiguous). The correct boolean flags are --yes-playlist and
+        // --no-playlist. The --playlist=true/false syntax was mistakenly documented in
+        // yt-dlp 2024.02.07 release notes but was never actually implemented.
+        $no_playlist = !(isset($_GET['playlist']) && $_GET['playlist'] === '1');
         // yt-dlp per-connection timeout: PHP-side INFO_TIMEOUT is the outer limit,
         // yt-dlp's --socket-timeout is the inner limit. Set to INFO_TIMEOUT - 5s so
         // PHP always fires first and classifies as SOURCE_TIMEOUT rather than CONNECTION_FAILED.
@@ -1674,28 +1675,24 @@ switch ($action) {
         $ytdlp_cmd = [
             YTDLP_PATH,
             '--dump-json',
-            '--playlist', $playlist_value,
-            '--skip-download',
+            '--no-playlist',
+        ];
+        if (!$no_playlist) {
+            $ytdlp_cmd[] = '--yes-playlist';
+        }
+        $ytdlp_cmd[] = '--skip-download';
+        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // even during --skip-download which would prepend garbage to stderr
             // and corrupt json_decode on stdout. The empty-string form (below) is an
             // alternative; 'false' is the canonical modern yt-dlp syntax for this.
             '--progress-template', 'false',
-            // NOTE: --no-warnings is deliberately NOT used in the info action.
-            // yt-dlp emits its error/warning messages to stderr, and
-            // classifyYtdlpError() reads $proc_stderr to classify failures
-            // (GEOBLOCKED, AGE_RESTRICTED, LOGIN_REQUIRED, etc.).
-            // Suppressing warnings via --no-warnings would empty $proc_stderr
-            // and break error classification on the info action.
-            // yt-dlp progress output is already suppressed via --progress-template false,
-            // so --no-warnings is redundant for that purpose anyway.
-            // --progress-template false: suppress ALL progress output to stderr.
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
-        ];
+        ]);
         // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
         // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
@@ -2305,14 +2302,13 @@ switch ($action) {
         // to cleanly terminate the process and emit a classified DOWNLOAD_TIMEOUT error.
         // Without this, yt-dlp uses its own default (~20s) which can fire before PHP's timeout
         // and produce an unclassified error instead of DOWNLOAD_TIMEOUT.
-        // --playlist: controls whether to download a playlist (all videos) or a single
-        // video. yt-dlp 2024.02.07+ accepts --playlist true/false (replacing the
-        // deprecated --yes-playlist/--no-playlist flags). The modern form is used here.
-        // Pass --playlist false by default (playlist=0, the default) so single-video
-        // URLs always get one video. Pass --playlist true when playlist=1 is explicitly
-        // requested. Note: passing --yes-playlist via the format field does NOT work —
-        // playlist flags must appear BEFORE the URL.
-        $playlist_val = isset($_GET['playlist']) && $_GET['playlist'] === '1' ? 'true' : 'false';
+        // --no-playlist / --yes-playlist: controls whether to download a playlist (all
+        // videos) or a single video. yt-dlp accepts --yes-playlist and --no-playlist
+        // as boolean flags (not --playlist true/false, which yt-dlp rejects as ambiguous).
+        // Pass --no-playlist by default (playlist=0, the default) so single-video URLs
+        // always get one video. Pass --yes-playlist when playlist=1 is explicitly requested.
+        // Note: playlist flags must appear BEFORE the URL in the yt-dlp command.
+        $no_playlist = !(isset($_GET['playlist']) && $_GET['playlist'] === '1');
         // yt-dlp per-connection timeout: PHP-side DOWNLOAD_TIMEOUT is the outer limit,
         // yt-dlp's --socket-timeout is the inner limit. Set to DOWNLOAD_TIMEOUT - 15s so
         // PHP always fires first and classifies as DOWNLOAD_TIMEOUT rather than CONNECTION_FAILED.
@@ -2323,17 +2319,17 @@ switch ($action) {
             '-o', $out_template,
             '--force-overwrites',
             '--retries', '3',
-            '--playlist', $playlist_val,
-            // --progress-template false: suppress all progress output (replaces the
-            // deprecated --no-progress flag). yt-dlp emits progress template noise
-            // to stderr during download which would corrupt classifyYtdlpError parsing.
-            // Using 'false' (the canonical modern yt-dlp syntax) is cleaner than the
-            // empty-string form and semantically identical (suppress all progress).
+            '--no-playlist',
+        ];
+        if (!$no_playlist) {
+            $ytdlp_cmd[] = '--yes-playlist';
+        }
+        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
-        ];
+        ]);
         // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
         // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
