@@ -2570,6 +2570,7 @@ switch ($action) {
                 $status = $err_classified['status'] ?? 422;
                 logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code($status);
+                header('Cache-Control: no-store, must-revalidate');
                 $resp = [
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
@@ -2588,6 +2589,7 @@ switch ($action) {
                 // Unclassified error — $err_classified is null; use 422 as safe default.
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
+                header('Cache-Control: no-store, must-revalidate');
                 // Truncate the user-facing error message to match the ~200-char ceiling used
                 // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
                 // The full raw error is preserved in 'raw_error' for diagnostics.

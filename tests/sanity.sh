@@ -1099,6 +1099,24 @@ fi
 echo "  ✓ All 503 error responses include Retry-After header"
 
 echo ""
+echo "==> Checking Cache-Control: no-store on download error responses..."
+# All download error paths must prevent caching of generated error responses.
+# Verified paths: classified error (err_classified), unclassified error (YTDLP_ERROR),
+# timeout (DOWNLOAD_TIMEOUT), empty/missing file (DOWNLOAD_EMPTY).
+# Use grep -c to count all occurrences of 'Cache-Control: no-store' in download case.
+DOWNLOAD_CASE=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
+# Count 'Cache-Control: no-store' occurrences in the download case.
+# Known working occurrences: timeout error, empty file error (both already had it).
+# New: classified error and unclassified error (added in this patch).
+no_store_count=$(echo "$DOWNLOAD_CASE" | grep -c "Cache-Control: no-store" || true)
+if [ "$no_store_count" -ge 4 ]; then
+    echo "  ✓ Cache-Control: no-store present on all download error paths ($no_store_count occurrences)"
+else
+    echo "  ✗ Cache-Control: no-store missing on some download error paths (found $no_store_count, expected ≥4)"
+    exit 1
+fi
+
+echo ""
 echo "==> Running PHP unit tests..."
 php tests/api_test.php
 PHP_RESULT=$?
