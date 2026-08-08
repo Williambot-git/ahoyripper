@@ -1684,6 +1684,7 @@ switch ($action) {
         $socket_timeout = max(1, INFO_TIMEOUT - 5);
         $ytdlp_cmd = [
             YTDLP_PATH,
+            '--newline',
             '--dump-json',
             '--no-playlist',
         ];
@@ -2325,6 +2326,7 @@ switch ($action) {
         $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
             YTDLP_PATH,
+            '--newline',
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrites',
@@ -3232,6 +3234,7 @@ switch ($action) {
                 $probe_pipes = null;
                 $probe_proc = proc_open([
                     YTDLP_PATH,
+                    '--newline',
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
