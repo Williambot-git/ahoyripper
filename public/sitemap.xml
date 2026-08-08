@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ahoyripper.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <image:image>
-      <image:loc>https://ahoyripper.com/og-image.png</image:loc>
-      <image:caption>AhoyRipper - Download video and audio from 1872+ platforms</image:caption>
-    </image:image>
+  </url>
+  <url>
+    <loc>https://ahoyripper.com/src/api.php</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ahoyripper.com/src/api.php?action=check</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

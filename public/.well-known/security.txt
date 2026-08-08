@@ -10,6 +10,6 @@
 # a reasonable timeframe (typically 48–72 hours on business days).
 
 Contact: mailto:security@ahoyripper.com
-Expires: 2027-06-06T00:00:00.000Z
+Expires: 2028-08-08T00:00:00.000Z
 Preferred-Languages: en
 Canonical: https://ahoyripper.com/.well-known/security.txt
