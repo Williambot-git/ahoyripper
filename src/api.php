@@ -1224,7 +1224,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     if (!$url) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'missing_url']);
-        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
@@ -1238,7 +1237,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     if (!isValidUrl($url)) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'invalid_url']);
-        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1256,7 +1254,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     if (strlen($url) > MAX_URL_LEN) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
