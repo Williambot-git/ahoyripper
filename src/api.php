@@ -2880,7 +2880,13 @@ switch ($action) {
             $disposition = "attachment; filename=\"{$dl_raw}\"";
         }
         header('Content-Disposition: ' . $disposition);
-        header('Cache-Control: no-cache');
+        // no-store: do not cache this response — it is a file download and must not
+        // be stored by shared caches (proxies, corporate proxies, CDNs).
+        // must-revalidate: once the file is delivered, caches must not serve the stale
+        // file without revalidating. This is the correct directive for file downloads.
+        // (no-cache would allow serving from cache after revalidation, which is wrong for
+        // on-demand generated file downloads that are not cacheable by definition.)
+        header('Cache-Control: no-store, must-revalidate');
         // Accept-Ranges: none — this response is a full-file download with no seeking.
         // Explicitly disabling range requests prevents proxies and browser caches from
         // attempting to resume or partial-fetch the download, which could corrupt the
