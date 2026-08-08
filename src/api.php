@@ -1590,7 +1590,7 @@ switch ($action) {
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
                 header('X-DailyLimit-Window: 86400');
                 echo json_encode([
-                    'error' => "Daily limit reached. You get {$daily_limit} free rips per day. For unlimited access, get AhoyVPN.",
+                    'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => 'https://ahoyvpn.com',
                     'daily_limit' => $daily_limit,
