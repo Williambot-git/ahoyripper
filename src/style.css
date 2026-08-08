@@ -531,6 +531,14 @@ body {
     border-color: var(--color-border);
   }
 }
+/* Expand format cards to full-width on small screens so they stack
+   single-column instead of staying cramped at 160px minimum. */
+@media (max-width: 480px) {
+  .format-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
 .format-ext {
   font-size: 0.75rem;
   font-weight: 700;
