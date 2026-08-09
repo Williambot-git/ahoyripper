@@ -667,6 +667,8 @@ When `action=download` succeeds (HTTP 200), the response includes binary file da
 | `Content-Disposition` | `attachment; filename="<name>.<ext>"` with RFC 5987 UTF-8 encoding for non-ASCII filenames. The filename is derived from the `filename` query parameter (sanitized), or `ahoyrip.<ext>` if not provided. |
 | `Accept-Ranges: none` | Explicitly disables resume / partial-fetch range requests. The download is always a full-file transfer. |
 | `Transfer-Encoding: identity` | Suppresses PHP's automatic chunked transfer encoding for binary streams, ensuring raw bytes are sent with the declared `Content-Length`. |
+| `Cache-Control: no-store, must-revalidate` | Disables caching of the download response by shared caches (proxies, CDNs). The file is an on-demand generated artifact — it must not be stored or re-served without revalidation. |
+| `Connection: close` | Closes the connection after this response to prevent keep-alive issues where long-running downloads cause premature client cut-off. Also ensures the full JSON error body (on early-exit failures) is readable before connection closure. |
 | `X-Content-Type-Options: nosniff` | Prevents browsers from MIME-sniffing the response away from the declared `Content-Type`. |
 | `X-Download-Options: noopen` | Prevents the file from automatically opening in the browser context (forces a save dialog). |
 | `X-Format-Substituted` | Set only when ffprobe detected the downloaded file differs materially from what was requested (different resolution, codec, or container). The value is the actual quality label (e.g. `720p` or `1280x720 vp9`). Absent on all normal downloads — only present when yt-dlp silently substituted a format. |
