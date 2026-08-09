@@ -1517,15 +1517,12 @@ $should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
 test('ffprobe non-zero exit → quota refund',
     $should_refund === true);
 
-// ffprobe succeeded but output is empty (no video stream) → refund
-// Even with exit code 0, empty output means no substitution detection is possible.
-// The refund condition in api.php uses: $probe_exit === 0 && $probe_out
-// When $probe_out is empty, ffprobe_exit===0 still passes the binary-level check
-// BUT the actual probe block in api.php requires BOTH exit=0 AND non-empty output.
-// We model the ffprobe_ok condition here as: isset($probe_exit) && $probe_exit === 0
-// So "exit=0, empty output" → ffprobe_ok=true (no refund).
-// This is the current behavior: ffprobe succeeded as a binary; the empty output
-// means no video stream (user's problem, not our infrastructure).
+// ffprobe succeeded (exit=0) but output is empty (no video stream detected).
+// The refund condition in api.php models ffprobe_ok as: isset($probe_exit) && $probe_exit === 0
+// (probe_out is checked separately in the actual ffprobe probe block, not in ffprobe_ok itself).
+// Since ffprobe_exit===0, ffprobe_ok=true → no refund.
+// Rationale: ffprobe succeeded as a binary; the empty output is a data-level issue
+// (no video stream in the file), not an infrastructure failure.
 $probe_exit = 0;
 $probe_out = '';
 $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
