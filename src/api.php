@@ -1719,8 +1719,44 @@ switch ($action) {
         $pipes = null;
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
         if (!$proc) {
-            $exit = -1;
-            $out = $err = '';
+            // proc_open failed — the process could not be started at all.
+            // This is a server-side error (binary missing, permissions, resource exhaustion),
+            // distinct from yt-dlp running but failing — return 500, not 422.
+            // Refund quota: unlimited-key holders skip increment; for free users who already
+            // had their count bumped before this point, undo it before responding.
+            if (!$unlimited) {
+                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+                if (!$undo_fp) {
+                    // best-effort — skip refund if file can't be opened
+                } elseif (flock($undo_fp, LOCK_EX)) {
+                    $undo_raw = fread($undo_fp, 4096);
+                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
+                    if ($undo_raw) {
+                        $decoded = json_decode($undo_raw, true);
+                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+                    }
+                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+                        $undo_data['c']--;
+                        ftruncate($undo_fp, 0);
+                        rewind($undo_fp);
+                        fwrite($undo_fp, json_encode($undo_data));
+                        fflush($undo_fp);
+                    }
+                    flock($undo_fp, LOCK_UN);
+                    fclose($undo_fp);
+                }
+            }
+            logRequest('info', 500, ['reason' => 'proc_open_failed']);
+            http_response_code(500);
+            header('X-Request-ID: ' . $request_id);
+            echo json_encode([
+                'error' => 'Failed to start download process.',
+                'error_code' => 'PROC_OPEN_FAILED',
+                'request_id' => $request_id,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
+            exit;
         } else {
             fclose($pipes[0]);
             unset($pipes[0]);
