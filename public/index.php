@@ -534,6 +534,10 @@ if (installDismissBtn && installBanner) {
   // API request_id that appears in API responses.
   var PAGE_REQUEST_ID = '<?= htmlspecialchars($page_request_id, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>';
 
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   const API = '/src/api.php';
 
   // Shared error hint map — single source of truth for human-readable error messages
@@ -880,10 +884,6 @@ if (installDismissBtn && installBanner) {
       return sep;
     }
 
-function escapeHtml(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-
   function renderFormatCard(f) {
     var card = document.createElement('a');
     card.className = 'format-card';
@@ -1068,6 +1068,15 @@ function escapeHtml(s) {
       if (addedAnything) formatGrid.appendChild(renderSeparator());
       formatGrid.appendChild(renderGroupHeader('Audio Only'));
       groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      addedAnything = true;
+    }
+    // All three groups were empty — no downloadable formats available.
+    // Show a clear message so the user knows this is expected behaviour, not a bug.
+    if (!addedAnything) {
+      var noFormats = document.createElement('div');
+      noFormats.className = 'format-group-header';
+      noFormats.textContent = 'No downloadable formats available for this video.';
+      formatGrid.appendChild(noFormats);
     }
   }
 

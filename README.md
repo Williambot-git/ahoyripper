@@ -427,10 +427,6 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
-| `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
-| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source |
-| `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues | Try again shortly |
-| `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error | Try again shortly |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
