@@ -2827,6 +2827,22 @@ switch ($action) {
                     $actual_width = isset($vstream['width']) ? (int)$vstream['width'] : null;
                     $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
                 }
+            } else {
+                // ffprobe failed (non-zero exit, timeout, or unreadable output).
+                // Log it server-side for diagnostics; the file was downloaded successfully
+                // so the user is not charged a quota refund. ffprobe_err carries the
+                // stderr output which describes what went wrong (e.g. "Invalid data found"
+                // for a corrupt file, or timeout messages).
+                $probe_err_clean = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $probe_err ?: ''));
+                logRequest('download', 200, [
+                    'reason' => 'ffprobe_verification_failed',
+                    'format_id' => $format_id,
+                    'ffprobe_exit' => $probe_exit,
+                    'ffprobe_err' => mb_strlen($probe_err_clean, 'UTF-8') > 150
+                        ? mb_substr($probe_err_clean, 0, 150, 'UTF-8') . '...'
+                        : $probe_err_clean,
+                ]);
+                header('X-FFProbe-Status: failed');
             }
             // Determine if substitution occurred by checking whether the requested format
             // materially differed from what was delivered. Only flag as substituted when
