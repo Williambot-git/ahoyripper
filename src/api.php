@@ -1951,6 +1951,8 @@ switch ($action) {
             http_response_code($err_status);
             $resp = [
                 'error' => $parsed['error'],
+                'error_code' => $parsed['error_code'] ?? 'YTDLP_ERROR',
+                'action' => 'info',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 // yt_dlp_version helps clients debug which yt-dlp build is running
@@ -1959,9 +1961,6 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
             ];
-            if (!empty($parsed['error_code'])) {
-                $resp['error_code'] = $parsed['error_code'];
-            }
             // Surface the raw yt-dlp output so the client can show diagnostic info
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
