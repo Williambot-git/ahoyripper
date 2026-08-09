@@ -2440,6 +2440,9 @@ switch ($action) {
                     }
                     flock($undo_fp, LOCK_UN);
                     fclose($undo_fp);
+                } else {
+                    // Lock acquisition failed — close the file handle to avoid leaking it.
+                    fclose($undo_fp);
                 }
             }
             http_response_code(500);
