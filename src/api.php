@@ -1055,6 +1055,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'id' => $format_id,
             'label' => $label,
             'description' => $desc,
+            'format_note' => $format_note ?: null,
             'format_description' => $format_description,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,

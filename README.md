@@ -43,7 +43,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
   -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
 ```
 
-Response includes `formats[]` with `id`, `label`, `description`, `filesize_mb`, `height`, `quality`, `ext`, `vcodec`, `acodec`, and `format_type` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
+Response includes `formats[]` with `id`, `label`, `description`, `format_note`, `filesize_mb`, `height`, `quality`, `ext`, `vcodec`, `acodec`, `format_type`, and `type_group` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
 
 ### Download a specific format
 
