@@ -13,6 +13,12 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 
 ## [Unreleased]
 
+### Fixed
+- **`.env.example` defaults** — `FFPROBE_TIMEOUT`, `YTDLP_TIMEOUT`, and `HEALTH_PROBE_TIMEOUT`
+  are now listed with their uncommented default values, matching what `api.php` actually
+  uses at runtime. Operators following `.env.example` now see all configurable env vars
+  with correct defaults rather than guessing which are commented-out vs. actively set.
+
 ### Added
 - Initial `CHANGELOG.md` — project version history now tracked here.
 
