@@ -3339,17 +3339,37 @@ switch ($action) {
                         'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                     ];
                 } else {
-                    // Classify the probe error so the client gets a structured error_code
-                    // and human-readable error_msg instead of a raw yt-dlp stderr dump.
-                    // This is consistent with how the info and download actions surface
-                    // classified errors to clients (classifyYtdlpError is already used
-                    // in those paths); the health probe was the only path returning raw text.
+                    // Probe failed — surface a structured error_code and error_msg.
+                    // Three distinct failure modes need explicit classification:
+                    //   1. proc_open returned false  → binary missing or system-level failure
+                    //   2. proc_open succeeded but exit=-1 → PHP-side timeout fired
+                    //   3. proc_open succeeded with exit>0 → yt-dlp itself reported an error
+                    //
+                    // classifyYtdlpError handles case 3 well (yt-dlp stderr). For cases 1-2
+                    // it returns null because the error text does not match any yt-dlp pattern.
+                    // Detect these explicitly before falling through to classifyYtdlpError so
+                    // clients receive a meaningful error_code instead of the generic 'PROBE_FAILED'.
                     $probe_raw_err = trim($probe_err ?: $probe_out);
-                    $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit);
+                    // case 1: proc_open false (binary absent, permissions, or system exhaustion)
+                    if ($probe_exit === -1 && $probe_raw_err === '') {
+                        $probe_classified = [
+                            'code' => 'YTDLP_NOT_FOUND',
+                            'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
+                        ];
+                    // case 2: PHP-side timeout (proc_open succeeded, process was killed)
+                    } elseif ($probe_exit === -1 && strpos($probe_raw_err, 'timed out') !== false) {
+                        $probe_classified = [
+                            'code' => 'SOURCE_TIMEOUT',
+                            'msg' => 'The source site took too long to respond during the health probe. Try again when the site is less busy.',
+                        ];
+                    // case 3: yt-dlp exited with a real error — classify from stderr
+                    } else {
+                        $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit);
+                    }
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
-                        'error_msg' => $probe_classified['msg'] ?? $probe_raw_err,
+                        'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
                         'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                     ];
                 }
