@@ -78,21 +78,15 @@ header('X-Download-Options: noopen');
 // all respect X-Robots-Tag. This complements robots.txt which only covers the
 // public page — the API endpoint (which returns JSON) needs its own directive.
 header('X-Robots-Tag: noindex, noai, noimage, noydir');
-$request_id = bin2hex(random_bytes(8));
+// Use the client-provided X-Request-ID if present; otherwise generate one.
+// Echoing the client's own ID back lets them confirm receipt and correlate
+// their local error events with server-side log entries. If no ID was sent
+// (direct API call, non-browser client), generate a server-side ID.
+$request_id = $_SERVER['HTTP_X_REQUEST_ID'] ?: bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
 
 // Make request ID available to logRequest via a static global
 $GLOBALS['__request_id'] = $request_id;
-// Echo back the browser-sent X-Request-ID so clients can confirm receipt and
-// correlate their local error events with server-side log entries. The browser
-// generates this ID on page load and sends it with every API request — echoing
-// it back lets the client verify the server received the correct ID for the
-// request. If the browser sent no ID (direct API call, non-browser client), this
-// is simply empty and the server-generated $request_id above is the authoritative ID.
-$client_req_id = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
-if ($client_req_id !== '') {
-    header('X-Request-ID: ' . $client_req_id);
-}
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 // Note: COEP removed — require-corp breaks cross-origin image loads (e.g. thumbnails
