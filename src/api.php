@@ -1536,12 +1536,25 @@ switch ($action) {
         }
         $unlimited = ($api_key !== null && hash_equals(AHOY_UNLIMITED_KEY, $api_key));
 
+        // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
+        // the quota file. This ensures unlimited-key responses always include
+        // the -1 signal regardless of whether the quota file is reachable.
+        // NOTE: $unlimited is declared at line 868 as `false` by default — it is
+        // set to true here only when a valid key is present.
+        if ($unlimited) {
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
+            // Return early — unlimited-key holders skip the quota file entirely.
+            // NOTE: the yt-dlp info call (line ~1675+) runs AFTER this block,
+            // so valid-key holders still get full info responses.
+        }
+
         // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         // Key must be read BEFORE this point so $unlimited is available for the
         // quota gate. The key-reading block is placed immediately below so it
         // runs before any stateful operations (rate limit, quota).
-        // NOTE: $unlimited is declared at line 868 as `false` by default — it is
-        // set to true here only when a valid key is present.
         if (!$unlimited) {
             // Use the same $ip variable declared above for the rate-limit gate.
             // Both info and download actions share the same daily-quota file so
@@ -1630,13 +1643,6 @@ switch ($action) {
             header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
             header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight UTC'));
             header('X-DailyLimit-Window: 86400');
-        } else {
-            // Unlimited-key holder — quota does not apply, signal this to the
-            // client with -1 so it can hide the "N free rips/day" UI element.
-            header('X-DailyLimit-Limit: -1');
-            header('X-DailyLimit-Remaining: -1');
-            header('X-DailyLimit-Reset: -1');
-            header('X-DailyLimit-Window: unlimited');
         }
 
         // Per-minute rate-limit headers — info is not a download action, so
