@@ -14,6 +14,14 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 ## [Unreleased]
 
 ### Fixed
+- **`deploy/nginx-docker.conf` static assets CSP** — Added missing `worker-src 'self'`
+  directive to the static assets location block (regex location for CSS/JS/fonts/images).
+  The server-level CSP, `api.php` location, and PHP layer all include `worker-src 'self'`
+  to control ServiceWorker instantiation, but the static assets location was missing this
+  directive, leaving ServiceWorker creation unconstrained for those file types in Docker
+  deployments. Added a full CSP header to the static assets location block so it matches
+  the consistent CSP coverage of all other deployment modes.
+
 - **`.env.example` defaults** — `FFPROBE_TIMEOUT`, `YTDLP_TIMEOUT`, and `HEALTH_PROBE_TIMEOUT`
   are now listed with their uncommented default values, matching what `api.php` actually
   uses at runtime. Operators following `.env.example` now see all configurable env vars
