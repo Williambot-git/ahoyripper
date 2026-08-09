@@ -475,6 +475,8 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "error_code": "GEOBLOCKED",
   "request_id": "a3f1b2c9d4e5f678",
   "source_url": "https://www.youtube.com/watch?v=...",
+  "yt_dlp_version": "2026.03.17",
+  "api_version": "1.0.0",
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -486,6 +488,8 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "error_code": "YTDLP_ERROR",
   "request_id": "a3f1b2c9d4e5f678",
   "source_url": "https://www.youtube.com/watch?v=...",
+  "yt_dlp_version": "2026.03.17",
+  "api_version": "1.0.0",
   "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
