@@ -1725,6 +1725,7 @@ switch ($action) {
             // even during --skip-download which would prepend garbage to stderr
             // and corrupt json_decode on stdout. The empty-string form (below) is an
             // alternative; 'false' is the canonical modern yt-dlp syntax for this.
+            '--no-warnings',
             '--progress-template', 'false',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',

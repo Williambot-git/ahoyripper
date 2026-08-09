@@ -11,8 +11,7 @@
   "orientation": "any",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["utilities", "multimedia"],
-  "handle_links": "preferred",
+  "categories": ["utilities"],
   "related_applications": [
     {
       "platform": "play",
