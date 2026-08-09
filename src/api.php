@@ -591,9 +591,12 @@ if (!$GLOBALS['__ytdlp_version']) {
 
 // Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
 // is wasteful and adds latency under load. Tracks hash to invalidate on binary upgrade.
-// Uses FFPROBE_PATH for hash computation to stay consistent with the actual binary used
-// by the post-download verification probe — if FFPROBE_PATH changes, the cache is
-// automatically invalidated because the hash will not match.
+// ffprobe version cache — keyed on FFPROBE_PATH so that changing the path
+// invalidates stale cache entries. Only the ffprobe binary is probed (used for
+// post-download codec/resolution verification); ffmpeg itself is not separately
+// checked since ffprobe is shipped alongside ffmpeg in virtually all deployments.
+// If ffprobe is present but ffmpeg is not, AhoyRipper's download flow would fail
+// at the yt-dlp merge stage anyway — so checking ffprobe's presence is sufficient.
 $ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
@@ -610,7 +613,7 @@ if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     }
 }
 if (!$GLOBALS['__ffmpeg_version']) {
-    // Use FFPROBE_PATH (not hardcoded 'ffmpeg') so the version probe matches
+    // Use FFPROBE_PATH (not hardcoded 'ffprobe') so the version probe matches
     // the binary whose hash is used as the cache key. If FFPROBE_PATH points
     // to a non-standard location (e.g. /usr/local/bin/ffprobe on macOS), the
     // version and hash now correctly reference the same binary.
@@ -3227,6 +3230,11 @@ switch ($action) {
             'os' => PHP_OS,
             'yt_dlp_version' => $version,
             'ffmpeg_version' => $ffmpeg,
+            // ffprobe_version mirrors ffmpeg_version — both report the same binary
+            // (ffprobe is part of the ffmpeg suite). Having both fields reduces
+            // confusion since ffprobe is the actual binary being checked, while
+            // ffmpeg_version is kept for backwards compatibility with existing clients.
+            'ffprobe_version' => $ffmpeg,
             'yt_dlp_ok' => $yt_dlp_ok,
             'ffmpeg_ok' => $ffmpeg_ok,
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
