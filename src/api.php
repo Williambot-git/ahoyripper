@@ -1439,6 +1439,20 @@ $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
 $json_actions = ['info', 'check', 'health', 'progress'];
 if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*' && !preg_match('/application\/json/i', $accept)) {
     http_response_code(406);
+    // Re-set security headers that the top-of-script block already set — this
+    // block bypasses the normal switch/case flow and sends its own response via
+    // exit, so the top-of-script headers may not have been applied. This mirrors
+    // the same pattern used by action=check and action=health for the same reason.
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Download-Options: noopen');
+    header('X-Robots-Tag: noindex, noai, noimage, noydir');
+    header('X-Request-ID: ' . $request_id);
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
     // Consistent with the METHOD_NOT_ALLOWED (405) response: include all
     // rate-limit headers so API clients always get complete header coverage
     // regardless of which early-exit code path they hit.
