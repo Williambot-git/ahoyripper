@@ -60,6 +60,12 @@ function isValidUrl($url) {
     if ($parsed === false || $parsed === null) {
         return false;
     }
+    // Enforce RFC 1035 hostname length limit (253 chars max for full domain,
+    // 63 chars per label). This prevents edge-case parse_url edge cases with
+    // extreme input and aligns with what DNS can actually resolve.
+    if (strlen($parsed) > 253) {
+        return false;
+    }
     // Strip brackets from IPv6 URLs (e.g., [::1] -> ::1) before validation.
     // parse_url with PHP_URL_HOST returns IPv6 addresses in bracketed form.
     // filter_var with FILTER_VALIDATE_IP rejects bracketed strings, so we must
@@ -184,6 +190,8 @@ test('rejects unresolvable domain (no DNS A record)',
     isValidUrl('https://this-domain-definitely-does-not-exist.invalid/path') === false);
 test('rejects localhost (resolves to 127.0.0.1 — SSRF via DNS rebinding)',
     isValidUrl('https://localhost/path') === false);
+test('rejects over-long hostname (254+ chars — RFC 1035 max is 253)',
+    isValidUrl('https://' . str_repeat('a', 250) . '.com/path') === false);
 test('rejects bare multicast IP 224.0.0.1 (FILTER_FLAG_NO_RES_RANGE does not block multicast)',
     isValidUrl('https://224.0.0.1/path') === false);
 test('rejects bare broadcast IP 255.255.255.255 (reserved range)',

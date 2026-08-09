@@ -1717,9 +1717,8 @@ switch ($action) {
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // even during --skip-download which would prepend garbage to stderr
-            // and corrupt json_decode on stdout. The empty-string form (below) is an
-            // alternative; 'false' is the canonical modern yt-dlp syntax for this.
-            '--no-warnings',
+            // and corrupt json_decode on stdout. 'false' is the canonical modern
+            // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
@@ -2409,7 +2408,6 @@ switch ($action) {
             $ytdlp_cmd[] = COOKIES_PATH;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--no-warnings',
             '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E;,=]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
             '--',
             $url,
