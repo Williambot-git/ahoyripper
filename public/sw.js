@@ -51,24 +51,33 @@ self.addEventListener('install', (event) => {
   // the same waitUntil so both operations complete before the SW activates.
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => {
-        // Wrap addAll in a promise so catch() applies to rejection from addAll(),
-        // not to the synchronous try block itself (which can only throw on a
-        // non-object cache argument — a programming error, not a runtime failure).
-        return new Promise((resolve, reject) => {
+      .then((cache) =>
+        // Return the promise chain so waitUntil receives addAll's outcome.
+        // If addAll rejects (network error, storage quota), the promise
+        // rejects and the SW stays in the waiting state rather than
+        // activating without cached assets. An install failure is recoverable —
+        // the browser retries SW activation on the next page visit.
+        new Promise((resolve, reject) => {
           cache.addAll(STATIC_ASSETS).then(resolve).catch(reject);
-        }).catch((err) => {
-          console.warn('[SW] Failed to cache some static assets:', err);
-          // Swallow the error — the SW still activates and the network
-          // serves uncached assets as the fallback.
-        });
-      })
+        })
+      )
+      // Only clean old caches after static assets are confirmed cached.
+      // Cleaning caches before addAll completes can delete the very assets
+      // we just cached if the browser evicted the old cache prematurely.
       .then(() => caches.keys())
       .then((names) => Promise.all(
         names
           .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE && n !== SHELL_CACHE)
           .map((n) => caches.delete(n))
       ))
+      .catch((err) => {
+        // addAll failed (network error, storage quota). Fail the install
+        // deliberately so the SW does NOT activate without its static assets.
+        // An install rejection is not fatal — the browser will retry activation
+        // on the next visit, giving the network a chance to recover.
+        // Re-throw so waitUntil receives a rejected promise.
+        throw err;
+      })
   );
   // Do NOT skipWaiting here — let the frontend decide when to activate.
   // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
