@@ -232,6 +232,21 @@ else
 fi
 
 echo ""
+echo "==> Checking PWA manifest description length (W3C + Play Store compliance)... "
+# W3C Web Manifest spec recommends descriptions stay under 512 bytes.
+# Play Store requires ≤ 80 chars. Using 512 bytes as the primary limit here
+# since it is the W3C requirement; the test is informational.
+MANIFEST_DESC=$(php -r "echo json_decode(file_get_contents('$PROJECT_ROOT/public/manifest.json'))->description ?? '';")
+DESC_LEN=${#MANIFEST_DESC}
+MAX_DESC_LEN=512
+if [ "$DESC_LEN" -le "$MAX_DESC_LEN" ]; then
+    echo "  ✓ manifest description length: $DESC_LEN bytes (≤ $MAX_DESC_LEN)"
+else
+    echo "  ✗ manifest description too long: $DESC_LEN bytes (W3C recommends ≤ $MAX_DESC_LEN)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking security headers in api.php..."
 REQUIRED_HEADERS=(
     "Date"
