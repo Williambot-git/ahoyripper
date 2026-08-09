@@ -680,6 +680,20 @@ else
     exit 1
 fi
 
+echo ""
+echo "==> Checking og-image.svg platform count consistency (1872, not 1800)... "
+# The og-image.svg <desc>, comment, and <text> element must all say "1872".
+# Inconsistency here (e.g. <desc> saying "1800+" while <text> says "+1872")
+# was found and fixed in the 2026-08 caretaker run.
+OG_DESC=$(grep 'id="og-desc"' public/og-image.svg | grep -o '1872\|1800' || true)
+OG_TEXT=$(grep 'text.*1872\|text.*1800' public/og-image.svg | grep -o '1872\|1800' || true)
+if [ "$OG_DESC" = "1872" ] && [ "$OG_TEXT" = "1872" ]; then
+    echo "  ✓ og-image.svg consistently says 1872+ (desc and text match)"
+else
+    echo "  ✗ og-image.svg platform count mismatch: desc='$OG_DESC', text='$OG_TEXT' (both must be 1872)"
+    exit 1
+fi
+
 echo "==> Checking og:title meta tag in public/index.php..."
 if grep -q 'meta property="og:title"' public/index.php; then
     echo "  ✓ og:title present in index.php"
