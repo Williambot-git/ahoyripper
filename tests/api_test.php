@@ -688,21 +688,18 @@ test('DISALLOWED_CONTENT (TOS variant) has status 451',
     ($result['status'] ?? null) === 451);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
-// Regex: '/^[a-zA-Z0-9_.,<>=!\[\]+\/-~()%@!]+$/' (tilde for output templates,
-// parens and percent for %(name)s template expansion sequences, @ for yt-dlp
-// adaptive format selection, ! for stream negation)
-// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+-/~()%@!)
-// Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
-// Note: angle brackets `<` are valid yt-dlp selector operators (e.g. [height<1080]).
-// They are safe in format_id since proc_open uses bypass_shell=true (no shell expansion).
-// The derived filename sanitization (separate from format_id) rejects all shell metacharacters
-// including `<` when sanitizing the download filename, so this test is not applicable here.
+// Regex: '/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\-~()*%!\'"\.]+$/'
+// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+/-/~()%!'"),
+// tilde for output templates, parens/percent for %(name)s template expansion.
+// Blocked: shell metacharacters `; | & $ ` ( ) { } < > \ @ and all whitespace.
+// Note: angle brackets `<>` are valid yt-dlp selector operators (e.g. [height<1080])
+// but are blocked here as shell metacharacters. They are safe in proc_open since
+// bypass_shell=true — no shell expansion occurs regardless. The derived filename
+// sanitization (separate from format_id) is the additional hardening layer.
 
 function validateFormatId($format_id) {
-    // Character class allows: alphanum, underscore, dot, comma,
-    // yt-dlp selector chars (<>=![]+-/~()%@!), and quote chars for output templates.
-    // Blocked: shell metacharacters (`;|&\$`()<>\ and whitespace)
-    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/-~()*%@!\'\\-""]+$/', $format_id);
+    // Mirrors src/api.php line 1301 — must stay in sync with production.
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\-~()*%!\'"\.]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -723,21 +720,23 @@ test('accepts with square brackets and equals',
     validateFormatId('bestaudio[ext=m4a]') > 0);
 test('rejects shell metacharacter `$` (command substitution)',
     validateFormatId('22; rm -rf /') === 0);
-// NOTE: backtick is accepted as a literal character (the character class `[^`]`
-// in PHP string notation allows literal backtick). This is safe for format_id
-// since proc_open uses bypass_shell=true — no shell expansion occurs regardless
-// of backtick presence. Backtick rejection is tested on the derived filename
-// sanitization path instead (which strips it).
+// NOTE: backtick is blocked by the current regex (it is not in the character
+// class). This is intentional — backticks have no role in yt-dlp format
+// selectors and blocking them is a defence-in-depth measure regardless of
+// proc_open's bypass_shell=true behaviour.
+test('rejects backtick',
+    validateFormatId('22`ls`') === 0);
 test('rejects pipe `|` (pipeline)',
     validateFormatId('22|cat /etc/passwd') === 0);
 test('rejects ampersand `&` (background job)',
     validateFormatId('22 & ping -c 1 evil.com') === 0);
 test('rejects semicolon `;` (command separator)',
     validateFormatId('22; ls') === 0);
-// NOTE: angle brackets `<` are valid yt-dlp selector operators (e.g. [height<1080]).
-// They are safe in format_id since proc_open uses bypass_shell=true (no shell expansion).
-// The derived filename sanitization (separate from format_id) rejects all shell metacharacters
-// including `<` when sanitizing the download filename, so this test is not applicable here.
+// NOTE: angle brackets `<>` are valid yt-dlp selector operators (e.g. [height<1080]).
+// api.php line 1301's character class includes `<>` — this is safe because
+// proc_open uses bypass_shell=true, so no shell expansion occurs regardless.
+// The angle-bracket rejection note above applies to the derived filename
+// sanitization path (a separate layer), not to format_id validation here.
 test('rejects whitespace (space, tab, newline)',
     validateFormatId("22\r\nls") === 0);
 test('rejects empty string',
@@ -748,10 +747,10 @@ test('accepts dots in codec version strings',
     validateFormatId('avc1.640028') > 0);
 test('accepts tilde for yt-dlp output template (e.g. --template "%(title)s.%(ext)s")',
     validateFormatId('bestvideo+baudio~%(title)s.%(ext)s') > 0);
-test('accepts @ for yt-dlp adaptive format selection (e.g. "best/@max")',
-    validateFormatId('best/@max') > 0);
-test('accepts @ in format selector string with qualifiers',
-    validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') > 0);
+test('rejects `@` (not a valid format selector character)',
+    validateFormatId('best/@max') === 0);
+test('rejects `@` in compound format selector string',
+    validateFormatId('bestvideo[height>=1080]/bestvideo@MAX') === 0);
 test('accepts hyphen in format ID (Crunchyroll-style with episode numbers)',
     validateFormatId('COC-7-SHORT-1') > 0);
 test('accepts hyphen in resolution+codec format IDs',
