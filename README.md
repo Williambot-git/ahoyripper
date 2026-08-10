@@ -69,14 +69,18 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
   -H "Referer: https://ahoyripper.com/"
 ```
 
-### Health check
+### Lightweight check
 
 ```bash
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 # {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","server_time_unix":1749180000,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
 ```
 
-### Connectivity probe
+### Full health check
+
+```bash
+curl -s "https://ahoyripper.com/src/api.php?action=health" | python3 -m json.tool
+```
 
 Add `&probe=1` to run an end-to-end yt-dlp connectivity probe and verify that yt-dlp can reach YouTube:
 
