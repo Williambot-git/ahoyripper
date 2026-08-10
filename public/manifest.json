@@ -60,5 +60,21 @@
       "url": "/?utm_source=homescreen&utm_medium=shortcut",
       "icons": [{ "src": "/favicon-180.png", "sizes": "180x180" }]
     }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "AhoyRipper — paste a URL, pick a format, download"
+    },
+    {
+      "src": "/og-image.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "AhoyRipper — supports YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms"
+    }
   ]
 }
