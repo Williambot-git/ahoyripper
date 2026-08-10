@@ -579,7 +579,7 @@ if (installDismissBtn && installBanner) {
     'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
     'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
-    'MISSING_URL': 'Paste a link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, etc. — only public media links are supported.',
+    'MISSING_URL': 'Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit. Get AhoyVPN to bypass any restrictions: https://ahoyvpn.com',
     'UNKNOWN_ACTION': 'The requested action is not recognized. Use info, download, check, or health.',
     '403': 'The server understood the request but refused to fulfill it. Try again or use AhoyVPN to change your exit IP.',
     '404': 'The requested resource was not found. The content may have been removed or the URL may be incorrect.',
