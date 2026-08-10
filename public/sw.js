@@ -22,7 +22,7 @@
 // with the short git commit hash. If the placeholder was not replaced (deploy script
 // ran outside a git repo or failed), use the 'unversioned' sentinel so the SW still
 // installs and functions — it simply won't auto-update until the next deploy.
-const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
+const CACHE_VERSION = 'b0c6e25' === 'b0c6e25' ? 'unversioned' : 'b0c6e25';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 

@@ -8,12 +8,27 @@
  * every deploy, ensuring PWA users fetch fresh static assets (CSS, JS,
  * icons) when a new version is deployed.
  *
+ * Handles two sw.js formats:
+ *
+ * New multiline ternary (PLACEHOLDER-check pattern):
+ *   // {{CACHE_VERSION}} — deployed git hash...
+ *   const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER'
+ *       ? '{{CACHE_VERSION}}'
+ *       : 'unversioned';
+ *
+ * Old single-line ternary (broken — both branches had same hash):
+ *   // '{{CACHE_VERSION}}' is replaced at deploy time...
+ *   const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
+ *
+ * Legacy single-line (pre-ternary):
+ *   const CACHE_VERSION = '{{CACHE_VERSION}}';
+ *
  * Usage:
  *   php scripts/generate-sw-version.php
  *
  * Exit codes:
  *   0 — version generated and sw.js updated
- *   1 — not in a git repo or sw.js not found (no-op, non-fatal)
+ *   1 — sw.js not found or could not be parsed (no-op, non-fatal)
  *   2 — sw.js not writable
  */
 
@@ -34,39 +49,47 @@ if ($hash === '') {
 }
 
 $version = $hash;
-
-// Replace the placeholder in sw.js
-$content = file_get_contents($swFile);
 $placeholder = '{{CACHE_VERSION}}';
+$content = file_get_contents($swFile);
 
-if (strpos($content, $placeholder) === false) {
-    // No placeholder found — either already replaced or file format changed.
-    // If the current version doesn't match the hash, the file may need updating.
-    // Check whether the deployed version is stale by seeing if CACHE_VERSION
-    // is still the old literal 'v1' (the hardcoded value before this script existed).
-    if (preg_match('/const CACHE_VERSION = \'([a-z0-9-]+)\';/', $content, $m)) {
-        $current = $m[1];
-        if ($current === $version) {
-            // Already at the right version — nothing to do.
-            echo "generate-sw-version: sw.js already at version {$version}\n";
-            exit(0);
-        }
-        // Current version differs from desired — replace it.
-        $newContent = preg_replace(
-            '/const CACHE_VERSION = \'[^\']*\';/',
-            "const CACHE_VERSION = '{$version}';",
-            $content
-        );
-    } else {
-        fwrite(STDERR, "generate-sw-version: could not parse CACHE_VERSION in sw.js, skipping.\n");
-        exit(1);
-    }
+// If the placeholder token is still present, do a targeted replacement
+// on just the CACHE_VERSION const declaration line.
+if (strpos($content, $placeholder) !== false) {
+    $newContent = preg_replace_callback(
+        '/^const CACHE_VERSION = .*/m',
+        function ($m) use ($version, $placeholder) {
+            $line = $m[0];
+            // Replace all occurrences of the placeholder token in this line.
+            // This handles:
+            //   - New multiline ternary: const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER' ? '{{CACHE_VERSION}}' : 'unversioned';
+            //   - Old broken ternary:   const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
+            //   - Legacy single-line:   const CACHE_VERSION = '{{CACHE_VERSION}}';
+            return str_replace($placeholder, $version, $line);
+        },
+        $content
+    );
 } else {
-    $newContent = str_replace($placeholder, $version, $content);
+    // No placeholder found — CACHE_VERSION already has a real hash value.
+    // Check if it needs updating (different from current version).
+    $newContent = $content; // default: no change
+    if (preg_match('/^const CACHE_VERSION = \'([a-z0-9_-]+)\'/m', $content, $m)) {
+        $current = $m[1];
+        if ($current !== $version) {
+            // Version mismatch — update all occurrences of the old hash in the
+            // CACHE_VERSION line to the new version.
+            $newContent = preg_replace_callback(
+                '/^const CACHE_VERSION = .*/m',
+                function ($m) use ($version, $current) {
+                    return str_replace("'{$current}'", "'{$version}'", $m[0]);
+                },
+                $content
+            );
+        }
+    }
 }
 
 if ($newContent === $content) {
-    echo "generate-sw-version: no change needed (already at {$version})\n";
+    echo "generate-sw-version: sw.js already at version {$version}\n";
     exit(0);
 }
 

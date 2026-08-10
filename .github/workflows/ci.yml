@@ -33,6 +33,23 @@ jobs:
             if [ ! -f "$f" ]; then echo "Missing: $f"; exit 1; fi
           done
 
+      - name: Check PWA ServiceWorker cache versioning
+        run: |
+          # sw.js must have its CACHE_VERSION replaced from the default
+          # '{{CACHE_VERSION}}' by generate-sw-version.php. If the value
+          # is still 'unversioned', the deploy-time script was not run
+          # (or ran but failed silently), and PWA users will never get
+          # cache-busting updates after a new deployment.
+          if grep -q "CACHE_VERSION = 'unversioned'" public/sw.js; then
+            echo "FAIL: sw.js CACHE_VERSION is still 'unversioned' — generate-sw-version.php was not run"
+            exit 1
+          fi
+          if grep -q "{{CACHE_VERSION}}" public/sw.js; then
+            echo "FAIL: sw.js still contains unreplaced {{CACHE_VERSION}} placeholder"
+            exit 1
+          fi
+          echo "PWA cache versioning OK: $(grep "CACHE_VERSION = " public/sw.js)"
+
       - name: Check security headers
         run: |
           for header in X-Content-Type-Options X-Frame-Options Strict-Transport-Security Content-Security-Policy X-Download-Options Cross-Origin-Opener-Policy Cross-Origin-Resource-Policy; do

@@ -27,6 +27,15 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   uses at runtime. Operators following `.env.example` now see all configurable env vars
   with correct defaults rather than guessing which are commented-out vs. actively set.
 
+### Changed
+- **`Dockerfile` PWA cache versioning** — Added `RUN php scripts/generate-sw-version.php`
+  after copying `public/` so the ServiceWorker cache version is bumped on every deploy.
+  Previously the script existed but was never invoked in Docker builds, leaving
+  `CACHE_VERSION='unversioned'` permanently — PWA users would never receive cache-busted
+  static assets after a new deployment. Also added a CI sanity check that fails if
+  `sw.js` still contains the `unversioned` sentinel or the unreplaced `{{CACHE_VERSION}}`
+  placeholder.
+
 ### Added
 - Initial `CHANGELOG.md` — project version history now tracked here.
 

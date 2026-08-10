@@ -107,6 +107,15 @@ WORKDIR /app
 COPY public/ ./public/
 COPY src/ ./src/
 
+# Bump PWA ServiceWorker cache version on every deploy so returning
+# PWA users fetch fresh static assets (CSS, JS, icons) automatically.
+# generate-sw-version.php reads the git commit hash and replaces
+# {{CACHE_VERSION}} in sw.js with the current hash. When there is no
+# git repo (e.g. source tarball), it falls back to a date-based string
+# that changes every minute. Without this step the SW always gets
+# CACHE_VERSION='unversioned' and never invalidates the PWA cache.
+RUN php scripts/generate-sw-version.php || true
+
 # Run as non-root — the image must be built with this user, not root.
 # This prevents the container from gaining root privileges via setuid binaries
 # and reduces the impact of any future container escape vulnerability.
