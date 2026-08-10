@@ -1836,6 +1836,12 @@ switch ($action) {
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota_remaining/quota_limit/quota_reset: quota was refunded before
+                // this response, so remaining is 0. Mirrors the fields set on every
+                // other error and success response so the client quota UI stays current.
+                'quota_remaining' => 0,
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         } else {
@@ -2522,6 +2528,12 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota_remaining/quota_limit/quota_reset: quota was refunded before
+                // this response, so remaining is 0. Mirrors the fields set on every
+                // other error and success response so the client quota UI stays current.
+                'quota_remaining' => 0,
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
