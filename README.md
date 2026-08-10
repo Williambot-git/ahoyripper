@@ -128,6 +128,8 @@ yt-dlp --list-extractors
 
 ---
 
+## Installation Steps
+
 ```bash
 # 1. Clone the repo
 git clone https://github.com/Williambot-git/ahoyripper.git /var/www/ahoyripper
