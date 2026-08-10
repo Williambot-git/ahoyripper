@@ -1413,6 +1413,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
     header('X-DailyLimit-Window: unlimited');
+    // Add Referrer-Policy (missing here — the 406 block has it; both early-exit
+    // error paths should be equally hardened since both bypass the switch block
+    // that would otherwise set it globally).
+    header('Referrer-Policy: strict-origin-when-cross-origin');
     echo json_encode([
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
