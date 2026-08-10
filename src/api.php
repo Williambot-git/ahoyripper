@@ -2634,10 +2634,18 @@ switch ($action) {
                 }
             }
 
+            // Retry-After: Unix timestamp when the download can be retried.
+            // Set to now + DOWNLOAD_TIMEOUT so transient source-site errors (rate limits,
+            // 5xx, connection failures) have a consistent client-visible retry window.
+            // Permanent failures (GEOBLOCKED 451, COPYRIGHT 451, PRIVATE 403) still
+            // carry this header — clients treat it as advisory; the user sees the error
+            // message and won't retry a permanent failure even if they ignore the hint.
+            $retry_ts = time() + DOWNLOAD_TIMEOUT;
             if ($err_classified) {
                 $status = $err_classified['status'] ?? 422;
                 logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code($status);
+                header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
                 $resp = [
                     'error' => $err_classified['msg'],
@@ -2657,6 +2665,7 @@ switch ($action) {
                 // Unclassified error — $err_classified is null; use 422 as safe default.
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
+                header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
                 // Truncate the user-facing error message to match the ~200-char ceiling used
                 // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
