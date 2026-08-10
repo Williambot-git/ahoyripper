@@ -549,11 +549,12 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
   "php_version": "8.2.0",
-  "api_version": "1.0.0"
+  "api_version": "1.0.0",
+  "yt_dlp_version": "2026.03.17"
 }
 ```
 
-`php_version` and `api_version` are present on `action=check` and `action=health`. Both `app_version` and `api_version` are present on all endpoints for full API surface metadata.
+`yt_dlp_version` is present on all endpoints (`check`, `health`, `info`, `download`) for consistent API surface metadata. On `check` it is the cached version string (no additional subprocess call); on `health`/`info`/`download` it confirms the binary was exercised.
 
 `action=health` returns full system status:
 ```

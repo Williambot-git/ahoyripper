@@ -3159,10 +3159,10 @@ switch ($action) {
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
         header('Cache-Control: no-cache');
-        // yt_dlp_version is intentionally absent here: check is a zero-dependency
-        // ping that does not invoke yt-dlp. Including the field would falsely imply
-        // the binary was exercised and confirmed functional. The field IS included
-        // in health, info, and download responses where yt-dlp is genuinely called.
+        // yt_dlp_version is included in the check response for consistency with
+        // health/info/download responses. The version string is pre-cached before
+        // the routing switch (lines 535-583) so no additional subprocess call is
+        // needed here — $GLOBALS['__ytdlp_version'] is already set.
         echo json_encode([
             'status' => 'ok',
             'server_time' => date('c'),
@@ -3171,6 +3171,7 @@ switch ($action) {
             'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
