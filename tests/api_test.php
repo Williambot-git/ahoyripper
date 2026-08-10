@@ -987,7 +987,12 @@ test('rejects object',
 // string in this context and should map to 'Unknown' alongside null and ''.
 
 function cleanForTest($s) {
-    if ($s === null || $s === '') return 'Unknown';
+    if (is_string($s)) {
+        $s = trim($s);
+        if ($s === '') return 'Unknown';
+    } elseif ($s === null || $s === '') {
+        return 'Unknown';
+    }
     if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
     return (string)$s;
 }
@@ -998,10 +1003,16 @@ test('clean(null) returns "Unknown"',
     cleanForTest(null) === 'Unknown');
 test('clean("") returns "Unknown"',
     cleanForTest('') === 'Unknown');
+test('clean("   ") whitespace-only returns "Unknown"',
+    cleanForTest('   ') === 'Unknown');
+test('clean(" \t\n ") mixed whitespace returns "Unknown"',
+    cleanForTest(" \t\n ") === 'Unknown');
 test('clean(0) returns "0" (valid numeric — audio-only formats report height=0)',
     cleanForTest(0) === '0');
+test('clean("  Rick Astley  ") trims surrounding whitespace',
+    cleanForTest('  Rick Astley  ') === 'Rick Astley');
 test('clean("valid string") passes through unchanged',
-    cleanForTest('Rick Astley') === 'Rick Astley');
+    cleanForTest('valid string') === 'valid string');
 test('clean(42) numeric non-zero becomes string "42"',
     cleanForTest(42) === '42');
 test('clean([1,2]) array returns "Unknown" (not "Array")',

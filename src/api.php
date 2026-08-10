@@ -650,12 +650,19 @@ if (!$GLOBALS['__ffmpeg_version']) {
 
 // Sanitize string for JSON output
 function clean($s) {
-    // Return 'Unknown' for null or empty string only.
+    // Return 'Unknown' for null, empty string, or whitespace-only string.
     // Integer 0 is NOT treated as Unknown — it is a valid numeric value that
     // appears in yt-dlp metadata (e.g., height=0 for audio-only formats).
     // Passing 0 through as '0' (string) keeps the UI consistent and prevents
     // silent label corruption (e.g., "0kbps m4a" would become "Unknown kbps m4a").
-    if ($s === null || $s === '') return 'Unknown';
+    // Whitespace-only strings from yt-dlp metadata would produce blank or
+    // space-filled labels (e.g., "  kbps m4a") — trim before checking emptiness.
+    if (is_string($s)) {
+        $s = trim($s);
+        if ($s === '') return 'Unknown';
+    } elseif ($s === null || $s === '') {
+        return 'Unknown';
+    }
     // Reject booleans, arrays and objects — yt-dlp metadata is always scalar
     // (string, int, float, or null). A boolean in a format label field would
     // become "1" or "" (empty string) via (string) cast, corrupting the label
