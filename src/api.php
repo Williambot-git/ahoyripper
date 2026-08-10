@@ -2907,16 +2907,23 @@ switch ($action) {
             }
         }
 
-        // Refund daily quota if ffprobe verification failed — the file was downloaded
-        // successfully but ffprobe could not verify the codec/resolution (e.g. ffprobe
-        // timed out on a corrupt file, or the binary was not executable). Since the
-        // substitution-detection info is lost, the user effectively received the same
-        // outcome as if no ffprobe had run (no substitution notice shown). Refunding
-        // is the consistent choice: we refund on all yt-dlp failures regardless of
-        // classified/unclassified status, so ffprobe failures (which are outside the
-        // user's control) deserve the same treatment.
+        // Refund daily quota if ffprobe verification failed or was skipped — the file was
+        // downloaded successfully but ffprobe could not verify the codec/resolution (e.g. ffprobe
+        // timed out on a corrupt file, or the binary was not executable or not found).
+        // Since the substitution-detection info is unreliable in these cases, the user
+        // effectively received the same outcome as if no ffprobe had run.
+        // Refunding is the consistent choice: we refund on all yt-dlp failures regardless of
+        // classified/unclassified status, so ffprobe failures (which are outside the user's
+        // control) deserve the same treatment.
         // Skip when: ffprobe succeeded ($probe_exit === 0), audio-only (no probe ran),
         // or user is unlimited-key holder ($unlimited=true — never had quota incremented).
+        // $probe_exit is only set inside the ffprobe block (line 2773), so isset() distinguishes
+        // "ffprobe ran and exited 0" (no refund) from "ffprobe ran and failed" or "ffprobe
+        // was skipped" (both get a refund). The distinction between failure and skip is
+        // made by the probe_exit value: 0 = success (no refund), -1 or non-zero = fail/refund.
+        // A non-existent FFPROBE_PATH causes is_executable() to return false, the if block
+        // is never entered, $probe_exit is never set, and this refund fires — correct
+        // behavior since the user shouldn't be charged when ffprobe couldn't even be attempted.
         $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
         if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
             $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
