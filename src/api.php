@@ -1805,10 +1805,14 @@ switch ($action) {
             // distinct from yt-dlp running but failing — return 500, not 422.
             // Refund quota: unlimited-key holders skip increment; for free users who already
             // had their count bumped before this point, undo it before responding.
+            // $post_refund_count tracks the quota count AFTER the refund is applied.
+            // Initialised to $daily_limit as a safe default (no refund on failure).
+            $post_refund_count = $daily_limit;
             if (!$unlimited) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if (!$undo_fp) {
-                    // best-effort — skip refund if file can't be opened
+                    // best-effort — skip refund if file can't be opened; $post_refund_count
+                    // stays at $daily_limit (safe: user keeps their credit rather than losing it)
                 } elseif (flock($undo_fp, LOCK_EX)) {
                     $undo_raw = fread($undo_fp, 4096);
                     $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
@@ -1823,6 +1827,7 @@ switch ($action) {
                         fwrite($undo_fp, json_encode($undo_data));
                         fflush($undo_fp);
                     }
+                    $post_refund_count = $undo_data['c'];
                     flock($undo_fp, LOCK_UN);
                     fclose($undo_fp);
                 }
@@ -1838,9 +1843,10 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining/quota_limit/quota_reset: quota was refunded before
-                // this response, so remaining is 0. Mirrors the fields set on every
-                // other error and success response so the client quota UI stays current.
-                'quota_remaining' => 0,
+                // this response. $post_refund_count is the post-refund daily count.
+                // Unlimited-key holders ($unlimited=true) were never incremented, so
+                // $post_refund_count is $daily_limit for them (no change from baseline).
+                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -2490,6 +2496,9 @@ switch ($action) {
             // Only refund when the baseline was set (proc_open was attempted after
             // quota increment). Unlimited-key holders ($unlimited=true) skip
             // increment so no refund needed.
+            // $post_refund_count tracks the quota count AFTER the refund is applied.
+            // Initialised to $daily_limit as a safe default (no refund on failure).
+            $post_refund_count = $daily_limit;
             if (!$unlimited && isset($dl_quota_before_refund)) {
                 $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
                 if (!$undo_fp) {
@@ -2512,6 +2521,7 @@ switch ($action) {
                         fwrite($undo_fp, json_encode($undo_data));
                         fflush($undo_fp);
                     }
+                    $post_refund_count = $undo_data['c'];
                     flock($undo_fp, LOCK_UN);
                     fclose($undo_fp);
                 } else {
@@ -2530,9 +2540,10 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining/quota_limit/quota_reset: quota was refunded before
-                // this response, so remaining is 0. Mirrors the fields set on every
-                // other error and success response so the client quota UI stays current.
-                'quota_remaining' => 0,
+                // this response. $post_refund_count is the post-refund daily count.
+                // Unlimited-key holders ($unlimited=true) were never incremented, so
+                // $post_refund_count is $daily_limit for them (no change from baseline).
+                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -3215,8 +3226,9 @@ switch ($action) {
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unlimited');
         // Standard rate-limit header family for generic API consumers.
-        // X-RateLimit-Limit: 0 = this endpoint has no request frequency cap.
-        header('X-RateLimit-Limit: 0');
+        // X-RateLimit-Limit: -1 = no rate limit applies (convention: -1 means
+        // "unlimited", 0 means "limit exhausted"). Mirrors X-DL-RateLimit-Limit.
+        header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
@@ -3573,8 +3585,9 @@ switch ($action) {
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unlimited');
         // Standard rate-limit header family for generic API consumers.
-        // X-RateLimit-Limit: 0 = this endpoint has no request frequency cap.
-        header('X-RateLimit-Limit: 0');
+        // X-RateLimit-Limit: -1 = no rate limit applies (convention: -1 means
+        // "unlimited", 0 means "limit exhausted"). Mirrors X-DL-RateLimit-Limit.
+        header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
@@ -3645,7 +3658,8 @@ switch ($action) {
         header('X-DL-RateLimit-Remaining: -1');
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unlimited');
-        header('X-RateLimit-Limit: 0');
+        // Rate-limit headers: -1 = no limit applies (0 = exhausted).
+        header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
