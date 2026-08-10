@@ -128,11 +128,6 @@ header_remove('X-Powered-By');
        process images. Matches the descriptive alt text already used in twitter:image:alt.
        Keep in sync with twitter:image:alt when updating share copy. -->
   <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
-  <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
-       This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
-       on social media or linked from external sites, since the og:image is the most
-       visually prominent element in link previews. It also helps Core Web Vitals. -->
-  <meta property="og:image:fetchpriority" content="high">
   <!-- Preload the og:image so social share previews load instantly.
        fetchpriority="high" on the preload signals the browser to prioritize
        this resource early in the page load, meaningfully improving LCP (Largest
@@ -275,7 +270,7 @@ header_remove('X-Powered-By');
 
 <!-- PWA update banner — shown when a new service worker is installed and waiting -->
 <!-- role="alert" + aria-live="assertive" signals screen readers to announce immediately -->
-<div id="update-banner" class="update-banner" style="display:none" role="alert" aria-live="assertive">
+<div id="update-banner" class="update-banner" style="display:none" role="alert" aria-live="assertive" tabindex="-1">
   <span>A new version of AhoyRipper is available.</span>
   <button type="button" class="refresh-btn">Update now</button>
 </div>
@@ -283,7 +278,7 @@ header_remove('X-Powered-By');
 <!-- PWA install banner — shown when the browser fires the beforeinstallprompt event.
      Only shown on first visit (persisted in localStorage). Hidden automatically if
      the app is already installed (navigator.standalone === true on iOS/supported browsers). -->
-<div id="install-banner" class="update-banner" style="display:none" role="alert" aria-live="polite">
+<div id="install-banner" class="update-banner" style="display:none" role="alert" aria-live="polite" tabindex="-1">
   <span>Install AhoyRipper for faster access and offline support.</span>
   <button type="button" id="install-btn" class="refresh-btn">Install</button>
   <button type="button" id="install-dismiss-btn" class="refresh-btn" style="background:#374151" aria-label="Dismiss install prompt">✕</button>
