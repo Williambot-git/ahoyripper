@@ -574,8 +574,12 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "yt_dlp_probe_cache_expires_at": "2026-05-21T16:05:00+00:00",
   "yt_dlp_probe_cache_ttl_seconds": 300,
   "server_uptime_seconds": 86400,
-  "server_time_unix": 1747843200,
-  "yt_dlp_probe": { "ok": true, "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)", "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+  "yt_dlp_probe": {
+    "ok": true,
+    "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)",
+    "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "probe_age_seconds": 120
+  },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2
@@ -607,12 +611,12 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "yt_dlp_probe_cache_expires_at": "2026-05-21T16:05:00+00:00",
   "yt_dlp_probe_cache_ttl_seconds": 300,
   "server_uptime_seconds": 86400,
-  "server_time_unix": 1747843200,
   "yt_dlp_probe": {
     "ok": false,
     "error_code": "SOURCE_FORBIDDEN",
     "error_msg": "The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.",
-    "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "probe_age_seconds": 45
   },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
