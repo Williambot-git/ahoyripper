@@ -300,17 +300,19 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
 // files themselves accumulate on long-running servers if not removed.
 // When the cache is cleared, also clear the in-memory global so the next request
 // fetches a fresh value rather than holding a stale entry across requests.
-foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
+// Uses sys_get_temp_dir() to locate the same cache files updated elsewhere in this file.
+$tmp = sys_get_temp_dir();
+foreach ([$tmp . '/ahoyrip_ytdlp_ver.cache', $tmp . '/ahoyrip_ffmpeg_ver.cache', $tmp . '/ahoyrip_ytdlp_probe.cache'] as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
         @unlink($cache);
-        if ($cache === '/tmp/ahoyrip_ytdlp_ver.cache') {
+        if ($cache === $tmp . '/ahoyrip_ytdlp_ver.cache') {
             $GLOBALS['__ytdlp_version'] = null;
         }
-        if ($cache === '/tmp/ahoyrip_ffmpeg_ver.cache') {
+        if ($cache === $tmp . '/ahoyrip_ffmpeg_ver.cache') {
             $GLOBALS['__ffmpeg_version'] = null;
         }
-        if ($cache === '/tmp/ahoyrip_ytdlp_probe.cache') {
+        if ($cache === $tmp . '/ahoyrip_ytdlp_probe.cache') {
             $GLOBALS['__ytdlp_probe'] = null;
         }
     }
@@ -514,7 +516,8 @@ function isValidUrl($url) {
 // Stores: ['ver' => string, 'hash' => string, 'exp' => int]
 // 'hash' is MD5 of the binary — if the binary is replaced (new yt-dlp installed),
 // the hash changes and the cached version is invalidated so we re-fetch the new version.
-$version_cache_file = '/tmp/ahoyrip_ytdlp_ver.cache';
+// Uses sys_get_temp_dir() instead of hardcoded /tmp for container/sandbox portability.
+$version_cache_file = sys_get_temp_dir() . '/ahoyrip_ytdlp_ver.cache';
 $GLOBALS['__ytdlp_version'] = null;
 $GLOBALS['__ytdlp_probe'] = null;
 if ($version_cache_file && is_readable($version_cache_file)) {
@@ -586,12 +589,13 @@ if (!$GLOBALS['__ytdlp_version']) {
 // Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
 // is wasteful and adds latency under load. Tracks hash to invalidate on binary upgrade.
 // ffprobe version cache — keyed on FFPROBE_PATH so that changing the path
-// invalidates stale cache entries. Only the ffprobe binary is probed (used for
+// invalidates stale cache entries. Uses sys_get_temp_dir() instead of hardcoded
+// /tmp for container/sandbox portability. Only the ffprobe binary is probed (used for
 // post-download codec/resolution verification); ffmpeg itself is not separately
 // checked since ffprobe is shipped alongside ffmpeg in virtually all deployments.
 // If ffprobe is present but ffmpeg is not, AhoyRipper's download flow would fail
 // at the yt-dlp merge stage anyway — so checking ffprobe's presence is sufficient.
-$ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
+$ffmpeg_cache_file = sys_get_temp_dir() . '/ahoyrip_ffmpeg_ver.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
@@ -3332,9 +3336,10 @@ switch ($action) {
         // yt-dlp probe cache — TTL controlled by PROBE_CACHE_TTL constant so repeated
         // health?probe=1 calls don't hammer YouTube. Declared early here (before the
         // ffprobe block below) so the cache-read is adjacent to the ffprobe block for clarity.
+        // Uses sys_get_temp_dir() instead of hardcoded /tmp for container/sandbox portability.
         // The actual probe execution lives deeper in the case block where it has
         // access to the full $out response array.
-        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
+        $probe_cache_file = sys_get_temp_dir() . '/ahoyrip_ytdlp_probe.cache';
         $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
         if ($do_probe && is_readable($probe_cache_file)) {
             $cached = @json_decode(@file_get_contents($probe_cache_file), true);
