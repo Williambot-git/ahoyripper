@@ -1173,6 +1173,37 @@ done
 echo "  ✓ MISSING_FORMAT and INVALID_FORMAT_ID return HTTP 400"
 
 echo ""
+echo "==> Checking MISSING_URL and INVALID_URL responses have security headers..."
+# Both URL validation error responses exit before the normal response-building pipeline
+# where headers are typically set — mirror the protection already added to MISSING_FORMAT
+# and INVALID_FORMAT_ID. Without these, browsers and proxies may sniff or cache responses
+# that appear successful at the HTTP level but are semantically error payloads.
+#
+# Use unique strings near each block as anchors to avoid matching the wrong occurrence
+# (MISSING_URL also appears in the $http_status_codes array at a different line).
+for err_code in MISSING_URL INVALID_URL; do
+    case "$err_code" in
+        MISSING_URL)  anchor="No URL was provided" ;;
+        INVALID_URL)  anchor="error_code.*INVALID_URL" ;;
+    esac
+    # Compute start/end around the anchor to capture headers that may appear
+    # before the anchor line (e.g. INVALID_URL headers are ~20 lines before the
+    # error_code line). Use a 40-line window centred on the anchor.
+    anchor_line=$(grep -n "$anchor" src/api.php | head -1 | cut -d: -f1)
+    start_line=$(( anchor_line > 20 ? anchor_line - 20 : 1 ))
+    end_line=$(( anchor_line + 20 ))
+    BLOCK_LINES=$(sed -n "${start_line},${end_line}p" src/api.php)
+    for header in "X-Content-Type-Options" "X-Frame-Options" "X-RateLimit-Limit" "Referrer-Policy"; do
+        if echo "$BLOCK_LINES" | grep -q "$header"; then
+            echo "  ✓ $err_code includes $header"
+        else
+            echo "  ✗ $err_code missing $header"
+            exit 1
+        fi
+    done
+done
+
+echo ""
 echo "==> Checking MISSING_URL response has user-friendly message..."
 # MISSING_URL error message must be specific (mention pasting a link), not generic.
 # Extract the error message string for MISSING_URL (in the info/download validation block).

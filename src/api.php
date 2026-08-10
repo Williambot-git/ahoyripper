@@ -1228,6 +1228,20 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
     if (!$url) {
         http_response_code(400);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'missing_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         echo json_encode([
@@ -1245,6 +1259,20 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     }
     if (!isValidUrl($url)) {
         http_response_code(400);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         echo json_encode([
