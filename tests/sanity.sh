@@ -689,6 +689,35 @@ else
 fi
 
 echo ""
+echo "==> Checking PWA CACHE_VERSION uses sentinel comparison pattern (not self-referential hash)... "
+# sw.js CACHE_VERSION must compare '{{CACHE_VERSION}}' against a sentinel like 'PLACEHOLDER',
+# NOT against itself (e.g. 'b0c6e25' === 'b0c6e25'). A self-referential comparison is always
+# true and defeats PWA cache versioning — the SW always gets 'unversioned' in every deploy.
+# The correct pattern: '{{CACHE_VERSION}}' === 'PLACEHOLDER' ? 'unversioned' : '{{CACHE_VERSION}}'
+# Detect self-referential comparison: 'HASH' === 'HASH' — always true, defeats PWA versioning.
+# The old (broken) pattern used 'b0c6e25' on both sides of ===, so the placeholder hash
+# appeared as a literal in sw.js. The correct pattern uses '{{CACHE_VERSION}}' on the
+# left side and 'PLACEHOLDER' sentinel on the right. A simple grep for the old hash
+# is the most reliable regression test — if 'b0c6e25' appears in sw.js at all, the
+# CACHE_VERSION line is almost certainly self-referential.
+if grep -q "'b0c6e25'" public/sw.js 2>/dev/null; then
+    echo "  ✗ sw.js still contains old placeholder hash 'b0c6e25' — CACHE_VERSION is self-referential"
+    exit 1
+else
+    echo "  ✓ sw.js CACHE_VERSION does not contain self-referential hash placeholder"
+fi
+
+echo ""
+echo "==> Checking generate-sw-version.php documents the PLACEHOLDER sentinel pattern... "
+# The generate-sw-version.php script must document the correct PLACEHOLDER sentinel pattern.
+# When the script is updated to support PLACEHOLDER, the comment block should mention it.
+if grep -q "PLACEHOLDER" scripts/generate-sw-version.php 2>/dev/null; then
+    echo "  ✓ generate-sw-version.php documents PLACEHOLDER sentinel pattern"
+else
+    echo "  ⚠ generate-sw-version.php does not mention PLACEHOLDER sentinel — script may be out of date"
+fi
+
+echo ""
 echo "==> Checking og:image meta tag in public/index.php..."
 if grep -q 'meta property="og:image"' public/index.php; then
     echo "  ✓ og:image present in index.php"

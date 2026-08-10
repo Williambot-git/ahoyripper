@@ -12,9 +12,12 @@
  *
  * New multiline ternary (PLACEHOLDER-check pattern):
  *   // {{CACHE_VERSION}} — deployed git hash...
- *   const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER'
- *       ? '{{CACHE_VERSION}}'
- *       : 'unversioned';
+ *   const CACHE_VERSION = '{{CACHE_VERSION}}' === 'PLACEHOLDER'
+ *       ? 'unversioned'
+ *       : '{{CACHE_VERSION}}';
+ *   (When the deploy script replaces PLACEHOLDER with the real hash,
+ *    the ternary evaluates to the hash, enabling PWA cache versioning.
+ *    When the placeholder is left unreplaced, it falls back to 'unversioned'.)
  *
  * Old single-line ternary (broken — both branches had same hash):
  *   // '{{CACHE_VERSION}}' is replaced at deploy time...

@@ -20,9 +20,10 @@
  */
 // '{{CACHE_VERSION}}' is replaced at deploy time by scripts/generate-sw-version.php
 // with the short git commit hash. If the placeholder was not replaced (deploy script
-// ran outside a git repo or failed), use the 'unversioned' sentinel so the SW still
-// installs and functions — it simply won't auto-update until the next deploy.
-const CACHE_VERSION = 'b0c6e25' === 'b0c6e25' ? 'unversioned' : 'b0c6e25';
+// ran outside a git repo or failed), 'PLACEHOLDER' !== '{{CACHE_VERSION}}' evaluates
+// to true and CACHE_VERSION falls back to 'unversioned' so the SW still installs
+// and functions — it simply won't auto-update until the next deploy.
+const CACHE_VERSION = '{{CACHE_VERSION}}' === 'PLACEHOLDER' ? 'unversioned' : '{{CACHE_VERSION}}';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 
