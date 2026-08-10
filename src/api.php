@@ -1834,6 +1834,7 @@ switch ($action) {
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
                 'request_id' => $request_id,
+                'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining/quota_limit/quota_reset: quota was refunded before
