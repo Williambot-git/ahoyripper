@@ -691,6 +691,29 @@ if (installDismissBtn && installBanner) {
   var toggleBtn = document.getElementById('toggleKey');
   var toggleIcon = document.getElementById('toggleKeyIcon');
   var keyInput = document.getElementById('apiKey');
+
+  // Restore API key from sessionStorage on page load so returning visitors
+  // don't have to re-enter it after every page refresh. sessionStorage is
+  // cleared when the browser tab closes (vs. localStorage which persists
+  // indefinitely) — a reasonable balance between convenience and shared-device
+  // risk. The key is stored under a versioned name so future UI changes can
+  // invalidate old entries without requiring a migration.
+  if (keyInput) {
+    try {
+      var storedKey = sessionStorage.getItem('ahoyrip_key_v1');
+      if (storedKey !== null) {
+        keyInput.value = storedKey;
+      }
+    } catch (e) {}
+    // Persist the key to sessionStorage whenever it changes (user types,
+    // pastes, or clears it) so page reloads and tab restores remember it.
+    keyInput.addEventListener('input', function() {
+      try {
+        sessionStorage.setItem('ahoyrip_key_v1', keyInput.value);
+      } catch (e) {}
+    });
+  }
+
   if (toggleBtn && keyInput) {
     toggleBtn.addEventListener('click', function() {
       if (keyInput.type === 'password') {
