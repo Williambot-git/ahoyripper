@@ -312,6 +312,11 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
 - `audio_quality` — audio formats first, then video/combined; within each group sorts by quality tier descending, then tbr descending
 
+The `quality` field in each format is a numeric tier that enables cross-format comparisons:
+- **Video formats** (combined or video-only): `quality` equals the pixel height (e.g. `720` = 720p, `1080` = 1080p). This is identical to the `height` field for video formats.
+- **Audio-only formats**: `quality` equals the bitrate tier (kbps mapped to tier: `320` ≥ 320kbps, `256` ≥ 256kbps, `192` ≥ 192kbps, `128` ≥ 128kbps, `96` ≥ 96kbps, `64` ≥ 64kbps, `48` < 64kbps). `null` when bitrate is unknown.
+- Because video heights (1080, 720, 480) and audio tier values (320, 256, 128) use different scales, the `quality` field is only meaningful for comparing formats of the same type — use it within `type_group` segments, not across them.
+
 The `sort_applied` field (e.g. `"height"`) confirms which sort was applied — useful because the sort is computed server-side and the client renders from the sorted list. The `type_group` field groups formats as the primary sort dimension: `0` = combined (video+audio), `1` = video-only, `2` = audio-only. Formats are always grouped by type first (combined → video-only → audio-only), then sorted within each group by the chosen sort key. For example, with `sort=height` (default): all combined formats appear first sorted by height descending, then all video-only formats sorted by height descending, then all audio-only formats sorted by bitrate descending. The `format_type` field distinguishes `"combined"`, `"video"`, and `"audio"` for display purposes. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
 The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1920x1080 1080p60 HDR 10bit"`) — use this for display when available.
