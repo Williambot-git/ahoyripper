@@ -1229,6 +1229,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     if (!$url) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'missing_url']);
+        $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
@@ -1236,12 +1237,16 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            'quota_remaining' => null,
+            'quota_limit' => $daily_limit,
+            'quota_reset' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
     if (!isValidUrl($url)) {
         http_response_code(400);
         logRequest($action, 400, ['reason' => 'invalid_url']);
+        $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1249,6 +1254,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            'quota_remaining' => null,
+            'quota_limit' => $daily_limit,
+            'quota_reset' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1289,6 +1297,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => null,
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -1314,6 +1325,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => null,
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
