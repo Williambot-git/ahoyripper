@@ -660,7 +660,7 @@ function clean($s) {
     if (is_string($s)) {
         $s = trim($s);
         if ($s === '') return 'Unknown';
-    } elseif ($s === null || $s === '') {
+    } elseif ($s === null) {
         return 'Unknown';
     }
     // Reject booleans, arrays and objects — yt-dlp metadata is always scalar
@@ -1127,7 +1127,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
         // smoother formats appear first within the same resolution tier.
         if ($cmp === 0) {
-            $cmp = ($a['height'] ?? 0) <=> ($b['height'] ?? 0);
+            $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
         if ($cmp === 0) {
             $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);

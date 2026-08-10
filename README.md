@@ -741,6 +741,14 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 | [Weibo](https://weibo.com) | Video + Audio | Chinese platform |
 | [Snapchat](https://snapchat.com) | Video | Stories, spotlight |
 | [Telegram](https://telegram.org) | Video + Audio | Public channels |
+| [Google Drive](https://drive.google.com) | Video + Audio | Shared files, Google Photos |
+| [Discord](https://discord.com) | Video | Shared video links |
+| [WhatsApp](https://whatsapp.com) | Video + Audio | Status, channels |
+| [LinkedIn](https://linkedin.com) | Video | |
+| [Steam](https://store.steampowered.com) | Video | Steam store trailers |
+| [Pornhub](https://pornhub.com) | Video + Audio | |
+| [XVideos](https://xvideos.com) | Video + Audio | |
+| [xHamster](https://xhamster.com) | Video + Audio | |
 
 > **DRM note:** Netflix, Disney+, Amazon Prime Video, Hulu, Paramount+, Peacock, and Max content with digital rights management (DRM) cannot be ripped. Only non-DRM content from these platforms will work.
 
