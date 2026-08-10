@@ -1208,7 +1208,7 @@ function logRequest($action, $status, $extra = []) {
 $sendDailyLimitHeaders = function(int $limit, ?int $remaining) {
     header('X-DailyLimit-Limit: ' . $limit);
     header('X-DailyLimit-Remaining: ' . ($remaining ?? $limit));
-    header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight', new DateTimeZone('UTC')));
+    header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
     header('X-DailyLimit-Window: 86400');
 };
 
@@ -1463,7 +1463,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
         header('X-DailyLimit-Limit: ' . $dl);
         header('X-DailyLimit-Remaining: ' . $dl);
-        header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight', new DateTimeZone('UTC')));
+        header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
         header('X-DailyLimit-Window: 86400');
     } else {
         header('X-DailyLimit-Limit: -1');
@@ -1612,7 +1612,7 @@ switch ($action) {
                 fclose($daily_fp);
                 logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
-                $reset_timestamp = strtotime('tomorrow midnight', new DateTimeZone('UTC'));
+                $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
@@ -1653,7 +1653,7 @@ switch ($action) {
             // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
             header('X-DailyLimit-Limit: ' . $daily_limit);
             header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
-            header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight', new DateTimeZone('UTC')));
+            header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
             header('X-DailyLimit-Window: 86400');
         }
 
@@ -2051,7 +2051,7 @@ switch ($action) {
         // -1 sentinel values signal "not applicable" (unlimited-key holder).
         $parsed['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $daily_data['c'] + 1) : -1;
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
-        $parsed['quota_reset'] = $unlimited ? -1 : strtotime('tomorrow midnight', new DateTimeZone('UTC'));
+        $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         header('Cache-Control: no-cache');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
@@ -2259,7 +2259,7 @@ switch ($action) {
                 fclose($daily_fp);
                 logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
-                $reset_timestamp = strtotime('tomorrow midnight', new DateTimeZone('UTC'));
+                $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
@@ -2299,7 +2299,7 @@ switch ($action) {
             // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
             header('X-DailyLimit-Limit: ' . $daily_limit);
             header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
-            header('X-DailyLimit-Reset: ' . strtotime('tomorrow midnight', new DateTimeZone('UTC')));
+            header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
             header('X-DailyLimit-Window: 86400');
         } else {
             // Unlimited-key holder — quota does not apply, signal this to the
