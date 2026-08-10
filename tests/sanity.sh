@@ -286,8 +286,10 @@ fi
 
 echo ""
 echo "==> Checking rate limiting (info endpoint)..."
-if grep -q "rate_limit = 30" src/api.php; then
-    echo "  ✓ Info rate limit (30/min) configured"
+# Check for the constant definition: define('RATE_LIMIT', ... ?: 30) — the default is 30.
+# Also accept the variable assignment: $rate_limit = RATE_LIMIT (both in one check).
+if grep -qE "define\s*\(\s*'RATE_LIMIT'" src/api.php && grep -qE "\\\$rate_limit\s*=\s*RATE_LIMIT" src/api.php; then
+    echo "  ✓ Info rate limit (RATE_LIMIT constant, default 30/min) configured"
 else
     echo "  ✗ Info rate limit not found"
     exit 1
