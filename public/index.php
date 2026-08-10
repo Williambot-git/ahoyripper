@@ -121,8 +121,8 @@ header_remove('X-Powered-By');
   <meta property="og:image" content="<?= $BASE_URL ?>/og-image.png">
   <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.png">
   <meta property="og:image:type" content="image/png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
   <!-- og:image:alt provides a text alternative for the Open Graph image — used by
        screen readers, non-visual social media clients, and indexing bots that cannot
        process images. Matches the descriptive alt text already used in twitter:image:alt.
@@ -155,8 +155,8 @@ header_remove('X-Powered-By');
   <meta name="twitter:title" content="AhoyRipper - Free Media Ripper">
   <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.png">
-  <meta name="twitter:image:width" content="1200">
-  <meta name="twitter:image:height" content="630">
+  <meta name="twitter:image:width" content="512">
+  <meta name="twitter:image:height" content="512">
   <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
 
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
