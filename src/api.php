@@ -180,7 +180,7 @@ $is_rate_limited = in_array($action, $rate_limited_actions, true);
 // reads it at line 593, download action at line 818).
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
-$rate_limit = 30; // requests per minute
+$rate_limit = RATE_LIMIT; // requests per minute (configurable via RATE_LIMIT env var)
 $rate_window = 60;
 // $cleanup_cutoff: stale rate files older than $rate_window seconds are removed.
 // A file is stale when (now - stored_timestamp) > $rate_window, meaning the
@@ -1360,6 +1360,13 @@ define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15)
 // the process, producing "Process timed out after Ns" in the error output.
 // yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
 define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
+
+// Request rate limit: max info/download requests per minute per IP (both share
+// the same rate limiter). nginx's 30r/m shared gate is the first threshold;
+// this PHP-layer RATE_LIMIT is the per-action ceiling that disciplines clients
+// who pass through nginx but exceed the per-action limit.
+// Override via RATE_LIMIT env var in .env or docker-compose.
+define('RATE_LIMIT', max(1, (int)getenv('RATE_LIMIT') ?: 30));
 
 // Download rate limit: max download requests per minute per IP.
 // Override via DL_RATE_LIMIT env var in .env or docker-compose.
