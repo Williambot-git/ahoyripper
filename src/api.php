@@ -3401,8 +3401,12 @@ switch ($action) {
                     // Detect these explicitly before falling through to classifyYtdlpError so
                     // clients receive a meaningful error_code instead of the generic 'PROBE_FAILED'.
                     $probe_raw_err = trim($probe_err ?: $probe_out);
-                    // case 1: proc_open false (binary absent, permissions, or system exhaustion)
-                    if ($probe_exit === -1 && $probe_raw_err === '') {
+                    // case 1: proc_open false (binary absent, permissions, or system exhaustion).
+                    // Guard: $probe_err === '' distinguishes this from case 2 (PHP-side timeout),
+                    // where proc_open succeeds but $probe_err contains "Process timed out...".
+                    // Without the guard, strpos('', 'timed out')===0 would incorrectly match case 2
+                    // and classify a missing binary as SOURCE_TIMEOUT instead of YTDLP_NOT_FOUND.
+                    if ($probe_exit === -1 && $probe_err === '' && $probe_raw_err === '') {
                         $probe_classified = [
                             'code' => 'YTDLP_NOT_FOUND',
                             'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
