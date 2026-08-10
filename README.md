@@ -557,7 +557,10 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "app_version": "1.0.0",
   "php_version": "8.2.0",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.03.17"
+  "yt_dlp_version": "2026.03.17",
+  "quota_remaining": -1,
+  "quota_limit": 5,
+  "quota_reset": -1
 }
 ```
 
@@ -595,7 +598,10 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
-  "disk_free_gb": 48.2
+  "disk_free_gb": 48.2,
+  "quota_remaining": -1,
+  "quota_limit": 5,
+  "quota_reset": -1
 }
 ```
 
@@ -633,7 +639,10 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   },
   "load_avg": [0.15, 0.08, 0.05],
   "memory_available_pct": 72.4,
-  "disk_free_gb": 48.2
+  "disk_free_gb": 48.2,
+  "quota_remaining": -1,
+  "quota_limit": 5,
+  "quota_reset": -1
 }
 ```
 
@@ -644,6 +653,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 `yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes; `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds` surface the cache expiration so monitoring dashboards can track when the cached result will be refreshed.
 
 `yt_dlp_cache_expires_at` / `yt_dlp_cache_ttl_seconds` track the yt-dlp version cache (1-hour TTL). `ffmpeg_cache_expires_at` / `ffmpeg_cache_ttl_seconds` track the ffmpeg version cache (1-hour TTL). `yt_dlp_probe_cache_expires_at` / `yt_dlp_probe_cache_ttl_seconds` track the yt-dlp connectivity probe cache (5-minute TTL).
+
+`quota_remaining`, `quota_limit`, and `quota_reset` are included in `action=check` and `action=health` responses (as `-1`, the configured limit, and `-1` respectively) for API surface consistency with `action=info` and `action=download` responses. Since `check` and `health` are read-only probes that do not consume quota, `quota_remaining` is `-1` and `quota_reset` is `-1`. `quota_limit` always reflects the configured daily limit (default `5`).
 
 `action=csp-report` receives [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) violation reports from browsers. Nginx is configured with a `report-uri /src/api.php?action=csp-report` directive in the CSP-Report-Only header, so violations (e.g., mixed content, inline script attempts) are logged to `error_log` rather than silently ignored. The report body is sanitized before logging — video URLs and referrers are omitted. This endpoint returns `200 OK` to all POST requests so browsers do not retry.
 

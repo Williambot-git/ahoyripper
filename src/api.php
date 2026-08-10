@@ -3234,6 +3234,13 @@ switch ($action) {
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // Daily quota fields — check is a read-only probe (does not consume quota)
+            // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
+            // configured daily limit for API surface consistency with info/download
+            // responses, allowing clients to always determine the limit from the body.
+            'quota_remaining' => -1,
+            'quota_limit' => (int)QUOTA_DAILY_DEFAULT,
+            'quota_reset' => -1,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
@@ -3379,6 +3386,13 @@ switch ($action) {
             'load_avg' => $sys['load_avg'],
             'memory_available_pct' => $sys['memory_available_pct'],
             'disk_free_gb' => $sys['disk_free_gb'],
+            // Daily quota fields — health is a read-only probe (does not consume quota)
+            // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
+            // configured daily limit for API surface consistency with info/download
+            // responses, allowing clients to always determine the limit from the body.
+            'quota_remaining' => -1,
+            'quota_limit' => (int)QUOTA_DAILY_DEFAULT,
+            'quota_reset' => -1,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
