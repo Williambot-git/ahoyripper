@@ -431,6 +431,7 @@ if (in_array($action, $internal_actions, true)) {
     echo json_encode([
         'status' => 'ok',
         'server_time' => date('c'),
+        'server_time_unix' => time(),
         'request_id' => $request_id,
         'app_version' => AHOYRIPPER_VERSION,
         'php_version' => PHP_VERSION,
