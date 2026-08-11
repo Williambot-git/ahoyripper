@@ -1020,32 +1020,30 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 11 times legitimately:
+# COOP and CORP each appear 12 times legitimately:
 #   - 1 at server level (base hardening for all responses)
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
 #     own headers because server-level add_header directives are NOT inherited by
 #     location blocks that define their own add_header (nginx behaviour).
-#   - 1 in `location /` block (root HTML and static assets)
-#   - 1 in second `location /` block (try_files fallback, added 2026-06)
+#   - 1 in `location = /` block (root HTML page with preload Link header)
+#   - 1 in /manifest.json location block (PWA manifest)
+#   - 1 in /opensearch.xml location block (OpenSearch description)
 #   - 1 in /.well-known/security.txt location block for security.txt and similar files.
+#   - 1 in /sitemap.xml location block (XML sitemap for search engines)
+#   - 1 in /og-image.png location block (social share preview image)
 #   - 1 in /404.html location block for not-found responses (defense-in-depth)
 #   - 1 in /50x.html location block for PHP-FPM error pages (502/504) and
 #     limit_req burst rejections (503) — bypasses PHP so headers must be at nginx level.
 #   - 1 in /src/api.php location block for the API endpoint
-#   - 1 in the catch-all regex location block (ico|png|jpg|...) — defense-in-depth
-#     so unhandled paths always return hardened responses.
-#   - 1 in the sitemap.xml location — sitemap is a special static file served with
-#     explicit security headers (nginx's add_header inheritance rule requires each
-#     location to declare all headers it needs; HSTS, COOP, CORP, Perm-Policy added here).
-#   - 1 in the /og-image.png location block (explicit PNG handling).
+#   - 1 in the catch-all `location /` block (try_files fallback)
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 11 ] && [ "$CORP_COUNT" -eq 11 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location / + second location / + /.well-known/ + /og-image.png + /50x.html + /src/api.php + sitemap.xml + static asset regex + catch-all location /)"
+if [ "$COOP_COUNT" -eq 12 ] && [ "$CORP_COUNT" -eq 12 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /sitemap.xml + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location /)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 11), CORP appears $CORP_COUNT times (expected 11)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 12), CORP appears $CORP_COUNT times (expected 12)"
     exit 1
 fi
 
