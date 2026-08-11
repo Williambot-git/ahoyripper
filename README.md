@@ -445,6 +445,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | Server error — could not start the download process. The server may be restarting or overloaded. | Try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
+| `YTDLP_NOT_FOUND` | yt-dlp could not be started. The server is misconfigured — yt-dlp may not be installed or the path is incorrect. Contact the server administrator. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
 
 ### Download a format
