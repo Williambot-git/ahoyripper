@@ -3194,6 +3194,8 @@ switch ($action) {
                     'error_code' => 'DOWNLOAD_CANCELLED',
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
                 ]);
                 exit;
             }
