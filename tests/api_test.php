@@ -542,6 +542,22 @@ $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
 test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
     $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
 
+// Out-of-range HTTP codes (outside 400-599) should still be classified as
+// SOURCE_HTTP_ERROR — they represent malformed or non-standard upstream responses.
+// Uses a message that avoids triggering other patterns (e.g., "refused" would
+// match CONNECTION_FAILED before the HTTP error classifier runs).
+$result = classifyYtdlpError('ERROR: HTTP Error 1: Bad response');
+test('detects SOURCE_HTTP_ERROR — HTTP 1 (out of range, below 400)',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 599: Service unavailable');
+test('detects SOURCE_HTTP_ERROR — HTTP 599 (out of range, above 599)',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
+
+$result = classifyYtdlpError('ERROR: HTTP Error 0: Internal error');
+test('detects SOURCE_HTTP_ERROR — HTTP 0 (edge case, null status)',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR');
+
 // ─── exit-code classification (new in this patch) ─────────────────────────────
 // Text-based matches take absolute precedence over exit-code fallbacks.
 // A geo-blocked error that also exits with code 1 still returns GEOBLOCKED.
