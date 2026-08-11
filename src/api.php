@@ -318,7 +318,7 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
 foreach (array_merge(
     glob('/tmp/ahoyrip_ytdlp_*.cache') ?: [],
     glob('/tmp/ahoyrip_ffprobe_*.cache') ?: [],
-    glob('/tmp/ahoyrip_ytdlp_probe.cache') ? [$probe_cache_file] : []
+    is_file('/tmp/ahoyrip_ytdlp_probe.cache') ? ['/tmp/ahoyrip_ytdlp_probe.cache'] : []
 ) as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
