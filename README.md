@@ -1078,6 +1078,24 @@ AhoyRipper follows [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) (security.
 https://ahoyripper.com/.well-known/security.txt
 ```
 
+**Security headers:** All API responses include a comprehensive set of HTTP security headers applied at the nginx and PHP level:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `Content-Security-Policy` | `default-src 'self'; ...` | Prevents cross-site script injection, inline scripts restricted to fonts only |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | Enforces HTTPS (HSTS) — preloaded in browser trust stores |
+| `X-Frame-Options` | `SAMEORIGIN` | Prevents AhoyRipper pages from being embedded in iframes (clickjacking protection) |
+| `X-Content-Type-Options` | `nosniff` | Prevents browsers from MIME-sniffing responses away from declared Content-Type |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer leakage when navigating to third-party thumbnail/CDN hosts |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=()` | Disables all browser APIs not used by AhoyRipper |
+| `Cross-Origin-Opener-Policy` | `same-origin` | Prevents cross-origin documents from interacting with AhoyRipper's window |
+| `Cross-Origin-Resource-Policy` | `same-origin` | Prevents cross-origin resources from loading AhoyRipper's assets |
+| `X-Robots-Tag` | `noindex, noai, noimage, noydir` | Instructs crawlers not to index, cache, or AI-train on API responses |
+| `Report-To` / `Reporting-Endpoints` | csp-report endpoint | Receives CSP violation reports for monitoring |
+| `X-Download-Options` | `noopen` | Prevents direct execution of downloaded files (IE/legacy compat) |
+
+API endpoints additionally enforce `Referer` validation — requests without a referer originating from `ahoyripper.com` or `ahoyvpn.com` are rejected with HTTP 403. The CSP report-uri endpoint (`/src/api.php?action=csp-report`) receives and sanitizes CSP violation reports from browsers and logs them for security monitoring.
+
 **Responsible disclosure:** If you discover a security vulnerability, please report it to `security@ahoyripper.com`. Include a description of the issue and any relevant details. You can expect a response within 48–72 hours on business days.
 
 **Scope:** Reports are accepted for the AhoyRipper application, its API, and infrastructure. Do not attempt to exploit vulnerabilities for research purposes — report only.
