@@ -1866,6 +1866,7 @@ switch ($action) {
             }
             logRequest('info', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
+            header('Cache-Control: no-cache');
             header('X-Request-ID: ' . $request_id);
             echo json_encode([
                 'error' => 'Failed to start download process.',
