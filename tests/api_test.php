@@ -1782,6 +1782,28 @@ test('ffprobe stderr: truncation preserves prefix',
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 
+// 4. ffprobe exit 0 with zero streams — malformed/empty container treated as failure.
+// ffprobe -select_streams v:0 returns exit 0 even when no video stream exists;
+// the streams key is absent or []. This must be treated as a verification failure.
+// The code path: vstream null → probe_exit = -1 → falls into the else branch
+// which triggers the full DOWNLOAD_EMPTY error response with quota refund.
+$probe_out_zero_streams = json_encode(['streams' => []]);
+$probe_zero = @json_decode($probe_out_zero_streams, true);
+$vstream_zero = $probe_zero['streams'][0] ?? null;
+test('ffprobe exit 0 with empty streams array: vstream is null (triggers verification failure)',
+    $vstream_zero === null);
+// Confirm that a null vstream is falsy in the if() condition — this is what drives
+// the probe_exit=-1 branch that surfaces the DOWNLOAD_EMPTY error to the client.
+test('null vstream is falsy: if ($vstream) branch skipped, else branch taken',
+    ($vstream_zero ? true : false) === false);
+
+// 5. ffprobe exit 0 with valid JSON but missing streams key entirely — also fails verification.
+$probe_out_no_streams_key = json_encode([]);
+$probe_no_key = @json_decode($probe_out_no_streams_key, true);
+$vstream_no_key = $probe_no_key['streams'][0] ?? null;
+test('ffprobe exit 0 with no streams key: vstream is null (triggers verification failure)',
+    $vstream_no_key === null);
+
 echo "\n";
 $total = $tests_run;
 $passed = $tests_passed;

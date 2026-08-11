@@ -2943,10 +2943,19 @@ switch ($action) {
             if ($probe_exit === 0 && $probe_out) {
                 $probe = @json_decode($probe_out, true);
                 $vstream = $probe['streams'][0] ?? null;
+                // ffprobe with -select_streams v:0 returns exit 0 even when no video
+                // stream exists — it simply omits the streams key or returns [].
+                // Treat this as a verification failure: the file has no video to deliver.
                 if ($vstream) {
                     $actual_video_codec = $vstream['codec_name'] ?? null;
                     $actual_width = isset($vstream['width']) ? (int)$vstream['width'] : null;
                     $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
+                } else {
+                    // ffprobe succeeded (exit 0, valid JSON) but found no video stream —
+                    // the downloaded file is a broken container. Flag as verification
+                    // failure so the quota is refunded and the user sees a clear error.
+                    $probe_exit = -1;
+                    $probe_err = 'No video stream found in downloaded file (malformed or empty container).';
                 }
             } else {
                 // ffprobe failed (non-zero exit, timeout, or unreadable output).
