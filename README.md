@@ -24,7 +24,7 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 **2. Click "Rip It"** — Or just press Enter. AhoyRipper fetches the available formats from the server.
 
-**3. Pick a format** — Browse the format cards, sort by quality or file size, then click **Download** next to your preferred option.
+**3. Pick a format** — Browse the format cards, sort by quality (height/bitrate), file size, or audio quality using the dropdown, then click **Download** next to your preferred option.
 
 The file streams directly to your browser — nothing is stored on the server. Each rip counts toward your daily quota (5 free rips per day, resetting at midnight UTC). Enter an AhoyVPN API key to bypass the limit.
 

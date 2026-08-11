@@ -13,6 +13,14 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 
 ## [Unreleased]
 
+### Added
+- **Twitter Card meta tags** — Added `twitter:card`, `twitter:title`,
+  `twitter:description`, and `twitter:image` to `public/index.php`. Cards now
+  render with a large image preview when links are shared on X/Twitter.
+- **README sort documentation** — Step 3 "Pick a format" now mentions the
+  full set of sort options (quality/bitrate, file size, audio quality) instead
+  of just "quality or file size".
+
 ### Fixed
 - **`deploy/nginx-docker.conf` static assets CSP** — Added missing `worker-src 'self'`
   directive to the static assets location block (regex location for CSS/JS/fonts/images).
