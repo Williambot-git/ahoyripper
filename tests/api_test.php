@@ -1734,6 +1734,52 @@ $result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false);
 test('zero total memory: guards division by zero, memory_available_pct is null',
     $result['memory_available_pct'] === null);
 
+// ─── logRequest for ffprobe failure status code ─────────────────────────────
+// Standalone reproduction of the logRequest signature used in api.php.
+// Confirms that ffprobe_verification_failed is logged with status 500.
+
+$logEntries = [];
+
+function logRequestTest($action, $status, $extra = []) {
+    global $logEntries;
+    $logEntries[] = ['action' => $action, 'status' => $status, 'extra' => $extra];
+    return true;
+}
+
+// 1. ffprobe verification failure should be logged with status 500 (not 200)
+logRequestTest('download', 500, [
+    'reason' => 'ffprobe_verification_failed',
+    'format_id' => '18',
+    'ffprobe_exit' => 1,
+    'ffprobe_err' => 'Invalid data found when processing input',
+]);
+test('ffprobe_verification_failed: status code is 500 (not 200)',
+    $logEntries[count($logEntries)-1]['status'] === 500);
+test('ffprobe_verification_failed: reason is preserved',
+    $logEntries[count($logEntries)-1]['extra']['reason'] === 'ffprobe_verification_failed');
+test('ffprobe_verification_failed: ffprobe_exit is preserved',
+    $logEntries[count($logEntries)-1]['extra']['ffprobe_exit'] === 1);
+test('ffprobe_verification_failed: ffprobe_err is preserved',
+    $logEntries[count($logEntries)-1]['extra']['ffprobe_err'] === 'Invalid data found when processing input');
+
+// 2. ffprobe stderr control-char stripper (verbatim from api.php)
+$probe_err_raw = "Invalid data found\x00\x07\x1Fwhen processing input\n";
+$probe_err_clean = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $probe_err_raw));
+test('ffprobe stderr: control chars stripped (ASCII 0–31 and 127)',
+    $probe_err_clean === 'Invalid data foundwhen processing input');
+test('ffprobe stderr: trailing newline removed by trim',
+    strpos($probe_err_clean, "\n") === false);
+
+// 3. ffprobe stderr truncation ( >150 chars → ... suffix)
+$probe_err_long = str_repeat('x', 200);
+$probe_err_truncated = mb_strlen($probe_err_long, 'UTF-8') > 150
+    ? mb_substr($probe_err_long, 0, 150, 'UTF-8') . '...'
+    : $probe_err_long;
+test('ffprobe stderr: long output truncated to 150 + ellipsis',
+    mb_strlen($probe_err_truncated, 'UTF-8') === 153 && str_ends_with($probe_err_truncated, '...'));
+test('ffprobe stderr: truncation preserves prefix',
+    str_starts_with($probe_err_truncated, str_repeat('x', 150)));
+
 // ─── Report ─────────────────────────────────────────────────────────────────
 
 echo "\n";

@@ -2929,12 +2929,12 @@ switch ($action) {
                 }
             } else {
                 // ffprobe failed (non-zero exit, timeout, or unreadable output).
-                // Log it server-side for diagnostics; the file was downloaded successfully
-                // so the user is not charged a quota refund. ffprobe_err carries the
-                // stderr output which describes what went wrong (e.g. "Invalid data found"
-                // for a corrupt file, or timeout messages).
+                // The file may be corrupt or the ffprobe binary may have failed.
+                // Surface a structured error so the client can distinguish this from
+                // a successful download, rather than silently sending an unverifiable file.
+                // Refund the quota since the file could not be verified.
                 $probe_err_clean = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $probe_err ?: ''));
-                logRequest('download', 200, [
+                logRequest('download', 500, [
                     'reason' => 'ffprobe_verification_failed',
                     'format_id' => $format_id,
                     'ffprobe_exit' => $probe_exit,
@@ -2942,7 +2942,19 @@ switch ($action) {
                         ? mb_substr($probe_err_clean, 0, 150, 'UTF-8') . '...'
                         : $probe_err_clean,
                 ]);
+                foreach (glob($glob_pattern) as $f) { @unlink($f); }
+                header('Cache-Control: no-store, must-revalidate');
                 header('X-FFProbe-Status: failed');
+                http_response_code(500);
+                echo json_encode([
+                    'error' => 'Download could not be verified. The file may be corrupt or the verification tool encountered an error. Please try again or choose a different format.',
+                    'error_code' => 'DOWNLOAD_EMPTY',
+                    'request_id' => $request_id,
+                    'source_url' => $url,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
+                exit;
             }
             // Determine if substitution occurred by checking whether the requested format
             // materially differed from what was delivered. Only flag as substituted when
