@@ -1232,6 +1232,40 @@ function logRequest($action, $status, $extra = []) {
     }
 }
 
+// ─── Quota refund helper ───────────────────────────────────────────────
+// Best-effort refund of one daily-quota increment applied before a failure.
+// $ip:          client IP used to build the quota filename
+// $unlimited:   skip refund if true (unlimited-key holders never incremented)
+// $daily_limit: safe default return value when refund cannot be performed
+// Returns the post-refund daily count; callers use this to compute quota_remaining.
+// Guard: only decrements when the stored record is today's and count > 0,
+// preventing double-refund and race conditions between concurrent requests.
+function refundQuota(string $ip, bool $unlimited, int $daily_limit): int {
+    if ($unlimited) return $daily_limit;
+    $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+    if (!$undo_fp) return $daily_limit;
+    if (!flock($undo_fp, LOCK_EX)) {
+        fclose($undo_fp);
+        return $daily_limit;
+    }
+    $undo_raw = fread($undo_fp, 4096);
+    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
+    if ($undo_raw) {
+        $decoded = json_decode($undo_raw, true);
+        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+    }
+    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+        $undo_data['c']--;
+        ftruncate($undo_fp, 0);
+        rewind($undo_fp);
+        fwrite($undo_fp, json_encode($undo_data));
+        fflush($undo_fp);
+    }
+    flock($undo_fp, LOCK_UN);
+    fclose($undo_fp);
+    return $undo_data['c'];
+}
+
 // ─── Shared validation helper ─────────────────────────────────────────
 // DRY helper for URL and format validation. Used by both info and download
 // actions to ensure consistent error codes and log messages.
@@ -1841,28 +1875,7 @@ switch ($action) {
             // Initialised to $daily_limit as a safe default (no refund on failure).
             $post_refund_count = $daily_limit;
             if (!$unlimited) {
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // best-effort — skip refund if file can't be opened; $post_refund_count
-                    // stays at $daily_limit (safe: user keeps their credit rather than losing it)
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    $post_refund_count = $undo_data['c'];
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                }
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
             }
             logRequest('info', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
@@ -1935,33 +1948,7 @@ switch ($action) {
             // The fetch failed — undo the quota increment so failed attempts don't
             // burn the user's daily limit. Only count successful info retrievals.
             if (!$unlimited) {
-                // Use the same $ip variable declared at the top of the script so the undo
-                // targets the correct daily-quota file regardless of which action ran.
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // Could not open quota file — skip the refund rather than fail the response.
-                    // Best-effort grace; the user is not charged when the refund mechanism fails.
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    // Only decrement if it's the current day's record
-                    // Guard: only decrement if current day record exists and count > 0.
-                    // Prevents double-refund and race conditions between
-                    // the quota-increment write and this refund read.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                }
+                refundQuota($ip, $unlimited, $daily_limit);
             }
 
             // Extract a clean, readable error from yt-dlp output
@@ -2002,30 +1989,7 @@ switch ($action) {
             // Undo the quota increment — parseFormats returned null means the content
             // could not be parsed; we don't burn the user's daily limit for this.
             if (!$unlimited) {
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // Could not open quota file — skip the refund rather than fail the response.
-                    // Best-effort grace; the user is not charged when the refund mechanism fails.
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    // Guard: only decrement if current day record exists and count > 0.
-                    // Prevents double-refund and race conditions between
-                    // the quota-increment write and this refund read.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                }
+                refundQuota($ip, $unlimited, $daily_limit);
             }
             $err_status = 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
@@ -2086,30 +2050,7 @@ switch ($action) {
             // if proc_open ever fails without decrementing first.
             $info_quota_before_refund = $daily_data['c'];
             if (!$unlimited) {
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // Could not open quota file — skip the refund rather than fail the response.
-                    // Best-effort grace; the user is not charged when the refund mechanism fails.
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    // Guard: only decrement if current day record exists and count > 0.
-                    // Prevents double-refund and race conditions between
-                    // the quota-increment write and this refund read.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                }
+                refundQuota($ip, $unlimited, $daily_limit);
             }
             http_response_code($err_status);
             $resp = [
@@ -2538,34 +2479,7 @@ switch ($action) {
             // Initialised to $daily_limit as a safe default (no refund on failure).
             $post_refund_count = $daily_limit;
             if (!$unlimited && isset($dl_quota_before_refund)) {
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // Could not open quota file — skip the refund rather than fail the response.
-                    // Best-effort grace; the user is not charged when the refund mechanism fails.
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    // Guard: only decrement if current day record exists and count > 0.
-                    // Prevents double-refund and race conditions between
-                    // the quota-increment write and this refund read.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    $post_refund_count = $undo_data['c'];
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                } else {
-                    // Lock acquisition failed — close the file handle to avoid leaking it.
-                    fclose($undo_fp);
-                }
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
             }
             http_response_code(500);
             header('Cache-Control: no-cache');
@@ -2614,29 +2528,7 @@ switch ($action) {
                 // quota increment). Unlimited-key holders ($unlimited=true) skip
                 // increment so no refund needed.
                 if (!$unlimited && isset($dl_quota_before_refund)) {
-                    $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                    if (!$undo_fp) {
-                        // Could not open quota file — skip the refund rather than fail the response.
-                    } elseif (flock($undo_fp, LOCK_EX)) {
-                        $undo_raw = fread($undo_fp, 4096);
-                        $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                        if ($undo_raw) {
-                            $decoded = json_decode($undo_raw, true);
-                            if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                        }
-                        // Guard: only decrement if current day record exists and count > 0.
-                        // Prevents double-refund and race conditions between
-                        // the quota-increment write and this refund read.
-                        if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                            $undo_data['c']--;
-                            ftruncate($undo_fp, 0);
-                            rewind($undo_fp);
-                            fwrite($undo_fp, json_encode($undo_data));
-                            fflush($undo_fp);
-                        }
-                        flock($undo_fp, LOCK_UN);
-                        fclose($undo_fp);
-                    }
+                    refundQuota($ip, $unlimited, $daily_limit);
                 }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
@@ -2719,37 +2611,10 @@ switch ($action) {
             // Skip refund only for successful exits and when the user is on the
             // free tier ($unlimited is false) — unlimited-key holders never had
             // their quota incremented in the first place.
-            // Uses pre-read file approach to handle proc_open failure gracefully:
-            // if proc_open failed it decremented before us, so we skip our decrement
-            // to avoid double-refunding. This is the baseline for the at-most-once refund.
+            // refundQuota() uses an at-most-once guard internally to handle
+            // proc_open failure gracefully (if it decremented before us, we skip).
             if (!$unlimited) {
-                $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-                if (!$undo_fp) {
-                    // Could not open quota file — skip the refund rather than fail the response.
-                    // Best-effort grace; the user is not charged when the refund mechanism fails.
-                } elseif (flock($undo_fp, LOCK_EX)) {
-                    $undo_raw = fread($undo_fp, 4096);
-                    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                    if ($undo_raw) {
-                        $decoded = json_decode($undo_raw, true);
-                        if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                    }
-                    // Only decrement if the stored count is at or above our baseline
-                    // (meaning proc_open hasn't already decremented). If proc_open
-                    // failed and decremented first, our count is already lower — skip.
-                    // Guard: only decrement if current day record exists and count > 0.
-                    // Prevents double-refund and race conditions between
-                    // the quota-increment write and this refund read.
-                    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                        $undo_data['c']--;
-                        ftruncate($undo_fp, 0);
-                        rewind($undo_fp);
-                        fwrite($undo_fp, json_encode($undo_data));
-                        fflush($undo_fp);
-                    }
-                    flock($undo_fp, LOCK_UN);
-                    fclose($undo_fp);
-                }
+                refundQuota($ip, $unlimited, $daily_limit);
             }
 
             // Retry-After: Unix timestamp when the download can be retried.
@@ -3074,27 +2939,7 @@ switch ($action) {
         // behavior since the user shouldn't be charged when ffprobe couldn't even be attempted.
         $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
         if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
-            $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
-            if ($undo_fp && flock($undo_fp, LOCK_EX)) {
-                $undo_raw = fread($undo_fp, 4096);
-                $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-                if ($undo_raw) {
-                    $decoded = json_decode($undo_raw, true);
-                    if ($decoded && is_array($decoded)) $undo_data = $decoded;
-                }
-                // Guard: only decrement if current day record exists and count > 0.
-                // Prevents double-refund and race conditions between
-                // the quota-increment write and this refund read.
-                if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
-                    $undo_data['c']--;
-                    ftruncate($undo_fp, 0);
-                    rewind($undo_fp);
-                    fwrite($undo_fp, json_encode($undo_data));
-                    fflush($undo_fp);
-                }
-                flock($undo_fp, LOCK_UN);
-                fclose($undo_fp);
-            }
+            $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
         }
 
         $mime = 'application/octet-stream';
