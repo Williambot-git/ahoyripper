@@ -430,8 +430,11 @@ echo "==> Checking quota undo when parseFormats returns a classified error..."
 # "if (isset(\$parsed['error']))" branch, not just in the $out-empty branch.
 # Extract the info case and check for quota-undo logic after parseFormats error.
 INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
-# The undo block appears AFTER the logRequest for 'parse_formats_ytdlp_error'
-if echo "$INFO_CASE" | grep -A 30 "parseFormats.*error" | grep -q "ahoyrip_daily_.*md5.*ip"; then
+# The refundQuota() call appears AFTER the logRequest for 'parse_formats_ytdlp_error'
+# inside the "if (isset(\$parsed['error']))" block.
+# NOTE: After refactoring to refundQuota() helper, the file path is constructed
+# inside the function, so the check looks for refundQuota() call sites instead.
+if echo "$INFO_CASE" | grep -A 30 "parseFormats.*error" | grep -q "refundQuota"; then
     echo "  ✓ Quota undo present for parseFormats classified errors"
 else
     echo "  ✗ Quota undo missing for parseFormats classified errors — daily limit burned on unavailable content"
@@ -443,7 +446,10 @@ echo "==> Checking quota undo when parseFormats returns null..."
 # When parseFormats returns null (parse failure), quota should also be undone.
 # This prevents burning daily limit on content that can't be parsed at all.
 INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
-if echo "$INFO_CASE" | grep -A 30 "if (\!\$parsed)" | grep -q "ahoyrip_daily_.*md5.*ip"; then
+# The refundQuota() call appears inside the "if (!\$parsed)" block.
+# NOTE: After refactoring to refundQuota() helper, the check looks for
+# the refundQuota() call rather than the inline file-path string.
+if echo "$INFO_CASE" | grep -A 30 "if (\!\$parsed)" | grep -q "refundQuota"; then
     echo "  ✓ Quota undo present for parseFormats null (parse failure)"
 else
     echo "  ✗ Quota undo missing for parseFormats null — daily limit burned on unparseable content"
@@ -465,7 +471,9 @@ echo "==> Checking quota undo for all download failures (classified and unclassi
 # or unclassified (network glitch, source timeout, unexpected yt-dlp exit).
 # The user didn't successfully download anything, so the quota should not be burned.
 # The undo block appears before the $err_classified check so it covers both branches.
-if awk '/\$err_classified = classifyYtdlpError/,/^[[:space:]]*\}[[:space:]]*$/' src/api.php | grep -q "ahoyrip_daily_.*md5.*ip"; then
+# NOTE: After refactoring to refundQuota() helper, the file path is constructed
+# inside the function, so the check looks for the refundQuota() call site instead.
+if awk '/\$err_classified = classifyYtdlpError/,/^[[:space:]]*\}/' src/api.php | grep -q "refundQuota"; then
     echo "  ✓ Quota undo present for all download failures"
 else
     echo "  ✗ Quota undo missing for download failures — daily limit burned on failed downloads"
