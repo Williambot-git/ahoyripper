@@ -1199,18 +1199,43 @@ if (installDismissBtn && installBanner) {
         // "free rips/day" label since the quota concept does not apply to them.
         // Use Number() to normalise the header value (always a string) to an integer
         // so the strict-equality check works regardless of type (e.g. "-1" vs -1).
+        //
+        // Rate-limit sentinel: when X-DL-RateLimit-Limit is -1 the -1 on
+        // X-DailyLimit-Remaining signals a per-minute rate-limit hit, NOT an
+        // unlimited-key holder. Show "Rate limited" with the exhausted animation
+        // and keep the UI visible so the user sees their actual quota on reload.
+        // Do NOT persist a rate-limit -1 to localStorage (it would be mistaken
+        // for the unlimited-key flag and suppress the quota UI after the window resets).
+        var dlLim = resp.headers.get('X-DL-RateLimit-Limit');
+        var isRateLimited = (dlLim !== null && Number(dlLim) === -1);
         if (Number(rem) === -1 && labelEl) {
-          labelEl.style.display = 'none';
-          el.style.display = 'none';
-          if (limEl) limEl.style.display = 'none';
+          if (isRateLimited) {
+            // Per-minute rate-limit hit — show "Rate limited" with exhausted style.
+            el.textContent = 'Rate limited';
+            el.classList.add('exhausted');
+            el.classList.remove('low');
+            labelEl.style.display = '';
+            el.style.display = '';
+            if (limEl) limEl.style.display = 'none';
+          } else {
+            // Unlimited-key holder — hide the quota UI entirely.
+            labelEl.style.display = 'none';
+            el.style.display = 'none';
+            if (limEl) limEl.style.display = 'none';
+          }
         }
         // Persist quota to localStorage so the correct value is shown on page reload.
         // Only persist when the header is a real quota value (non-negative integer).
-        // -1 signals unlimited-key holders — persist a flag to suppress the quota UI.
+        // -1 signals either unlimited-key holders (persist flag) or per-minute
+        // rate-limit hits (do NOT persist — resets automatically after 60 seconds).
         if (Number(rem) === -1) {
-          localStorage.setItem('ahoyrip_quota_unlimited', '1');
-          localStorage.removeItem('ahoyrip_quota_remaining');
-          localStorage.removeItem('ahoyrip_quota_reset');
+          if (!isRateLimited) {
+            localStorage.setItem('ahoyrip_quota_unlimited', '1');
+            localStorage.removeItem('ahoyrip_quota_remaining');
+            localStorage.removeItem('ahoyrip_quota_reset');
+          }
+          // Rate-limit state is intentionally NOT persisted — it would incorrectly
+          // suppress the quota UI after the rate-limit window expires (60 seconds).
         } else {
           var remNum = parseInt(rem, 10);
           var limNum = parseInt(lim, 10);
