@@ -38,6 +38,13 @@ define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 // env var — increase the constant directly if longer TTL is ever needed.
 define('PROBE_CACHE_TTL', 300);
 
+// YouTube video ID used for the /health endpoint connectivity probe. Rick Astley's
+// "Never Gonna Give You Up" is reliably available, long enough to detect stream stalls,
+// and unlikely to be geo-restricted or age-gated. Configurable via HEALTH_PROBE_VIDEO_ID
+// env var so deployments can substitute a different stable video if needed.
+define('HEALTH_PROBE_VIDEO_ID', getenv('HEALTH_PROBE_VIDEO_ID') ?: 'dQw4w9WgXcQ');
+define('HEALTH_PROBE_URL', 'https://www.youtube.com/watch?v=' . HEALTH_PROBE_VIDEO_ID);
+
 // Default daily quota for unauthenticated users (free tier).
 // Override via QUOTA_DAILY env var in .env or docker-compose.
 // Named with _DEFAULT suffix to distinguish from the runtime $daily_limit variable
@@ -3458,7 +3465,7 @@ switch ($action) {
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
                     '--',
-                    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                    HEALTH_PROBE_URL,
                 ], $probe_desc, $probe_pipes, '/tmp', [], ['bypass_shell' => true]);
 
                 $probe_out = $probe_err = '';
@@ -3506,7 +3513,7 @@ switch ($action) {
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => true,
                         'title' => substr($probe_result['title'] ?? '', 0, 80),
-                        'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                        'source_url' => HEALTH_PROBE_URL,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
@@ -3544,7 +3551,7 @@ switch ($action) {
                         'ok' => false,
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
-                        'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                        'source_url' => HEALTH_PROBE_URL,
                     ];
                 }
                 if ($probe_cache_file) {
