@@ -684,6 +684,46 @@ $result = classifyYtdlpError('ERROR: This video has been removed');
 test('VIDEO_UNAVAILABLE status is 410',
     ($result['status'] ?? null) === 410);
 
+$result = classifyYtdlpError('ERROR: [twitter] HTTP Error 404: Not Found');
+test('SOURCE_NOT_FOUND status is 404',
+    ($result['status'] ?? null) === 404);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
+test('SOURCE_SERVER_ERROR status is 502 (HTTP 500 variant)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
+test('SOURCE_SERVER_ERROR status is 502 (HTTP 503 variant)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
+test('SOURCE_HTTP_ERROR (non-standard HTTP) status is 502',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: [youtube] SSL Error');
+test('SSL_ERROR status is 502 (short form)',
+    ($result['status'] ?? null) === 502);
+
+$result = classifyYtdlpError('ERROR: File is larger than 2GB limit');
+test('FILE_TOO_LARGE status is 413',
+    ($result['status'] ?? null) === 413);
+
+$result = classifyYtdlpError('ERROR: Requested format not available');
+test('FORMAT_UNAVAILABLE status is 422',
+    ($result['status'] ?? null) === 422);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
+test('SOURCE_RATE_LIMITED status is 429',
+    ($result['status'] ?? null) === 429);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
+test('SOURCE_FORBIDDEN status is 403',
+    ($result['status'] ?? null) === 403);
+
+$result = classifyYtdlpError('ERROR: Process timed out after 45 seconds');
+test('SOURCE_TIMEOUT status is 504 (PHP-side process timeout)',
+    ($result['status'] ?? null) === 504);
+
 // Codes that set a status field are tested above.
 // This confirms that text-only variants (without HTTP error patterns)
 // also carry status — which is the correct current behavior.
