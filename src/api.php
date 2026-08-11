@@ -1438,6 +1438,14 @@ define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
 // Override via AHOY_USER_AGENT env var in docker-compose or cloud dashboard.
 // Used by all yt-dlp invocations (info, download) so agents stay consistent.
 define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36');
+// yt-dlp 2024.09+ impersonation target — spoofs browser TLS/ALPN fingerprints to
+// reduce anti-bot 403/422 errors on protected sites (YouTube, Twitter, etc.).
+// Defaults to 'chrome' (curl_cffi impersonates Chrome on Linux).
+// Set to '' to disable impersonation if needed. Not configurable via env var —
+// changing impersonation targets changes behavior significantly; edit the constant
+// directly for targeted testing. The --user-agent flag is still passed alongside
+// --impersonate so both the TLS fingerprint and the HTTP User-Agent header match.
+define('AHOY_IMPERSONATE', getenv('AHOY_IMPERSONATE') ?: 'chrome');
 
 // Path to a Netscape-format cookies.txt file for authenticated requests
 // (age-restricted YouTube, Spotify, etc.). Set via COOKIES_PATH env var or
@@ -1851,6 +1859,12 @@ switch ($action) {
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ]);
+        // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
+        // Dramatically reduces 403/422 bot-detection errors on protected sites.
+        if (AHOY_IMPERSONATE !== '') {
+            $ytdlp_cmd[] = '--impersonate';
+            $ytdlp_cmd[] = AHOY_IMPERSONATE;
+        }
         // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
         // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
@@ -2453,6 +2467,12 @@ switch ($action) {
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
         ]);
+        // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
+        // Dramatically reduces 403/422 bot-detection errors on protected sites.
+        if (AHOY_IMPERSONATE !== '') {
+            $ytdlp_cmd[] = '--impersonate';
+            $ytdlp_cmd[] = AHOY_IMPERSONATE;
+        }
         // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
         // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
@@ -3339,30 +3359,36 @@ switch ($action) {
                 // tokens, causing yt-dlp to receive a mangled --user-agent argument.
                 // Using bypass_shell=true with a direct array bypasses the shell
                 // entirely so no escaping is needed regardless of UA string content.
-                $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
-                $probe_pipes = null;
-                $probe_proc = proc_open([
+                // Build the full yt-dlp command array before proc_open.
+                // --impersonate: spoof browser TLS/ALPN fingerprints to reduce 403/422 on
+                // YouTube health checks. Only used when AHOY_IMPERSONATE is non-empty.
+                $probe_cmd = [
                     YTDLP_PATH,
                     '--newline',
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
-                    // --progress-template false: suppress all progress output (replaces the
-                    // deprecated --no-progress flag). yt-dlp emits progress template noise
-                    // to stderr even during --skip-download which would corrupt json_decode
-                    // on stdout. Using 'false' (the canonical modern yt-dlp syntax) is
-                    // semantically identical to the empty-string form but cleaner.
                     '--progress-template', 'false',
-                    // NOTE: --no-warnings is deliberately NOT used here. The health probe
-                    // reads $probe_err via classifyYtdlpError() to surface actionable error
-                    // codes (SSL_ERROR, CONNECTION_FAILED, SOURCE_FORBIDDEN, etc.) to callers.
-                    // Suppressing warnings would empty $probe_err and break error classification.
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
-                    '--',
-                    HEALTH_PROBE_URL,
-                ], $probe_desc, $probe_pipes, '/tmp', [], ['bypass_shell' => true]);
+                ];
+                if (AHOY_IMPERSONATE !== '') {
+                    $probe_cmd[] = '--impersonate';
+                    $probe_cmd[] = AHOY_IMPERSONATE;
+                }
+                $probe_cmd[] = '--';
+                $probe_cmd[] = HEALTH_PROBE_URL;
+                $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+                $probe_pipes = null;
+                $probe_proc = proc_open(
+                    $probe_cmd,
+                    $probe_desc,
+                    $probe_pipes,
+                    '/tmp',
+                    [],
+                    ['bypass_shell' => true]
+                );
 
                 $probe_out = $probe_err = '';
                 $probe_exit = -1;
