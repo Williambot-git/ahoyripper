@@ -239,6 +239,9 @@ if ($is_rate_limited) {
             header('X-DL-RateLimit-Remaining: 0');
             header('X-DL-RateLimit-Reset: ' . $reset_timestamp);
             header('X-DL-RateLimit-Window: ' . $rate_window);
+            // Guard retry_after with max(0, ...) to prevent negative values if the
+            // reset timestamp is somehow in the past (clock skew, stale rate file).
+            // A negative Retry-After is invalid per HTTP spec and rejected by some clients.
             header('Retry-After: ' . max(0, $reset_timestamp - time()));
             // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
             // not a daily quota hit — allows the UI to distinguish the two cases without
