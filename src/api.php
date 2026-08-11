@@ -2500,6 +2500,7 @@ switch ($action) {
             '--force-overwrites',
             '--retries', '3',
             '--no-playlist',
+            '--restrict-filenames',
         ];
         if (!$no_playlist) {
             $ytdlp_cmd[] = '--yes-playlist';
