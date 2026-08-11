@@ -43,9 +43,9 @@ self.addEventListener('install', (event) => {
   // waitUntil accepts a promise — if the promise rejects, the SW fails to activate
   // and remains in the waiting state indefinitely. To guarantee activation even
   // when caching fails (network error during install, storage quota exceeded, etc.),
-  // we wrap addAll() in a try/catch so it never rejects — the promise always resolves.
-  // This means the SW activates even if some assets were not cached; the network
-  // serves as the fallback for any uncached resources.
+  // we resolve the promise even when addAll fails — the network serves as the
+  // fallback for any uncached assets and the SW still activates. This prevents
+  // a broken PWA that requires manual site-data clearing to recover.
   //
   // Stale-cache cleanup (deleting old version caches) also runs in waitUntil so
   // that old caches are removed before activation completes. It is placed inside
@@ -53,13 +53,19 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) =>
-        // Return the promise chain so waitUntil receives addAll's outcome.
-        // If addAll rejects (network error, storage quota), the promise
-        // rejects and the SW stays in the waiting state rather than
-        // activating without cached assets. An install failure is recoverable —
-        // the browser retries SW activation on the next page visit.
-        new Promise((resolve, reject) => {
-          cache.addAll(STATIC_ASSETS).then(resolve).catch(reject);
+        // Wrap addAll in a resolved Promise so a failed asset (e.g. a cached 404
+        // from a prior network request) does not cause waitUntil to reject and
+        // prevent SW activation. If addAll fails, we log the error but resolve
+        // anyway — the network serves as the fallback for any uncached assets,
+        // so the SW still activates and the PWA remains functional.
+        // An install rejection would leave the PWA permanently broken until the
+        // user manually clears site data, which is a worse outcome than falling
+        // back to the network for a few assets.
+        new Promise((resolve) => {
+          cache.addAll(STATIC_ASSETS).then(resolve).catch((err) => {
+            console.warn('[SW] install: cache.addAll failed, activating with network fallback:', err);
+            resolve();
+          });
         })
       )
       // Only clean old caches after static assets are confirmed cached.
@@ -74,14 +80,6 @@ self.addEventListener('install', (event) => {
           .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE)
           .map((n) => caches.delete(n))
       ))
-      .catch((err) => {
-        // addAll failed (network error, storage quota). Fail the install
-        // deliberately so the SW does NOT activate without its static assets.
-        // An install rejection is not fatal — the browser will retry activation
-        // on the next visit, giving the network a chance to recover.
-        // Re-throw so waitUntil receives a rejected promise.
-        throw err;
-      })
   );
   // Do NOT skipWaiting here — let the frontend decide when to activate.
   // The frontend sends a 'SKIP_WAITING' message after showing the update prompt.
