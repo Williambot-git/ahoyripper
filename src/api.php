@@ -473,6 +473,14 @@ function isValidUrl($url) {
             if ($octets[0] >= 224 && $octets[0] <= 239) {
                 return false; // IPv4 multicast (224.0.0.0/4)
             }
+            // Block 100.64.0.0/10 — carrier-grade NAT (CGN) addresses.
+            // FILTER_FLAG_NO_PRIV_RANGE intentionally leaves 100.64.0.0/10 unblocked
+            // because RFC 6598 classifies it as shared address space (not private).
+            // However, CGN addresses cannot receive inbound connections from the
+            // public internet and should not be targeted by outbound requests.
+            if ($octets[0] === 100 && $octets[1] >= 64 && $octets[1] <= 127) {
+                return false; // 100.64.0.0/10 — CGN (shared address space, not routable)
+            }
         }
         return true;
     };
