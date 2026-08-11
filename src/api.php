@@ -302,22 +302,29 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
         @unlink($f);
     }
 }
-// Clean up stale version cache files (yt-dlp and ffmpeg) and the yt-dlp
+// Clean up stale version cache files (yt-dlp and ffprobe) and the yt-dlp
 // connectivity probe cache — they expire after their respective TTLs but the
 // files themselves accumulate on long-running servers if not removed.
 // When the cache is cleared, also clear the in-memory global so the next request
 // fetches a fresh value rather than holding a stale entry across requests.
-foreach (['/tmp/ahoyrip_ytdlp_ver.cache', '/tmp/ahoyrip_ffmpeg_ver.cache', '/tmp/ahoyrip_ytdlp_probe.cache'] as $cache) {
+// Uses glob patterns for ffprobe caches since the filename includes an MD5 hash
+// of FFPROBE_PATH — this also cleans up stale caches from a previous FFPROBE_PATH
+// value after a path change (which the old hardcoded filename never handled).
+foreach (array_merge(
+    glob('/tmp/ahoyrip_ytdlp_*.cache') ?: [],
+    glob('/tmp/ahoyrip_ffprobe_*.cache') ?: [],
+    glob('/tmp/ahoyrip_ytdlp_probe.cache') ? [$probe_cache_file] : []
+) as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
         @unlink($cache);
-        if ($cache === '/tmp/ahoyrip_ytdlp_ver.cache') {
+        if (strpos($cache, 'ahoyrip_ytdlp_') === 0 && strpos($cache, '_probe') === false) {
             $GLOBALS['__ytdlp_version'] = null;
         }
-        if ($cache === '/tmp/ahoyrip_ffmpeg_ver.cache') {
+        if (strpos($cache, 'ahoyrip_ffprobe_') === 0) {
             $GLOBALS['__ffmpeg_version'] = null;
         }
-        if ($cache === '/tmp/ahoyrip_ytdlp_probe.cache') {
+        if (strpos($cache, 'ahoyrip_ytdlp_probe') === 0) {
             $GLOBALS['__ytdlp_probe'] = null;
         }
     }
@@ -598,15 +605,18 @@ if (!$GLOBALS['__ytdlp_version']) {
     }
 }
 
-// Cache ffmpeg version similarly — running `ffmpeg -version` on every health check
+// Cache ffprobe version similarly — running `ffprobe -version` on every health check
 // is wasteful and adds latency under load. Tracks hash to invalidate on binary upgrade.
 // ffprobe version cache — keyed on FFPROBE_PATH so that changing the path
-// invalidates stale cache entries. Only the ffprobe binary is probed (used for
+// invalidates stale cache entries. The cache filename includes a hash of FFPROBE_PATH
+// so that switching to a different ffprobe binary (e.g. /usr/bin/ffprobe vs
+// /usr/local/bin/ffprobe) creates a separate cache rather than returning a stale
+// version from the previous binary. Only the ffprobe binary is probed (used for
 // post-download codec/resolution verification); ffmpeg itself is not separately
 // checked since ffprobe is shipped alongside ffmpeg in virtually all deployments.
 // If ffprobe is present but ffmpeg is not, AhoyRipper's download flow would fail
 // at the yt-dlp merge stage anyway — so checking ffprobe's presence is sufficient.
-$ffmpeg_cache_file = '/tmp/ahoyrip_ffmpeg_ver.cache';
+$ffmpeg_cache_file = '/tmp/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
