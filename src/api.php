@@ -3258,7 +3258,7 @@ switch ($action) {
             // configured daily limit for API surface consistency with info/download
             // responses, allowing clients to always determine the limit from the body.
             'quota_remaining' => -1,
-            'quota_limit' => (int)QUOTA_DAILY_DEFAULT,
+            'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
@@ -3410,7 +3410,7 @@ switch ($action) {
             // configured daily limit for API surface consistency with info/download
             // responses, allowing clients to always determine the limit from the body.
             'quota_remaining' => -1,
-            'quota_limit' => (int)QUOTA_DAILY_DEFAULT,
+            'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
         ];
 
