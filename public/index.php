@@ -799,6 +799,14 @@ if (installDismissBtn && installBanner) {
     if (existing) { existing.remove(); }
     var notice = document.createElement('div');
     notice.id = 'substitutionNotice';
+    // role="status" makes this a polite live region — screen readers announce its
+    // content when it appears without interrupting the current speech/reading.
+    // aria-live="polite" is the implicit role for status; pairing them explicitly
+    // maximises cross-screen-reader compatibility (NVDA, JAWS, VoiceOver).
+    // aria-atomic="true" ensures the full message is read even if only part changes.
+    notice.setAttribute('role', 'status');
+    notice.setAttribute('aria-live', 'polite');
+    notice.setAttribute('aria-atomic', 'true');
     notice.style.cssText = [
       'position: fixed',
       'bottom: 2rem',
