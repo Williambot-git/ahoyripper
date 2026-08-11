@@ -849,6 +849,9 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
 | `DOWNLOAD_CANCELLED` | Download was cancelled (tab closed or connection lost) | Your quota was not charged — try again when ready |
+| `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | API requests must include a Referer or Origin header from an allowed domain |
+| `METHOD_NOT_ALLOWED` | HTTP method not allowed for this endpoint | Use GET for info/download/health; POST for CSP report submission |
+| `NOT_ACCEPTABLE` | Client requested an unsupported response format | API only returns application/json — ensure Accept: application/json header is sent |
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
