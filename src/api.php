@@ -646,11 +646,10 @@ if (!$GLOBALS['__ffmpeg_version']) {
         // rather than persisting an invalid empty hash that masks binary upgrades.
         if ($hash !== false) {
             @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + 3600]));
-        } elseif ($GLOBALS['__ffmpeg_version'] === 'not installed') {
-            // Binary is absent — write a sentinel cache entry so subsequent requests
-            // don't re-probe. Without this, every request triggers shell_exec even though
-            // ffprobe is not installed and won't suddenly become available between requests.
-            // This mirrors the yt-dlp version cache sentinel (lines 482-484).
+        } else {
+            // md5_file failed — binary is absent or unreadable.
+            // Write a sentinel so subsequent requests don't re-probe every time.
+            // yt-dlp's version cache uses the same pattern (lines 587-589).
             @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => '', 'exp' => time() + 3600]));
         }
     }
