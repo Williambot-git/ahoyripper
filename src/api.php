@@ -204,6 +204,7 @@ if ($is_rate_limited) {
     if (!$fp) {
         http_response_code(503);
         header('Retry-After: 5');
+        header('X-Content-Type-Options: nosniff');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -211,6 +212,7 @@ if ($is_rate_limited) {
         fclose($fp);
         http_response_code(503);
         header('Retry-After: 5');
+        header('X-Content-Type-Options: nosniff');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -1660,6 +1662,7 @@ switch ($action) {
             if (!$daily_fp) {
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Content-Type-Options: nosniff');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -1667,6 +1670,7 @@ switch ($action) {
                 fclose($daily_fp);
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Content-Type-Options: nosniff');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -2222,6 +2226,7 @@ switch ($action) {
         if (!$dl_fp) {
             http_response_code(503);
             header('Retry-After: 5');
+            header('X-Content-Type-Options: nosniff');
             echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2229,6 +2234,7 @@ switch ($action) {
             fclose($dl_fp);
             http_response_code(503);
             header('Retry-After: 5');
+            header('X-Content-Type-Options: nosniff');
             echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2320,6 +2326,7 @@ switch ($action) {
             if (!$daily_fp) {
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Content-Type-Options: nosniff');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -2327,6 +2334,7 @@ switch ($action) {
                 fclose($daily_fp);
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Content-Type-Options: nosniff');
                 echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
