@@ -193,6 +193,26 @@ header_remove('X-Powered-By');
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebSite",
+        "@id": "<?= $BASE_URL ?>/#website",
+        "name": "AhoyRipper",
+        "url": "<?= $BASE_URL ?>",
+        "description": "Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "AhoyVPN",
+          "url": "https://ahoyvpn.com"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "<?= $BASE_URL ?>/?url={searchTerms}"
+          },
+          "query-input": "required name=searchTerms"
+        }
+      },
+      {
         "@type": "WebApplication",
         "@id": "<?= $BASE_URL ?>/#webapplication",
         "name": "AhoyRipper",
