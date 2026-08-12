@@ -2491,6 +2491,11 @@ switch ($action) {
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
 
         if (!$proc) {
+            // pipes[0] (stdin) may be partially open — clean up all three pipes
+            if ($pipes !== null) {
+                foreach ($pipes as $p) { if ($p !== null && is_resource($p)) fclose($p); }
+                $pipes = null;
+            }
             logRequest('download', 500, ['reason' => 'proc_open_failed']);
             // Refund daily quota since no download attempt was possible.
             // Only refund when the baseline was set (proc_open was attempted after
@@ -2521,6 +2526,15 @@ switch ($action) {
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
+        }
+
+        // Close stdin — yt-dlp does not need input from stdin. Not closing it can
+        // cause yt-dlp to hang waiting for input on stdin if the pipe is inherited
+        // open across an exec or in certain subprocess scenarios. The info action
+        // also closes stdin immediately after proc_open (line 1915).
+        if ($pipes !== null && $pipes[0] !== null) {
+            fclose($pipes[0]);
+            unset($pipes[0]);
         }
 
         $start = hrtime(true);
