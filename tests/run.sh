@@ -38,6 +38,26 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (classify_ytdlp_error_test.php) ─────
+echo "==> Running classify_ytdlp_error_test.php (error classification tests)..."
+if php "$SCRIPT_DIR/classify_ytdlp_error_test.php"; then
+    echo "✓ classify_ytdlp_error_test.php: passed"
+else
+    echo "✗ classify_ytdlp_error_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
+# ─── PHP unit tests (is_valid_url_test.php) ──────────────
+echo "==> Running is_valid_url_test.php (URL validation / SSRF tests)..."
+if php "$SCRIPT_DIR/is_valid_url_test.php"; then
+    echo "✓ is_valid_url_test.php: passed"
+else
+    echo "✗ is_valid_url_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── PHP unit tests (playlist_param_test.php) ──────────
 echo "==> Running playlist_param_test.php (playlist flag resolution)..."
 if php "$SCRIPT_DIR/playlist_param_test.php"; then
