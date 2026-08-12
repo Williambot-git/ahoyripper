@@ -3424,6 +3424,7 @@ switch ($action) {
                     '--skip-download',
                     '--progress-template', 'false',
                     '--compat-options', 'no-warnings',
+                    '--geo-bypass',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
