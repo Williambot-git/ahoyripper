@@ -1017,6 +1017,10 @@ if (installDismissBtn && installBanner) {
         // Forward page_request_id so the API and server logs can correlate
         // the download request with the browser's page view.
         dlHeaders['X-Request-ID'] = PAGE_REQUEST_ID;
+        // Referer is required for API origin checks — the info fetch sends it implicitly
+        // via fetch() (uses page URL), but the download fetch also needs it explicitly
+        // since window.location.href navigation bypasses fetch entirely.
+        dlHeaders['Referer'] = window.location.href;
         card.classList.add('downloading');
         setLoading(true);
 
