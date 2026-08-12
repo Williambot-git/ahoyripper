@@ -1862,6 +1862,11 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
+            // --compat-options no-warnings: suppress yt-dlp deprecation warnings on stderr.
+            // These warnings can appear during info fetches on sites with extractor updates
+            // and would pollute stderr, potentially interfering with error classification.
+            // Mirrors the same flag already used in the download action for consistency.
+            '--compat-options', 'no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
