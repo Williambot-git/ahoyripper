@@ -1862,6 +1862,7 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
