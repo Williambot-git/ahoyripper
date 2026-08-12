@@ -2949,15 +2949,31 @@ switch ($action) {
                 ]);
                 foreach (glob($glob_pattern) as $f) { @unlink($f); }
                 header('Cache-Control: no-store, must-revalidate');
+                header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
                 http_response_code(500);
+                // retry_after: Unix timestamp when the download can be retried.
+                // Set to now + DOWNLOAD_TIMEOUT so the client has a consistent reset window.
+                $retry_ts = time() + DOWNLOAD_TIMEOUT;
+                header('Retry-After: ' . max(0, $retry_ts));
+                // Refund quota inline — the conditional refund block below (which sets
+                // $post_refund_count) is never reached due to this early exit, so compute
+                // and apply the refund here before building the response.
+                $ffprobe_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 echo json_encode([
                     'error' => 'Download could not be verified. The file may be corrupt or the verification tool encountered an error. Please try again or choose a different format.',
                     'error_code' => 'DOWNLOAD_EMPTY',
+                    'retry_after' => max(0, $retry_ts),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
+                    // quota was refunded above. Unlimited-key holders ($unlimited=true) were never
+                    // incremented, so quota fields use -1 sentinel values.
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $ffprobe_post_refund_count),
+                    'quota_limit' => $unlimited ? -1 : $daily_limit,
+                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
