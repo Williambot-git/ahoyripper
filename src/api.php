@@ -3262,6 +3262,7 @@ switch ($action) {
             'quota_remaining' => -1,
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
+            'quota_reset_unix' => -1,
             // source_url: self-referencing URL for this API endpoint.
             // Mirrors the source_url field in the /health response, giving API consumers
             // a consistent, always-present reference to the AhoyRipper home page.
@@ -3418,6 +3419,7 @@ switch ($action) {
             'quota_remaining' => -1,
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
+            'quota_reset_unix' => -1,
             // source_url: self-referencing URL for this API endpoint.
             // Mirrors the source_url field in the /check response, giving API consumers
             // a consistent, always-present reference to the AhoyRipper home page.
