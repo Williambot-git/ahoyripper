@@ -36,6 +36,11 @@ const STATIC_ASSETS = [
   '/favicon.svg',
   '/favicon-512.png',
   '/favicon-180.png',
+  // og-image.png: pre-cached so social share previews load instantly and are
+  // available offline. Preloaded in index.php with fetchpriority=high so the
+  // browser prioritizes it early on first visit — the SW cache is the fallback
+  // for return visits and offline scenarios (e.g. sharing the URL while offline).
+  '/og-image.png',
 ];
 
 // ─── Install: pre-cache static assets ────────────────────────────────────────
