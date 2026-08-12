@@ -285,6 +285,17 @@ else
 fi
 
 echo ""
+echo "==> Checking og:image dimensions in index.php (Twitter Card / social preview)... "
+# Twitter Cards and most social crawlers require og:image:width and og:image:height
+# to be present for accurate rendering. These are part of the Open Graph spec.
+if grep -q 'og:image:width.*content=' public/index.php && grep -q 'og:image:height.*content=' public/index.php; then
+    echo "  ✓ og:image:width and og:image:height present"
+else
+    echo "  ✗ og:image:width or og:image:height missing (social previews may be inaccurate)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking rate limiting (info endpoint)..."
 # Check for the constant definition: define('RATE_LIMIT', ... ?: 30) — the default is 30.
 # Also accept the variable assignment: $rate_limit = RATE_LIMIT (both in one check).
