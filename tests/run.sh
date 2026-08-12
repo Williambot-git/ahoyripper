@@ -48,6 +48,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (clean_test.php) ───────────────────
+echo "==> Running clean_test.php (clean() sanitization tests)..."
+if php "$SCRIPT_DIR/clean_test.php"; then
+    echo "OK clean_test.php: passed"
+else
+    echo "FAIL clean_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── PHP unit tests (is_valid_url_test.php) ──────────────
 echo "==> Running is_valid_url_test.php (URL validation / SSRF tests)..."
 if php "$SCRIPT_DIR/is_valid_url_test.php"; then
