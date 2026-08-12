@@ -537,6 +537,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `500` | `PROC_OPEN_FAILED` | Server error — could not start the download process. Try again shortly. |
+| `500` | `YTDLP_NOT_FOUND` | yt-dlp binary could not be started. The server is misconfigured — yt-dlp may not be installed or the path is incorrect. |
 | `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
