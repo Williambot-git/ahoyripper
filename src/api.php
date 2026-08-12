@@ -1330,6 +1330,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'error_code' => 'MISSING_URL',
             'request_id' => $request_id,
             'source_url' => null,
+            // 'source_url_missing' is true when the client provided no URL at all,
+            // distinguishing MISSING_URL from other null-source_url error cases.
+            // API consumers can check this flag for precise error routing without
+            // relying on string matching on the error message.
+            'source_url_missing' => true,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'quota_remaining' => $daily_limit,
