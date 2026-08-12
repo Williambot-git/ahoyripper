@@ -1862,7 +1862,6 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
@@ -2053,6 +2052,8 @@ switch ($action) {
                 'DOWNLOAD_TIMEOUT' => 504,
                 'DOWNLOAD_CANCELLED' => 499,
                 'MISSING_URL' => 400, 'MISSING_FORMAT' => 400,
+                'INVALID_URL' => 400, 'INVALID_KEY' => 401,
+                'INVALID_FORMAT_ID' => 400,
                 'FORMAT_UNAVAILABLE' => 422,
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
                 'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
