@@ -2479,7 +2479,7 @@ switch ($action) {
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',
-            '--no-warnings',
+            '--compat-options', 'no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -3406,7 +3406,7 @@ switch ($action) {
                     '--no-playlist',
                     '--skip-download',
                     '--progress-template', 'false',
-                    '--no-warnings',
+                    '--compat-options', 'no-warnings',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
