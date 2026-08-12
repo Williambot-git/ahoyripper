@@ -886,9 +886,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) {
                     $raw_error_out = $raw_diag;
                 }
+                // Always include 'formats' => [] so API consumers can always
+                // access response.formats without checking if the key exists first.
                 return [
                     'error' => $classified['msg'],
                     'error_code' => $classified['code'],
+                    'formats' => [],
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
@@ -899,7 +902,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             if ($raw_error_out !== null) {
                 $raw_error_out = $err_msg;
             }
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg];
+            // Always include 'formats' => [] so API consumers can always
+            // access response.formats without checking if the key exists first.
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg, 'formats' => []];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
@@ -913,7 +918,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         if ($raw_error_out !== null) {
             $raw_error_out = $parse_fail_msg;
         }
-        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $parse_fail_msg];
+        // Always include 'formats' => [] so API consumers can always
+        // access response.formats without checking if the key exists first.
+        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $parse_fail_msg, 'formats' => []];
     }
 
     // JSON parsed successfully but has no formats key — this is a distinct
@@ -933,6 +940,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // Use the computed message when caller didn't pass $raw_error_out (null).
             // Mirrors the pattern used in the JSON-parse-failure case above.
             'raw_error' => $raw_error_out ?? $no_formats_msg,
+            // Always include 'formats' => [] so API consumers can always
+            // access response.formats without checking if the key exists first.
+            'formats' => [],
         ];
     }
 

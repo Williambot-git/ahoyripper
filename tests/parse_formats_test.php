@@ -105,11 +105,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             $err_lower = strtolower($err_msg);
             if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED'];
+                // Always include 'formats' => [] so API consumers can always
+                // access response.formats without checking if the key exists first.
+                return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED', 'formats' => []];
             }
             if (preg_match('/video is private|this video is private/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This video is private and cannot be downloaded.', 'error_code' => 'PRIVATE_VIDEO'];
+                return ['error' => 'This video is private and cannot be downloaded.', 'error_code' => 'PRIVATE_VIDEO', 'formats' => []];
             }
             // "authentication required" must be checked separately because the merged
             // pattern "authentication.*required" would require "required" to appear
@@ -117,59 +119,59 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // match it directly as its own alternative.
             if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This video requires login or subscription.', 'error_code' => 'LOGIN_REQUIRED'];
+                return ['error' => 'This video requires login or subscription.', 'error_code' => 'LOGIN_REQUIRED', 'formats' => []];
             }
             if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This site is not supported by yt-dlp.', 'error_code' => 'UNSUPPORTED_SITE'];
+                return ['error' => 'This site is not supported by yt-dlp.', 'error_code' => 'UNSUPPORTED_SITE', 'formats' => []];
             }
             if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'Playlist not found or no longer exists.', 'error_code' => 'PLAYLIST_MISSING'];
+                return ['error' => 'Playlist not found or no longer exists.', 'error_code' => 'PLAYLIST_MISSING', 'formats' => []];
             }
             if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This content has been removed due to a copyright claim.', 'error_code' => 'COPYRIGHT_REMOVED'];
+                return ['error' => 'This content has been removed due to a copyright claim.', 'error_code' => 'COPYRIGHT_REMOVED', 'formats' => []];
             }
             if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This video is no longer available or has been removed.', 'error_code' => 'VIDEO_UNAVAILABLE'];
+                return ['error' => 'This video is no longer available or has been removed.', 'error_code' => 'VIDEO_UNAVAILABLE', 'formats' => []];
             }
             if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'error_code' => 'SOURCE_RATE_LIMITED'];
+                return ['error' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'error_code' => 'SOURCE_RATE_LIMITED', 'formats' => []];
             }
             if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This video is age-restricted and cannot be downloaded without verification.', 'error_code' => 'AGE_RESTRICTED'];
+                return ['error' => 'This video is age-restricted and cannot be downloaded without verification.', 'error_code' => 'AGE_RESTRICTED', 'formats' => []];
             }
             if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR'];
+                return ['error' => 'Secure connection to the source failed. Try again shortly.', 'error_code' => 'SSL_ERROR', 'formats' => []];
             }
             if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE'];
+                return ['error' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'error_code' => 'FILE_TOO_LARGE', 'formats' => []];
             }
             if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE'];
+                return ['error' => 'That format is not available for this video. Select another from the list.', 'error_code' => 'FORMAT_UNAVAILABLE', 'formats' => []];
             }
             // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
-            // the source blocks content on legal/TOS grounds. The \bdisallowed\b(?!\\s+content\\b)
+            // the source blocks content on legal/TOS grounds. The \bdisallowed\b(?!\s+content\b)
             // negative lookahead prevents "disallowed content" (no violation language) from matching —
             // it falls through to SOURCE_FORBIDDEN (HTTP 403) instead. The explicit
             // content-disallow(ed)? sentinel catches yt-dlp's legal-blocked sentinel.
             if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'This content is not available due to a terms of service or legal violation.', 'error_code' => 'DISALLOWED_CONTENT'];
+                return ['error' => 'This content is not available due to a terms of service or legal violation.', 'error_code' => 'DISALLOWED_CONTENT', 'formats' => []];
             }
             // "process timed out" is produced by PHP-side timeout in the inline
             // proc_open timeout handler (api.php).
             // Distinct from connection-level "timed out" which implies a network failure.
             if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'error_code' => 'SOURCE_TIMEOUT'];
+                return ['error' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'error_code' => 'SOURCE_TIMEOUT', 'formats' => []];
             }
             // \\b(?!process )timed out\\b — "timed out" as a standalone word, NOT preceded
             // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookahead (?!)
@@ -177,10 +179,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // \\bi?/o timeout\\b — IO timeout as a standalone word (handles "i/o timeout").
             if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
-                return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED'];
+                return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED', 'formats' => []];
             }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR'];
+            // Always include 'formats' => [] so API consumers can always
+            // access response.formats without checking if the key exists first.
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'formats' => []];
         }
         return null;
     }
@@ -194,10 +198,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         if ($raw_error_out !== null) {
             $raw_error_out = $no_formats_msg;
         }
+        // Always include 'formats' => [] so API consumers can always
+        // access response.formats without checking if the key exists first.
         return [
             'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
             'error_code' => 'PARSE_ERROR',
             'raw_error' => $raw_error_out ?? $no_formats_msg,
+            'formats' => [],
         ];
     }
 
