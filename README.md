@@ -520,7 +520,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `401` | `LOGIN_REQUIRED` | Video requires login or subscription |
-| `422` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `451` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
 | `404` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
 | `404` | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
 | `422` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
@@ -534,7 +534,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `502` | `CONNECTION_FAILED` | Could not connect to the source |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
-| `422` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
+| `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `500` | `PROC_OPEN_FAILED` | Server error — could not start the download process. Try again shortly. |
 | `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
