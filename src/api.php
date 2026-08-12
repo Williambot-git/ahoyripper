@@ -1324,6 +1324,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'missing_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $sendDailyLimitHeaders($daily_limit, $daily_limit);
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
@@ -1331,7 +1332,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'quota_remaining' => null,
+            'quota_remaining' => $daily_limit,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1355,6 +1356,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $sendDailyLimitHeaders($daily_limit, $daily_limit);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1362,7 +1364,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'quota_remaining' => null,
+            'quota_remaining' => $daily_limit,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1374,7 +1376,22 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     // centralising it in the validation helper ensures both actions are covered.
     if (strlen($url) > MAX_URL_LEN) {
         http_response_code(400);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+        $sendDailyLimitHeaders($daily_limit, $daily_limit);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
@@ -1382,6 +1399,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            'quota_remaining' => $daily_limit,
+            'quota_limit' => $daily_limit,
+            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1397,7 +1417,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
-            $sendDailyLimitHeaders($daily_limit, null);
+            $sendDailyLimitHeaders($daily_limit, $daily_limit);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
@@ -1405,7 +1425,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => null,
+                'quota_remaining' => $daily_limit,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1425,7 +1445,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
-            $sendDailyLimitHeaders($daily_limit, null);
+            $sendDailyLimitHeaders($daily_limit, $daily_limit);
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
@@ -1433,7 +1453,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => null,
+                'quota_remaining' => $daily_limit,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
