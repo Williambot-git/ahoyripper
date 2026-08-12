@@ -912,6 +912,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 2. Try a different format (audio-only often works when video fails)
 3. Try a different video from the same platform (rules out site-wide blocks)
 4. Check [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — the platform may have added/changed its API
+5. **If you get `SOURCE_FORBIDDEN` (HTTP 403 from the source site):** Many sites (YouTube, TikTok, Twitter) block known VPN/proxy exit IPs. Use AhoyVPN to route through a different server location, or try during off-peak hours when the IP pool is less flaggged.
 
 ---
 
