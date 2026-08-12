@@ -73,6 +73,11 @@ function isValidUrl($url) {
             if ($octets[0] === 100 && $octets[1] >= 64 && $octets[1] <= 127) {
                 return false; // 100.64.0.0/10 — CGN (shared address space, not routable)
             }
+        } else {
+            // IPv6: block multicast range ff00::/8.
+            if (str_starts_with($ip, 'ff')) {
+                return false; // IPv6 multicast (ff00::/8)
+            }
         }
         return true;
     };
@@ -213,6 +218,12 @@ test('rejects 2001:db8::1 (documentation)', !isValidUrl('https://[2001:db8::1]/'
 // IPv4-mapped IPv6
 test('rejects ::ffff:127.0.0.1 (mapped loopback)', !isValidUrl('https://[::ffff:127.0.0.1]/'));
 test('rejects ::ffff:192.168.1.1 (mapped private)', !isValidUrl('https://[::ffff:192.168.1.1]/'));
+
+// IPv6 multicast (ff00::/8)
+test('rejects ff02::1 (IPv6 link-local multicast)', !isValidUrl('https://[ff02::1]/'));
+test('rejects ff08::1 (IPv6 multicast, site-local)', !isValidUrl('https://[ff08::1]/'));
+test('rejects ff1e::1 (IPv6 multicast, organization-local)', !isValidUrl('https://[ff1e::1]/'));
+test('rejects ff05::1 (IPv6 multicast, site-local)', !isValidUrl('https://[ff05::1]/'));
 
 // ─── IPv4-mapped IPv6 public IP validation ───────────────────────────────────
 

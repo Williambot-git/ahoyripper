@@ -485,9 +485,10 @@ function isValidUrl($url) {
                 return false;
             }
         }
-        // FILTER_FLAG_NO_RES_RANGE does NOT block multicast IPs (224.0.0.0/4).
-        // Block them explicitly — multicast addresses cannot be routed and are
-        // never valid targets for outbound HTTP requests.
+        // FILTER_FLAG_NO_RES_RANGE does NOT block multicast IPs (IPv4 224.0.0.0/4
+        // or IPv6 ff00::/8). Block them explicitly — multicast addresses cannot be
+        // routed on the public internet and are never valid targets for outbound
+        // HTTP requests.
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
             $octets = array_map('intval', explode('.', $ip));
             if ($octets[0] >= 224 && $octets[0] <= 239) {
@@ -500,6 +501,13 @@ function isValidUrl($url) {
             // public internet and should not be targeted by outbound requests.
             if ($octets[0] === 100 && $octets[1] >= 64 && $octets[1] <= 127) {
                 return false; // 100.64.0.0/10 — CGN (shared address space, not routable)
+            }
+        } else {
+            // IPv6: block multicast range ff00::/8. Unlike IPv4 where FILTER_FLAG_IPV4
+            // is used as the detection mechanism, IPv6 multicast is detected by
+            // checking if the first byte is 0xff (ff00::/8 prefix).
+            if (str_starts_with($ip, 'ff')) {
+                return false; // IPv6 multicast (ff00::/8)
             }
         }
         return true;
