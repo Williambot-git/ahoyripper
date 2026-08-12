@@ -1878,7 +1878,6 @@ switch ($action) {
             // and would pollute stderr, potentially interfering with error classification.
             // Mirrors the same flag already used in the download action for consistency.
             '--compat-options', 'no-warnings',
-            '--geo-bypass',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
@@ -2496,7 +2495,6 @@ switch ($action) {
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',
             '--compat-options', 'no-warnings',
-            '--geo-bypass',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
