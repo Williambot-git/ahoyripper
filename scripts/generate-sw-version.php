@@ -45,10 +45,13 @@ if (!is_readable($swFile)) {
 // Get short git hash — fallback to date-based string if not in a repo
 $hash = trim(@exec('git rev-parse --short HEAD 2>/dev/null') ?: '');
 if ($hash === '') {
-    // Not in a git repo — use YYYYMMDD-HHMM as a monotonically-increasing fallback.
-    // Using date is safe: it changes every minute, forcing a cache bump even
-    // without git. git-rev-parse is preferred when available (unique per commit).
-    $hash = date('ymd-His');
+    // Not in a git repo — use YYYYMMDD as a daily monotonically-increasing
+    // fallback. Using a daily date prevents the hash from changing between runs
+    // within the same day, which would modify sw.js on every CI run and cause
+    // the PWA versioning test to falsely fail with "sw.js was modified". The
+    // daily granularity is sufficient: it bumps the PWA cache once per
+    // deployment day, not once per CI pipeline run.
+    $hash = date('ymd');
 }
 
 $version = $hash;
