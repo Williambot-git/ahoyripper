@@ -2075,6 +2075,11 @@ switch ($action) {
                 refundQuota($ip, $unlimited, $daily_limit);
             }
             http_response_code($err_status);
+            // retry_after: Unix timestamp when the info request can be retried.
+            // Use INFO_TIMEOUT (same as the unclassified error path) so clients have
+            // a consistent future reset point regardless of how the error was classified.
+            $retry_ts = time() + INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             $resp = [
                 'error' => $parsed['error'],
                 'error_code' => $parsed['error_code'] ?? 'YTDLP_ERROR',
@@ -2086,6 +2091,7 @@ switch ($action) {
                 // Included in success responses; add it here for parity on error responses.
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'retry_after' => max(0, $retry_ts),
             ];
             // Surface the raw yt-dlp output so the client can show diagnostic info
             if ($raw_err) {
