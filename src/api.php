@@ -3200,6 +3200,12 @@ switch ($action) {
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
+        // Daily-limit sentinels (-1) signal clients this is a read-only probe,
+        // not a rip-consuming action — mirrors the pattern used by action=health.
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
         header('Cache-Control: no-cache');
         // yt_dlp_version is included in the check response for consistency with
         // health/info/download responses. The version string is pre-cached before
