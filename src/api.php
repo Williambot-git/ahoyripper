@@ -1854,11 +1854,6 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
-            // --no-warnings: suppress yt-dlp deprecation notices and non-fatal warnings
-            // from stderr. Keeps the JSON output clean and reduces log noise. Fatal
-            // errors (extractor failures, network issues) are still surfaced in stderr
-            // and are classified by parseFormats() for proper error reporting.
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             '--referer', 'https://ahoyripper.com/',
@@ -2468,6 +2463,7 @@ switch ($action) {
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -3374,6 +3370,7 @@ switch ($action) {
                     '--no-playlist',
                     '--skip-download',
                     '--progress-template', 'false',
+                    '--no-warnings',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://www.youtube.com/',
                     '--user-agent', AHOY_USER_AGENT,
