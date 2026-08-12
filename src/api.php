@@ -1242,13 +1242,15 @@ function logRequest($action, $status, $extra = []) {
 
 // ─── Quota refund helper ───────────────────────────────────────────────
 // Best-effort refund of one daily-quota increment applied before a failure.
-// $ip:          client IP used to build the quota filename
-// $unlimited:   skip refund if true (unlimited-key holders never incremented)
-// $daily_limit: safe default return value when refund cannot be performed
+// $ip:                  client IP used to build the quota filename
+// $unlimited:           skip refund if true (unlimited-key holders never incremented)
+// $daily_limit:         safe default return value when refund cannot be performed
+// $pre_increment_count: the daily count BEFORE the request incremented it.
+//                        Used to detect whether this request's increment is still
+//                        present in the quota file (not yet refunded by a concurrent
+//                        request that failed at the same time).
 // Returns the post-refund daily count; callers use this to compute quota_remaining.
-// Guard: only decrements when the stored record is today's and count > 0,
-// preventing double-refund and race conditions between concurrent requests.
-function refundQuota(string $ip, bool $unlimited, int $daily_limit): int {
+function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count): int {
     if ($unlimited) return $daily_limit;
     $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
     if (!$undo_fp) return $daily_limit;
@@ -1262,7 +1264,13 @@ function refundQuota(string $ip, bool $unlimited, int $daily_limit): int {
         $decoded = json_decode($undo_raw, true);
         if ($decoded && is_array($decoded)) $undo_data = $decoded;
     }
-    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > 0) {
+    // Only decrement if: same day AND this request's increment is still present.
+    // c > $pre_increment_count means the increment from this request is reflected
+    // in the stored count (another concurrent request hasn't refunded it yet).
+    // This prevents the race where Request B reads c=6 (both requests incremented
+    // from 5), Request A's refund decrements to 5, then Request B's refund ALSO
+    // decrements to 4 (should be 5 — Request B's increment was undone by Request A).
+    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > $pre_increment_count) {
         $undo_data['c']--;
         ftruncate($undo_fp, 0);
         rewind($undo_fp);
@@ -1783,6 +1791,9 @@ switch ($action) {
             // the classified-error refund block can detect whether the quota file
             // was modified by another request since this increment (prevents
             // double-refund when concurrent requests hit different error paths).
+            // This is the count AFTER increment — refundQuota's c > baseline guard
+            // will only decrement if the stored count is still above this value,
+            // meaning this request's increment hasn't been refunded by a concurrent req.
             $info_quota_before_refund = $daily_data['c'];
 
             // Surface daily quota state so the client can display remaining rips.
@@ -1903,7 +1914,7 @@ switch ($action) {
             // Initialised to $daily_limit as a safe default (no refund on failure).
             $post_refund_count = $daily_limit;
             if (!$unlimited) {
-                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $info_quota_before_refund);
             }
             logRequest('info', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
@@ -1916,11 +1927,11 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
                 // quota_remaining/quota_limit/quota_reset: quota was refunded before
                 // this response. $post_refund_count is the post-refund daily count.
                 // Unlimited-key holders ($unlimited=true) were never incremented, so
                 // $post_refund_count is $daily_limit for them (no change from baseline).
-                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1976,7 +1987,7 @@ switch ($action) {
             // The fetch failed — undo the quota increment so failed attempts don't
             // burn the user's daily limit. Only count successful info retrievals.
             if (!$unlimited) {
-                refundQuota($ip, $unlimited, $daily_limit);
+                refundQuota($ip, $unlimited, $daily_limit, $info_quota_before_refund);
             }
 
             // Extract a clean, readable error from yt-dlp output
@@ -2017,7 +2028,7 @@ switch ($action) {
             // Undo the quota increment — parseFormats returned null means the content
             // could not be parsed; we don't burn the user's daily limit for this.
             if (!$unlimited) {
-                refundQuota($ip, $unlimited, $daily_limit);
+                refundQuota($ip, $unlimited, $daily_limit, $info_quota_before_refund);
             }
             $err_status = 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
@@ -2076,11 +2087,10 @@ switch ($action) {
             // Refund guard: if parseFormats returned a classified error (GEOBLOCKED,
             // PRIVATE_VIDEO, etc.), the user burned a quota hit but got no usable
             // content. Undo the increment so it doesn't count against their daily cap.
-            // Use the same >= guard as the download action to prevent double-refund
-            // if proc_open ever fails without decrementing first.
-            $info_quota_before_refund = $daily_data['c'];
+            // Uses the same c > baseline guard as the download action to prevent
+            // double-refund when concurrent requests hit different error paths.
             if (!$unlimited) {
-                refundQuota($ip, $unlimited, $daily_limit);
+                refundQuota($ip, $unlimited, $daily_limit, $info_quota_before_refund);
             }
             http_response_code($err_status);
             // retry_after: Unix timestamp when the info request can be retried.
@@ -2529,14 +2539,14 @@ switch ($action) {
             // Initialised to $daily_limit as a safe default (no refund on failure).
             $post_refund_count = $daily_limit;
             if (!$unlimited && isset($dl_quota_before_refund)) {
-                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
             }
             http_response_code(500);
             header('Cache-Control: no-cache');
             header('X-Request-ID: ' . $request_id);
             // retry_after: Unix timestamp when the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
-            // download failures, giving a consistent point to count down to.
+            // download failures, giving a consistent future reset point to count down to.
             $retry_ts = time() + DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_ts));
             echo json_encode([
@@ -2593,7 +2603,7 @@ switch ($action) {
                 // quota increment). Unlimited-key holders ($unlimited=true) skip
                 // increment so no refund needed.
                 if (!$unlimited && isset($dl_quota_before_refund)) {
-                    refundQuota($ip, $unlimited, $daily_limit);
+                    refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
@@ -2678,8 +2688,8 @@ switch ($action) {
             // their quota incremented in the first place.
             // refundQuota() uses an at-most-once guard internally to handle
             // proc_open failure gracefully (if it decremented before us, we skip).
-            if (!$unlimited) {
-                refundQuota($ip, $unlimited, $daily_limit);
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
             }
 
             // Retry-After: Unix timestamp when the download can be retried.
@@ -3004,7 +3014,7 @@ switch ($action) {
         // behavior since the user shouldn't be charged when ffprobe couldn't even be attempted.
         $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
         if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
-            $post_refund_count = refundQuota($ip, $unlimited, $daily_limit);
+            $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
         }
 
         $mime = 'application/octet-stream';
