@@ -162,7 +162,10 @@ header_remove('X-Powered-By');
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
        production, but the meta tag ensures CSP is enforced even when the page is
        served through a reverse proxy, CDN, or alternative deployment that might
-       strip or not propagate the HTTP header. Same policy as the nginx directive. -->
+       strip or not propagate the HTTP header. img-src must stay in sync with the
+       HTTP header's img-src directive — specifically include https://fonts.googleapis.com
+       (needed for OG image and font preloads) and https://*.tiktokcdn.com (CDN for
+       TikTok video thumbnails). -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://*.tiktokcdn.com https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self'; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report; report-uri /csp-report;">
   <!-- worker-src 'self' is also set in the nginx HTTP header (deploy/nginx.conf).
        The meta tag above serves as a fallback when the HTTP header is stripped
