@@ -537,11 +537,16 @@ body {
   color: var(--color-accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .format-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0; /* flex child respect min-width:0 for overflow wrapping */
 }
 .format-meta {
   font-size: 0.8rem;
