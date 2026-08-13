@@ -3093,6 +3093,14 @@ switch ($action) {
         if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
             $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
         }
+        // Surface ffprobe verification outcome in response headers for client diagnostics.
+        // Matches the failure header set in the early-exit block at line 2981.
+        // X-Request-ID is always set on every API response; add it here for consistency
+        // with all other download response paths (empty-file, timeout, proc failure, etc.).
+        // Retry-After: 0 on success — the request succeeded, no retry needed.
+        header('X-FFProbe-Status: ' . ($ffprobe_ok ? 'success' : 'skipped'));
+        header('X-Request-ID: ' . $request_id);
+        header('Retry-After: 0');
 
         $mime = 'application/octet-stream';
         $finfo = new finfo(FILEINFO_MIME_TYPE);
