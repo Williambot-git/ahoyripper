@@ -2195,7 +2195,7 @@ switch ($action) {
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         header('Cache-Control: no-cache');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
-        logRequest('info', 200, ['url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
+        logRequest('info', 200, ['platform' => $platform, 'url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
     }
 
