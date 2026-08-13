@@ -524,13 +524,21 @@ function isValidUrl($url) {
         // This prevents SSRF via DNS rebinding (e.g. localhost resolving to 127.0.0.1
         // or an attacker controlling DNS to point a domain at a private IP).
         // Domains that don't resolve are rejected.
-        $resolved = @gethostbynamel($parsed);
+        //
+        // Use dns_get_record (DNS_A | DNS_AAAA) instead of gethostbynamel() because
+        // gethostbynamel() only returns IPv4 (A records) — IPv6-only domains (e.g.
+        // ipv6.google.com) return false and are incorrectly rejected. dns_get_record
+        // returns both A ('ip' key) and AAAA ('ipv6' key) records so IPv6-only
+        // domains are handled correctly.
+        $resolved = @dns_get_record($parsed, DNS_A | DNS_AAAA);
         if ($resolved === false || empty($resolved)) {
             return false; // Cannot resolve — reject
         }
         // Validate every IP the domain resolves to. Reject if ANY is private/reserved/multicast.
-        foreach ($resolved as $ip) {
-            if (!$isPublicIp($ip)) {
+        // Collect IPv4 from 'ip' key and IPv6 from 'ipv6' key.
+        foreach ($resolved as $record) {
+            $ip = $record['ip'] ?? $record['ipv6'] ?? null;
+            if ($ip === null || !$isPublicIp($ip)) {
                 return false;
             }
         }

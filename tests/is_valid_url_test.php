@@ -87,12 +87,16 @@ function isValidUrl($url) {
     } elseif (filter_var(substr($parsed, 1, -1), FILTER_VALIDATE_IP) !== false) {
         $host = substr($parsed, 1, -1);
     } else {
-        $resolved = @gethostbynamel($parsed);
+        // Use dns_get_record (DNS_A | DNS_AAAA) instead of gethostbynamel() because
+        // gethostbynamel() only returns IPv4 (A records) — IPv6-only domains return
+        // false and are incorrectly rejected.
+        $resolved = @dns_get_record($parsed, DNS_A | DNS_AAAA);
         if ($resolved === false || empty($resolved)) {
             return false;
         }
-        foreach ($resolved as $ip) {
-            if (!$isPublicIp($ip)) {
+        foreach ($resolved as $record) {
+            $ip = $record['ip'] ?? $record['ipv6'] ?? null;
+            if ($ip === null || !$isPublicIp($ip)) {
                 return false;
             }
         }
@@ -256,6 +260,15 @@ test('accepts example.com (public)',        isValidUrl('https://example.com/'));
 test('accepts www.example.com',             isValidUrl('https://www.example.com/'));
 test('accepts github.com',                  isValidUrl('https://github.com/path'));
 test('accepts youtube.com',                  isValidUrl('https://youtube.com/watch?v=dQw4w9WgXcQ'));
+
+// ─── IPv6-only domains (dns_get_record fix) ──────────────────────────────────
+
+echo "\n==> Testing IPv6-only domains (DNS AAAA record support)\n";
+
+// ipv6.google.com resolves ONLY to IPv6 (AAAA records, no A records).
+// gethostbynamel() returns false for IPv6-only domains — the original bug.
+// dns_get_record(DNS_A | DNS_AAAA) returns AAAA records and correctly accepts them.
+test('accepts ipv6.google.com (IPv6-only domain)', isValidUrl('https://ipv6.google.com/'));
 
 // ─── SSRF via DNS rebinding ──────────────────────────────────────────────────
 
