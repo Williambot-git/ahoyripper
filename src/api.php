@@ -767,7 +767,9 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
-    if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
+    // "sign in to confirm" is yt-dlp's bot-confirm message (Google/YouTube): the user
+    // must sign in to their browser (passing cookies via --cookies) to proceed.
+    if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
         return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {

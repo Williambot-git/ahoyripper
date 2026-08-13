@@ -83,6 +83,12 @@ test('classifies "login required for this video"',
 test('classifies "this video requires login"',
     assert_classify('ERROR: [TikTok] xyz: this video requires login', 'LOGIN_REQUIRED', 401));
 
+test('classifies "Sign in to confirm" bot-confirm',
+    assert_classify('ERROR: [YouTube] abc: Sign in to confirm you are not a bot', 'LOGIN_REQUIRED', 401));
+
+test('classifies "sign in to confirm" bare',
+    assert_classify('Sign in to confirm you are not a bot', 'LOGIN_REQUIRED', 401));
+
 test('classifies HTTP 401',
     assert_classify('ERROR: [YouTube] abc: HTTP Error 401', 'LOGIN_REQUIRED', 401));
 

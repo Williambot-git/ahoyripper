@@ -64,7 +64,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
         return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
     }
-    if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
+    if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
         return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
