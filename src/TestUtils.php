@@ -129,3 +129,21 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     }
     return null;
 }
+
+/**
+ * Resolve the playlist URL parameter to yt-dlp playlist flags.
+ * Mirrors the canonical implementation in src/api.php.
+ *
+ * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
+ * --no-playlist (fetch single video only). yt-dlp does NOT support
+ * --playlist true/false — that syntax is rejected as ambiguous.
+ *
+ * @param string|null $playlist_get  $_GET['playlist'] value
+ * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
+ */
+function resolvePlaylistFlag($playlist_get) {
+    if (isset($playlist_get) && $playlist_get === '1') {
+        return ['--yes-playlist'];
+    }
+    return ['--no-playlist'];
+}

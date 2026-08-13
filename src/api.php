@@ -720,6 +720,29 @@ function clean($s) {
     return (string)$s;
 }
 
+/**
+ * Resolve the playlist URL parameter to yt-dlp playlist flags.
+ *
+ * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
+ * --no-playlist (fetch single video only). yt-dlp does NOT support
+ * --playlist true/false — that syntax is rejected as ambiguous.
+ *
+ * The ?playlist=1 URL param requests playlist mode; all other values
+ * (including absent, empty, 0, "yes", "true") default to --no-playlist.
+ *
+ * @param string|null $playlist_get  $_GET['playlist'] value
+ * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
+ */
+function resolvePlaylistFlag($playlist_get) {
+    // yt-dlp does NOT support --playlist true/false — that syntax is rejected
+    // as ambiguous. Only --yes-playlist and --no-playlist are valid.
+    // Treat playlist=1 as the only truthy value; all others → --no-playlist.
+    if (isset($playlist_get) && $playlist_get === '1') {
+        return ['--yes-playlist'];
+    }
+    return ['--no-playlist'];
+}
+
 // Classify yt-dlp error messages into actionable error codes.
 // Each entry includes an HTTP status code appropriate to the error category:
 //   451 — Unavailable For Legal Reasons (geo-restricted, copyright, TOS)
@@ -1924,7 +1947,9 @@ switch ($action) {
         // with any value as ambiguous). The correct boolean flags are --yes-playlist and
         // --no-playlist. The --playlist=true/false syntax was mistakenly documented in
         // yt-dlp 2024.02.07 release notes but was never actually implemented.
-        $no_playlist = !(isset($_GET['playlist']) && $_GET['playlist'] === '1');
+        // Delegated to resolvePlaylistFlag() — a pure helper that returns ['--yes-playlist']
+        // or ['--no-playlist'] to avoid duplicating the resolution logic inline.
+        $playlist_flags = resolvePlaylistFlag($_GET['playlist'] ?? null);
         // yt-dlp per-connection timeout: PHP-side INFO_TIMEOUT is the outer limit,
         // yt-dlp's --socket-timeout is the inner limit. Set to INFO_TIMEOUT - 5s so
         // PHP always fires first and classifies as SOURCE_TIMEOUT rather than CONNECTION_FAILED.
@@ -1935,8 +1960,8 @@ switch ($action) {
             '--dump-json',
             '--no-playlist',
         ];
-        if (!$no_playlist) {
-            $ytdlp_cmd[] = '--yes-playlist';
+        foreach ($playlist_flags as $flag) {
+            $ytdlp_cmd[] = $flag;
         }
         $ytdlp_cmd[] = '--skip-download';
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
@@ -2554,7 +2579,9 @@ switch ($action) {
         // Pass --no-playlist by default (playlist=0, the default) so single-video URLs
         // always get one video. Pass --yes-playlist when playlist=1 is explicitly requested.
         // Note: playlist flags must appear BEFORE the URL in the yt-dlp command.
-        $no_playlist = !(isset($_GET['playlist']) && $_GET['playlist'] === '1');
+        // Delegated to resolvePlaylistFlag() — a pure helper that returns ['--yes-playlist']
+        // or ['--no-playlist'] to avoid duplicating the resolution logic inline.
+        $playlist_flags = resolvePlaylistFlag($_GET['playlist'] ?? null);
         // yt-dlp per-connection timeout: PHP-side DOWNLOAD_TIMEOUT is the outer limit,
         // yt-dlp's --socket-timeout is the inner limit. Set to DOWNLOAD_TIMEOUT - 15s so
         // PHP always fires first and classifies as DOWNLOAD_TIMEOUT rather than CONNECTION_FAILED.
@@ -2566,11 +2593,13 @@ switch ($action) {
             '-o', $out_template,
             '--force-overwrites',
             '--retries', '3',
-            '--no-playlist',
             '--restrict-filenames',
         ];
-        if (!$no_playlist) {
-            $ytdlp_cmd[] = '--yes-playlist';
+        // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
+        // --no-playlist is the safe default (single video); --yes-playlist is
+        // added only when playlist=1 is explicitly requested.
+        foreach ($playlist_flags as $flag) {
+            $ytdlp_cmd[] = $flag;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',

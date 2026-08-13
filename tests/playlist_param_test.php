@@ -4,6 +4,7 @@
  * Run: php tests/playlist_param_test.php
  *
  * Tests that the playlist parameter is correctly resolved to yt-dlp flags.
+ * Uses the canonical resolvePlaylistFlag() from src/TestUtils.php.
  * yt-dlp accepts boolean flags --yes-playlist and --no-playlist.
  * NOTE: yt-dlp does NOT support --playlist true/false (rejected as ambiguous).
  * The correct flags are --yes-playlist (fetch playlist) and --no-playlist (single video).
@@ -25,22 +26,10 @@ function test($name, $condition) {
     }
 }
 
-/**
- * Mirrors the playlist resolution logic in api.php.
- * yt-dlp uses --yes-playlist (fetch all playlist videos) and --no-playlist (single video).
- * yt-dlp does NOT support --playlist true/false — that syntax is rejected as ambiguous.
- */
-function resolvePlaylistFlag($playlist_get) {
-    $no_playlist = !(isset($playlist_get) && $playlist_get === '1');
-    // Returns an array of flags to apply
-    if ($no_playlist) {
-        return ['--no-playlist'];
-    } else {
-        return ['--yes-playlist'];
-    }
-}
+// Load canonical resolvePlaylistFlag() from TestUtils.php
+require_once __DIR__ . '/../src/TestUtils.php';
 
-echo "\n==> Testing playlist parameter resolution\n";
+echo "\n==> Testing resolvePlaylistFlag() from TestUtils.php\n";
 
 $flags_1 = resolvePlaylistFlag('1');
 $flags_0 = resolvePlaylistFlag('0');
