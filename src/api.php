@@ -1312,8 +1312,11 @@ function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_inc
 // to read the quota file since that would require IP-based tracking that is not
 // available at this stage (the quota file is opened only after these early exits).
 $sendDailyLimitHeaders = function(int $limit, ?int $remaining) {
+    // X-DailyLimit-Remaining: when $remaining is null, quota is unknown at this
+    // validation stage (before the quota file is opened). Use -1 as the sentinel,
+    // consistent with the 'quota_remaining: -1' JSON body field.
     header('X-DailyLimit-Limit: ' . $limit);
-    header('X-DailyLimit-Remaining: ' . ($remaining ?? $limit));
+    header('X-DailyLimit-Remaining: ' . ($remaining ?? -1));
     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
     header('X-DailyLimit-Window: 86400');
 };
@@ -1343,7 +1346,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'missing_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
-        $sendDailyLimitHeaders($daily_limit, $daily_limit);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
@@ -1385,7 +1388,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
-        $sendDailyLimitHeaders($daily_limit, $daily_limit);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1425,7 +1428,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
-        $sendDailyLimitHeaders($daily_limit, $daily_limit);
+        $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
