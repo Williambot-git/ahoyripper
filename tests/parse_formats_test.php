@@ -24,37 +24,10 @@ function test($name, $condition) {
     }
 }
 
-// ─── clean() and parseFormats() verbatim copies from api.php ──────────────────
-
-function clean($s) {
-    // Return 'Unknown' for null, empty string, or whitespace-only string.
-    // Integer 0 is NOT treated as Unknown — it is a valid numeric value that
-    // appears in yt-dlp metadata (e.g., height=0 for audio-only formats).
-    // Passing 0 through as '0' (string) keeps the UI consistent and prevents
-    // silent label corruption (e.g., "0kbps m4a" would become "Unknown kbps m4a").
-    // Whitespace-only strings from yt-dlp metadata would produce blank or
-    // space-filled labels (e.g., "  kbps m4a") — trim before checking emptiness.
-    if (is_string($s)) {
-        $s = trim($s);
-        if ($s === '') return 'Unknown';
-    } elseif ($s === null) {
-        return 'Unknown';
-    }
-    // Reject booleans, arrays and objects — yt-dlp metadata is always scalar
-    // (string, int, float, or null). A boolean in a format label field would
-    // become "1" or "" (empty string) via (string) cast, corrupting the label
-    // silently. An array/object would become the literal string "Array", also
-    // corrupting the API response. Return 'Unknown' for all of these.
-    if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
-    // No htmlspecialchars — API outputs JSON, not HTML.
-    // Type coercion to string is sufficient.
-    return (string)$s;
-}
-
-// Shared constant: maximum filename length in characters.
-// Mirrors MAX_FILENAME_LEN from src/api.php to keep the test's inline
-// parseFormats() copy consistent with the canonical source.
-define('MAX_FILENAME_LEN', 80);
+// ─── Load canonical clean() from src/TestUtils.php ────────────────────────────
+// parseFormats() is still duplicated inline below — this test focuses on
+// parseFormats() and reuses the clean() helper from production.
+require_once __DIR__ . '/../src/TestUtils.php';
 
 echo "\n==> Testing clean() — null and empty string\n";
 test('clean(null) returns "Unknown"',
