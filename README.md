@@ -71,9 +71,11 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
 
 ### Lightweight check
 
+`action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
+
 ```bash
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
-# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","server_time_unix":1749180000,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"..."}
+# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","server_time_unix":1749180000,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"...","yt_dlp_version":"2026.06.02","quota_remaining":-1,"quota_limit":5,"quota_reset":-1,"quota_reset_unix":-1,"source_url":"https://ahoyripper.com"}
 ```
 
 ### Full health check
@@ -95,7 +97,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "app_version": "...",
 #   "php_version": "8.2.0",
 #   "api_version": "...",
-#   "ytdlp_version": "2026.06.02",
+#   "yt_dlp_version": "2026.06.02",
 #   "ffmpeg_version": "6.1...",
 #   "yt_dlp_probe": {
 #     "ok": true,
@@ -104,7 +106,16 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #     "probe_age_seconds": 0
 #   },
 #   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
-#   "yt_dlp_probe_cache_ttl_seconds": 300
+#   "yt_dlp_probe_cache_ttl_seconds": 300,
+#   "server_uptime_seconds": 86400,
+#   "load_avg": 0.15,
+#   "memory_available_pct": 72.4,
+#   "disk_free_gb": 48.2,
+#   "quota_remaining": -1,
+#   "quota_limit": 5,
+#   "quota_reset": -1,
+#   "quota_reset_unix": -1,
+#   "source_url": "https://ahoyripper.com"
 # }
 ```
 
