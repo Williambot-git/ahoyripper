@@ -206,7 +206,8 @@ test('rejects hostname exceeding RFC 1035 limit (253 chars)',
 // ─── classifyYtdlpError (verbatim copy from api.php) ────────────────────────
 // Note on regex patterns: some require specific phrasing.
 // - GEOBLOCKED requires "geo restriction" OR "this video is available in" (not just "is available in")
-// - LOGIN_REQUIRED requires "login required" OR "this video requires login" (not "requires authentication")
+// - LOGIN_REQUIRED includes "sign in to confirm" (yt-dlp bot-confirm message)
+// - AGE_RESTRICTED includes bare "age restricted" as a catch-all variant
 
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
@@ -219,7 +220,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
-    if (preg_match('/authentication required|login.*required|this video requires login/i', $err_lower)) {
+    // "sign in to confirm" is yt-dlp's bot-confirm message (Google/YouTube).
+    if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
         return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
@@ -228,16 +230,16 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
         return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'status' => 404];
     }
-    if (preg_match('/copyright|infringe|removed.*by|content.*strike/i', $err_lower)) {
+    if (preg_match('/copyright|\binfringe\b|removed.*by|content.*strike/i', $err_lower)) {
         return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'status' => 451];
     }
-    if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted))|video (has been )?removed|video (is )?unavailable/i', $err_lower)) {
+    if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted|deleted))|video (has been )?removed|video (is )?unavailable|video (is )?deleted/i', $err_lower)) {
         return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'status' => 410];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
         return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
     }
-    if (preg_match('/age.*restriction|under age|video is age.*restricted/i', $err_lower)) {
+    if (preg_match('/age.*restriction|under age|video is age.*restricted|age restricted/i', $err_lower)) {
         return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'status' => 403];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
@@ -257,7 +259,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
-    if (preg_match('/file.*larger|size.*exceed|exceeds.*limit/i', $err_lower)) {
+    if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
     }
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
@@ -333,6 +335,10 @@ test('detects PRIVATE_VIDEO — case insensitive',
 // (no occurrence of the word "login") — the merged pattern handles both.
 $result = classifyYtdlpError('ERROR: This video requires login');
 test('detects LOGIN_REQUIRED — "this video requires login"',
+    $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
+
+$result = classifyYtdlpError("ERROR: Sign in to confirm you're not a bot");
+test("detects LOGIN_REQUIRED — \"Sign in to confirm\" (yt-dlp bot-confirm message)",
     $result !== null && ($result['code'] ?? '') === 'LOGIN_REQUIRED');
 
 $result = classifyYtdlpError('ERROR: Authentication required for this content');
