@@ -2947,6 +2947,11 @@ switch ($action) {
                     $actual_video_codec = $vstream['codec_name'] ?? null;
                     $actual_width = isset($vstream['width']) ? (int)$vstream['width'] : null;
                     $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
+                    // Surface ffprobe verification outcome in response headers for client
+                    // diagnostics. 'success' means ffprobe confirmed a video stream was
+                    // present in the file. The failure case sets 'failed' in the early-exit
+                    // block at line 2975.
+                    header('X-FFProbe-Status: success');
                 } else {
                     // ffprobe succeeded (exit 0, valid JSON) but found no video stream —
                     // the downloaded file is a broken container. Flag as verification

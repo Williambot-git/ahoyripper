@@ -1068,6 +1068,26 @@ else
 fi
 
 echo ""
+echo "==> Checking X-FFProbe-Status header in download responses..."
+# X-FFProbe-Status should be set on both success and failure paths so the
+# client can always diagnose ffprobe verification outcomes. The success case
+# (header 'X-FFProbe-Status: success') is set after ffprobe confirms a video
+# stream; the failure case (header 'X-FFProbe-Status: failed') is set in the
+# early-exit block when ffprobe fails, times out, or finds no video stream.
+# Both occurrences must be present to ensure the header is never absent.
+FFPROBE_SUCCESS=$(grep -c "X-FFProbe-Status: success" src/api.php || true)
+FFPROBE_FAILED=$(grep -c "X-FFProbe-Status: failed" src/api.php || true)
+if [ "$FFPROBE_SUCCESS" -ge 1 ] && [ "$FFPROBE_FAILED" -ge 1 ]; then
+    echo "  ✓ X-FFProbe-Status header present on both success and failure paths"
+elif [ "$FFPROBE_SUCCESS" -ge 1 ]; then
+    echo "  ✗ X-FFProbe-Status: success present but X-FFProbe-Status: failed missing"
+    exit 1
+else
+    echo "  ✗ X-FFProbe-Status header not found in download response paths"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking RFC 5987 filename encoding in Content-Disposition... "
 # The download path should use filename*=utf-8'' for non-ASCII names (RFC 5987)
 # to ensure correct filename encoding across browsers.
