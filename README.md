@@ -455,6 +455,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
+| `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | Server error — could not start the download process. The server may be restarting or overloaded. | Try again shortly. |
@@ -552,6 +553,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
+| `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
 
 ### Health check / progress
@@ -866,6 +868,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access |
 | `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `DOWNLOAD_EMPTY` | Empty or corrupt output file | Try another format or wait and retry |
+| `VERIFICATION_FAILED` | ffprobe could not verify the downloaded file — file may be corrupt | Try another format |
 | `DOWNLOAD_CANCELLED` | Download was cancelled (tab closed or connection lost) | Your quota was not charged — try again when ready |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | API requests must include a Referer or Origin header from an allowed domain |
 | `METHOD_NOT_ALLOWED` | HTTP method not allowed for this endpoint | Use GET for info/download/health; POST for CSP report submission |
