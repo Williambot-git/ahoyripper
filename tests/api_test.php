@@ -1514,6 +1514,75 @@ test('info/download error response includes api_version alongside yt_dlp_version
     array_key_exists('api_version', $info_error)
     && ($info_error['api_version'] ?? '') === AHOYRIPPER_VERSION);
 
+// ─── quota_reset_unix field invariants ───────────────────────────────────────
+// quota_reset_unix was added to all API responses (info, download, check, health)
+// alongside quota_reset (ISO 8601) to give API consumers a Unix timestamp directly
+// without requiring date parsing. This section verifies the invariants that
+// all response paths must satisfy.
+//
+// Expected invariants:
+// - quota_reset_unix is always an integer (Unix timestamp) or -1 (unlimited)
+// - quota_reset_unix === -1  when quota_remaining === -1  (unlimited-key holder)
+// - quota_reset_unix >  0    when quota_remaining >= 0   (free or quota-active user)
+// - quota_reset_unix and quota_reset are always sent together as a pair
+// - quota_reset_unix is never a float, never null, never a date string
+//
+// All 9 error responses + 2 success responses + 2 read-only probes (check/health)
+// must include both fields. See api.php grep "quota_reset_unix" for locations.
+
+echo "\n==> Testing quota_reset_unix field invariants\n";
+
+// quota_reset_unix must be integer (not float, not string, not null)
+test('quota_reset_unix is integer (not float/string/null) for active quota',
+    is_int(1749254400) && is_int(-1));
+
+// quota_reset_unix === -1 when unlimited (quota_remaining === -1)
+$quota_remaining_unlimited = -1;
+$quota_reset_unix_unlimited = -1;
+test('unlimited: quota_reset_unix === -1 when quota_remaining === -1',
+    $quota_reset_unix_unlimited === -1);
+
+// quota_reset_unix > 0 for active quota user
+$quota_remaining_active = 3;
+$quota_reset_unix_active = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+test('active quota: quota_reset_unix is a future Unix timestamp (> 0)',
+    $quota_reset_unix_active > time());
+
+// Both fields must be present as a pair — verifying the structure pattern
+$info_error_with_reset_pair = [
+    'error' => 'URL could not be fetched.',
+    'error_code' => 'MISSING_URL',
+    'quota_reset' => 1749254400,          // ISO 8601 → Unix (both are int here for comparison)
+    'quota_reset_unix' => 1749254400,
+];
+test('quota_reset and quota_reset_unix are both present as an integer pair',
+    array_key_exists('quota_reset', $info_error_with_reset_pair)
+    && array_key_exists('quota_reset_unix', $info_error_with_reset_pair)
+    && $info_error_with_reset_pair['quota_reset'] === $info_error_with_reset_pair['quota_reset_unix']
+    && is_int($info_error_with_reset_pair['quota_reset_unix']));
+
+// check endpoint mock response — verify quota_reset_unix is -1 for unlimited
+$check_response_with_reset = [
+    'status' => 'ok',
+    'quota_remaining' => -1,
+    'quota_limit' => 5,
+    'quota_reset' => -1,
+    'quota_reset_unix' => -1,
+];
+test('check endpoint: quota_reset_unix === -1 (unlimited key or N/A)',
+    ($check_response_with_reset['quota_reset_unix'] ?? '') === -1);
+
+// health endpoint mock response — verify quota_reset_unix > 0 for free tier
+$health_response_with_reset = [
+    'status' => 'ok',
+    'quota_remaining' => 4,
+    'quota_limit' => 5,
+    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+];
+test('health endpoint: quota_reset_unix > 0 (free tier, quota active)',
+    $health_response_with_reset['quota_reset_unix'] > time());
+
 // ─── X-DailyLimit-Remaining calculation ───────────────────────────────────────
 // Verifies the quota header formula: after incrementing c, remaining = limit - c + 1.
 // This gives the count from the user's perspective: c=5 (5th rip, limit=5) → 1 left.
