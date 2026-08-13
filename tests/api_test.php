@@ -1901,30 +1901,42 @@ test('ffprobe exit 0 with no streams key: vstream is null (triggers verification
     $vstream_no_key === null);
 
 // ─── 5b. PROC_OPEN_FAILED Cache-Control header consistency ────────────────────
-// The info action PROC_OPEN_FAILED response (line ~1869) and the download action
-// PROC_OPEN_FAILED response (line ~2570) must both include 'Cache-Control: no-cache'
+// The info action PROC_OPEN_FAILED response and the download action
+// PROC_OPEN_FAILED response must both include a no-cache Cache-Control header
 // so browsers and proxies never cache a 500 error response. The info action was
 // missing this header (bug), creating an inconsistency where the download action
 // had it but the info action did not. This test reads the actual api.php source
 // and verifies both PROC_OPEN_FAILED blocks contain the Cache-Control header.
+// The info action uses 'Cache-Control: no-cache'; the download action uses
+// 'Cache-Control: no-store, must-revalidate' — both are equally correct for
+// preventing caching of error responses.
 $api_source = file_get_contents(__DIR__ . '/../src/api.php');
 $info_cc_pos = strpos($api_source, "// proc_open failed — the process could not be started at all.");
 $download_cc_pos = strpos($api_source, "// Refund daily quota since no download attempt was possible.");
-// Find the next Cache-Control: no-cache after each proc_open block
-// The comment spans up to ~2200 chars before Cache-Control: no-cache, so 5000 is safe.
+// Find the next Cache-Control header after each proc_open block.
+// The comment spans up to ~2200 chars before Cache-Control, so 5000 is safe.
 $info_cc_block = $info_cc_pos !== false
     ? substr($api_source, $info_cc_pos, 5000)
     : '';
 $download_cc_block = $download_cc_pos !== false
     ? substr($api_source, $download_cc_pos, 5000)
     : '';
+// The info action uses 'Cache-Control: no-cache'.
+// The download action uses 'Cache-Control: no-store, must-revalidate'.
+// Both prevent caching; check for either pattern.
 $info_has_cc = $info_cc_pos !== false
-    && strpos($info_cc_block, "Cache-Control: no-cache") !== false;
+    && (
+        strpos($info_cc_block, "Cache-Control: no-cache") !== false
+        || strpos($info_cc_block, "Cache-Control: no-store") !== false
+    );
 $download_has_cc = $download_cc_pos !== false
-    && strpos($download_cc_block, "Cache-Control: no-cache") !== false;
-test('PROC_OPEN_FAILED (info action): Cache-Control: no-cache present in source',
+    && (
+        strpos($download_cc_block, "Cache-Control: no-cache") !== false
+        || strpos($download_cc_block, "Cache-Control: no-store") !== false
+    );
+test('PROC_OPEN_FAILED (info action): Cache-Control: no-store/no-cache present in source',
     $info_has_cc === true);
-test('PROC_OPEN_FAILED (download action): Cache-Control: no-cache present in source',
+test('PROC_OPEN_FAILED (download action): Cache-Control: no-store/no-cache present in source',
     $download_has_cc === true);
 
 // ─── 6. Probe cache cleanup loop path resolution ─────────────────────────────
