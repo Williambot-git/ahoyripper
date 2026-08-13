@@ -42,20 +42,20 @@ test('clean(0) returns "0" (zero is valid, not unknown)',
     clean(0) === '0');
 
 echo "\n==> Testing clean() — array and object rejection\n";
-test('clean(array) returns "Unknown" (not "Array")',
-    clean(['video', 'mp4']) === 'Unknown');
-test('clean(associative array) returns "Unknown"',
-    clean(['ext' => 'mp4', 'height' => 720]) === 'Unknown');
-test('clean(object) returns "Unknown" (not "Array")',
-    clean((object)['ext' => 'mp4']) === 'Unknown');
-test('clean(stdClass) returns "Unknown"',
-    clean(json_decode('{"ext":"mp4"}')) === 'Unknown');
+test('clean(array) returns null (not "Array")',
+    clean(['video', 'mp4']) === null);
+test('clean(associative array) returns null',
+    clean(['ext' => 'mp4', 'height' => 720]) === null);
+test('clean(object) returns null (not "Array")',
+    clean((object)['ext' => 'mp4']) === null);
+test('clean(stdClass) returns null',
+    clean(json_decode('{"ext":"mp4"}')) === null);
 
 echo "\n==> Testing clean() — boolean rejection\n";
-test('clean(true) returns "Unknown" (not "1")',
-    clean(true) === 'Unknown');
-test('clean(false) returns "Unknown" (not "")',
-    clean(false) === 'Unknown');
+test('clean(true) returns null (not "1")',
+    clean(true) === null);
+test('clean(false) returns null (not "")',
+    clean(false) === null);
 
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     $data = json_decode($json_str, true);

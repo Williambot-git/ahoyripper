@@ -713,8 +713,11 @@ function clean($s) {
     // (string, int, float, or null). A boolean in a format label field would
     // become "1" or "" (empty string) via (string) cast, corrupting the label
     // silently. An array/object would become the literal string "Array", also
-    // corrupting the API response. Return 'Unknown' for all of these.
-    if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
+    // corrupting the API response. Return null for all of these so the ternary
+    // `$format_note ?: null` on the format array (line 1141) correctly produces
+    // null rather than the truthy string 'Unknown' (which would cause the label
+    // builder to append "Unknown" to the format label).
+    if (is_bool($s) || is_array($s) || is_object($s)) return null;
     // No htmlspecialchars — API outputs JSON, not HTML.
     // Type coercion to string is sufficient.
     return (string)$s;

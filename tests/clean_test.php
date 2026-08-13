@@ -59,22 +59,22 @@ test('returns "0" for float 0.0', clean(0.0) === '0');
 
 // --- booleans ---
 
-echo "\n==> Testing boolean input (must return Unknown, not \"1\" or \"\")\n";
-test('returns Unknown for true (not "1")', clean(true) === 'Unknown');
-test('returns Unknown for false (not "")', clean(false) === 'Unknown');
+echo "\n==> Testing boolean input (must return null, not 'Unknown' or '1' or '')\n";
+test('returns null for true (not "1")', clean(true) === null);
+test('returns null for false (not "")', clean(false) === null);
 
 // --- arrays ---
 
-echo "\n==> Testing array input (must return Unknown, not \"Array\")\n";
-test('returns Unknown for empty array (not "Array")', clean([]) === 'Unknown');
-test('returns Unknown for indexed array (not "Array")', clean(['a', 'b']) === 'Unknown');
-test('returns Unknown for associative array (not "Array")', clean(['key' => 'val']) === 'Unknown');
+echo "\n==> Testing array input (must return null, not 'Unknown' or 'Array')\n";
+test('returns null for empty array (not "Unknown")', clean([]) === null);
+test('returns null for indexed array (not "Unknown")', clean(['a', 'b']) === null);
+test('returns null for associative array (not "Unknown")', clean(['key' => 'val']) === null);
 
 // --- objects ---
 
-echo "\n==> Testing object input (must return Unknown, not \"Array\")\n";
-test('returns Unknown for stdClass object (not "Array")', clean((object)['key' => 'val']) === 'Unknown');
-test('returns Unknown for DateTime object', clean(new DateTime()) === 'Unknown');
+echo "\n==> Testing object input (must return null, not 'Unknown' or 'Array')\n";
+test('returns null for stdClass object (not "Unknown")', clean((object)['key' => 'val']) === null);
+test('returns null for DateTime object', clean(new DateTime()) === null);
 
 // --- valid scalar strings ---
 
