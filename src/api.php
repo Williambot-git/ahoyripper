@@ -1356,7 +1356,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url_missing' => true,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'quota_remaining' => $daily_limit,
+            // quota_remaining: -1 signals that quota tracking is not available at this
+            // early validation stage (before the quota file is opened). Matches the
+            // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
+            // same reason. API consumers should treat -1 as "unknown remaining quota".
+            'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
             'quota_reset_unix' => $quota_reset_ts,
@@ -1389,7 +1393,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'quota_remaining' => $daily_limit,
+            // quota_remaining: -1 signals that quota tracking is not available at this
+            // early validation stage (before the quota file is opened). Matches the
+            // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
+            // same reason. API consumers should treat -1 as "unknown remaining quota".
+            'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
             'quota_reset_unix' => $quota_reset_ts,
@@ -1425,7 +1433,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'quota_remaining' => $daily_limit,
+            // quota_remaining: -1 signals that quota tracking is not available at this
+            // early validation stage (before the quota file is opened). Matches the
+            // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
+            // same reason. API consumers should treat -1 as "unknown remaining quota".
+            'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -1452,7 +1464,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => $daily_limit,
+                // quota_remaining: -1 signals that quota tracking is not available at this
+                // early validation stage (before the quota file is opened). Matches the
+                // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
+                // same reason. API consumers should treat -1 as "unknown remaining quota".
+                'quota_remaining' => -1,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -1481,7 +1497,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => $daily_limit,
+                // quota_remaining: -1 signals that quota tracking is not available at this
+                // early validation stage (before the quota file is opened). Matches the
+                // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
+                // same reason. API consumers should treat -1 as "unknown remaining quota".
+                'quota_remaining' => -1,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
