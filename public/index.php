@@ -585,6 +585,7 @@ if (installDismissBtn && installBanner) {
     'DOWNLOAD_TIMEOUT': 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
     'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
     'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
+    'VERIFICATION_FAILED': 'The downloaded file could not be verified as valid. This is a server-side issue — try another format or try again in a moment.',
     'PROC_OPEN_FAILED': 'The download could not be started. The server may be restarting or overloaded. Try again in a moment.',
     'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
     'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',

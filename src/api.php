@@ -2115,6 +2115,7 @@ switch ($action) {
                 'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
                 'FILE_TOO_LARGE' => 413,
                 'DOWNLOAD_EMPTY' => 500,
+                'VERIFICATION_FAILED' => 500,
                 'PROC_OPEN_FAILED' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
                 'DOWNLOAD_CANCELLED' => 499,
@@ -2988,8 +2989,8 @@ switch ($action) {
                 // and apply the refund here before building the response.
                 $ffprobe_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 echo json_encode([
-                    'error' => 'Download could not be verified. The file may be corrupt or the verification tool encountered an error. Please try again or choose a different format.',
-                    'error_code' => 'DOWNLOAD_EMPTY',
+                    'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
+                    'error_code' => 'VERIFICATION_FAILED',
                     'retry_after' => max(0, $retry_ts),
                     'request_id' => $request_id,
                     'source_url' => $url,
