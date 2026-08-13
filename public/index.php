@@ -143,7 +143,6 @@ header_remove('X-Powered-By');
        is supported in Chromium 86+ and Firefox 121+; Safari ignores it (no
        harm, no regression) and falls back to the existing og:image meta tag. -->
   <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png">
-  <meta property="og:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
 

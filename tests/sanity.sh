@@ -285,6 +285,20 @@ else
 fi
 
 echo ""
+echo "==> Checking og:alt (not og:image:alt) is NOT present in index.php (duplicate)... "
+# og:alt is NOT a valid Open Graph property — og:image:alt is the correct one.
+# A bare og:alt on the page (not scoped to og:image) is redundant and should be
+# removed to avoid confusing social media scrapers that may misread it.
+# Valid: <meta property="og:image:alt" content="...">
+# Invalid: <meta property="og:alt" content="...">  (no og:image: scope, bare og:alt)
+if grep -q '<meta property="og:alt"' public/index.php; then
+    echo "  ✗ Duplicate og:alt found (use og:image:alt instead — og:alt without og:image: scope is invalid)"
+    exit 1
+else
+    echo "  ✓ No bare og:alt (duplicate of og:image:alt)"
+fi
+
+echo ""
 echo "==> Checking og:image dimensions in index.php (Twitter Card / social preview)... "
 # Twitter Cards and most social crawlers require og:image:width and og:image:height
 # to be present for accurate rendering. These are part of the Open Graph spec.
