@@ -2596,7 +2596,7 @@ switch ($action) {
                 $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
             }
             http_response_code(500);
-            header('Cache-Control: no-cache');
+            header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
             // retry_after: Unix timestamp when the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
