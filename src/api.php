@@ -2353,6 +2353,9 @@ switch ($action) {
         header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
         header('X-DL-RateLimit-Reset: ' . $dl_reset);
         header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+        // Mirrors the X-RateLimit-Limit header sent by the info action so
+        // generic API consumers always see a consistent rate-limit envelope.
+        header('X-RateLimit-Limit: ' . $dl_rate_limit);
 
         // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         if (!$unlimited) {
