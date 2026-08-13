@@ -3203,6 +3203,11 @@ switch ($action) {
         if ($format_substituted) {
             header('X-Format-Substituted: ' . ($substituted_label ?? 'true'));
         }
+        // X-Download-Timeout: exposes the server-side download timeout (DOWNLOAD_TIMEOUT)
+        // to clients so they can set an appropriate client-side fetch timeout. Clients should
+        // use this value rather than a hardcoded one, ensuring the client deadline never
+        // exceeds the server deadline. The value is in seconds (integer).
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // Content-Type and X-Download-Options are set immediately before streaming
         // so that error response paths above (empty-file, timeout, proc failure)
         // return with the default Content-Type: application/json from the top of

@@ -1029,7 +1029,18 @@ if (installDismissBtn && installBanner) {
 
         // navigateOnSuccess guard: set to false when fetch fails so window.location.href
         // is not called (would otherwise download the JSON error body as a file).
-        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(300000) })
+        // Client-side timeout: use the server-reported X-Download-Timeout (ms) so the
+        // client deadline never outlasts the server deadline. Falls back to 300000ms (5 min)
+        // if the header is absent (e.g. direct curl or old server).
+        var clientDownloadTimeout = 300000;
+        var downloadTimeoutHeader = resp.headers ? resp.headers.get('X-Download-Timeout') : null;
+        if (downloadTimeoutHeader !== null) {
+          var serverTimeoutSec = parseInt(downloadTimeoutHeader, 10);
+          if (!isNaN(serverTimeoutSec) && serverTimeoutSec > 0) {
+            clientDownloadTimeout = serverTimeoutSec * 1000;
+          }
+        }
+        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(clientDownloadTimeout) })
           .then(function(resp) {
             if (!resp.ok) {
               navigateOnSuccess = false;
