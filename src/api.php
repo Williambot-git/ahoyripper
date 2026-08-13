@@ -1351,6 +1351,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_remaining' => $daily_limit,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
+            'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1383,6 +1384,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_remaining' => $daily_limit,
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_ts,
+            'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1418,6 +1420,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_remaining' => $daily_limit,
             'quota_limit' => $daily_limit,
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -1444,6 +1447,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_remaining' => $daily_limit,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -1472,6 +1476,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_remaining' => $daily_limit,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -1809,6 +1814,7 @@ switch ($action) {
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (int)$reset_timestamp,
+                    'quota_reset_unix' => (int)$reset_timestamp,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
@@ -1969,6 +1975,7 @@ switch ($action) {
                 // $post_refund_count is $daily_limit for them (no change from baseline).
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         } else {
@@ -2402,6 +2409,7 @@ switch ($action) {
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (int)$reset_timestamp,
+                    'quota_reset_unix' => (int)$reset_timestamp,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
@@ -2597,6 +2605,7 @@ switch ($action) {
                 'quota_remaining' => max(0, $daily_limit - $post_refund_count),
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2975,6 +2984,7 @@ switch ($action) {
                     'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $ffprobe_post_refund_count),
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
