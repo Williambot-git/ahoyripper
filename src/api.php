@@ -2868,16 +2868,28 @@ switch ($action) {
         if (!$actual_file || !is_file($actual_file)) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
+            // Refund quota — yt-dlp succeeded but produced no file (server-side issue,
+            // not a format/quality problem the user can fix by choosing differently).
+            $post_refund_count = $daily_limit;
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+            }
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
+            $retry_ts = time() + DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'retry_after' => max(0, $retry_ts),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                'quota_limit' => $unlimited ? -1 : $daily_limit,
+                'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2891,16 +2903,28 @@ switch ($action) {
         if ($filesize === false || $filesize === 0) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
+            // Refund quota — yt-dlp succeeded but produced an empty/zero-byte file (server-side
+            // issue, not a format/quality problem the user can fix by choosing differently).
+            $post_refund_count = $daily_limit;
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+            }
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
+            $retry_ts = time() + DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'retry_after' => max(0, $retry_ts),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                'quota_limit' => $unlimited ? -1 : $daily_limit,
+                'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
