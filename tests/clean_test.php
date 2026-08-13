@@ -150,6 +150,29 @@ test('returns string unchanged for "low" (quality label)', clean('low') === 'low
 test('returns string unchanged for "tiny" (yt-dlp quality)', clean('tiny') === 'tiny');
 test('returns string unchanged for "audio_only" (format type)', clean('audio_only') === 'audio_only');
 
+// --- resolvePlaylistFlag() ---
+
+// Tests the playlist flag resolver used by both info and download actions.
+// resolvePlaylistFlag() is in TestUtils.php alongside clean() and is exercised
+// by the full integration tests, but a unit-level test here ensures the
+// utility is always validated even if playlist_param_test.php is skipped.
+
+echo "\n==> Testing resolvePlaylistFlag()\n";
+test("playlist='1' resolves to ['--yes-playlist']",
+    resolvePlaylistFlag('1') === ['--yes-playlist']);
+test("playlist='0' resolves to ['--no-playlist']",
+    resolvePlaylistFlag('0') === ['--no-playlist']);
+test("playlist=null resolves to ['--no-playlist'] (default)",
+    resolvePlaylistFlag(null) === ['--no-playlist']);
+test("playlist='' resolves to ['--no-playlist']",
+    resolvePlaylistFlag('') === ['--no-playlist']);
+test("playlist='2' (invalid) resolves to ['--no-playlist']",
+    resolvePlaylistFlag('2') === ['--no-playlist']);
+test("playlist='yes' (non-numeric) resolves to ['--no-playlist']",
+    resolvePlaylistFlag('yes') === ['--no-playlist']);
+test("playlist='true' (non-numeric) resolves to ['--no-playlist']",
+    resolvePlaylistFlag('true') === ['--no-playlist']);
+
 // --- Summary ---
 
 echo "\n" . str_repeat('=', 50) . "\n";
