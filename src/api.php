@@ -1444,7 +1444,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
-            $sendDailyLimitHeaders($daily_limit, $daily_limit);
+            $sendDailyLimitHeaders($daily_limit, null);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
@@ -1473,7 +1473,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
-            $sendDailyLimitHeaders($daily_limit, $daily_limit);
+            $sendDailyLimitHeaders($daily_limit, null);
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
