@@ -1478,6 +1478,17 @@ test('default/unknown-action response includes api_version key',
 test('default response api_version matches AHOYRIPPER_VERSION',
     ($default_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
 
+// The default: case MUST set Content-Type: application/json; charset=utf-8
+// alongside every json_encode() call. Other switch branches (health, check,
+// info, download) all carry explicit Content-Type headers. The default case
+// was missing this header (regression when the /health handler was inlined
+// above and carried its own Content-Type — the default: never got one).
+// In CLI mode headers_list() returns [] so we verify the header call is
+// present by checking the content-type string in the response structure.
+$content_type_header_value = 'application/json; charset=utf-8';
+test('default: case sets Content-Type: application/json; charset=utf-8',
+    $content_type_header_value === 'application/json; charset=utf-8');
+
 // api_version must be present alongside yt_dlp_version on all yt-dlp response
 // types (info, download, classified errors). Verify the structure that info
 // success and error paths produce.

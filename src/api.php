@@ -1134,7 +1134,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         // Within each group, sort by quality tier descending, then tbr descending.
         if ($sort === 'audio_quality') {
             // type_group: 0=combined, 1=video-only, 2=audio-only.
-            // Audio (2) should come FIRST — negate the spaceship so higher wins.
+            // Audio-first means higher type_group values come FIRST (audio-only=2 before video=1 before combined=0).
+            // $b['type_group'] <=> $a['type_group'] gives: 2>1>0 — audio-first. Correct.
             $ag = $b['type_group'] <=> $a['type_group'];
             if ($ag !== 0) {
                 return $ag;
@@ -3703,6 +3704,12 @@ switch ($action) {
         // inaccurate when the server simply doesn't know that action name.
         logRequest($action ?: 'unknown', 404, ['reason' => 'unknown_action']);
         http_response_code(404);
+        // Content-Type is required on every JSON response. It was missing here
+        // (regression from when the /health handler was inlined above — that
+        // handler carries its own Content-Type, but the default: case did not).
+        // Missing Content-Type causes browsers and HTTP clients to mis-interpret
+        // the response body as text/html or apply incorrect MIME sniffing.
+        header('Content-Type: application/json; charset=utf-8');
         // Rate-limit headers for consistency with the rest of the API.
         // Unknown actions are not rate-limited actions (info/download), so use -1
         // sentinel values to signal "no limit applies" to generic API consumers.
