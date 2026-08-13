@@ -717,11 +717,14 @@ When `action=download` succeeds (HTTP 200), the response includes binary file da
 | `Connection: close` | Closes the connection after this response to prevent keep-alive issues where long-running downloads cause premature client cut-off. Also ensures the full JSON error body (on early-exit failures) is readable before connection closure. |
 | `X-Content-Type-Options: nosniff` | Prevents browsers from MIME-sniffing the response away from the declared `Content-Type`. |
 | `X-Download-Options: noopen` | Prevents the file from automatically opening in the browser context (forces a save dialog). |
+| `X-FFProbe-Status` | Set on every download response. `success` means ffprobe confirmed a video stream was present in the downloaded file. `failed` means ffprobe could not verify the file (corrupt, empty, or ffprobe error) — the user's quota is refunded in this case. Allows clients to distinguish between a successful download and an unverifiable one. |
 | `X-Format-Substituted` | Set only when ffprobe detected the downloaded file differs materially from what was requested (different resolution, codec, or container). The value is the actual quality label (e.g. `720p` or `1280x720 vp9`). Absent on all normal downloads — only present when yt-dlp silently substituted a format. |
 | `X-DL-RateLimit-Limit` | Download-specific rate limit (10/min). |
 | `X-DL-RateLimit-Remaining` | Download requests remaining in the current window. |
 | `X-DL-RateLimit-Reset` | Unix timestamp when the download rate limit window resets. |
-| `X-RateLimit-*` | Shared rate-limit headers (same values as `X-DL-RateLimit-*`). |
+| `X-RateLimit-Limit` | Shared rate-limit ceiling (10/min). Sent on download responses alongside the download-specific `X-DL-RateLimit-*` headers, giving generic API consumers the same rate-limit envelope as the info endpoint. |
+| `X-RateLimit-Remaining` | Shared rate-limit remaining (same value as `X-DL-RateLimit-Remaining`). |
+| `X-RateLimit-Reset` | Shared rate-limit reset timestamp (same value as `X-DL-RateLimit-Reset`). |
 | `X-DailyLimit-*` | Daily quota headers for non-unlimited users (same pattern as `info`). |
 
 On `action=download` failure (any non-200 status), the response is always JSON with the standard error shape — the binary download headers above are never sent on error responses.
