@@ -933,17 +933,20 @@ echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcem
 # There are 5 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
 #   2. Server-level report-only (add_header ... Content-Security-Policy-Report-Only ...)
-#   3. API-location override (location = /src/api.php block) — intentionally more
+#   3. API-location enforcement (location = /src/api.php block) — intentionally more
 #      restrictive for the JSON API endpoint (no unsafe-inline, no font CDNs).
-#   4. /csp-report location enforcement CSP (location = /csp-report block)
-#   5. /csp-report location report-only CSP
-# The test checks that there are exactly 5 (not 1-4, which would indicate
+#   4. API-location report-only (same location, mirrors server-level report-only).
+#      Needed so Safari and older Firefox (< Firefox 79) which support neither
+#      Reporting-Endpoints nor Report-To can still submit CSP violation reports.
+#   5. /csp/report location enforcement CSP (location = /csp/report block)
+#   6. /csp/report location report-only CSP
+# The test checks that there are exactly 6 (not 1-5, which would indicate
 # duplicate server-level or spurious entries).
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
-if [ "$CSP_COUNT" -eq 5 ]; then
+if [ "$CSP_COUNT" -eq 6 ]; then
     echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (enforcement + report-only at server, API override + csp-report location)"
 else
-    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 5: enforcement + report-only at server, API override + csp-report location)"
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 6: enforcement + report-only at server, API override + csp-report location)"
     exit 1
 fi
 
