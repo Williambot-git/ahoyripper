@@ -2675,6 +2675,12 @@ switch ($action) {
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             // retry_after: Unix timestamp when the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
             // download failures, giving a consistent future reset point to count down to.
