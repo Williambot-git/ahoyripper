@@ -250,10 +250,27 @@ if ($is_rate_limited) {
             // reset timestamp is somehow in the past (clock skew, stale rate file).
             // A negative Retry-After is invalid per HTTP spec and rejected by some clients.
             header('Retry-After: ' . max(0, $reset_timestamp - time()));
-            // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
-            // not a daily quota hit — allows the UI to distinguish the two cases without
-            // parsing the error message. The daily-quota 429 block (when $daily_limit is
-            // exceeded) sends the real daily-limit values instead.
+            // Include daily-quota info so clients know their full quota state at 429 time.
+            // Read the quota file (shared with download action) without altering the count.
+            $qreset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+            $qlimit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+            $qfp = @fopen('/tmp/ahoyrip_daily_' . md5($ip), 'r');
+            $qremaining = -1;
+            if ($qfp) {
+                if (flock($qfp, LOCK_SH | LOCK_NB)) {
+                    $qraw = fread($qfp, 4096);
+                    flock($qfp, LOCK_UN);
+                    if ($qraw) {
+                        $qdata = json_decode($qraw, true);
+                        if (is_array($qdata) && ($qdata['t'] ?? '') === gmdate('Y-m-d')) {
+                            $qremaining = max(0, $qlimit - (int)($qdata['c'] ?? 0));
+                        }
+                    }
+                    fclose($qfp);
+                } else {
+                    fclose($qfp);
+                }
+            }
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
@@ -263,6 +280,9 @@ if ($is_rate_limited) {
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
+                'quota_remaining' => $qremaining,
+                'quota_limit' => $qlimit,
+                'quota_reset' => $qreset_ts,
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
@@ -2397,9 +2417,27 @@ switch ($action) {
                 header('X-RateLimit-Remaining: 0');
                 header('X-RateLimit-Reset: ' . $dl_reset_ts);
                 header('X-RateLimit-Window: ' . $dl_rate_window);
-                // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
-                // not a daily quota hit — allows the UI to distinguish the two cases without
-                // parsing the error message. The daily-quota 429 block sends the real values.
+                // Include daily-quota info so clients know their full quota state at 429 time.
+                // Read the quota file (shared with info action) without altering the count.
+                $qreset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+                $qlimit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+                $qfp = @fopen('/tmp/ahoyrip_daily_' . md5($ip), 'r');
+                $qremaining = -1;
+                if ($qfp) {
+                    if (flock($qfp, LOCK_SH | LOCK_NB)) {
+                        $qraw = fread($qfp, 4096);
+                        flock($qfp, LOCK_UN);
+                        if ($qraw) {
+                            $qdata = json_decode($qraw, true);
+                            if (is_array($qdata) && ($qdata['t'] ?? '') === gmdate('Y-m-d')) {
+                                $qremaining = max(0, $qlimit - (int)($qdata['c'] ?? 0));
+                            }
+                        }
+                        fclose($qfp);
+                    } else {
+                        fclose($qfp);
+                    }
+                }
                 header('X-DailyLimit-Limit: -1');
                 header('X-DailyLimit-Remaining: -1');
                 header('X-DailyLimit-Reset: -1');
@@ -2409,6 +2447,9 @@ switch ($action) {
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
+                    'quota_remaining' => $qremaining,
+                    'quota_limit' => $qlimit,
+                    'quota_reset' => $qreset_ts,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
