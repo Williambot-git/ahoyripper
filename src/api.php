@@ -51,6 +51,13 @@ define('HEALTH_PROBE_URL', 'https://www.youtube.com/watch?v=' . HEALTH_PROBE_VID
 // and to signal that this is a compile-time fallback, not the runtime value.
 define('QUOTA_DAILY_DEFAULT', 5);
 
+// URL shown to users when they hit quota/rate-limit barriers — directs users to
+// the upsell destination (e.g. AhoyVPN landing page for the public deploy).
+// Override via UPGRADE_URL env var so self-hosted deployments can point to
+// their own product page, Patreon, Ko-fi, or any preferred destination.
+// Must be an absolute URL with scheme (https:// preferred).
+define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/'));
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
@@ -254,7 +261,7 @@ if ($is_rate_limited) {
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
-                'upgrade_url' => 'https://ahoyvpn.com',
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -1872,7 +1879,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
-                    'upgrade_url' => 'https://ahoyvpn.com',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
@@ -2395,7 +2402,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
-                    'upgrade_url' => 'https://ahoyvpn.com',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -2490,7 +2497,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
-                    'upgrade_url' => 'https://ahoyvpn.com',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
