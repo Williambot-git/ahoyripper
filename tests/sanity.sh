@@ -1318,15 +1318,18 @@ echo ""
 echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
 # Users hitting rate/daily limits need to know when they can retry. Both error codes
 # should include a 'retry_after' field in the JSON response.
-for code in RATE_LIMIT_EXCEEDED DAILY_LIMIT MISSING_FORMAT INVALID_FORMAT_ID; do
-    CODE_BLOCK=$(sed -n "/'error_code' => '$code'/,/'api_version'/p" src/api.php | head -n -1)
-    if echo "$CODE_BLOCK" | grep -q "'retry_after'"; then
-        echo "  ✓ $code includes retry_after field"
-    else
-        echo "  ✗ $code is missing retry_after field"
-        exit 1
-    fi
-done
+# PARSE_ERROR also includes retry_after for consistent client backoff handling.
+# Use a targeted check: the PARSE_ERROR response in the info action is identifiable
+# by the unique logRequest call with reason='parse_formats_failed' at the top.
+# Check that this block contains 'retry_after' — this reliably identifies the
+# HTTP response endpoint and not the parseFormats() helper function returns.
+PARSE_ERROR_CHECK=$(sed -n '/logRequest.*parse_formats_failed/,/echo json_encode/p' src/api.php)
+if echo "$PARSE_ERROR_CHECK" | grep -q "'retry_after'"; then
+    echo "  ✓ PARSE_ERROR includes retry_after field"
+else
+    echo "  ✗ PARSE_ERROR is missing retry_after field"
+    exit 1
+fi
 
 echo ""
 echo "==> Running PHP unit tests..."

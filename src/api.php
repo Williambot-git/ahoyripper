@@ -2139,6 +2139,12 @@ switch ($action) {
             $err_status = 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code($err_status);
+            // retry_after: Unix timestamp when the info request can be retried.
+            // PARSE_ERROR is non-retryable in the short term (server-side issue),
+            // but providing retry_after gives the client a consistent field to read
+            // for backoff timing — matching the contract of all other error responses.
+            $retry_ts = time() + INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
@@ -2147,6 +2153,7 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'retry_after' => max(0, $retry_ts),
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
