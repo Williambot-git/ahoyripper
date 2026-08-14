@@ -895,6 +895,10 @@ if (installDismissBtn && installBanner) {
   function renderFormats(url, data) {
     formatGrid.innerHTML = '';
     resultsTitle.textContent = data.title || 'Select a format to download';
+    // Update <title> so browser tabs, history entries, and scroll position
+    // all reflect the ripped video. When no title is available (null/error),
+    // fall back to the static default so the tab stays labelled correctly.
+    document.title = data.title ? data.title + ' — AhoyRipper' : 'AhoyRipper';
 
     // Populate metadata: thumbnail, uploader, duration
     var thumb = document.getElementById('resultsThumb');

@@ -125,6 +125,8 @@ self.addEventListener('fetch', (event) => {
 
   // Google Fonts — cache with network fallback and offline fallback.
   // Falls back to cache when network is unavailable (e.g. offline, airplane mode).
+  // Cache misses (network success) are stored so subsequent offline requests
+  // are served from cache without a failed network round-trip.
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(
       caches.match(request).then((cached) => {
