@@ -36,6 +36,13 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   with correct defaults rather than guessing which are commented-out vs. actively set.
 
 ### Changed
+- **README Environment Variables table** — Added three missing env vars that were
+  documented in the Docker setup section but absent from the main Environment
+  Variables reference table: `AHOY_IMPERSONATE` (browser TLS fingerprint
+  impersonation), `RATE_LIMIT` (per-IP request rate limit), and
+  `HEALTH_PROBE_VIDEO_ID` (YouTube video ID for the health probe). The env vars
+  were functional and documented in the Docker table but easy to miss for
+  operators reading only the main reference section.
 - **`Dockerfile` PWA cache versioning** — Added `RUN php scripts/generate-sw-version.php`
   after copying `public/` so the ServiceWorker cache version is bumped on every deploy.
   Previously the script existed but was never invoked in Docker builds, leaving
