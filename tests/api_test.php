@@ -93,6 +93,21 @@ function isValidUrl($url) {
             if ($octets[0] >= 224 && $octets[0] <= 239) {
                 return false; // IPv4 multicast (224.0.0.0/4)
             }
+            // Block 100.64.0.0/10 — carrier-grade NAT (CGN) addresses.
+            // FILTER_FLAG_NO_PRIV_RANGE intentionally leaves 100.64.0.0/10 unblocked
+            // because RFC 6598 classifies it as shared address space (not private).
+            // However, CGN addresses cannot receive inbound connections from the
+            // public internet and should not be targeted by outbound requests.
+            if ($octets[0] === 100 && $octets[1] >= 64 && $octets[1] <= 127) {
+                return false; // 100.64.0.0/10 — CGN (shared address space, not routable)
+            }
+        } else {
+            // IPv6: block multicast range ff00::/8. Unlike IPv4 where FILTER_FLAG_IPV4
+            // is used as the detection mechanism, IPv6 multicast is detected by
+            // checking if the first byte is 0xff (ff00::/8 prefix).
+            if (str_starts_with($ip, 'ff')) {
+                return false; // IPv6 multicast (ff00::/8)
+            }
         }
         return true;
     };
@@ -108,13 +123,20 @@ function isValidUrl($url) {
         // This prevents SSRF via DNS rebinding (e.g. localhost resolving to 127.0.0.1
         // or an attacker controlling DNS to point a domain at a private IP).
         // Domains that don't resolve are rejected.
-        $resolved = @gethostbynamel($parsed);
+        //
+        // Use dns_get_record (DNS_A | DNS_AAAA) instead of gethostbynamel() because
+        // gethostbynamel() only returns IPv4 (A records) — IPv6-only domains return
+        // false and are incorrectly rejected. dns_get_record returns both A ('ip' key)
+        // and AAAA ('ipv6' key) records so IPv6-only domains are handled correctly.
+        $resolved = @dns_get_record($parsed, DNS_A | DNS_AAAA);
         if ($resolved === false || empty($resolved)) {
             return false; // Cannot resolve — reject
         }
         // Validate every IP the domain resolves to. Reject if ANY is private/reserved/multicast.
-        foreach ($resolved as $ip) {
-            if (!$isPublicIp($ip)) {
+        // Collect IPv4 from 'ip' key and IPv6 from 'ipv6' key.
+        foreach ($resolved as $record) {
+            $ip = $record['ip'] ?? $record['ipv6'] ?? null;
+            if ($ip === null || !$isPublicIp($ip)) {
                 return false;
             }
         }
