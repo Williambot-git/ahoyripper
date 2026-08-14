@@ -443,6 +443,7 @@ if (in_array($action, $internal_actions, true)) {
         'app_version' => AHOYRIPPER_VERSION,
         'php_version' => PHP_VERSION,
         'api_version' => AHOYRIPPER_VERSION,
+        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'source_url' => 'https://ahoyripper.com',
     ]);
     exit;
