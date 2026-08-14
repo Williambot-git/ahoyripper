@@ -29,6 +29,8 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 The file streams directly to your browser — nothing is stored on the server. Each rip counts toward your daily quota (5 free rips per day, resetting at midnight UTC). Enter an AhoyVPN API key to bypass the limit.
 
 > **Tip:** Append `?url=https://...` to the page URL to pre-load a video link — useful for sharing direct rip links.
+>
+> **Add to search bar:** OpenSearch is enabled — your browser may already suggest adding AhoyRipper as a search engine. Once added, type your video URL directly in the URL bar and press Tab or Enter to rip instantly.
 
 ---
 
