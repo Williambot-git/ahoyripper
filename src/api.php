@@ -3869,6 +3869,10 @@ switch ($action) {
             'request_id' => $request_id,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // source_url is null here because an unknown action has no associated video URL.
+            // This matches the pattern used by MISSING_URL (source_url: null) and ensures
+            // all API error responses have a consistent top-level shape.
+            'source_url' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
