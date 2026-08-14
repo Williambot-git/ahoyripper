@@ -50,8 +50,6 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   static assets after a new deployment. Also added a CI sanity check that fails if
   `sw.js` still contains the `unversioned` sentinel or the unreplaced `{{CACHE_VERSION}}`
   placeholder.
-
-### Added
 - Initial `CHANGELOG.md` — project version history now tracked here.
 
 ---
