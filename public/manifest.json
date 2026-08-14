@@ -6,6 +6,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "handle_links": "preferred",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "orientation": "any",
@@ -78,7 +79,7 @@
       "src": "/og-image.webp",
       "sizes": "1200x630",
       "type": "image/webp",
-      "form_factor": "narrow",
+      "form_factor": "wide",
       "label": "AhoyRipper — paste a URL, pick a format, download"
     },
     {
