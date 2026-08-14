@@ -564,7 +564,7 @@ GET /src/api.php?action=check          # lightweight internal ping (Docker healt
 GET /src/api.php?action=health         # full system status with resource metrics
 GET /src/api.php?action=progress        # alias for health (same response shape)
 GET /src/api.php?action=health&probe=1 # include live yt-dlp connectivity probe
-POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)"
+POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)
 ```
 
 `action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
