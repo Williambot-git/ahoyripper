@@ -3600,6 +3600,22 @@ switch ($action) {
             }
         }
 
+        // ffprobe (ffmpeg) version cache — same TTL/read pattern as yt-dlp version
+        // cache above. The cache file path uses md5(FFPROBE_PATH) so it automatically
+        // diverges if the binary path changes. Read it here so the TTL and expiry
+        // can be surfaced in the health response (lines 3632-3633).
+        $ffmpeg_cache_file = '/tmp/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
+        $ffmpeg_cache_ttl = null;
+        $ffmpeg_cache_expires_at = null;
+        if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
+            $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
+            if ($cached && is_array($cached)) {
+                $exp = $cached['exp'] ?? 0;
+                $ffmpeg_cache_expires_at = date('c', $exp);
+                $ffmpeg_cache_ttl = max(0, $exp - time());
+            }
+        }
+
         $sys = getSystemMetrics();
         $yt_dlp_ok = !empty($version) && strpos($version, 'not installed') === false;
         $ffmpeg_ok = !empty($ffmpeg) && strpos($ffmpeg, 'not installed') === false;
