@@ -574,6 +574,7 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
 {
   "status": "ok",
   "server_time": "2026-05-21T16:00:00+00:00",
+  "server_time_unix": 1749180000,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
   "php_version": "8.2.0",
@@ -581,7 +582,9 @@ POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx r
   "yt_dlp_version": "2026.03.17",
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1
+  "quota_reset": -1,
+  "quota_reset_unix": -1,
+  "source_url": "https://ahoyripper.com"
 }
 ```
 
