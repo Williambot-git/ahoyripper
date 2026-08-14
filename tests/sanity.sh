@@ -636,6 +636,24 @@ else
 fi
 
 echo ""
+echo "==> Checking Docker nginx.conf server-level CSP connect-src includes Google Fonts CDNs... "
+# The server-level CSP in nginx-docker.conf must include fonts.googleapis.com and
+# fonts.gstatic.com in connect-src, because browsers make CONNECT requests to these
+# hosts when loading Google Fonts (even if the font URLs are only in CSS @import).
+# Without this, fonts are silently blocked in CSP-reporting mode (no visible error
+# in the browser console — only a CSP violation report is sent).
+# The /csp-report location (line ~109) and production nginx.conf (line ~71) both
+# correctly include these domains; this test guards against the server-level CSP
+# regressing to connect-src 'self' only.
+SERVER_CSP=$(grep "^[[:space:]]*add_header Content-Security-Policy \"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" deploy/nginx-docker.conf | grep -v "Report-Only" | head -1)
+if echo "$SERVER_CSP" | grep -q "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com"; then
+    echo "  ✓ Server-level CSP connect-src includes Google Fonts CDNs"
+else
+    echo "  ✗ Server-level CSP connect-src missing Google Fonts CDNs (browsers can't load fonts)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking API PHP CSP includes upgrade-insecure-requests... "
 if grep "Content-Security-Policy" src/api.php | grep -q "upgrade-insecure-requests"; then
     echo "  ✓ API PHP CSP includes upgrade-insecure-requests"
