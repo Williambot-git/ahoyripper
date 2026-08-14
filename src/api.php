@@ -2959,11 +2959,15 @@ switch ($action) {
             ];
             $probe_out = '';
             $probe_err = '';
-            $probe_exit = 0;
+            // Default to -1 (failure sentinel) so that a failed proc_open (binary
+            // missing/not executable at runtime) is correctly treated as a probe
+            // failure rather than silently passing with exit=0.
+            $probe_exit = -1;
             $probe_start = hrtime(true);
             $probe_timeout = FFPROBE_TIMEOUT; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
             if ($probe_proc) {
+                $probe_exit = 0; // proc_open succeeded — will be overwritten by proc_close
                 fclose($probe_pipes[0]);
                 unset($probe_pipes[0]);
                 stream_set_timeout($probe_pipes[1], 5);
