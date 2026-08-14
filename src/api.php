@@ -3544,7 +3544,7 @@ switch ($action) {
         logRequest('client-error', 200, $entry);
 
         echo 'ok';
-        break;
+        return;
     }
 
     case 'progress':
