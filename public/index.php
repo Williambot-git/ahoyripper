@@ -1068,6 +1068,14 @@ if (installDismissBtn && installBanner) {
                     dlMsg = ERROR_HINTS[dlStatusKey];
                   }
                 }
+                // Surface the upgrade_url from the API response when the error code
+                // indicates an upgradable condition. Use it instead of the generic
+                // AhoyVPN URL already in ERROR_HINTS. Avoid duplicating URLs.
+                if (typeof err.upgrade_url === 'string' && err.upgrade_url.length > 0) {
+                  if (dlMsg.indexOf('://') === -1) {
+                    dlMsg += ' ' + err.upgrade_url;
+                  }
+                }
                 showError(dlMsg);
                 setLoading(false);
                 card.classList.remove('downloading');
@@ -1365,6 +1373,16 @@ if (installDismissBtn && installBanner) {
                 msg += ' Try again in about ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.';
               } else if (secs > 0) {
                 msg += ' Try again in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '.';
+              }
+            }
+            // Surface the upgrade_url from the API response when the error code
+            // indicates an upgradable condition (DAILY_LIMIT, RATE_LIMIT_EXCEEDED,
+            // INVALID_KEY, FORBIDDEN_ORIGIN). The API returns upgrade_url as an
+            // actionable link — use it instead of the generic AhoyVPN URL.
+            // Skip if msg already contains a URL (avoid duplicating links).
+            if (typeof err.upgrade_url === 'string' && err.upgrade_url.length > 0) {
+              if (msg.indexOf('://') === -1) {
+                msg += ' ' + err.upgrade_url;
               }
             }
           }
