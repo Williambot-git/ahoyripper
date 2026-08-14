@@ -1318,7 +1318,7 @@ echo ""
 echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
 # Users hitting rate/daily limits need to know when they can retry. Both error codes
 # should include a 'retry_after' field in the JSON response.
-for code in RATE_LIMIT_EXCEEDED DAILY_LIMIT; do
+for code in RATE_LIMIT_EXCEEDED DAILY_LIMIT MISSING_FORMAT INVALID_FORMAT_ID; do
     CODE_BLOCK=$(sed -n "/'error_code' => '$code'/,/'api_version'/p" src/api.php | head -n -1)
     if echo "$CODE_BLOCK" | grep -q "'retry_after'"; then
         echo "  ✓ $code includes retry_after field"
