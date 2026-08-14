@@ -3405,6 +3405,8 @@ switch ($action) {
             // source_url: self-referencing URL for this API endpoint.
             // Mirrors the source_url field in the /health response, giving API consumers
             // a consistent, always-present reference to the AhoyRipper home page.
+            // Also included in check/info/download responses so all endpoints have the
+            // same top-level shape for uniform client handling.
             'source_url' => 'https://ahoyripper.com',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
