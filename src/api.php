@@ -1964,12 +1964,11 @@ switch ($action) {
             YTDLP_PATH,
             '--newline',
             '--dump-json',
-            '--no-playlist',
+            '--skip-download',
         ];
         foreach ($playlist_flags as $flag) {
             $ytdlp_cmd[] = $flag;
         }
-        $ytdlp_cmd[] = '--skip-download';
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
