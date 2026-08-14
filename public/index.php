@@ -50,6 +50,17 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // any SharedArrayBuffer use would require a separate isolated context, not the
 // main page. Omitting COEP here matches api.php's policy and keeps thumbnails working.
 
+// X-Frame-Options: prevent clickjacking by blocking the page from being embedded
+// in an iframe on third-party sites. Mirrors the header set by api.php.
+header('X-Frame-Options: SAMEORIGIN');
+// X-Download-Options: noopen prevents the file download dialog from automatically
+// opening for downloaded files, reducing drive-by download attacks.
+header('X-Download-Options: noopen');
+// X-Robots-Tag: noindex,noai,noydir prevents all crawlers (search, AI training,
+// archival) from indexing or following links on this page. The web UI is not
+// useful as a search result and should not be vector for training data scraping.
+header('X-Robots-Tag: noindex, noai, noimage, noydir');
+
 header('X-Request-ID: ' . $page_request_id);
 // Remove the "PHP/x.y.z" Server header that PHP-FPM adds automatically.
 // header_remove() is idempotent — safe to call even when no such header was set.
