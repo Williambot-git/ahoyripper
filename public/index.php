@@ -1109,7 +1109,8 @@ if (installDismissBtn && installBanner) {
             navigateOnSuccess = false;
             var msg = 'Download failed. Try another format.';
             if (dlErr.name === 'AbortError') {
-              msg = 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format.';
+              var timeoutSec = downloadTimeoutHeader ? parseInt(downloadTimeoutHeader, 10) : 300;
+              msg = 'Download timed out after ' + timeoutSec + 's. The file may be too large or the source is slow. Try a smaller format.';
             }
             showError(msg);
             setLoading(false);
