@@ -3506,9 +3506,8 @@ switch ($action) {
     // nothing on the server (just a file write to the request log).
     case 'client-error': {
         // Always return 200 so the browser doesn't retry failed reports.
-        // Content-Type is text/plain to avoid any content-sniffing risk.
         http_response_code(200);
-        header('Content-Type: text/plain; charset=utf-8');
+        header('Content-Type: application/json; charset=utf-8');
         header('X-Content-Type-Options: nosniff');
         header('X-Robots-Tag: noindex, noai, noimage, noydir');
         header('X-Request-ID: ' . $request_id);
@@ -3544,7 +3543,12 @@ switch ($action) {
 
         logRequest('client-error', 200, $entry);
 
-        echo 'ok';
+        // Consistent JSON response with api_version for API surface parity.
+        echo json_encode([
+            'ok' => true,
+            'api_version' => API_VERSION,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?: null,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
 
