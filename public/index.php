@@ -496,21 +496,29 @@ if ('serviceWorker' in navigator) {
 
           // Show user-facing update prompt when the new SW is installed
           // (but not yet activated — it waits for our SKIP_WAITING message).
+          // { once: true } prevents duplicate handlers if statechange fires multiple
+          // times during SW lifecycle transitions. The banner is shown/hidden by
+          // toggling display so repeated show/hide cycles don't accumulate handlers.
           installing.addEventListener('statechange', function() {
             if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-              // New version is waiting — prompt user to refresh to apply.
               var banner = document.getElementById('update-banner');
               if (banner) {
                 banner.style.display = 'block';
-                banner.querySelector('.refresh-btn').addEventListener('click', function() {
-                  // Tell the waiting SW to activate immediately, then reload.
-                  if (registration.waiting) {
-                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                  }
-                });
+                var refreshBtn = banner.querySelector('.refresh-btn');
+                // Guard: only add the click handler once so repeated statechange
+                // events (e.g. from multiple SW lifecycle transitions) do not
+                // stack duplicate listeners onto the same button element.
+                if (refreshBtn && !refreshBtn._swHandler) {
+                  refreshBtn._swHandler = true;
+                  refreshBtn.addEventListener('click', function() {
+                    if (registration.waiting) {
+                      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                  });
+                }
               }
             }
-          });
+          }, { once: true });
         });
       })
       .catch(function(err) {
