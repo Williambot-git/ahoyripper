@@ -351,7 +351,7 @@ foreach (array_merge(
 // 'progress' case falls through to 'health' in the switch below). Exposing
 // both names maintains backwards compatibility with any clients that use the
 // older 'progress' action name while guiding new integrations toward 'health'.
-$internal_actions = ['check', 'health', 'progress', 'csp-report'];
+$internal_actions = ['check', 'health', 'progress', 'csp-report', 'client-error'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
     // csp-report: receive and log browser CSP violation reports (nginx POSTs
@@ -3486,6 +3486,60 @@ switch ($action) {
             $metrics['disk_free_gb'] = round($df / (1024 ** 3), 2);
         }
         return $metrics;
+    }
+
+    // Receives client-side JavaScript error reports from the frontend.
+    // Enables server-side operational monitoring of uncaught JS exceptions,
+    // fetch failures, and unhandled promise rejections — supplementing the
+    // browser-side page_request_id correlation that already exists for support tickets.
+    //
+    // POST-only: errors are one-way signals (fire-and-forget), no response body needed.
+    // No referer check: errors may arrive from contexts where the referer header
+    // is absent or stripped (e.g., PWA standalone mode, browser extensions).
+    // No daily-quota or rate-limit overhead: this endpoint is read-only and costs
+    // nothing on the server (just a file write to the request log).
+    case 'client-error': {
+        // Always return 200 so the browser doesn't retry failed reports.
+        // Content-Type is text/plain to avoid any content-sniffing risk.
+        http_response_code(200);
+        header('Content-Type: text/plain; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Cache-Control: no-store');
+
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+
+        // Build a structured log entry from the error payload.
+        // Fields: message (string, required), stack (string, optional), type
+        // (string: Error|TypeError|SyntaxError|etc), page_request_id (string,
+        // optional — correlates with server-side access logs), url (string,
+        // optional — URL of the page where the error occurred), line (int,
+        // optional), col (int, optional).
+        // All string fields are truncated to 500 chars to prevent log flooding.
+        $entry = [
+            'ts' => date('c'),
+            'req_id' => $request_id,
+            'page_req_id' => is_string($data['page_request_id'] ?? null)
+                ? substr($data['page_request_id'], 0, 32) : null,
+            'type' => is_string($data['type'] ?? null)
+                ? substr($data['type'], 0, 80) : 'unknown',
+            'msg' => is_string($data['message'] ?? null)
+                ? substr($data['message'], 0, 500) : null,
+            'url' => is_string($data['url'] ?? null)
+                ? substr($data['url'], 0, 500) : null,
+            'line' => is_int($data['line'] ?? null) ? $data['line'] : null,
+            'col' => is_int($data['col'] ?? null) ? $data['col'] : null,
+            'stack' => is_string($data['stack'] ?? null)
+                ? substr($data['stack'], 0, 1000) : null,
+            'ua' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
+        ];
+
+        logRequest('client-error', 200, $entry);
+
+        echo 'ok';
+        break;
     }
 
     case 'progress':

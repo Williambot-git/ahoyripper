@@ -1572,6 +1572,79 @@ if (installDismissBtn && installBanner) {
       hideError();
     }
   });
+
+  // ─── Client-side error reporting ─────────────────────────────────────────
+  // Send uncaught JS errors to the server for operational monitoring.
+  // Reports are fire-and-forget (async, no retry) — errors must never affect
+  // the UX even if the reporting endpoint is unreachable. page_request_id
+  // correlates client errors with server-side access and request logs.
+  function reportClientError(type, message, details) {
+    try {
+      var payload = JSON.stringify({
+        type: type,
+        message: message,
+        url: window.location.href,
+        page_request_id: PAGE_REQUEST_ID,
+      });
+      if (details) {
+        // Stack trace (Error objects), line/col numbers, extra context
+        for (var k in details) {
+          if (Object.prototype.hasOwnProperty.call(details, k)) {
+            payload = JSON.stringify({
+              type: type,
+              message: message,
+              url: window.location.href,
+              page_request_id: PAGE_REQUEST_ID,
+              stack: details.stack || null,
+              line: details.line || null,
+              col: details.col || null,
+            });
+            break;
+          }
+        }
+      }
+      navigator.sendBeacon && navigator.sendBeacon(
+        '/src/api.php?action=client-error',
+        payload
+      );
+    } catch (e) {
+      // Swallow all errors — reporting must never affect UX
+    }
+  }
+
+  // Global uncaught exception handler. message is the error message (string),
+  // source is the script URL, line and col are numbers.
+  window.onerror = function(message, source, line, col, error) {
+    // Ignore resource load errors (images, scripts, stylesheets) — these are
+    // common, low-signal, and not actionable for application debugging.
+    // Only capture actual JavaScript runtime errors.
+    if (!error || !(error instanceof Error)) {
+      return false; // Don't prevent default browser handling
+    }
+    reportClientError(error.name || 'Error', error.message, {
+      stack: error.stack,
+      line: line,
+      col: col,
+      source: source,
+    });
+    return false; // Let the browser handle it (console.error + onerror firing)
+  };
+
+  // Capture unhandled promise rejections. These are JS runtime errors that
+  // propagate through the promise chain without a .catch() handler.
+  window.addEventListener('unhandledrejection', function(e) {
+    var reason = e && e.reason;
+    if (!reason) return;
+    // Error objects have a meaningful stack; primitive reasons (string, number)
+    // are low-signal — still report them but only with the reason as message.
+    if (reason instanceof Error) {
+      reportClientError(reason.name || 'UnhandledRejection', reason.message, {
+        stack: reason.stack,
+      });
+    } else {
+      reportClientError('UnhandledRejection', String(reason), null);
+    }
+  });
 </script>
 
 </body>
