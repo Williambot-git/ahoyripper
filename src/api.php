@@ -1040,7 +1040,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             if ($height > 0) {
                 $label = "{$height}p";
                 if ($fps) $label .= "{$fps}";
-                if ($format_note) $label .= " {$format_note}";
+                // Skip 'Unknown' sentinel — clean() returns 'Unknown' for null/empty
+                // format_note values (absent or malformed yt-dlp metadata). Appending it
+                // would produce ugly labels like "1080p60 Unknown mp4".
+                if ($format_note && $format_note !== 'Unknown') $label .= " {$format_note}";
                 $label .= " {$ext}";
             } else {
                 // height=0 means yt-dlp didn't report a resolution (e.g. audio-video
