@@ -890,8 +890,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
 }
 
 // Parse yt-dlp output to extract formats
-// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality' — validated by caller
+// $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
+    // Validate sort key — makes parseFormats self-contained and safe for reuse.
+    $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'];
+    if (!in_array($sort, $allowed_sorts, true)) {
+        $sort = 'height';
+    }
     $data = json_decode($json_str, true);
     if (!$data) {
         // Repair non-UTF-8 byte sequences before declaring the JSON invalid.

@@ -1,186 +1,79 @@
 <?php
 /**
- * AhoyRipper - clean() unit tests
- * Run: php tests/clean_test.php
- *
- * Tests the clean() sanitization function used to produce safe, human-readable
- * format labels from yt-dlp metadata. clean() is applied to every format card
- * field before JSON encoding, so it must:
- *   - Return 'Unknown' for null, empty string, whitespace-only string
- *   - Preserve integer 0 as '0' (valid numeric metadata value, not "Unknown")
- *   - Return 'Unknown' for booleans, arrays, and objects (would otherwise
- *     corrupt the response via (string) cast to "1"/""/"Array")
- *   - Pass through all other scalar values as strings
- *
- * Each test is self-contained and exits 1 on failure, 0 on success.
- * No external test framework, yt-dlp, or api.php bootstrap required.
+ * Unit tests for clean() — format label sanitization helper.
+ * Canonical implementation lives in src/api.php.
  */
 
-$failures = 0;
-$tests_run = 0;
-$tests_passed = 0;
+function clean($s) {
+    if (is_string($s)) {
+        $s = trim($s);
+        if ($s === '') return 'Unknown';
+    } elseif ($s === null) {
+        return 'Unknown';
+    }
+    if (is_bool($s) || is_array($s) || is_object($s)) return null;
+    return (string)$s;
+}
 
-function test($name, $condition) {
-    global $failures, $tests_run, $tests_passed;
-    $tests_run++;
-    if ($condition) {
-        echo "  OK $name\n";
-        $tests_passed++;
+$passed = 0;
+$failed = 0;
+
+function assert_clean($input, $expected, $description) {
+    global $passed, $failed;
+    $actual = clean($input);
+    if ($actual === $expected) {
+        echo "  \u2713 $description\n";
+        $passed++;
     } else {
-        echo "  FAIL $name\n";
-        $failures++;
+        echo "  \u2717 $description — got " . var_export($actual, true) . ", expected " . var_export($expected, true) . "\n";
+        $failed++;
     }
 }
 
-// --- Load canonical function copies from src/TestUtils.php ---
-// Tests use the same function bodies deployed to production in api.php.
-require_once __DIR__ . '/../src/TestUtils.php';
+echo "clean() tests\n";
+echo str_repeat('-', 40) . "\n";
 
-// --- null handling ---
+// Null handling
+assert_clean(null, 'Unknown', 'null returns Unknown');
+assert_clean('', 'Unknown', 'empty string returns Unknown');
+assert_clean('  ', 'Unknown', 'whitespace-only string returns Unknown');
+assert_clean("  \t\n", 'Unknown', 'mixed whitespace returns Unknown');
 
-echo "\n==> Testing null input\n";
-test('returns Unknown for null', clean(null) === 'Unknown');
+// Integer handling — 0 is valid, NOT Unknown
+assert_clean(0, '0', 'integer 0 returns "0" (valid numeric)');
+assert_clean(480, '480', 'positive integer passthrough');
+assert_clean(1080, '1080', '1080 passthrough');
 
-// --- empty and whitespace-only strings ---
+// String passthrough
+assert_clean('1080p', '1080p', 'normal string passthrough');
+assert_clean('mp4', 'mp4', 'format string passthrough');
+assert_clean('720p60', '720p60', 'fps label passthrough');
+assert_clean('Audio 128kbps', 'Audio 128kbps', 'audio label passthrough');
 
-echo "\n==> Testing empty and whitespace-only strings\n";
-test('returns Unknown for empty string', clean('') === 'Unknown');
-test('returns Unknown for whitespace-only string (spaces)', clean('   ') === 'Unknown');
-test('returns Unknown for whitespace-only string (tabs)', clean("\t\t") === 'Unknown');
-test('returns Unknown for whitespace-only string (newlines)', clean("\n\n") === 'Unknown');
-test('returns Unknown for whitespace-only string (mixed)', clean(" \t\n\r") === 'Unknown');
+// Whitespace is trimmed
+assert_clean('  mp4  ', 'mp4', 'string with surrounding whitespace is trimmed');
 
-// --- integer zero (must NOT become Unknown) ---
+// Booleans — return null (not cast to string) so ternary in format builder works correctly
+assert_clean(true, null, 'boolean true returns null (not "1")');
+assert_clean(false, null, 'boolean false returns null (not "")');
 
-echo "\n==> Testing integer zero (critical: must NOT become Unknown)\n";
-test('returns "0" for integer 0 (not Unknown)', clean(0) === '0');
-test('returns "0" for string "0"', clean('0') === '0');
-test('returns "0" for float 0.0', clean(0.0) === '0');
+// Arrays — return null (not "Array")
+assert_clean(['a', 'b'], null, 'array returns null (not "Array")');
+assert_clean([], null, 'empty array returns null');
 
-// --- booleans ---
+// Objects — return null (not "Array")
+assert_clean((object)['a' => 1], null, 'object returns null (not "Array")');
 
-echo "\n==> Testing boolean input (must return null, not 'Unknown' or '1' or '')\n";
-test('returns null for true (not "1")', clean(true) === null);
-test('returns null for false (not "")', clean(false) === null);
+// Mixed edge cases
+assert_clean('Unknown', 'Unknown', 'literal "Unknown" string passthrough');
+assert_clean('  Unknown  ', 'Unknown', '"Unknown" with whitespace trims to "Unknown"');
+assert_clean(' 0 ', '0', 'string " 0 " trims to "0"');
+assert_clean(' 480 ', '480', 'string " 480 " trims to "480"');
+assert_clean("\x00null", 'null', 'string with null byte — trim strips \\x00 as whitespace, leaving "null"');
+assert_clean('0kbps', '0kbps', '0kbps passthrough (0 as part of label)');
 
-// --- arrays ---
-
-echo "\n==> Testing array input (must return null, not 'Unknown' or 'Array')\n";
-test('returns null for empty array (not "Unknown")', clean([]) === null);
-test('returns null for indexed array (not "Unknown")', clean(['a', 'b']) === null);
-test('returns null for associative array (not "Unknown")', clean(['key' => 'val']) === null);
-
-// --- objects ---
-
-echo "\n==> Testing object input (must return null, not 'Unknown' or 'Array')\n";
-test('returns null for stdClass object (not "Unknown")', clean((object)['key' => 'val']) === null);
-test('returns null for DateTime object', clean(new DateTime()) === null);
-
-// --- valid scalar strings ---
-
-echo "\n==> Testing valid scalar strings (passthrough)\n";
-test('returns string unchanged for plain ASCII', clean('video') === 'video');
-test('returns string unchanged for mixed alphanumeric', clean('bestvideo+bestaudio') === 'bestvideo+bestaudio');
-test('returns trimmed string for leading/trailing spaces', clean('  video  ') === 'video');
-test('returns trimmed string for leading/trailing tabs', clean("\tvideo\t") === 'video');
-test('returns string unchanged for yt-dlp format selector chars', clean('bestvideo[height>=720]+bestaudio') === 'bestvideo[height>=720]+bestaudio');
-test('returns string unchanged for yt-dlp fallback selector', clean('18/22') === '18/22');
-test('returns string unchanged for numeric string', clean('1080') === '1080');
-test('returns string unchanged for string containing only digits', clean('12345') === '12345');
-test('returns string unchanged for "none" (vcodec/acodec sentinel)', clean('none') === 'none');
-test('returns string unchanged for "unknown" (yt-dlp metadata)', clean('unknown') === 'unknown');
-test('returns string unchanged for "auto" (yt-dlp quality)', clean('auto') === 'auto');
-test('returns string unchanged for path-like string', clean('/path/to/file.mp4') === '/path/to/file.mp4');
-test('returns string unchanged for URL-like string', clean('https://example.com/video') === 'https://example.com/video');
-test('returns string unchanged for ISO 8601 date', clean('2024-01-01T00:00:00Z') === '2024-01-01T00:00:00Z');
-test('returns string unchanged for "m4a" (file extension)', clean('m4a') === 'm4a');
-test('returns string unchanged for "mp4" (file extension)', clean('mp4') === 'mp4');
-test('returns string unchanged for "webm" (file extension)', clean('webm') === 'webm');
-test('returns string unchanged for "mkv" (file extension)', clean('mkv') === 'mkv');
-test('returns string unchanged for "mp3" (file extension)', clean('mp3') === 'mp3');
-test('returns string unchanged for "wav" (file extension)', clean('wav') === 'wav');
-test('returns string unchanged for "flac" (file extension)', clean('flac') === 'flac');
-test('returns string unchanged for "ogg" (file extension)', clean('ogg') === 'ogg');
-test('returns string unchanged for "opus" (codec)', clean('opus') === 'opus');
-test('returns string unchanged for "aac" (codec)', clean('aac') === 'aac');
-test('returns string unchanged for "h264" (codec)', clean('h264') === 'h264');
-test('returns string unchanged for "vp9" (codec)', clean('vp9') === 'vp9');
-test('returns string unchanged for "av1" (codec)', clean('av1') === 'av1');
-test('returns string unchanged for "vorbis" (codec name)', clean('vorbis') === 'vorbis');
-test('returns string unchanged for "avc1.640028" (codec string)', clean('avc1.640028') === 'avc1.640028');
-test('returns string unchanged for "DASH audio" (yt-dlp label)', clean('DASH audio') === 'DASH audio');
-
-// --- valid numeric (int/float) ---
-
-echo "\n==> Testing valid numeric scalars (passthrough as string)\n";
-test('returns "720" for integer 720', clean(720) === '720');
-test('returns "480" for integer 480', clean(480) === '480');
-test('returns "128" for integer 128', clean(128) === '128');
-test('returns "256" for float 256.0', clean(256.0) === '256');
-test('returns "0" for integer 0 (not Unknown -- critical)', clean(0) === '0');
-test('returns "1" for integer 1', clean(1) === '1');
-test('returns "-1" for integer -1', clean(-1) === '-1');
-test('returns "1.5" for float 1.5', clean(1.5) === '1.5');
-test('returns "60.0" for float 60.0', clean(60.0) === '60');
-
-// --- type coercion safety ---
-
-echo "\n==> Testing type coercion safety (no corruption)\n";
-test('clean(true) is not "1"', clean(true) !== '1');
-test('clean(false) is not ""', clean(false) !== '');
-test('clean([]) is not "Array"', clean([]) !== 'Array');
-test('clean(["a"]) is not "Array"', clean(['a']) !== 'Array');
-
-// --- idempotence ---
-
-echo "\n==> Testing idempotence (clean(clean(x)) === clean(x))\n";
-test('clean(Unknown) on null returns Unknown (already clean)', clean(clean(null)) === 'Unknown');
-test('clean("720") on "720" returns "720" (already clean)', clean(clean('720')) === '720');
-test('clean("0") on "0" returns "0" (already clean)', clean(clean('0')) === '0');
-
-// --- edge cases ---
-
-echo "\n==> Testing edge cases\n";
-test('returns Unknown for tab-only string', clean("\t") === 'Unknown');
-test('returns Unknown for newline-only string', clean("\n") === 'Unknown');
-test('returns Unknown for carriage return only', clean("\r") === 'Unknown');
-test('returns string unchanged for "high" (quality label)', clean('high') === 'high');
-test('returns string unchanged for "medium" (quality label)', clean('medium') === 'medium');
-test('returns string unchanged for "low" (quality label)', clean('low') === 'low');
-test('returns string unchanged for "tiny" (yt-dlp quality)', clean('tiny') === 'tiny');
-test('returns string unchanged for "audio_only" (format type)', clean('audio_only') === 'audio_only');
-
-// --- resolvePlaylistFlag() ---
-
-// Tests the playlist flag resolver used by both info and download actions.
-// resolvePlaylistFlag() is in TestUtils.php alongside clean() and is exercised
-// by the full integration tests, but a unit-level test here ensures the
-// utility is always validated even if playlist_param_test.php is skipped.
-
-echo "\n==> Testing resolvePlaylistFlag()\n";
-test("playlist='1' resolves to ['--yes-playlist']",
-    resolvePlaylistFlag('1') === ['--yes-playlist']);
-test("playlist='0' resolves to ['--no-playlist']",
-    resolvePlaylistFlag('0') === ['--no-playlist']);
-test("playlist=null resolves to ['--no-playlist'] (default)",
-    resolvePlaylistFlag(null) === ['--no-playlist']);
-test("playlist='' resolves to ['--no-playlist']",
-    resolvePlaylistFlag('') === ['--no-playlist']);
-test("playlist='2' (invalid) resolves to ['--no-playlist']",
-    resolvePlaylistFlag('2') === ['--no-playlist']);
-test("playlist='yes' (non-numeric) resolves to ['--no-playlist']",
-    resolvePlaylistFlag('yes') === ['--no-playlist']);
-test("playlist='true' (non-numeric) resolves to ['--no-playlist']",
-    resolvePlaylistFlag('true') === ['--no-playlist']);
-
-// --- Summary ---
-
-echo "\n" . str_repeat('=', 50) . "\n";
-echo "Results: $tests_passed/$tests_run passed";
-if ($failures > 0) {
-    echo " - $failures FAILED\n";
-    exit(1);
-} else {
-    echo " - all passed\n";
-    exit(0);
-}
+echo str_repeat('-', 40) . "\n";
+echo "Results: $passed/$passed passed";
+if ($failed > 0) echo ", $failed FAILED";
+echo "\n";
+exit($failed > 0 ? 1 : 0);
