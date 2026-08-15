@@ -1162,23 +1162,23 @@ if (installDismissBtn && installBanner) {
     formatGrid.style.flexDirection = 'row';
     formatGrid.style.flexWrap = 'wrap';
 
-    var addedAnything = false;
+    var lastGroup = null;
     if (groups.combined.length > 0) {
       formatGrid.appendChild(renderGroupHeader('Video + Audio'));
       groups.combined.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
-      addedAnything = true;
+      lastGroup = 'combined';
     }
     if (groups.videoOnly.length > 0) {
-      if (addedAnything) formatGrid.appendChild(renderSeparator());
+      if (lastGroup !== null) formatGrid.appendChild(renderSeparator());
       formatGrid.appendChild(renderGroupHeader('Video Only'));
       groups.videoOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
-      addedAnything = true;
+      lastGroup = 'videoOnly';
     }
     if (groups.audioOnly.length > 0) {
-      if (addedAnything) formatGrid.appendChild(renderSeparator());
+      if (lastGroup !== null) formatGrid.appendChild(renderSeparator());
       formatGrid.appendChild(renderGroupHeader('Audio Only'));
       groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
-      addedAnything = true;
+      lastGroup = 'audioOnly';
     }
     // All three groups were empty — no downloadable formats available.
     // Show a clear message so the user knows this is expected behaviour, not a bug.
