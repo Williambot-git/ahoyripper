@@ -811,7 +811,7 @@ Run `yt-dlp --list-extractors` locally, or see the [yt-dlp supported sites list]
 
 Some platforms require you to be logged in to access certain content. If you encounter a `LOGIN_REQUIRED` error:
 
-1. **On YouTube:** Age-restricted videos require authentication. You can pass cookies to yt-dlp by adding a `cookies` option to the command in `src/api.php` — see [yt-dlp cookies guide](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#how-do-i-pass-cookies-to-yt-dlp).
+1. **On YouTube:** Age-restricted videos require authentication. Set the `COOKIES_PATH` environment variable to enable cookie-based authentication — see [cookies section](#passing-cookies-to-yt-dlp) for full setup instructions. No code changes are required.
 2. **On other platforms:** Content behind login walls (Instagram private posts, Patreon, etc.) cannot be downloaded without valid credentials.
 
 ### Passing cookies to yt-dlp
