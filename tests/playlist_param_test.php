@@ -1,13 +1,17 @@
 <?php
 /**
- * AhoyRipper — playlist parameter unit tests
+ * AhoyRipper — resolvePlaylistFlag() unit tests
  * Run: php tests/playlist_param_test.php
  *
- * Tests that the playlist parameter is correctly resolved to yt-dlp flags.
- * Uses the canonical resolvePlaylistFlag() from src/TestUtils.php.
- * yt-dlp accepts boolean flags --yes-playlist and --no-playlist.
- * NOTE: yt-dlp does NOT support --playlist true/false (rejected as ambiguous).
- * The correct flags are --yes-playlist (fetch playlist) and --no-playlist (single video).
+ * Tests the resolvePlaylistFlag() function that maps the ?playlist=1 URL
+ * parameter to yt-dlp's --yes-playlist / --no-playlist flags.
+ *
+ * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
+ * --no-playlist (fetch single video only). yt-dlp does NOT support
+ * --playlist true/false — that syntax is rejected as ambiguous.
+ *
+ * Each test is self-contained and exits 1 on failure, 0 on success.
+ * No external test framework or yt-dlp required.
  */
 
 $failures = 0;
@@ -26,69 +30,77 @@ function test($name, $condition) {
     }
 }
 
-// Load canonical resolvePlaylistFlag() from TestUtils.php
+// ─── Load canonical function copy from src/TestUtils.php ───────────────────────
 require_once __DIR__ . '/../src/TestUtils.php';
 
-echo "\n==> Testing resolvePlaylistFlag() from TestUtils.php\n";
+// ─── Core behavior ────────────────────────────────────────────────────────────
 
-$flags_1 = resolvePlaylistFlag('1');
-$flags_0 = resolvePlaylistFlag('0');
-$flags_null = resolvePlaylistFlag(null);
-$flags_empty = resolvePlaylistFlag('');
-$flags_2 = resolvePlaylistFlag('2');
-$flags_yes = resolvePlaylistFlag('yes');
-$flags_true = resolvePlaylistFlag('true');
+echo "\n==> Testing resolvePlaylistFlag() — core behavior\n";
 
-test('playlist=1 resolves to --yes-playlist (not --no-playlist)',
-    $flags_1 === ['--yes-playlist']);
-test('playlist=0 resolves to --no-playlist',
-    $flags_0 === ['--no-playlist']);
-test('playlist absent resolves to --no-playlist (default)',
-    $flags_null === ['--no-playlist']);
-test('playlist empty string resolves to --no-playlist',
-    $flags_empty === ['--no-playlist']);
-test('playlist=2 (invalid) resolves to --no-playlist',
-    $flags_2 === ['--no-playlist']);
-test('playlist=yes (non-numeric) resolves to --no-playlist',
-    $flags_yes === ['--no-playlist']);
-test('playlist=true (non-numeric) resolves to --no-playlist',
-    $flags_true === ['--no-playlist']);
+// ?playlist=1 (the only truthy value) → --yes-playlist
+test('playlist=1 returns --yes-playlist',
+    resolvePlaylistFlag('1') === ['--yes-playlist']);
 
-// Verify yt-dlp accepts these as valid flags
-test('--yes-playlist is a valid yt-dlp flag',
-    in_array('--yes-playlist', ['--yes-playlist', '--no-playlist'], true));
-test('--no-playlist is a valid yt-dlp flag',
-    in_array('--no-playlist', ['--yes-playlist', '--no-playlist'], true));
+// All other values → --no-playlist
+test('playlist=0 returns --no-playlist',
+    resolvePlaylistFlag('0') === ['--no-playlist']);
 
-// yt-dlp flag ordering invariant: playlist flags must appear BEFORE the URL
-// (before the -- separator in the command array). This test documents the
-// required ordering constraint so future refactors don't accidentally break it.
-echo "\n==> Testing yt-dlp flag ordering constraint (documentation)\n";
-$ytdlp_cmd_with_playlist_before_url = [
-    '/usr/local/bin/yt-dlp',
-    '-f', 'best',
-    '--no-playlist',  // playlist flag BEFORE -- separator
-    '--',
-    'https://youtube.com/watch?v=...',
-];
-$url_index = array_search('--', $ytdlp_cmd_with_playlist_before_url);
-$playlist_index = array_search('--no-playlist', $ytdlp_cmd_with_playlist_before_url);
-test('playlist flag must appear before -- separator (url index > playlist index)',
-    $url_index !== false && $playlist_index !== false && $playlist_index < $url_index);
+test('playlist=yes returns --no-playlist',
+    resolvePlaylistFlag('yes') === ['--no-playlist']);
 
-$ytdlp_cmd_playlist_after_url = [
-    '/usr/local/bin/yt-dlp',
-    '-f', 'best',
-    '--',
-    'https://youtube.com/watch?v=...',
-    '--yes-playlist',  // WRONG: playlist flag AFTER -- separator (does not work)
-];
-$url_idx = array_search('--', $ytdlp_cmd_playlist_after_url);
-$playlist_idx = array_search('--yes-playlist', $ytdlp_cmd_playlist_after_url);
-test('playlist flag after -- separator is ineffective (documented broken pattern)',
-    $url_idx !== false && $playlist_idx !== false && $playlist_idx > $url_idx);
+test('playlist=true returns --no-playlist',
+    resolvePlaylistFlag('true') === ['--no-playlist']);
 
-echo "\n==> Summary: $tests_passed/$tests_run tests passed\n";
+test('playlist=false returns --no-playlist',
+    resolvePlaylistFlag('false') === ['--no-playlist']);
+
+test('playlist=anything-else returns --no-playlist',
+    resolvePlaylistFlag('anything-else') === ['--no-playlist']);
+
+// ─── Null and empty ─────────────────────────────────────────────────────────
+
+echo "\n==> Testing resolvePlaylistFlag() — null and empty\n";
+
+test('null returns --no-playlist',
+    resolvePlaylistFlag(null) === ['--no-playlist']);
+
+test('empty string returns --no-playlist',
+    resolvePlaylistFlag('') === ['--no-playlist']);
+
+// ─── Array input (simulating $_GET edge cases) ───────────────────────────────
+
+echo "\n==> Testing resolvePlaylistFlag() — edge cases\n";
+
+// Integer 1 is not a string, but if passed it would not === '1'
+// The function uses === '1' comparison so integer 1 would NOT be truthy
+test('integer 1 returns --no-playlist (=== strict comparison fails)',
+    resolvePlaylistFlag(1) === ['--no-playlist']);
+
+// The return type is always an array of one or two elements
+$result = resolvePlaylistFlag('1');
+test('returns array type',
+    is_array($result));
+
+$result = resolvePlaylistFlag(null);
+test('null returns array type',
+    is_array($result));
+
+$result = resolvePlaylistFlag('0');
+test('returns exactly one flag',
+    count($result) === 1);
+
+$result = resolvePlaylistFlag('1');
+test('playlist=1 returns exactly one flag',
+    count($result) === 1);
+
+// ─── Summary ─────────────────────────────────────────────────────────────────
+
+echo "\n" . str_repeat('=', 50) . "\n";
+echo "Results: $tests_passed/$tests_run passed";
 if ($failures > 0) {
+    echo " — $failures FAILED\n";
     exit(1);
+} else {
+    echo " — all passed\n";
+    exit(0);
 }
