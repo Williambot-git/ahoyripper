@@ -3173,6 +3173,10 @@ switch ($action) {
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    // Surface ffprobe failure details for client diagnostics — the early-exit path
+                    // (ffprobe exit !== 0) sets $probe_err to a descriptive string. The no-stream
+                    // path (ffprobe exit === 0 but vstream missing) sets $probe_err explicitly above.
+                    'verification_error' => $probe_err ?? null,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
