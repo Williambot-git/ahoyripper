@@ -3576,8 +3576,8 @@ switch ($action) {
         // Health/progress — full system status with resource metrics.
         // Note: all security headers are already set at the top of the script.
 
-        $version = $GLOBALS['__ytdlp_version'] ?: 'not installed';
-        $ffmpeg = $GLOBALS['__ffmpeg_version'] ?: 'not installed';
+        $version = $GLOBALS['__ytdlp_version'] ?? 'not installed';
+        $ffmpeg = $GLOBALS['__ffmpeg_version'] ?? 'not installed';
 
         $ytdlp_cache_ttl = null;
         $ytdlp_cache_expires_at = null;
