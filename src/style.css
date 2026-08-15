@@ -749,8 +749,10 @@ footer a:hover { color: var(--color-accent); }
   .hero p { font-size: 1rem; }
   .features-grid { grid-template-columns: 1fr; }
   .format-card { flex: 1 1 140px; }
-/* Mobile: wrap badges, tighten layout so they fit in ~2 rows on small screens */
+}
+
 @media (max-width: 500px) {
+  /* Mobile: wrap badges, tighten layout so they fit in ~2 rows on small screens */
   .sites-bar {
     padding: 0 0.5rem;
     gap: 0.3rem;
