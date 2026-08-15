@@ -64,6 +64,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
         return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
     }
+    // "authentication required" must be checked separately because the merged pattern
+    // "authentication.*required" requires the word "required" to appear twice —
+    // yt-dlp only says it once ("authentication required"), so we match it directly.
+    // "sign in to confirm" is yt-dlp's bot-confirm message (Google/YouTube).
     if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
         return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
     }
@@ -88,9 +92,28 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
+
+    // "process timed out" is produced by the PHP-side timeout in the inline
+    // proc_open timeout handler (api.php).
+    // Distinct from connection-level "timed out" which implies a network failure.
+    // The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT (configurable
+    // via YTDLP_TIMEOUT env var, default 45s) and terminates the yt-dlp process.
+    // INFO_TIMEOUT (controlled by YTDLP_TIMEOUT) limits the info action;
+    // DOWNLOAD_TIMEOUT (controlled by YTDLP_DOWNLOAD_TIMEOUT) limits the download action.
+    // This means the server reached the source but it was too slow to respond within
+    // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
+    // (502) which implies a network or DNS issue on our end.
     if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
     }
+
+    // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
+    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above) and NOT followed by
+    // " after" (PHP timeout format: "Process timed out after 45s"). The negative
+    // lookahead (?!) at word boundary rejects "Process timed out" at the word level
+    // rather than relying solely on the (?<!Process ) lookbehind, making the intent
+    // explicit and robust against future variations of the PHP timeout message.
+    // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
@@ -100,9 +123,26 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
     }
+    // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
+    // the source blocks content on legal/TOS grounds — distinct from HTTP 403 which
+    // signals an IP ban (SOURCE_FORBIDDEN). Also catches explicit TOS-violation messages.
+    // The 'disallowed.*content' check is kept separate from 'content.*violat' so that
+    // a plain "disallowed content" (no violation language) is NOT classified here —
+    // it falls through to SOURCE_FORBIDDEN (HTTP 403) if the message contains "content
+    // is not allowed" specifically from yt-dlp, use the content-disallowed sentinel.
+    // Negative lookahead (?!\s+content\b) prevents "disallowed content" (two separate words
+    // where "content" immediately follows "disallowed") from matching — that pattern
+    // fires for generic "disallowed content" errors that should route to SOURCE_FORBIDDEN.
+    // (?<!\bdisallowed\s) prevents "content" preceded by "disallowed " from matching
+    // (same intent as the negative lookahead above, belt-and-suspenders).
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
         return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'status' => 451];
     }
+    // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
+    // yt-dlp emits these when the source returns a non-2xx status. The numeric
+    // status is extracted from the message for classification; 403/404/429 are the
+    // most common and map to existing error codes. Others fall through to a generic
+    // upstream HTTP error response.
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
@@ -120,12 +160,20 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         if ($code === 500 || $code === 502 || $code === 503) {
             return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
         }
+        // Other HTTP errors — surface the status but give a generic message.
         return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
     }
+    // yt-dlp exit codes carry semantic meaning that supplements text classification.
+    // Exit code 1 is the most common error code — it means "there was a problem" but often
+    // carries no descriptive stderr text (just "error" or empty). Fall back to it only
+    // after all specific text-pattern checks above have been exhausted.
+    // Text-based matches take absolute precedence — a geo-blocked video that also produces
+    // exit code 1 still returns GEOBLOCKED (451), not FORMAT_UNAVAILABLE (422).
     if ($exit_code !== null && $exit_code !== 0) {
         if ($exit_code === 1) {
             return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
         }
+        // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
         if ($exit_code >= 2) {
             return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'status' => 422];
         }
