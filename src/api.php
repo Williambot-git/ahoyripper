@@ -2861,6 +2861,7 @@ switch ($action) {
                     'error_code' => $err_classified['code'],
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                 ];
@@ -2888,6 +2889,7 @@ switch ($action) {
                     'error_code' => 'YTDLP_ERROR',
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                 ];
