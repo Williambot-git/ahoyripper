@@ -159,6 +159,7 @@ header_remove('X-Powered-By');
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $BASE_URL ?>">
   <meta name="twitter:domain" content="ahoyripper.com">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
