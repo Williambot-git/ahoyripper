@@ -236,6 +236,7 @@ docker compose up -d
 | `YTDLP_PATH` | `/usr/local/bin/yt-dlp` | Path to the yt-dlp binary. Override when yt-dlp is in a non-standard location (e.g. `/usr/bin/yt-dlp` on some systems, or a custom path in a Docker image). Changing this invalidates the yt-dlp version cache. |
 | `FFPROBE_PATH` | `/usr/bin/ffprobe` | Path to the ffprobe binary used for post-download codec/resolution verification. Override when ffprobe is in a non-standard location (e.g. `/usr/local/bin/ffprobe` on macOS). Changing this invalidates the ffprobe version cache. |
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
+| `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
 
