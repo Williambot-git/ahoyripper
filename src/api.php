@@ -2759,20 +2759,31 @@ switch ($action) {
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
                 // retry_after: Unix timestamp when the download can be retried.
-                // Set to now + the actual $timeout so the client has a consistent
-                // future reset point to count down to regardless of the configured limit.
-                $retry_ts = time() + $timeout;
+                // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
+                // download failures, giving a consistent future reset point to count down to.
+                $retry_ts = time() + DOWNLOAD_TIMEOUT;
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
                     'retry_after' => max(0, $retry_ts),
                     'request_id' => $request_id,
                     'source_url' => $url,
+                    'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'quota_remaining' => max(0, $daily_limit - $post_refund_count),
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
