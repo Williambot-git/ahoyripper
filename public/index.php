@@ -621,6 +621,7 @@ if (installDismissBtn && installBanner) {
     'SOURCE_SERVER_ERROR': 'The source site returned an error and is having issues. Try again shortly.',
     'SOURCE_HTTP_ERROR': 'The source site returned an unexpected error. Try again in a moment.',
     'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
+    'MISSING_URL': 'No URL was provided. Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit.',
     'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
     'PROBE_FAILED': 'Could not verify that yt-dlp is working. The server may be misconfigured or yt-dlp is not installed. Try again or contact support.',
     'YTDLP_NOT_FOUND': 'yt-dlp could not be started. The server is misconfigured — yt-dlp may not be installed or the path is incorrect. Contact the server administrator.',
