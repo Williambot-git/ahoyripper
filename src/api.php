@@ -1657,12 +1657,24 @@ $unlimited = false;
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     header('Allow: GET');
+    // Security headers: mirror the full set sent by the 406 handler so both early-exit
+    // error paths are equally hardened. Both bypass the switch block that would otherwise
+    // set them globally, so they must be set explicitly here.
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Download-Options: noopen');
+    header('X-Robots-Tag: noindex, noai, noimage, noydir');
+    header('X-Request-ID: ' . $request_id);
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
     // Rate-limit headers on 405: check is not a download action (X-DL-RateLimit=-1)
     // and has no per-minute ceiling (X-RateLimit=-1, not 0). -1 is the sentinel for
     // "no rate limit applies" — 0 means "rate limit exhausted" which is wrong here.
     // Daily limit is also inapplicable (-1). Including these on error responses gives
     // API clients consistent header coverage regardless of which code path they hit.
-    // Mirrors the header set sent on the 200 response for the check action.
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
@@ -1675,10 +1687,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
     header('X-DailyLimit-Window: unlimited');
-    // Add Referrer-Policy (missing here — the 406 block has it; both early-exit
-    // error paths should be equally hardened since both bypass the switch block
-    // that would otherwise set it globally).
-    header('Referrer-Policy: strict-origin-when-cross-origin');
     echo json_encode([
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
