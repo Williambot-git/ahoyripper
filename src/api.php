@@ -2878,6 +2878,23 @@ switch ($action) {
                 http_response_code($status);
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
+                // Compute post-refund quota for the JSON body. refundQuota() is idempotent
+                // (safe to call even if already refunded via the proc_open failure path above).
+                $post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+                // Mirror X-DailyLimit-* headers set on successful download responses,
+                // so the client always has quota metadata regardless of how the download ends.
+                // Unlimited-key holders get -1 sentinel values signaling "no quota applies".
+                if ($unlimited) {
+                    header('X-DailyLimit-Limit: -1');
+                    header('X-DailyLimit-Remaining: -1');
+                    header('X-DailyLimit-Reset: -1');
+                    header('X-DailyLimit-Window: unlimited');
+                } else {
+                    header('X-DailyLimit-Limit: ' . $daily_limit);
+                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $post_refund_count + 1));
+                    header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
+                    header('X-DailyLimit-Window: 86400');
+                }
                 $resp = [
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
@@ -2886,6 +2903,10 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count + 1),
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
