@@ -1478,6 +1478,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
+            'retry_after' => time(),
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,

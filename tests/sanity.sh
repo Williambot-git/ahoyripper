@@ -1362,6 +1362,20 @@ for err_code in MISSING_URL INVALID_URL; do
 done
 
 echo ""
+echo "==> Checking URL_TOO_LONG response includes retry_after field..."
+# URL_TOO_LONG is a client-input validation error (URL exceeds MAX_URL_LEN).
+# Adding retry_after gives API clients a consistent field to read for backoff
+# timing — matching the contract of all other validation errors (MISSING_URL,
+# INVALID_URL, MISSING_FORMAT, INVALID_FORMAT_ID) which all include it.
+URL_TOO_LONG_CHECK=$(sed -n '/URL is too long/,/echo json_encode/p' src/api.php | head -n 20)
+if echo "$URL_TOO_LONG_CHECK" | grep -q "'retry_after'"; then
+    echo "  ✓ URL_TOO_LONG includes retry_after field"
+else
+    echo "  ✗ URL_TOO_LONG is missing retry_after field (inconsistent with other validation errors)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
 # Users hitting rate/daily limits need to know when they can retry. Both error codes
 # should include a 'retry_after' field in the JSON response.
