@@ -3577,6 +3577,12 @@ switch ($action) {
 
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
+        // Guard against null (json_decode failure) or non-array input (e.g. empty body).
+        // Every other json_decode call site in this file has a similar guard — this
+        // action was missing one, causing PHP warnings on malformed POST bodies.
+        if ($data === null || !is_array($data)) {
+            $data = [];
+        }
 
         // Build a structured log entry from the error payload.
         // Fields: message (string, required), stack (string, optional), type
