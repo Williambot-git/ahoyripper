@@ -1478,6 +1478,16 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
+        // Rate-limit headers: -1 sentinel since this error occurs before the
+        // per-minute rate-limit gate (no rate tracking has occurred yet).
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unavailable');
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unavailable');
         $sendDailyLimitHeaders($daily_limit, null);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
@@ -1510,6 +1520,16 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
+            // Rate-limit headers: -1 sentinel since this error occurs before the
+            // per-minute rate-limit gate (no rate tracking has occurred yet).
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
@@ -1544,6 +1564,16 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
+            // Rate-limit headers: -1 sentinel since this error occurs before the
+            // per-minute rate-limit gate (no rate tracking has occurred yet).
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
