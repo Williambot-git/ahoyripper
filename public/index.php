@@ -1163,21 +1163,22 @@ if (installDismissBtn && installBanner) {
     formatGrid.style.flexWrap = 'wrap';
 
     var lastGroup = null;
+    var addedAnything = false;
     if (groups.combined.length > 0) {
       formatGrid.appendChild(renderGroupHeader('Video + Audio'));
-      groups.combined.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      groups.combined.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); addedAnything = true; });
       lastGroup = 'combined';
     }
     if (groups.videoOnly.length > 0) {
       if (lastGroup !== null) formatGrid.appendChild(renderSeparator());
       formatGrid.appendChild(renderGroupHeader('Video Only'));
-      groups.videoOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      groups.videoOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); addedAnything = true; });
       lastGroup = 'videoOnly';
     }
     if (groups.audioOnly.length > 0) {
       if (lastGroup !== null) formatGrid.appendChild(renderSeparator());
       formatGrid.appendChild(renderGroupHeader('Audio Only'));
-      groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); });
+      groups.audioOnly.forEach(function(f) { formatGrid.appendChild(renderFormatCard(f)); addedAnything = true; });
       lastGroup = 'audioOnly';
     }
     // All three groups were empty — no downloadable formats available.
