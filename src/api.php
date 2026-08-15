@@ -1936,10 +1936,10 @@ switch ($action) {
         header('X-DL-RateLimit-Remaining: -1');
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unlimited');
-        header('X-RateLimit-Limit: 30');
+        header('X-RateLimit-Limit: ' . $rate_limit);
         header('X-RateLimit-Remaining: ' . $info_rate_remaining);
         header('X-RateLimit-Reset: ' . $info_rate_reset);
-        header('X-RateLimit-Window: 60');
+        header('X-RateLimit-Window: ' . $rate_window);
 
         // URL is already validated by isValidUrl() and the length-check above.
         // No shell metacharacters possible when passed as a direct array element
