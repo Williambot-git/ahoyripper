@@ -1503,6 +1503,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // same reason. API consumers should treat -1 as "unknown remaining quota".
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
+            // quota_reset and quota_reset_unix carry the same Unix timestamp value.
+            // quota_reset exists for HTTP-header parity (X-DailyLimit-Reset accepts only
+            // a Unix timestamp integer, not an ISO string). quota_reset_unix is the
+            // explicit Unix-timestamp companion added to the JSON body for clients that
+            // need an unambiguous machine-readable timestamp without date-string parsing.
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
