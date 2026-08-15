@@ -3873,6 +3873,7 @@ switch ($action) {
                     }
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
+                        'source_url_missing' => false,
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
                         'source_url' => HEALTH_PROBE_URL,
