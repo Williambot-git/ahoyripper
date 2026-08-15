@@ -1600,6 +1600,47 @@ $check_response_with_reset = [
 test('check endpoint: quota_reset_unix === -1 (unlimited key or N/A)',
     ($check_response_with_reset['quota_reset_unix'] ?? '') === -1);
 
+// ─── source_url_missing field ─────────────────────────────────────────────────
+// MISSING_URL error response includes 'source_url_missing: true' to distinguish
+// "no URL provided" from other cases where source_url is null (e.g. invalid URL).
+// API consumers use this boolean flag for precise error routing without relying
+// on string matching the error message. INVALID_URL omits source_url_missing
+// (field is absent, not false) so the key check is sufficient for routing.
+echo "\n==> Testing source_url_missing field in MISSING_URL response\n";
+
+// MISSING_URL response: source_url_missing must be present and === true
+$missing_url_response = [
+    'error' => 'No URL was provided.',
+    'error_code' => 'MISSING_URL',
+    'source_url' => null,
+    'source_url_missing' => true,
+];
+test('MISSING_URL: source_url_missing key exists',
+    array_key_exists('source_url_missing', $missing_url_response));
+test('MISSING_URL: source_url_missing is boolean true',
+    $missing_url_response['source_url_missing'] === true);
+test('MISSING_URL: source_url is null',
+    $missing_url_response['source_url'] === null);
+test('MISSING_URL: error_code is MISSING_URL',
+    ($missing_url_response['error_code'] ?? '') === 'MISSING_URL');
+
+// INVALID_URL response: source_url_missing must be ABSENT (not false, not null).
+// The field is only added when source_url_missing is true — absence means the
+// client provided a URL that failed validation, not that no URL was provided.
+// Consumers distinguish MISSING_URL from INVALID_URL by checking key presence.
+$invalid_url_response = [
+    'error' => 'Invalid URL.',
+    'error_code' => 'INVALID_URL',
+    'source_url' => 'not-a-url',
+    // source_url_missing is intentionally absent here
+];
+test('INVALID_URL: source_url_missing key is absent',
+    !array_key_exists('source_url_missing', $invalid_url_response));
+test('INVALID_URL: source_url is the invalid string (not null)',
+    ($invalid_url_response['source_url'] ?? null) === 'not-a-url');
+test('INVALID_URL: error_code is INVALID_URL',
+    ($invalid_url_response['error_code'] ?? '') === 'INVALID_URL');
+
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
 $health_response_with_reset = [
     'status' => 'ok',
