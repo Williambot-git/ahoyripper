@@ -3566,7 +3566,7 @@ switch ($action) {
         echo json_encode([
             'ok' => true,
             'api_version' => AHOYRIPPER_VERSION,
-            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?: null,
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
