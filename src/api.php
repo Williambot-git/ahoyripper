@@ -1900,6 +1900,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
+                    'action' => 'info',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
