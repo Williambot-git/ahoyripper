@@ -2970,7 +2970,10 @@ switch ($action) {
         $ffprobe_bin = FFPROBE_PATH;
         // Probe only when there is a video stream to check: skip for audio-only
         // format IDs (bestaudio, any vcodec=none) and bare audio codecs.
-        $is_audio_only_format = ($acodec !== 'none' && $vcodec === 'none');
+        // NOTE: $acodec and $vcodec are NOT available in the download action — they
+        // are only set by parseFormats() in the info action. Detection must rely
+        // entirely on the format_id string passed by the client.
+        $is_audio_only_format = false; // determined below from format_id
         $is_bare_audio_id = strpos($format_id, 'bestaudio') !== false
             || preg_match('/^(140|141|251|250|249|171|172|18|139)$/', $format_id);
         if (!$is_audio_only_format && !$is_bare_audio_id
