@@ -35,6 +35,7 @@ const STATIC_ASSETS = [
   '/favicon.ico',
   '/favicon.svg',
   '/favicon-512.png',
+  '/favicon-144.png',
   '/favicon-180.png',
 ];
 
