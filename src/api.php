@@ -2907,6 +2907,13 @@ switch ($action) {
         if (!$actual_file || !is_file($actual_file)) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
+            // Refund daily quota — yt-dlp exited 0 but produced no file, so the
+            // user got nothing and shouldn't be charged. Consistent with all other
+            // download failure paths which also refund on the free tier.
+            $post_refund_count = $daily_limit;
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+            }
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
@@ -2917,6 +2924,10 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2930,6 +2941,13 @@ switch ($action) {
         if ($filesize === false || $filesize === 0) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
+            // Refund daily quota — yt-dlp exited 0 but produced an empty/zero-byte file.
+            // The user received nothing usable and shouldn't be charged. Consistent with
+            // all other download failure paths which also refund on the free tier.
+            $post_refund_count = $daily_limit;
+            if (!$unlimited && isset($dl_quota_before_refund)) {
+                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+            }
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
@@ -2940,6 +2958,10 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
+                'quota_limit' => $daily_limit,
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
