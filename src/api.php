@@ -1213,10 +1213,14 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             return $type_cmp;
         }
         // Same type group — sort by the caller's selected key.
+        // For filesize_asc: use -PHP_INT_MAX as the null sentinel so unknown sizes
+        // sort LAST (ascending = smallest first, so null = unknown = largest unknown
+        // = should appear after known values). Using 0 as the sentinel incorrectly
+        // put unknown-size formats at the top of an ascending (smallest-first) sort.
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'filesize_asc') {
-            $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
+            $cmp = ($a['filesize_mb'] ?? -PHP_INT_MAX) <=> ($b['filesize_mb'] ?? -PHP_INT_MAX);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
