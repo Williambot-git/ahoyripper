@@ -22,6 +22,15 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   of just "quality or file size".
 
 ### Fixed
+- **`src/api.php` `default:` case security headers** — Added all missing security headers
+  (`X-Request-ID`, `X-Content-Type-Options`, `X-Frame-Options`, `X-Download-Options`,
+  `X-Robots-Tag`, `Referrer-Policy`, `Strict-Transport-Security`, `Permissions-Policy`,
+  `COOP`, `CORP`, `Content-Security-Policy`, `Reporting-Endpoints`, `Report-To`) to the
+  `default:` case in the action switch. Unknown-action responses were only setting
+  `Content-Type` and rate-limit headers, leaving the response unhardened compared to
+  all other API actions. The `check` action (which also bypasses its own block) was
+  already correct.
+
 - **`deploy/nginx-docker.conf` static assets CSP** — Added missing `worker-src 'self'`
   directive to the static assets location block (regex location for CSS/JS/fonts/images).
   The server-level CSP, `api.php` location, and PHP layer all include `worker-src 'self'`

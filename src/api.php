@@ -3922,12 +3922,24 @@ switch ($action) {
         // inaccurate when the server simply doesn't know that action name.
         logRequest($action ?: 'unknown', 404, ['reason' => 'unknown_action']);
         http_response_code(404);
-        // Content-Type is required on every JSON response. It was missing here
-        // (regression from when the /health handler was inlined above — that
-        // handler carries its own Content-Type, but the default: case did not).
-        // Missing Content-Type causes browsers and HTTP clients to mis-interpret
-        // the response body as text/html or apply incorrect MIME sniffing.
+        // All security headers — consistent with every other API response.
+        // These mirror the headers set at the top of api.php for all responses,
+        // ensuring the 404 case is fully hardened even though it bypasses
+        // the normal action flow (no switch-case block-specific headers are sent).
         header('Content-Type: application/json; charset=utf-8');
+        header('X-Request-ID: ' . $request_id);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Rate-limit headers for consistency with the rest of the API.
         // Unknown actions are not rate-limited actions (info/download), so use -1
         // sentinel values to signal "no limit applies" to generic API consumers.
