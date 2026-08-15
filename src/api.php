@@ -1394,6 +1394,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
+            'retry_after' => time(),
             'request_id' => $request_id,
             'source_url' => null,
             // 'source_url_missing' is true when the client provided no URL at all,
@@ -1436,6 +1437,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
+            'retry_after' => time(),
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,

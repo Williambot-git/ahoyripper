@@ -1338,6 +1338,30 @@ else
 fi
 
 echo ""
+echo "==> Checking MISSING_URL and INVALID_URL responses include retry_after field..."
+# MISSING_URL and INVALID_URL are client-input validation errors that don't consume
+# quota (they fail before the quota file is opened). Adding retry_after gives
+# API clients a consistent field to read for backoff timing — matching the contract
+# of all other error responses (PARSE_ERROR, classified errors, rate limits).
+# Use the same anchor-based block extraction used by the security-headers check above.
+for err_code in MISSING_URL INVALID_URL; do
+    case "$err_code" in
+        MISSING_URL) anchor="No URL was provided" ;;
+        INVALID_URL)  anchor="Invalid URL. Please paste" ;;
+    esac
+    anchor_line=$(grep -n "$anchor" src/api.php | head -1 | cut -d: -f1)
+    start_line=$(( anchor_line > 20 ? anchor_line - 20 : 1 ))
+    end_line=$(( anchor_line + 25 ))
+    BLOCK_LINES=$(sed -n "${start_line},${end_line}p" src/api.php)
+    if echo "$BLOCK_LINES" | grep -q "'retry_after'"; then
+        echo "  ✓ $err_code includes retry_after field"
+    else
+        echo "  ✗ $err_code is missing retry_after field (inconsistent with PARSE_ERROR/classifed errors)"
+        exit 1
+    fi
+done
+
+echo ""
 echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
 # Users hitting rate/daily limits need to know when they can retry. Both error codes
 # should include a 'retry_after' field in the JSON response.
