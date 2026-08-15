@@ -152,8 +152,15 @@ header_remove('X-Powered-By');
        HTML is fully parsed and the meta tag is processed — a measurable delay
        for a visually prominent element. fetchpriority on <link rel="preload">
        is supported in Chromium 86+ and Firefox 121+; Safari ignores it (no
-       harm, no regression) and falls back to the existing og:image meta tag. -->
-  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png">
+       harm, no regression) and falls back to the existing og:image meta tag.
+       crossorigin="anonymous" is required: the og:image URL uses https://ahoyripper.com
+       which the browser treats as cross-origin by default. Without crossorigin,
+       the browser issues an anonymous fetch for the preload that does not share
+       credentials or cookies with the og:image meta tag's fetch (which also uses
+       crossorigin="anonymous" behavior implicitly for same-site URLs). Adding
+       crossorigin="anonymous" ensures both fetches use the same CORS context,
+       avoiding a double-fetch that wastes bandwidth and can delay LCP. -->
+  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
 
