@@ -747,8 +747,12 @@ function clean($s) {
 function resolvePlaylistFlag($playlist_get) {
     // yt-dlp does NOT support --playlist true/false — that syntax is rejected
     // as ambiguous. Only --yes-playlist and --no-playlist are valid.
-    // Treat playlist=1 as the only truthy value; all others → --no-playlist.
-    if (isset($playlist_get) && $playlist_get === '1') {
+    // Treat playlist=1 as the only truthy value.
+    // Accepts string '1' (canonical URL param) and int 1 (edge case from PHP code).
+    // Explicitly reject numeric strings like '01' and '1.0' that would be true
+    // for loose int comparison but are not the canonical '1' value.
+    // All other values ('yes', 'true', '01', '1.0', 0, null, etc.) → --no-playlist.
+    if (isset($playlist_get) && ($playlist_get === '1' || ($playlist_get === 1 && !is_string($playlist_get)))) {
         return ['--yes-playlist'];
     }
     return ['--no-playlist'];
