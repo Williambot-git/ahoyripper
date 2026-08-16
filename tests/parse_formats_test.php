@@ -58,7 +58,31 @@ test('clean(false) returns null (not "")',
     clean(false) === null);
 
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
-    $data = json_decode($json_str, true);
+    // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
+    // with one JSON object per video. A single json_decode() on the full multi-line
+    // string fails because newlines are not valid JSON separators. Detect and handle
+    // this by splitting on newlines and parsing each line independently, then merging
+    // formats from all videos into a single formats array.
+    $lines = preg_split('/\r\n|\n|\r/', trim($json_str));
+    $all_formats = [];
+    $first_valid = null;
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || $trimmed === '...') continue; // skip empty / truncation sentinel
+        $decoded = json_decode($trimmed, true);
+        if ($decoded && is_array($decoded) && array_key_exists('formats', $decoded)) {
+            if ($first_valid === null) $first_valid = $decoded;
+            $all_formats = array_merge($all_formats, $decoded['formats'] ?? []);
+        }
+    }
+    // If we successfully collected formats from multiple lines, this was a playlist.
+    // Use the first entry's metadata and the merged formats array.
+    if ($first_valid !== null && !empty($all_formats)) {
+        $data = $first_valid;
+        $data['formats'] = $all_formats;
+    } else {
+        $data = json_decode($json_str, true);
+    }
     if (!$data) {
         // Repair non-UTF-8 byte sequences before declaring the JSON invalid.
         // mb_convert_encoding replaces malformed byte sequences with a replacement
@@ -453,6 +477,64 @@ $json3 = makeJson('Audio Test', [], ['title' => '']);
 $result3 = parseFormats($json3);
 test('defaults empty title to "Unknown"',
     $result3 && ($result3['title'] ?? '') === 'Unknown');
+
+// ─── parseFormats: playlist (newline-delimited JSON) ─────────────────────────────
+// When --yes-playlist is used, yt-dlp outputs one JSON object per line.
+// parseFormats() must split on newlines and merge formats from all entries.
+
+// Simulate yt-dlp --yes-playlist output: two newline-separated JSON objects.
+$playlist_out = json_encode([
+    'title' => 'Playlist Video 1',
+    'thumbnail' => 'https://example.com/thumb1.jpg',
+    'duration' => 180,
+    'uploader' => 'Test Channel',
+    'uploader_url' => 'https://example.com/channel/test',
+    'extractor_key' => 'YouTube',
+    'formats' => [
+        makeFormat(['format_id' => '18', 'height' => 360, 'tbr' => 500]),
+        makeFormat(['format_id' => '140', 'height' => null, 'vcodec' => 'none', 'acodec' => 'mp4a.40.2', 'tbr' => 128]),
+    ],
+]) . "\n" . json_encode([
+    'title' => 'Playlist Video 2',
+    'thumbnail' => 'https://example.com/thumb2.jpg',
+    'duration' => 240,
+    'uploader' => 'Test Channel',
+    'uploader_url' => 'https://example.com/channel/test',
+    'extractor_key' => 'YouTube',
+    'formats' => [
+        makeFormat(['format_id' => '22', 'height' => 720, 'tbr' => 2500]),
+    ],
+]);
+
+$result_playlist = parseFormats($playlist_out);
+test('playlist: uses first video title as metadata title',
+    $result_playlist && ($result_playlist['title'] ?? '') === 'Playlist Video 1');
+test('playlist: merges formats from all playlist entries (3 total)',
+    $result_playlist && count($result_playlist['formats'] ?? []) === 3);
+test('playlist: includes format IDs from all videos',
+    $result_playlist && in_array('18', array_column($result_playlist['formats'], 'id')) &&
+                        in_array('140', array_column($result_playlist['formats'], 'id')) &&
+                        in_array('22', array_column($result_playlist['formats'], 'id')));
+test('playlist: sort_applied defaults to height',
+    $result_playlist && ($result_playlist['sort_applied'] ?? '') === 'height');
+
+// Single video (no playlist) still works — plain JSON without newlines.
+$single_out = json_encode([
+    'title' => 'Single Video',
+    'thumbnail' => 'https://example.com/thumb.jpg',
+    'duration' => 120,
+    'uploader' => 'Test Channel',
+    'extractor_key' => 'YouTube',
+    'formats' => [makeFormat(['format_id' => '18', 'height' => 360])],
+]);
+$result_single = parseFormats($single_out);
+test('single video: parses plain JSON normally',
+    $result_single && ($result_single['title'] ?? '') === 'Single Video' && count($result_single['formats'] ?? []) === 1);
+
+// Empty lines and "..." truncation sentinel are skipped gracefully.
+$result_with_empty = parseFormats("...\n\n" . $single_out . "\n");
+test('empty lines and truncation sentinel are skipped without breaking parse',
+    $result_with_empty && ($result_with_empty['title'] ?? '') === 'Single Video');
 
 // ─── parseFormats: platform field (extractor_key) ──────────────────────────────
 

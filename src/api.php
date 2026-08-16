@@ -957,7 +957,33 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     if (!in_array($sort, $allowed_sorts, true)) {
         $sort = 'height';
     }
-    $data = json_decode($json_str, true);
+    // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
+    // with one JSON object per video. A single json_decode() on the full multi-line
+    // string fails because newlines are not valid JSON separators. Detect and handle
+    // this by splitting on newlines and parsing each line independently, then merging
+    // formats from all videos into a single formats array.
+    $lines = preg_split('/\r\n|\n|\r/', trim($json_str));
+    $all_formats = [];
+    $first_valid = null;
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || $trimmed === '...') continue; // skip empty / truncation sentinel
+        $decoded = json_decode($trimmed, true);
+        if ($decoded && is_array($decoded) && array_key_exists('formats', $decoded)) {
+            if ($first_valid === null) $first_valid = $decoded;
+            $all_formats = array_merge($all_formats, $decoded['formats'] ?? []);
+        }
+    }
+    // If we successfully collected formats from multiple lines, this was a playlist.
+    // Use the first entry's metadata and the merged formats array.
+    if ($first_valid !== null && !empty($all_formats)) {
+        $data = $first_valid;
+        // Replace formats with the merged collection from all playlist entries.
+        $data['formats'] = $all_formats;
+        // The single-json-decode path below will process $data normally from here.
+    } else {
+        $data = json_decode($json_str, true);
+    }
     if (!$data) {
         // Repair non-UTF-8 byte sequences before declaring the JSON invalid.
         // yt-dlp metadata from niche/extractor-specific sites may contain invalid
