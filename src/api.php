@@ -1728,7 +1728,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
 // The env var takes precedence; falling back to a compile-time default
 // only for local development / docker where env is not set.
 // Keep the value in a single place to simplify rotation.
-define('AHOY_UNLIMITED_KEY', getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV');
+define('AHOY_UNLIMITED_KEY', getenv('AHOY_KEY') ?: (getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV'));
 
 // Configurable User-Agent — follows the same env-var pattern as AHOY_UNLIMITED_KEY.
 // Override via AHOY_USER_AGENT env var in docker-compose or cloud dashboard.
