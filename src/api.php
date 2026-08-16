@@ -2946,6 +2946,7 @@ switch ($action) {
                 $resp = [
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
+                    'action' => 'download',
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'format_id' => $format_id,
@@ -3015,6 +3016,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => DOWNLOAD_TIMEOUT,
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -3050,6 +3052,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => DOWNLOAD_TIMEOUT,
                 'request_id' => $request_id,
                 'source_url' => $url,
