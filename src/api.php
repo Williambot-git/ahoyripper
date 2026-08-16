@@ -60,6 +60,19 @@ define('QUOTA_DAILY_DEFAULT', 5);
 // Must be an absolute URL with scheme (https:// preferred).
 define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/'));
 
+// Rate limit: max info/download requests per IP per minute.
+// Defined early so the rate-limit gate (line ~199) can reference it before the
+// constants section at line ~1778. nginx's 30r/m shared gate is the first
+// threshold; this PHP-layer limit is the per-action ceiling.
+// Use ?? (not ?:) so that "0" (a string, which PHP evaluates as non-empty)
+// is not treated as falsy and mistaken for an unset variable.
+define('RATE_LIMIT', max(1, (int)(getenv('RATE_LIMIT') ?? 30)));
+
+// Download rate limit: max download requests per IP per minute.
+// Defined early for the same reason as RATE_LIMIT above. Named in all-caps
+// to match the env-var convention used throughout this file.
+define('DL_RATE_LIMIT', max(1, (int)(getenv('DL_RATE_LIMIT') ?? 10)));
+
 // Set UTC for all date/time functions — gmdate() and date('c') are used
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
