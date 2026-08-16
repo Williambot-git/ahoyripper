@@ -247,6 +247,10 @@ docker compose up -d
 | `FFPROBE_PATH` | `/usr/bin/ffprobe` | Path to the ffprobe binary used for post-download codec/resolution verification. Override when ffprobe is in a non-standard location (e.g. `/usr/local/bin/ffprobe` on macOS). Changing this invalidates the ffprobe version cache. |
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
 | `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
+| `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
+| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp and ffprobe version probes. Version information is cached to avoid repeated subprocess invocations. Increase if you restart yt-dlp/ffprobe frequently and want longer-lived cache entries. |
+| `YTDLP_VERSION` | `latest` | yt-dlp version to install in the Docker image. Set to `latest` (default) for the newest release on each build, or pin to a specific version (e.g. `2024.08.06`) for reproducible builds. In non-Docker installs, update yt-dlp via `pip install -U yt-dlp` or `scripts/install-deps.sh`. |
+| `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key granting unlimited daily quota. **Change this in production** — generate a secure value with `openssl rand -hex 32`. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
 
@@ -1097,6 +1101,9 @@ AhoyRipper is a tool. What you do with it is your responsibility. Do not use it 
 | `YTDLP_VERSION` | `latest` | yt-dlp version to install in the Docker image. Set to `latest` (default) for the newest release on each build, or pin to a specific version (e.g. `2024.08.06`) for reproducible builds. When pinned, the Docker build verifies the SHA256 checksum and confirms the installed version matches. In non-Docker installs, this variable is not used — update yt-dlp via `pip install -U yt-dlp` or `scripts/install-deps.sh`. |
 | `UPGRADE_URL` | `https://ahoyvpn.com` | URL shown to users in rate-limit and quota-exceeded error responses. Set to your own upsell page (Patreon, Ko-fi, etc.) for self-hosted deployments. Must be an absolute URL with scheme. |
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. Mount the file into the container and set the path here (e.g. `/cookies.txt`). See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
+| `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
+| `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
+| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp and ffprobe version probes. Version information is cached to avoid repeated subprocess invocations. Increase if you restart yt-dlp/ffprobe frequently and want longer-lived cache entries. |
 
 Example:
 ```bash
