@@ -2947,6 +2947,7 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'retry_after' => max(0, $retry_ts),
                     'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count + 1),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -2979,6 +2980,7 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'retry_after' => max(0, $retry_ts),
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
