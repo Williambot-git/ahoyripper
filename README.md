@@ -580,6 +580,7 @@ GET /src/api.php?action=health         # full system status with resource metric
 GET /src/api.php?action=progress        # alias for health (same response shape)
 GET /src/api.php?action=health&probe=1 # include live yt-dlp connectivity probe
 POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)
+POST /src/api.php?action=client-error   # client-side JS error reporting (internal)
 ```
 
 `action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
@@ -695,6 +696,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 `quota_remaining`, `quota_limit`, and `quota_reset` are included in `action=check` and `action=health` responses (as `-1`, the configured limit, and `-1` respectively) for API surface consistency with `action=info` and `action=download` responses. Since `check` and `health` are read-only probes that do not consume quota, `quota_remaining` is `-1` and `quota_reset` is `-1`. `quota_limit` always reflects the configured daily limit (default `5`).
 
 `action=csp-report` receives [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) violation reports from browsers. Nginx is configured with a `report-uri /src/api.php?action=csp-report` directive in the CSP-Report-Only header, so violations (e.g., mixed content, inline script attempts) are logged to `error_log` rather than silently ignored. The report body is sanitized before logging — video URLs and referrers are omitted. This endpoint returns `200 OK` to all POST requests so browsers do not retry.
+
+`action=client-error` receives client-side JavaScript error reports from the web UI. The frontend calls this via `navigator.sendBeacon` (fire-and-forget) when an uncaught JS exception occurs, providing operational visibility into browser-side failures without affecting UX. The body is a JSON object with fields: `type` (error class name), `message` (error message), `url` (page URL), `page_request_id` (correlates with server-side access logs), and optionally `stack`, `line`, and `col` for stack-trace details. All string fields are truncated to 500 chars before logging to prevent log flooding. This endpoint returns `200 OK` to all POST requests so browsers do not retry. Logged to `/var/log/ahoyripper/access.log`.
 
 ### Rate Limits
 
