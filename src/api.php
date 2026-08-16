@@ -1565,10 +1565,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        header('X-RateLimit-Limit: -1');
-        header('X-RateLimit-Remaining: -1');
-        header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'url_too_long', 'url_len' => strlen($url)]);
         // Rate-limit headers: -1 sentinel since this error occurs before the
         // per-minute rate-limit gate (no rate tracking has occurred yet).
