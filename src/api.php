@@ -3190,6 +3190,39 @@ switch ($action) {
                         : $probe_err_clean,
                 ]);
                 foreach (glob($glob_pattern) as $f) { @unlink($f); }
+                // Consistent header envelope with all other download error responses: include
+                // X-DL-RateLimit-*, X-RateLimit-*, and X-DailyLimit-* headers so API clients
+                // always have complete rate-limit context regardless of which error path they hit.
+                // X-DL-RateLimit-*: reflects the download action's per-minute rate limit.
+                // X-RateLimit-*: mirrors X-DL-RateLimit for generic API consumers.
+                // X-DailyLimit-*: mirrors the free-tier daily quota; -1 for unlimited-key holders.
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                    header('X-RateLimit-Limit: -1');
+                    header('X-RateLimit-Remaining: -1');
+                    header('X-RateLimit-Reset: -1');
+                    header('X-RateLimit-Window: unlimited');
+                    header('X-DailyLimit-Limit: -1');
+                    header('X-DailyLimit-Remaining: -1');
+                    header('X-DailyLimit-Reset: -1');
+                    header('X-DailyLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                    header('X-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                    header('X-RateLimit-Reset: ' . $dl_reset);
+                    header('X-RateLimit-Window: ' . $dl_rate_window);
+                    header('X-DailyLimit-Limit: ' . $daily_limit);
+                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $ffprobe_post_refund_count));
+                    header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
+                    header('X-DailyLimit-Window: 86400');
+                }
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
