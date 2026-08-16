@@ -1139,6 +1139,12 @@ function sort_formats($formats, $sort = 'height') {
         // Then by selected sort key
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+        } elseif ($sort === 'filesize_asc') {
+            // Unknown sizes (null) sort LAST in ascending order — use -PHP_INT_MAX
+            // as the sentinel so null is always larger than any known value.
+            // Using 0 as the sentinel would incorrectly put unknown sizes at the
+            // top of an ascending (smallest-first) sort.
+            $cmp = ($a['filesize_mb'] ?? -PHP_INT_MAX) <=> ($b['filesize_mb'] ?? -PHP_INT_MAX);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } else {
@@ -1274,18 +1280,23 @@ $result = classifyYtdlpError('TLS handshake timeout');
 test('detects SSL_ERROR — "tls handshake timeout" variant',
     $result !== null && ($result['code'] ?? '') === 'SSL_ERROR' && ($result['status'] ?? 0) === 502);
 
-// ─── filesize_asc sort (client-side sort option, never tested) ───────────────
-// Ascending: smallest files first (useful for finding lightweight mobile formats).
+// ─── filesize_asc sort ─────────────────────────────────────────────────────────
+// Ascending: smallest files first. Unknown filesizes (null) use -PHP_INT_MAX
+// as the sentinel — it is the smallest possible value, so unknown always sorts
+// FIRST in ascending order (smallest-first), then known values in size order.
 
 $formats_for_asc = [
     ['id' => 'small', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 1.5, 'tbr' => 128],
     ['id' => 'medium', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 10, 'tbr' => 128],
     ['id' => 'large', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => 50, 'tbr' => 128],
+    ['id' => 'unknown', 'height' => 0, 'vcodec' => 'none', 'acodec' => 'mp4a', 'filesize_mb' => null, 'tbr' => 128],
 ];
 $sorted_asc = sort_formats($formats_for_asc, 'filesize_asc');
 $ids_asc = array_column($sorted_asc, 'id');
-test('filesize_asc — smallest first (1.5 MB < 10 MB < 50 MB)',
-    $ids_asc[0] === 'small' && $ids_asc[1] === 'medium' && $ids_asc[2] === 'large');
+// Unknown (null) sorts FIRST because -PHP_INT_MAX is the smallest possible value.
+// Then known sizes in ascending order: 1.5 < 10 < 50.
+test('filesize_asc — unknown (null sentinel) first, then smallest-first (unknown < 1.5 MB < 10 MB < 50 MB)',
+    $ids_asc[0] === 'unknown' && $ids_asc[1] === 'small' && $ids_asc[2] === 'medium' && $ids_asc[3] === 'large');
 
 // string "Array" (the literal corruption symptom) is passed through as-is
 // This is intentional — the function cannot distinguish "Array" as a string
