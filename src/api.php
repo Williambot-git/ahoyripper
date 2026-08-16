@@ -417,6 +417,12 @@ if (in_array($action, $internal_actions, true)) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
+        // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
         echo json_encode(['status' => 'ok']);
         exit;
     }
@@ -3781,6 +3787,13 @@ switch ($action) {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Cache-Control: no-store');
+        // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
+        // fire-and-forget endpoint that does not consume from the per-minute rate budget.
+        // Mirrors the pattern used by action=check and action=health for consistency.
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. The client-error endpoint bypasses
         // the global header block by sending its own response — repeat them here so
@@ -4157,6 +4170,11 @@ switch ($action) {
         break;
     }
     case 'csp-report': {
+        // NOTE: csp-report is also handled inline at lines 362–421 (inside the
+        // internal_actions block above). That inline handler is the active one — it
+        // calls fastcgi_finish_request() and exits. This case block is unreachable
+        // dead code preserved for documentation and as a fallback if the inline
+        // handler is ever refactored. All security headers are set by the inline handler.
         // Receive and log CSP violation reports from browsers.
         // nginx routes POST /csp-report here (via fastcgi_pass to this script).
         // The browser POSTs a JSON report body — no authentication needed since
