@@ -2456,6 +2456,7 @@ switch ($action) {
                 header('X-DailyLimit-Remaining: -1');
                 header('X-DailyLimit-Reset: -1');
                 header('X-DailyLimit-Window: unlimited');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
@@ -2551,6 +2552,7 @@ switch ($action) {
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
                 header('X-DailyLimit-Window: 86400');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
@@ -2745,6 +2747,7 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // retry_after: Unix timestamp when the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
             // download failures, giving a consistent future reset point to count down to.
@@ -2822,6 +2825,7 @@ switch ($action) {
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
@@ -3189,6 +3193,7 @@ switch ($action) {
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 http_response_code(500);
                 // retry_after: Unix timestamp when the download can be retried.
                 // Set to now + DOWNLOAD_TIMEOUT so the client has a consistent reset window.
