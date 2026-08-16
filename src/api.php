@@ -3065,6 +3065,11 @@ switch ($action) {
                 if (mb_strlen($user_err, 'UTF-8') > 200) {
                     $user_err = mb_substr($user_err, 0, 200, 'UTF-8') . '...';
                 }
+                // Compute post-refund quota inline — $post_refund_count from the classified-error
+                // branch (line 3019) is not valid here since that block was never entered.
+                // refundQuota() is idempotent (safe to call even if already refunded via the
+                // proc_open failure path above).
+                $uncl_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 $resp = [
                     'error' => "Download failed" . ($proc_err ? ": $user_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
@@ -3075,7 +3080,7 @@ switch ($action) {
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'retry_after' => max(0, $retry_ts),
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count + 1),
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count + 1),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ];
