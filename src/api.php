@@ -1712,28 +1712,31 @@ define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15)
 // Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
 // Defaults to 45 seconds when the env var is absent or zero/negative.
 // This is the PHP-side timeout — distinct from yt-dlp's own connection timeout.
-// The PHP-side timeout fires when (time() - $start) > INFO_TIMEOUT and terminates
-// the process, producing "Process timed out after Ns" in the error output.
-// yt-dlp's own --socket-timeout flag controls per-connection timeouts separately.
-define('INFO_TIMEOUT', max(1, (int)getenv('YTDLP_TIMEOUT') ?: 45));
+// Configurable timeout for the info action (metadata fetch).
+// Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
+// Defaults to 45 seconds when the env var is absent. An explicit 0 (or any
+// non-positive integer) is passed through as-is; max(1, ...) then clamps it to 1.
+define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
 
 // Request rate limit: max info/download requests per minute per IP (both share
 // the same rate limiter). nginx's 30r/m shared gate is the first threshold;
 // this PHP-layer RATE_LIMIT is the per-action ceiling that disciplines clients
 // who pass through nginx but exceed the per-action limit.
 // Override via RATE_LIMIT env var in .env or docker-compose.
-define('RATE_LIMIT', max(1, (int)getenv('RATE_LIMIT') ?: 30));
+// NOTE: RATE_LIMIT=0 intentionally falls back to 30 (the default), so rate
+// limiting cannot be accidentally disabled by setting the env var to 0.
+// Use ?? (not ?:) so that "0" (a string, which PHP evaluates as non-empty)
+// is not treated as falsy and mistaken for an unset variable.
+define('RATE_LIMIT', max(1, (int)(getenv('RATE_LIMIT') ?? 30)));
 
 // Download rate limit: max download requests per minute per IP.
 // Override via DL_RATE_LIMIT env var in .env or docker-compose.
 // Named in all-caps to match the env-var convention used throughout this file.
-// When absent or zero/negative, falls back to 10 — the download-specific
-// limit that complements the nginx layer's 30r/m shared gate (both layers
-// are always consulted: nginx throttles before PHP even starts processing).
 // nginx's burst=5 allows ~35 requests through before throttling on a burst,
 // then sustains at 30r/m; the PHP-layer DL_RATE_LIMIT (10r/m) is the
 // per-IP sustained ceiling for the download action specifically.
-define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 10));
+// Use ?? (not ?:) — see RATE_LIMIT note above.
+define('DL_RATE_LIMIT', max(1, (int)(getenv('DL_RATE_LIMIT') ?? 10)));
 
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
@@ -1741,7 +1744,8 @@ define('DL_RATE_LIMIT', max(1, (int)getenv('DL_RATE_LIMIT') ?: 10));
 // The download action is I/O-bound (large media files) and needs a longer timeout
 // than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
 // controls download so the two can be tuned independently without compromise.
-define('DOWNLOAD_TIMEOUT', max(1, (int)getenv('YTDLP_DOWNLOAD_TIMEOUT') ?: 300));
+// Use ?? (not ??) to match the intent of INFO_TIMEOUT above.
+define('DOWNLOAD_TIMEOUT', max(1, (int)(getenv('YTDLP_DOWNLOAD_TIMEOUT') ?? 300)));
 
 // ─── ROUTING ────────────────────────────────────────────────
 
