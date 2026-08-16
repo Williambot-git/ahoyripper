@@ -420,6 +420,61 @@ if (in_array($action, $internal_actions, true)) {
         exit;
     }
 
+    // client-error: receive and log browser JavaScript runtime errors and unhandled
+    // promise rejections forwarded via navigator.sendBeacon (fetch in the browser with
+    // no way to read the response). Reports are fire-and-forget from the client side.
+    // This endpoint intentionally exits before the GET-method and Accept-header gates
+    // since sendBeacon sends POST with no custom Accept header.
+    if ($action === 'client-error') {
+        $body = file_get_contents('php://input');
+        $payload = json_decode($body, true);
+        if (!is_array($payload)) {
+            error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: malformed payload");
+        } else {
+            // Log with identifiable prefix and request_id for correlation.
+            // Omit the url field (contains the page URL which may have video URLs in query params).
+            $safe = [
+                'type' => $payload['type'] ?? null,
+                'message' => $payload['message'] ?? null,
+                'page_request_id' => $payload['page_request_id'] ?? null,
+                'stack' => $payload['stack'] ?? null,
+                'line' => $payload['line'] ?? null,
+                'col' => $payload['col'] ?? null,
+            ];
+            error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: " . json_encode($safe));
+        }
+        // Harden the client-error response to match the rest of the API.
+        // Use fastcgi_finish_request() (PHP-FPM only) to flush the full response
+        // (top-of-script headers + body) before exiting. This eliminates the
+        // maintenance burden of manually duplicating all security headers here
+        // whenever a new header is added to the top-of-script block. In non-FPM
+        // SAPIs the function doesn't exist and we fall back to manual headers.
+        if (function_exists('fastcgi_finish_request')) {
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            echo json_encode(['status' => 'ok']);
+            fastcgi_finish_request();
+            exit;
+        }
+        // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers.
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        echo json_encode(['status' => 'ok']);
+        exit;
+    }
+
     // All other internal_actions (check, health, progress)
     // receive X-Robots-Tag via the nginx add_header in deploy/nginx.conf
     // when served through the = /src/api.php location block (line ~98).
