@@ -2188,6 +2188,13 @@ switch ($action) {
             http_response_code(500);
             header('Cache-Control: no-cache');
             header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('X-Download-Options: noopen');
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
