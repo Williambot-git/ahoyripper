@@ -2207,6 +2207,12 @@ switch ($action) {
             '--compat-options', 'no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
+            // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
+            // temporary 5xx, etc.) separately from generic --retries. Useful for
+            // recovering from transient source-platform errors without escalating to
+            // the generic retry budget. Default is 3 when omitted; set explicitly
+            // so the behavior is intentional and documented.
+            '--extractor-retries', '3',
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ]);
@@ -2849,6 +2855,12 @@ switch ($action) {
             '-o', $out_template,
             '--force-overwrites',
             '--retries', '3',
+            // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
+            // temporary 5xx, etc.) separately from generic --retries. Useful for
+            // recovering from transient source-platform errors without escalating to
+            // the generic retry budget. Default is 3 when omitted; set explicitly
+            // so the behavior is intentional and documented.
+            '--extractor-retries', '3',
             '--restrict-filenames',
         ];
         // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
