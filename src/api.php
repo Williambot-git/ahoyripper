@@ -2288,8 +2288,12 @@ switch ($action) {
                     proc_terminate($proc, 9);
                     $err .= "\nProcess timed out after " . INFO_TIMEOUT . "s";
                     $exit = -1;
-                    foreach ($pipes as $p) { if ($p) fclose($p); }
-                    $pipes = null;
+                    // Close and null individual pipe elements — the download action
+                    // uses the same pattern. This allows the while-loop condition
+                    // (!feof($pipes[1]) || !feof($pipes[2])) to evaluate to
+                    // false after the break, cleanly exiting the loop rather than
+                    // continuing to the stream_select call with a null $pipes array.
+                    foreach ($pipes as $i => $p) { if ($p) { fclose($p); $pipes[$i] = null; } }
                     $proc = null;  // sentinel: prevents double proc_close() below
                     $out = '';
                     break;
