@@ -530,6 +530,13 @@ if (in_array($action, $internal_actions, true)) {
 // yt-dlp accepts file:// URLs directly, so we restrict to HTTP(S) and reject
 // private ranges (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x), IPv6
 // private/loopback/link-local ranges, and IPv4-mapped IPv6 (::ffff:192.168.x.x).
+/**
+ * Validate that a URL is a public HTTPS URL safe to pass to yt-dlp.
+ *
+ * @param mixed $url  URL to validate. Non-strings return false immediately.
+ * @return bool  True if the URL is a public HTTPS URL; false otherwise.
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
+ */
 function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
@@ -780,6 +787,13 @@ if (!$GLOBALS['__ffmpeg_version']) {
 }
 
 // Sanitize string for JSON output
+/**
+ * Sanitize a value from yt-dlp metadata for safe JSON output.
+ *
+ * @param mixed $s  Any value from yt-dlp JSON output.
+ * @return string  'Unknown' for null/empty/whitespace-only strings; (string)$s for all other scalar values.
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
+ */
 function clean($s) {
     // Return 'Unknown' for null, empty string, or whitespace-only string.
     // Integer 0 is NOT treated as Unknown — it is a valid numeric value that
@@ -820,6 +834,7 @@ function clean($s) {
  *
  * @param string|null $playlist_get  $_GET['playlist'] value
  * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
 function resolvePlaylistFlag($playlist_get) {
     // yt-dlp does NOT support --playlist true/false — that syntax is rejected
@@ -845,6 +860,14 @@ function resolvePlaylistFlag($playlist_get) {
 //   502 — Bad Gateway (connection/SSL failures)
 //   413 — Payload Too Large (file exceeds server limit)
 //   422 — Unprocessable Entity (format unavailable — client chose invalid option)
+/**
+ * Classify a yt-dlp error message into a structured error with HTTP status.
+ *
+ * @param string $raw_err   Raw stderr/output from yt-dlp.
+ * @param int|null $exit_code  yt-dlp exit code (null if unknown).
+ * @return array|null  ['code' => string, 'msg' => string, 'status' => int] on match; null if unclassified.
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
+ */
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
@@ -973,6 +996,15 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
 
 // Parse yt-dlp output to extract formats
 // $sort: one of 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'
+/**
+ * Parse yt-dlp JSON output into a structured format list response.
+ *
+ * @param string $json_str       Raw yt-dlp stdout (newline-delimited JSON for playlists).
+ * @param string|null &$raw_error_out  Populated with raw yt-dlp error text on parse failure.
+ * @param string $sort           Sort key: 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'.
+ * @return array  ['formats' => [...], 'error' => string|null, 'error_code' => string|null, 'title' => string|null, ...].
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
+ */
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // Validate sort key — makes parseFormats self-contained and safe for reuse.
     $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'];
