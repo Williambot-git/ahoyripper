@@ -1624,6 +1624,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
+                'action' => 'download',
                 'retry_after' => time(),
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -1668,6 +1669,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
+                'action' => 'download',
                 'retry_after' => time(),
                 'request_id' => $request_id,
                 'source_url' => $url,
