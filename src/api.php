@@ -2355,6 +2355,13 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_ts),
+                // quota fields: consistent with success and classified-error responses.
+                // Quota was incremented before this error path (line 2123); the refund
+                // above reversed it, so show the pre-increment count.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
@@ -2388,6 +2395,12 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_ts),
+                // quota fields: consistent with success and classified-error responses.
+                // Quota was incremented before this error path; the refund above reversed it.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
