@@ -936,7 +936,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
-            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'status' => 403];
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
         }
         if ($code === 401 || $code === 407) {
             return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'status' => 401];
