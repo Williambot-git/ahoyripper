@@ -483,7 +483,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 ### Download a format
 ```
 GET /src/api.php?action=download&url=<url>&format=<format_id>&filename=<name>&playlist=<0|1>&key=<api_key>
-Authorization: Bearer ***
+Authorization: Bearer YOUR_API_KEY
 ```
 
 **Parameters:**
