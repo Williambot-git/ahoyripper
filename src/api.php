@@ -1823,10 +1823,8 @@ define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15)
 // Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
 // Defaults to 45 seconds when the env var is absent or zero/negative.
 // This is the PHP-side timeout — distinct from yt-dlp's own connection timeout.
-// Configurable timeout for the info action (metadata fetch).
-// Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
-// Defaults to 45 seconds when the env var is absent. An explicit 0 (or any
-// non-positive integer) is passed through as-is; max(1, ...) then clamps it to 1.
+// An explicit 0 (or any non-positive integer) is passed through as-is;
+// max(1, ...) then clamps it to a minimum of 1 second.
 define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
 
 // Request rate limit: max info/download requests per minute per IP (both share
