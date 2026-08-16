@@ -3890,6 +3890,13 @@ switch ($action) {
                 $probe_cache_ttl = max(0, $exp - time());
             }
         }
+        // If the cache file doesn't exist yet (probe has never run), the TTL is
+        // unknown — surface PROBE_CACHE_TTL as the not-yet-computed TTL so callers
+        // can predict when the next ?probe=1 call will complete without guessing.
+        if ($probe_cache_ttl === null) {
+            $probe_cache_ttl = PROBE_CACHE_TTL;
+            $probe_cache_expires_at = null; // null signals "not yet computed"
+        }
 
         // ffprobe (ffmpeg) version cache — same TTL/read pattern as yt-dlp version
         // cache above. The cache file path uses md5(FFPROBE_PATH) so it automatically

@@ -135,6 +135,8 @@ The probe result:
 
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
+`yt_dlp_probe_cache_expires_at` is `null` when the probe has never been run (no cache exists yet). `yt_dlp_probe_cache_ttl_seconds` shows `300` (the configured TTL) in that case — use it to predict when the next `?probe=1` call will complete.
+
 ---
 
 ## Supported Platforms
