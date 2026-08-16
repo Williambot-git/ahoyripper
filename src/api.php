@@ -264,6 +264,7 @@ if ($is_rate_limited) {
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
+                'source_url' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
