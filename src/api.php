@@ -227,6 +227,15 @@ if ($is_rate_limited) {
         http_response_code(503);
         header('Retry-After: 5');
         header('X-Content-Type-Options: nosniff');
+        // Include rate-limit context so clients/monitoring can distinguish this
+        // from a generic 503 and know it is a rate-limit subsystem failure.
+        header('X-RateLimit-Limit: ' . $rate_limit);
+        header('X-RateLimit-Remaining: 0');
+        header('X-RateLimit-Window: ' . $rate_window);
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -235,6 +244,15 @@ if ($is_rate_limited) {
         http_response_code(503);
         header('Retry-After: 5');
         header('X-Content-Type-Options: nosniff');
+        // Include rate-limit context so clients/monitoring can distinguish this
+        // from a generic 503 and know it is a rate-limit subsystem failure.
+        header('X-RateLimit-Limit: ' . $rate_limit);
+        header('X-RateLimit-Remaining: 0');
+        header('X-RateLimit-Window: ' . $rate_window);
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
         echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
