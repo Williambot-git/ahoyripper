@@ -1490,7 +1490,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
-            'retry_after' => time(),
+            // No retry_after: this is a validation error (input must be corrected), not a
+            // temporary block. Frontend should not show a misleading retry countdown.
             'request_id' => $request_id,
             'source_url' => null,
             // 'source_url_missing' is true when the client provided no URL at all,
@@ -1533,7 +1534,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
-            'retry_after' => time(),
+            // No retry_after: this is a validation error (input must be corrected), not a
+            // temporary block. Frontend should not show a misleading retry countdown.
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -1580,7 +1582,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
-            'retry_after' => time(),
+            // No retry_after: this is a validation error (input must be corrected), not a
+            // temporary block. Frontend should not show a misleading retry countdown.
             'request_id' => $request_id,
             'source_url' => $url,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -1628,7 +1631,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
                 'action' => 'download',
-                'retry_after' => time(),
+                // No retry_after: this is a validation error (input must be corrected), not a
+                // temporary block. Frontend should not show a misleading retry countdown.
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -1673,7 +1677,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
                 'action' => 'download',
-                'retry_after' => time(),
+                // No retry_after: this is a validation error (input must be corrected), not a
+                // temporary block. Frontend should not show a misleading retry countdown.
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
