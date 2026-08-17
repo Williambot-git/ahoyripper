@@ -1339,6 +1339,7 @@ window.addEventListener('appinstalled', function() {
           if (!isRateLimited) {
             localStorage.setItem('ahoyrip_quota_unlimited', '1');
             localStorage.removeItem('ahoyrip_quota_remaining');
+            localStorage.removeItem('ahoyrip_quota_limit');
             localStorage.removeItem('ahoyrip_quota_reset');
           }
           // Rate-limit state is intentionally NOT persisted — it would incorrectly
