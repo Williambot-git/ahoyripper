@@ -3389,8 +3389,8 @@ switch ($action) {
                 $probe_exit = 0; // proc_open succeeded — will be overwritten by proc_close
                 fclose($probe_pipes[0]);
                 unset($probe_pipes[0]);
-                stream_set_timeout($probe_pipes[1], 5);
-                stream_set_timeout($probe_pipes[2], 5);
+                stream_set_timeout($probe_pipes[1], FFPROBE_TIMEOUT);
+                stream_set_timeout($probe_pipes[2], FFPROBE_TIMEOUT);
                 while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
                     // Outer timeout: ffprobe that takes >FFPROBE_TIMEOUT s is hung on a malformed/corrupt
                     // file. Terminate it rather than letting proc_close() block indefinitely.
