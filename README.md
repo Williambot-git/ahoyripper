@@ -293,7 +293,8 @@ ahoyripper/
 │       └── security.txt         # RFC 9116 security contact
 ├── src/
 │   ├── api.php                  # yt-dlp API (info, download, health)
-│   └── style.css                # CSS (AhoyVPN dark theme)
+│   ├── style.css                # Served at /src/style.css (nginx alias)
+│   └── TestUtils.php            # Canonical function copies used by test files
 ├── deploy/
 │   ├── nginx.conf               # Nginx config (production, VPS)
 │   └── nginx-docker.conf        # Nginx config (Docker standalone)
@@ -310,7 +311,7 @@ ahoyripper/
 │   ├── is_valid_url_test.php         # Unit tests for SSRF URL validation
 │   ├── parse_formats_test.php        # Unit tests for parseFormats()
 │   ├── playlist_param_test.php       # Integration tests for playlist URL parameter
-│   └── resolve_playlist_flag_test.php# Unit tests for resolvePlaylistFlag()
+│   └── resolve_playlist_flag_test.php # Unit tests for resolvePlaylistFlag()
 ├── .env.example                 # Environment variable template (Docker)
 ├── .dockerignore                # Docker build context exclusions
 ├── CHANGELOG.md                 # Project version history
