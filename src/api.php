@@ -2296,8 +2296,9 @@ switch ($action) {
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             echo json_encode([
-                'error' => 'Failed to start download process.',
+                'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -2988,6 +2989,7 @@ switch ($action) {
             $retry_ts = time() + DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_ts));
             header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
