@@ -639,7 +639,7 @@ POST /src/api.php?action=client-error   # client-side JS error reporting (intern
     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "probe_age_seconds": 120
   },
-  "load_avg": [0.15, 0.08, 0.05],
+  "load_avg": 0.15,
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
@@ -680,7 +680,7 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "probe_age_seconds": 45
   },
-  "load_avg": [0.15, 0.08, 0.05],
+  "load_avg": 0.15,
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
