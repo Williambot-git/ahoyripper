@@ -250,7 +250,6 @@ docker compose up -d
 | `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
 | `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp and ffprobe version probes. Version information is cached to avoid repeated subprocess invocations. Increase if you restart yt-dlp/ffprobe frequently and want longer-lived cache entries. |
 | `YTDLP_VERSION` | `latest` | yt-dlp version to install in the Docker image. Set to `latest` (default) for the newest release on each build, or pin to a specific version (e.g. `2024.08.06`) for reproducible builds. In non-Docker installs, update yt-dlp via `pip install -U yt-dlp` or `scripts/install-deps.sh`. |
-| `AHOY_UNLIMITED_KEY` | `RIPPER2026DEV` | API key granting unlimited daily quota. **Change this in production** — generate a secure value with `openssl rand -hex 32`. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
 
