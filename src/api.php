@@ -362,6 +362,21 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
         @unlink($f);
     }
 }
+// Clean up stale daily-quota files. These are stored as /tmp/ahoyrip_daily_<ip_hash>
+// and reset at midnight UTC. A quota file is stale when its stored date does not
+// match today (UTC), meaning midnight has passed and a fresh window has started.
+// Unlike rate files which expire after $rate_window seconds, quota files must wait
+// for the next calendar day — the midnight UTC boundary is the only valid reset point.
+// Stale quota files are safe to remove: the user starts a fresh window on the next
+// request, and keeping old files serves no purpose.
+$today_utc = gmdate('Y-m-d');
+foreach (glob('/tmp/ahoyrip_daily_*') as $f) {
+    $d = @json_decode(@file_get_contents($f), true);
+    $file_date = $d['t'] ?? null;
+    if (!$d || !is_array($d) || $file_date !== $today_utc) {
+        @unlink($f);
+    }
+}
 // Clean up stale version cache files (yt-dlp and ffprobe) and the yt-dlp
 // connectivity probe cache — they expire after their respective TTLs but the
 // files themselves accumulate on long-running servers if not removed.
