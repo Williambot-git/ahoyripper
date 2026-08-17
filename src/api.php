@@ -2463,6 +2463,8 @@ switch ($action) {
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
                 'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
                 'SOURCE_SERVER_ERROR' => 502, 'SOURCE_HTTP_ERROR' => 502,
+                'FORBIDDEN_ORIGIN' => 403,
+                'UNKNOWN_ACTION' => 400,
                 // HTTP 451: Unavailable For Legal Reasons — specifically for content
                 // blocked by legal demand (TOS violations, court orders, etc.).
                 // Distinct from SOURCE_FORBIDDEN (403) which is an access-control failure.
