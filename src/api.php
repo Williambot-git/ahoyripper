@@ -3144,6 +3144,7 @@ switch ($action) {
                 http_response_code($status);
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
+                header('X-Download-Options: noopen');
                 // Compute post-refund quota for the JSON body. refundQuota() is idempotent
                 // (safe to call even if already refunded via the proc_open failure path above).
                 $post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
@@ -3188,6 +3189,7 @@ switch ($action) {
                 http_response_code(422);
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
+                header('X-Download-Options: noopen');
                 // Truncate the user-facing error message to match the ~200-char ceiling used
                 // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
                 // The full raw error is preserved in 'raw_error' for diagnostics.
@@ -3200,9 +3202,21 @@ switch ($action) {
                 // refundQuota() is idempotent (safe to call even if already refunded via the
                 // proc_open failure path above).
                 $uncl_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+                if ($unlimited) {
+                    header('X-DailyLimit-Limit: -1');
+                    header('X-DailyLimit-Remaining: -1');
+                    header('X-DailyLimit-Reset: -1');
+                    header('X-DailyLimit-Window: unlimited');
+                } else {
+                    header('X-DailyLimit-Limit: ' . $daily_limit);
+                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $uncl_post_refund_count + 1));
+                    header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
+                    header('X-DailyLimit-Window: 86400');
+                }
                 $resp = [
                     'error' => "Download failed" . ($proc_err ? ": $user_err" : " (exit code $actual_exit)."),
                     'error_code' => 'YTDLP_ERROR',
+                    'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'request_id' => $request_id,
                     'source_url' => $url,
@@ -3213,11 +3227,11 @@ switch ($action) {
                     'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count + 1),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
                 }
-                header('X-Download-Options: noopen');
                 echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
