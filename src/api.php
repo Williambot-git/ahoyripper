@@ -240,7 +240,21 @@ if ($is_rate_limited) {
     if (!$fp) {
         http_response_code(503);
         header('Retry-After: 5');
+        // Re-set all security headers that the top-of-script block already set —
+        // this block bypasses the normal switch/case flow and sends its own 503
+        // via exit, so the top-of-script headers may not have been applied when
+        // served through certain nginx/php-fpm configurations. This mirrors the same
+        // pattern used by NOT_ACCEPTABLE (406) and METHOD_NOT_ALLOWED (405).
         header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
         // Include rate-limit context so clients/monitoring can distinguish this
         // from a generic 503 and know it is a rate-limit subsystem failure.
         header('X-RateLimit-Limit: ' . $rate_limit);
@@ -257,7 +271,18 @@ if ($is_rate_limited) {
         fclose($fp);
         http_response_code(503);
         header('Retry-After: 5');
+        // Re-set all security headers — same rationale as the fopen failure block above.
+        // Mirrors NOT_ACCEPTABLE (406) and METHOD_NOT_ALLOWED (405) patterns.
         header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('X-Request-ID: ' . $request_id);
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
         // Include rate-limit context so clients/monitoring can distinguish this
         // from a generic 503 and know it is a rate-limit subsystem failure.
         header('X-RateLimit-Limit: ' . $rate_limit);
