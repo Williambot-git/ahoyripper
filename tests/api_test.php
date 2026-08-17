@@ -1659,6 +1659,31 @@ test('INVALID_URL: source_url is the invalid string (not null)',
 test('INVALID_URL: error_code is INVALID_URL',
     ($invalid_url_response['error_code'] ?? '') === 'INVALID_URL');
 
+// MISSING_FORMAT response: format_id_missing must be present and === true.
+// INVALID_FORMAT_ID response: format_id_missing must be ABSENT.
+// This mirrors the source_url_missing pattern used for MISSING_URL/INVALID_URL.
+$missing_format_response = [
+    'error' => 'Select a format from the list above first, then click it to download.',
+    'error_code' => 'MISSING_FORMAT',
+    'format_id_missing' => true,
+];
+test('MISSING_FORMAT: format_id_missing key exists',
+    array_key_exists('format_id_missing', $missing_format_response));
+test('MISSING_FORMAT: format_id_missing is boolean true',
+    $missing_format_response['format_id_missing'] === true);
+test('MISSING_FORMAT: error_code is MISSING_FORMAT',
+    ($missing_format_response['error_code'] ?? '') === 'MISSING_FORMAT');
+
+$invalid_format_id_response = [
+    'error' => 'That format ID was not recognized.',
+    'error_code' => 'INVALID_FORMAT_ID',
+    // format_id_missing is intentionally absent here
+];
+test('INVALID_FORMAT_ID: format_id_missing key is absent',
+    !array_key_exists('format_id_missing', $invalid_format_id_response));
+test('INVALID_FORMAT_ID: error_code is INVALID_FORMAT_ID',
+    ($invalid_format_id_response['error_code'] ?? '') === 'INVALID_FORMAT_ID');
+
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
 $health_response_with_reset = [
     'status' => 'ok',

@@ -1745,6 +1745,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'format_id_missing' => true,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining: -1 signals that quota tracking is not available at this
