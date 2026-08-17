@@ -1086,7 +1086,7 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 12 times legitimately:
+# COOP and CORP each appear 13 times legitimately:
 #   - 1 at server level (base hardening for all responses)
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
 #     own headers because server-level add_header directives are NOT inherited by
@@ -1094,7 +1094,8 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #   - 1 in `location = /` block (root HTML page with preload Link header)
 #   - 1 in /manifest.json location block (PWA manifest)
 #   - 1 in /opensearch.xml location block (OpenSearch description)
-#   - 1 in /.well-known/security.txt location block for security.txt and similar files.
+#   - 1 in /.well-known/ location block (security.txt and other well-known files)
+#   - 1 in /.well-known/security.txt location block (RFC 9116 security contact)
 #   - 1 in /sitemap.xml location block (XML sitemap for search engines)
 #   - 1 in /og-image.png location block (social share preview image)
 #   - 1 in /404.html location block for not-found responses (defense-in-depth)
@@ -1106,10 +1107,10 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 12 ] && [ "$CORP_COUNT" -eq 12 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /sitemap.xml + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location /)"
+if [ "$COOP_COUNT" -eq 13 ] && [ "$CORP_COUNT" -eq 13 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location /)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 12), CORP appears $CORP_COUNT times (expected 12)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 13), CORP appears $CORP_COUNT times (expected 13)"
     exit 1
 fi
 
