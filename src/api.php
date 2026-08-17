@@ -305,6 +305,8 @@ if ($is_rate_limited) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
+            $rate_quota_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+            $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
@@ -314,6 +316,14 @@ if ($is_rate_limited) {
                 'source_url' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: included for consistency with all other error responses.
+                // At this point in the code (rate-limit gate, before daily-quota gate),
+                // the quota file has not been opened so exact remaining is unknown.
+                // Use configured limit and reset timestamp — same pattern as MISSING_URL.
+                'quota_remaining' => -1,
+                'quota_limit' => $rate_quota_limit,
+                'quota_reset' => $rate_quota_reset,
+                'quota_reset_unix' => $rate_quota_reset,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2144,7 +2154,9 @@ switch ($action) {
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
                 header('X-DailyLimit-Window: 86400');
                 echo json_encode([
-                    'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
+                    'error' => $daily_limit > 0
+                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN."
+                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
                     'action' => 'info',
                     'upgrade_url' => UPGRADE_URL,
@@ -2807,7 +2819,9 @@ switch ($action) {
                 header('X-DailyLimit-Window: 86400');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
-                    'error' => "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN.",
+                    'error' => $daily_limit > 0
+                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN."
+                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
