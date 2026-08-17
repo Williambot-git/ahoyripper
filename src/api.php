@@ -2336,6 +2336,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
+                'retry_after' => max(0, INFO_TIMEOUT),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -2503,6 +2504,7 @@ switch ($action) {
                 'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
                 'FILE_TOO_LARGE' => 413,
                 'DOWNLOAD_EMPTY' => 500,
+                'FILE_READ_ERROR' => 500,
                 'VERIFICATION_FAILED' => 500,
                 'PROC_OPEN_FAILED' => 500,
                 'DOWNLOAD_TIMEOUT' => 504,
@@ -3759,8 +3761,19 @@ switch ($action) {
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
             header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Cache-Control: no-store');
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
+                'error_code' => 'FILE_READ_ERROR',
+                'retry_after' => max(0, DOWNLOAD_TIMEOUT),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
