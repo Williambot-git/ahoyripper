@@ -34,6 +34,13 @@ function test($name, $condition) {
 // and run the test suite — tests passing confirms the copy is correct.
 require_once __DIR__ . '/../src/TestUtils.php';
 
+// UPGRADE_URL is referenced by classifyYtdlpError() in production but not defined
+// in TestUtils.php (it's defined in api.php). Define a dummy value here so the
+// test exercises the production code path without requiring api.php bootstrapping.
+if (!defined('UPGRADE_URL')) {
+    define('UPGRADE_URL', 'https://ahoyvpn.com');
+}
+
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function assert_classify($input, $expected_code, $expected_status, $exit_code = null) {
