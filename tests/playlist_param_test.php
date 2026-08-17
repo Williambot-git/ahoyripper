@@ -77,6 +77,9 @@ echo "\n==> Testing resolvePlaylistFlag() — edge cases\n";
 test('integer 1 returns --yes-playlist (correct behavior)',
     resolvePlaylistFlag(1) === ['--yes-playlist']);
 
+test('integer 0 returns --no-playlist',
+    resolvePlaylistFlag(0) === ['--no-playlist']);
+
 // The return type is always an array of one or two elements
 $result = resolvePlaylistFlag('1');
 test('returns array type',
