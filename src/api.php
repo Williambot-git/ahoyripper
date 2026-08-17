@@ -2227,10 +2227,17 @@ switch ($action) {
             '--dump-json',
             '--skip-download',
         ];
-        foreach ($playlist_flags as $flag) {
-            $ytdlp_cmd[] = $flag;
-        }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
+            // --no-playlist / --yes-playlist: prevent accidental playlist fetching when
+            // the user pastes a playlist URL intending only the single video. The info
+            // action previously built $ytdlp_cmd via array_merge() which discarded the
+            // $playlist_flags array entirely (a regression vs. the download action which
+            // used foreach). This meant no --no-playlist flag was sent by default,
+            // causing yt-dlp to follow playlists and return metadata for all items
+            // instead of the single video the user referenced. resolvePlaylistFlag()
+            // always returns exactly one flag: --yes-playlist (when playlist=1) or
+            // --no-playlist (all other cases), so this array always has one element.
+            '--no-playlist',
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // even during --skip-download which would prepend garbage to stderr
