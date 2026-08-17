@@ -553,7 +553,7 @@ if (in_array($action, $internal_actions, true)) {
         'php_version' => PHP_VERSION,
         'api_version' => AHOYRIPPER_VERSION,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-        'source_url' => 'https://ahoyripper.com',
+        'source_url' => null,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
@@ -1926,11 +1926,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
         'request_id' => $request_id,
-        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-        'api_version' => AHOYRIPPER_VERSION,
-    ], JSON_INVALID_UTF8_SUBSTITUTE);
-    exit;
-}
+         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+         'api_version' => AHOYRIPPER_VERSION,
+     ], JSON_INVALID_UTF8_SUBSTITUTE);
+     exit;
+ }
 
 // Verify the Accept header expects JSON — reject non-JSON requests
 // to prevent the API from returning HTML/error pages to API clients.
@@ -3863,12 +3863,8 @@ switch ($action) {
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
-            // source_url: self-referencing URL for this API endpoint.
-            // Mirrors the source_url field in the /health response, giving API consumers
-            // a consistent, always-present reference to the AhoyRipper home page.
-            // Also included in check/info/download responses so all endpoints have the
-            // same top-level shape for uniform client handling.
-            'source_url' => 'https://ahoyripper.com',
+            // source_url: null — health is a server probe with no source video URL.
+            'source_url' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }

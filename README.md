@@ -77,7 +77,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
 
 ```bash
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
-# {"status":"ok","server_time":"2026-08-06T03:30:00+00:00","server_time_unix":1749180000,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"...","yt_dlp_version":"2026.06.02","quota_remaining":-1,"quota_limit":5,"quota_reset":-1,"quota_reset_unix":-1,"source_url":"https://ahoyripper.com"}
+# {"status":"ok","server_time":"2026-08-17T00:00:00+00:00","server_time_unix":1752787200,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"...","yt_dlp_version":"2026.06.02","quota_remaining":-1,"quota_limit":5,"quota_reset":-1,"quota_reset_unix":-1,"source_url":null}
 ```
 
 ### Full health check
@@ -125,7 +125,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "quota_limit": 5,
 #   "quota_reset": -1,
 #   "quota_reset_unix": -1,
-#   "source_url": "https://ahoyripper.com"
+#   "source_url": null
 # }
 ```
 
@@ -592,18 +592,18 @@ POST /src/api.php?action=client-error   # client-side JS error reporting (intern
 ```json
 {
   "status": "ok",
-  "server_time": "2026-05-21T16:00:00+00:00",
-  "server_time_unix": 1749180000,
+  "server_time": "2026-08-17T00:00:00+00:00",
+  "server_time_unix": 1752787200,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
   "php_version": "8.2.0",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.03.17",
+  "yt_dlp_version": "2026.06.02",
   "quota_remaining": -1,
   "quota_limit": 5,
   "quota_reset": -1,
   "quota_reset_unix": -1,
-  "source_url": "https://ahoyripper.com"
+  "source_url": null
 }
 ```
 
