@@ -1576,6 +1576,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
+            'action' => $action,
             // retry_after: 0 signals "retry immediately once input is corrected" — a
             // validation error has no server-side backoff; the client just needs to
             // provide valid input. Consistent with INVALID_URL and INVALID_FORMAT_ID.
@@ -4428,6 +4429,7 @@ switch ($action) {
         echo json_encode([
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
+            'action' => $action,
             'request_id' => $request_id,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
@@ -4435,6 +4437,13 @@ switch ($action) {
             // This matches the pattern used by MISSING_URL (source_url: null) and ensures
             // all API error responses have a consistent top-level shape.
             'source_url' => null,
+            // quota_remaining: -1 signals that quota tracking is not available for unknown
+            // actions. Matches MISSING_URL which also has quota_remaining: -1 for the same
+            // reason. API consumers should treat -1 as "unknown remaining quota".
+            'quota_remaining' => -1,
+            'quota_limit' => $daily_limit,
+            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
