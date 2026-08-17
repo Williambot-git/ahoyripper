@@ -389,8 +389,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "acodec": "mp4a.40.2",
       "format_type": "combined",
       "type_group": 0,
-      "language": null,
-      "url": "https://..."
+      "language": null
     },
     {
       "id": "140",
@@ -408,8 +407,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "acodec": "mp4a.40.2",
       "format_type": "audio",
       "type_group": 2,
-      "language": null,
-      "url": "https://..."
+      "language": null
     }
   ],
   "sort_applied": "height",
