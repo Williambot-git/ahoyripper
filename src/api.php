@@ -2973,6 +2973,7 @@ switch ($action) {
             // download failures, giving a consistent future reset point to count down to.
             $retry_ts = time() + DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_ts));
+            header('X-Download-Options: noopen');
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
@@ -3046,6 +3047,7 @@ switch ($action) {
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Download-Options: noopen');
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
@@ -3215,6 +3217,7 @@ switch ($action) {
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
                 }
+                header('X-Download-Options: noopen');
                 echo json_encode($resp, JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
