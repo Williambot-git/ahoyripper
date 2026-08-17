@@ -4131,7 +4131,7 @@ switch ($action) {
                     '--progress-template', 'false',
                     '--compat-options', 'no-warnings',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
-                    '--referer', 'https://www.youtube.com/',
+                    '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
                 ];
                 if (AHOY_IMPERSONATE !== '') {
