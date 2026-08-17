@@ -37,6 +37,12 @@ const STATIC_ASSETS = [
   '/favicon-512.png',
   '/favicon-144.png',
   '/favicon-180.png',
+  // og-image.png is preloaded with fetchpriority="high" in index.php for
+  // social share previews (LCP). Cache it here so it's available offline —
+  // PWA users who share the page while offline will still get the preview
+  // image rather than a broken social card. The og-image.svg is the
+  // authoritative SVG source; the PNG is generated from it at build time.
+  '/og-image.png',
 ];
 
 // ─── Install: pre-cache static assets ────────────────────────────────────────
