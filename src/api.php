@@ -432,7 +432,7 @@ if (in_array($action, $internal_actions, true)) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
-            echo json_encode(['status' => 'ok']);
+            echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
         }
@@ -456,7 +456,7 @@ if (in_array($action, $internal_actions, true)) {
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
-        echo json_encode(['status' => 'ok']);
+        echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
@@ -493,7 +493,7 @@ if (in_array($action, $internal_actions, true)) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
-            echo json_encode(['status' => 'ok']);
+            echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
         }
@@ -511,7 +511,7 @@ if (in_array($action, $internal_actions, true)) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-        echo json_encode(['status' => 'ok']);
+        echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
@@ -540,7 +540,7 @@ if (in_array($action, $internal_actions, true)) {
         'api_version' => AHOYRIPPER_VERSION,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'source_url' => 'https://ahoyripper.com',
-    ]);
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
@@ -3716,7 +3716,7 @@ switch ($action) {
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                ]);
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             echo $chunk;
