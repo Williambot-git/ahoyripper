@@ -40,6 +40,12 @@ define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 // env var — increase the constant directly if longer TTL is ever needed.
 define('PROBE_CACHE_TTL', 300);
 
+// TTL (seconds) for yt-dlp and ffprobe binary version caches.
+// Cached for 1 hour — version rarely changes and probing on every health check
+// is unnecessary overhead. Not configurable via env var — adjust the constant
+// directly if a different balance of freshness vs overhead is needed.
+define('VERSION_CACHE_TTL', 3600);
+
 // YouTube video ID used for the /health endpoint connectivity probe. Rick Astley's
 // "Never Gonna Give You Up" is reliably available, long enough to detect stream stalls,
 // and unlikely to be geo-restricted or age-gated. Configurable via HEALTH_PROBE_VIDEO_ID
@@ -730,9 +736,9 @@ if (!$GLOBALS['__ytdlp_version']) {
         // might have after installation).
         $hash = @md5_file(YTDLP_PATH);
         if ($hash !== false) {
-            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + 3600]));
+            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => $hash, 'exp' => time() + VERSION_CACHE_TTL]));
         } elseif ($ver === 'not installed') {
-            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => '', 'exp' => time() + 3600]));
+            @file_put_contents($version_cache_file, json_encode(['ver' => $ver, 'hash' => '', 'exp' => time() + VERSION_CACHE_TTL]));
         }
     }
 }
@@ -794,12 +800,12 @@ if (!$GLOBALS['__ffmpeg_version']) {
         // If md5_file fails, skip cache write so the next request re-probes
         // rather than persisting an invalid empty hash that masks binary upgrades.
         if ($hash !== false) {
-            @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + 3600]));
+            @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + VERSION_CACHE_TTL]));
         } else {
             // md5_file failed — binary is absent or unreadable.
             // Write a sentinel so subsequent requests don't re-probe every time.
             // yt-dlp's version cache uses the same pattern (lines 587-589).
-            @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => '', 'exp' => time() + 3600]));
+            @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => '', 'exp' => time() + VERSION_CACHE_TTL]));
         }
     }
 }
