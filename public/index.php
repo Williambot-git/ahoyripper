@@ -136,9 +136,9 @@ header_remove('X-Powered-By');
   <meta property="og:image:height" content="630">
   <!-- og:image:alt provides a text alternative for the Open Graph image — used by
        screen readers, non-visual social media clients, and indexing bots that cannot
-       process images. Matches the descriptive alt text already used in twitter:image:alt.
-       Keep in sync with twitter:image:alt when updating share copy. -->
-  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms">
+       process images. Must match twitter:image:alt exactly (Twitter Card validation).
+       Keep both in sync when updating share copy. -->
+  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
   <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
        This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
        on social media or linked from external sites, since the og:image is the most
