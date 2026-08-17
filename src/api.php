@@ -2043,7 +2043,7 @@ switch ($action) {
         // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
         // the quota file. This ensures unlimited-key responses always include
         // the -1 signal regardless of whether the quota file is reachable.
-        // NOTE: $unlimited is declared at line 868 as `false` by default — it is
+        // NOTE: $unlimited is declared at line 1872 as `false` by default — it is
         // set to true here only when a valid key is present.
         if ($unlimited) {
             header('X-DailyLimit-Limit: -1');
@@ -3726,7 +3726,7 @@ switch ($action) {
         // Detect client abort AFTER the loop — feof() exits when the client disconnects,
         // so connection_aborted() here catches the abort cleanly. An aborted transfer
         // means the client gave up; no quota is burned since no usable file was received.
-        // NOTE: Connection: close was already sent before the streaming loop (line 2496).
+        // NOTE: Connection: close was already sent before the streaming loop (line 3685).
         // The server will close the connection immediately after the last chunk is sent.
         // Sending a JSON error body after binary data on a half-closed connection is
         // at best a protocol violation and at worst causes the JSON to be received as
@@ -4133,6 +4133,7 @@ switch ($action) {
                     '--skip-download',
                     '--progress-template', 'false',
                     '--compat-options', 'no-warnings',
+                    '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
