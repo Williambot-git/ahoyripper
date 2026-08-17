@@ -138,6 +138,14 @@ header('Reporting-Endpoints: csp-report="/csp-report"');
 // Also include report-to for browsers that support the modern Reporting API.
 // report-uri is kept as a fallback for older browsers.
 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+// Cache-Control: no-store — prevents all API responses from being cached.
+// This is critical for security-sensitive JSON APIs: cached responses could be
+// retrieved by other users on shared proxies or computers. The API serves
+// per-user quota state and video metadata that should not persist across requests.
+// Download responses (action=download) set no-store explicitly in their case block;
+// setting it globally here ensures check, health, info, and any future actions
+// are also protected without requiring each case to duplicate the header.
+header('Cache-Control: no-store');
 
 // ─── Early action routing ───────────────────────────────────────────────
 // Declare $action before the referer gate so the exempt check can reference it.
