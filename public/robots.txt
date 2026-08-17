@@ -41,19 +41,22 @@ Allow: /
 
 # Disallow all crawlers (including general bots) from the API endpoint.
 # The API returns JSON — it is not a crawlable resource and should not be
-# indexed. Placed BEFORE Allow: / so crawlers see the disallow first.
+# indexed. Placed AFTER Allow: / so crawlers see the allow first (at the
+# root level), then the more-specific Disallow: /src/ blocks access to the
+# API. Most crawlers follow "most specific wins" — /src/ is more specific
+# than /, so the Disallow correctly overrides the Allow for that path.
 # Note: crawlers listed in specific blocks above (GPTBot, ClaudeBot, etc.)
 # already have their own Disallow: / so this rule is redundant for them,
-# but placing it in this general block ensures crawlers that don't match
-# any specific block (and fall through to User-agent: *) cannot crawl /src/.
+# but placing it here ensures crawlers that don't match any specific block
+# (and fall through to User-agent: *) cannot crawl /src/.
 User-agent: *
 # RFC 9116 §3 recommends security.txt be accessible to scanners even when
 # general Disallow: rules are in effect. Adding an explicit Allow for the
 # /.well-known/ path ensures security researchers and vulnerability scanners
 # can discover the security policy regardless of other robots rules.
-Allow: /.well-known/security.txt
-Disallow: /src/
 Allow: /
+Disallow: /src/
+Allow: /.well-known/security.txt
 
 # Security contact — RFC 9116
 Sitemap: https://ahoyripper.com/sitemap.xml
