@@ -58,7 +58,14 @@ function clean($s) {
  */
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
-    if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
+    if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
+    }
+    // Standalone "geo restricted" (no characters after "geo") — the single-word
+    // form yt-dlp sometimes emits. Separate from the geo.?restricted pattern above
+    // (which requires characters after "restricted" and uses (?!.) to prevent
+    // "geo restriction" from matching here, since that pattern fires first).
+    if (preg_match('/\bgeo restricted\b/i', $err_lower)) {
         return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
@@ -193,7 +200,14 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
  */
 function resolvePlaylistFlag($playlist_get) {
-    if (isset($playlist_get) && $playlist_get === '1') {
+    // yt-dlp does NOT support --playlist true/false — that syntax is rejected
+    // as ambiguous. Only --yes-playlist and --no-playlist are valid.
+    // Treat playlist=1 as the only truthy value.
+    // Accepts string '1' (canonical URL param) and int 1 (edge case from PHP code).
+    // Explicitly reject numeric strings like '01' and '1.0' that would be true
+    // for loose int comparison but are not the canonical '1' value.
+    // All other values ('yes', 'true', '01', '1.0', 0, null, etc.) → --no-playlist.
+    if (isset($playlist_get) && ($playlist_get === '1' || ($playlist_get === 1 && !is_string($playlist_get)))) {
         return ['--yes-playlist'];
     }
     return ['--no-playlist'];

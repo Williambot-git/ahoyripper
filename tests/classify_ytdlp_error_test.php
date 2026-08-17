@@ -60,6 +60,12 @@ test('classifies "Geo IP restriction"',
 test('GEOBLOCKED is case-insensitive',
     assert_classify('ERROR: This Video Is Available In Canada', 'GEOBLOCKED', 451));
 
+test('classifies "geo restricted" (standalone two-word form)',
+    assert_classify('ERROR: [YouTube] abc: video is geo restricted', 'GEOBLOCKED', 451));
+
+test('classifies "Geo Restricted" (capitalized standalone)',
+    assert_classify('ERROR: [YouTube] abc: Geo Restricted', 'GEOBLOCKED', 451));
+
 // ─── PRIVATE_VIDEO ──────────────────────────────────────────────────────────
 
 echo "\n==> Testing PRIVATE_VIDEO\n";

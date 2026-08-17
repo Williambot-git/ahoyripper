@@ -71,10 +71,11 @@ test('empty string returns --no-playlist',
 
 echo "\n==> Testing resolvePlaylistFlag() — edge cases\n";
 
-// Integer 1 is not a string, but if passed it would not === '1'
-// The function uses === '1' comparison so integer 1 would NOT be truthy
-test('integer 1 returns --no-playlist (=== strict comparison fails)',
-    resolvePlaylistFlag(1) === ['--no-playlist']);
+// Integer 1 is the canonical truthy value — string '1' and integer 1 are both
+// truthy. The function uses === '1' for string '1' and separate `=== 1 && !is_string`
+// for integer 1, so integer 1 returns --yes-playlist.
+test('integer 1 returns --yes-playlist (correct behavior)',
+    resolvePlaylistFlag(1) === ['--yes-playlist']);
 
 // The return type is always an array of one or two elements
 $result = resolvePlaylistFlag('1');

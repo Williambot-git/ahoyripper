@@ -888,7 +888,14 @@ function resolvePlaylistFlag($playlist_get) {
  */
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
-    if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
+    if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
+    }
+    // Standalone "geo restricted" (no characters after "geo") — the single-word
+    // form yt-dlp sometimes emits. Separate from the geo.?restricted pattern above
+    // (which requires characters after "restricted" and uses (?!.) to prevent
+    // "geo restriction" from matching here, since that pattern fires first).
+    if (preg_match('/\bgeo restricted\b/i', $err_lower)) {
         return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
