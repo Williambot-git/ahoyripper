@@ -3417,6 +3417,12 @@ switch ($action) {
                         : $probe_err_clean,
                 ]);
                 foreach (glob($glob_pattern) as $f) { @unlink($f); }
+                // Refund quota inline — the conditional refund block below (which sets
+                // $post_refund_count) is never reached due to this early exit, so compute
+                // and apply the refund here before building the response.
+                // $ffprobe_post_refund_count is computed first so it is available for
+                // both the X-DailyLimit-Remaining header and the JSON body below.
+                $ffprobe_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 // Consistent header envelope with all other download error responses: include
                 // X-DL-RateLimit-*, X-RateLimit-*, and X-DailyLimit-* headers so API clients
                 // always have complete rate-limit context regardless of which error path they hit.
@@ -3459,10 +3465,6 @@ switch ($action) {
                 // Set to now + DOWNLOAD_TIMEOUT so the client has a consistent reset window.
                 $retry_ts = time() + DOWNLOAD_TIMEOUT;
                 header('Retry-After: ' . max(0, $retry_ts));
-                // Refund quota inline — the conditional refund block below (which sets
-                // $post_refund_count) is never reached due to this early exit, so compute
-                // and apply the refund here before building the response.
-                $ffprobe_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 echo json_encode([
                     'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
                     'error_code' => 'VERIFICATION_FAILED',
