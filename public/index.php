@@ -501,6 +501,11 @@ window.addEventListener('beforeinstallprompt', function(e) {
   deferredInstallPrompt = e;
   var banner = document.getElementById('install-banner');
   if (banner) banner.style.display = 'flex';
+  // A fresh beforeinstallprompt means the browser is willing to install — clear any
+  // previously dismissed state so the banner reappears even if the user previously
+  // clicked Dismiss. Without this, a user who dismissed the banner would never see it
+  // again on the same origin even though the browser's own install prompt is active.
+  try { localStorage.removeItem('ahoyrip_install_dismissed'); } catch (ev) {}
 });
 
 // Show the install prompt when the user clicks "Install".
@@ -574,6 +579,20 @@ if (installDismissBtn && installBanner) {
     try { localStorage.setItem('ahoyrip_install_dismissed', '1'); } catch (e) {}
   });
 }
+
+// Handle PWA installation triggered by the browser's own mini-infobar install button
+// (instead of AhoyRipper's custom "Install" button). The appinstalled event fires
+// when the user accepts the browser's install UI, regardless of which install path
+// was used. This ensures the custom banner is always dismissed on successful install.
+window.addEventListener('appinstalled', function() {
+  var banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'none';
+  // Clear the dismissed state so the banner is eligible to show again if the user
+  // later uninstalls the PWA and revisits. Without this, dismissed persists forever
+  // and the banner would never reappear on a fresh install cycle.
+  try { localStorage.removeItem('ahoyrip_install_dismissed'); } catch (e) {}
+  console.info('[PWA] App installed successfully.');
+});
 
 // ─── Frontend Logic ─────────────────────────────────────────
 (function() {
