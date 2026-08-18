@@ -4609,6 +4609,11 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // Prevent caching of the unknown-action JSON response.
+        // All other API responses (success and error) set Cache-Control: no-store
+        // globally or in their respective case blocks. This case was missing it,
+        // creating a cacheable response surface for a security-sensitive JSON endpoint.
+        header('Cache-Control: no-store');
         echo json_encode([
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
             'error_code' => 'UNKNOWN_ACTION',
