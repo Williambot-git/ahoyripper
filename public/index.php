@@ -415,7 +415,7 @@ header_remove('X-Powered-By');
           </select>
         </div>
       </div>
-      <div class="format-grid" id="formatGrid"></div>
+      <div class="format-grid" id="formatGrid" role="group" aria-label="Available formats"></div>
       <div style="margin-top:1.5rem; text-align:center;">
         <button class="rip-again" id="ripAgain">Rip another</button>
       </div>
