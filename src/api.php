@@ -3342,7 +3342,16 @@ switch ($action) {
                 http_response_code(422);
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('X-Download-Options: noopen');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 // Truncate the user-facing error message to match the ~200-char ceiling used
                 // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
                 // The full raw error is preserved in 'raw_error' for diagnostics.
@@ -3408,6 +3417,15 @@ switch ($action) {
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('X-Download-Options: noopen');
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
@@ -3444,6 +3462,15 @@ switch ($action) {
             http_response_code(500);
             header('Cache-Control: no-store, must-revalidate');
             header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('X-Download-Options: noopen');
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
