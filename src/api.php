@@ -1939,26 +1939,6 @@ define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15)
 // max(1, ...) then clamps it to a minimum of 1 second.
 define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
 
-// Request rate limit: max info/download requests per minute per IP (both share
-// the same rate limiter). nginx's 30r/m shared gate is the first threshold;
-// this PHP-layer RATE_LIMIT is the per-action ceiling that disciplines clients
-// who pass through nginx but exceed the per-action limit.
-// Override via RATE_LIMIT env var in .env or docker-compose.
-// NOTE: RATE_LIMIT=0 intentionally falls back to 30 (the default), so rate
-// limiting cannot be accidentally disabled by setting the env var to 0.
-// Use ?? (not ?:) so that "0" (a string, which PHP evaluates as non-empty)
-// is not treated as falsy and mistaken for an unset variable.
-define('RATE_LIMIT', max(1, (int)(getenv('RATE_LIMIT') ?? 30)));
-
-// Download rate limit: max download requests per minute per IP.
-// Override via DL_RATE_LIMIT env var in .env or docker-compose.
-// Named in all-caps to match the env-var convention used throughout this file.
-// nginx's burst=5 allows ~35 requests through before throttling on a burst,
-// then sustains at 30r/m; the PHP-layer DL_RATE_LIMIT (10r/m) is the
-// per-IP sustained ceiling for the download action specifically.
-// Use ?? (not ?:) — see RATE_LIMIT note above.
-define('DL_RATE_LIMIT', max(1, (int)(getenv('DL_RATE_LIMIT') ?? 10)));
-
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
 // Defaults to 300 seconds (5 minutes) when the env var is absent or zero/negative.
