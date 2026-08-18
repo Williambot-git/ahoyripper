@@ -594,6 +594,10 @@ if (in_array($action, $internal_actions, true)) {
     // overhead of establishing a new connection each time is measurable. With keep-alive,
     // the same connection is reused across multiple requests, which is the correct
     // default for a lightweight JSON API endpoint.
+    // Daily quota fields — check is a read-only probe (does not consume quota)
+    // so quota_remaining is -1 (unlimited signal). quota_limit, quota_reset, and
+    // quota_reset_unix are included for API surface consistency with health/info
+    // responses, allowing clients to always determine the limit and reset from the body.
     echo json_encode([
         'status' => 'ok',
         'server_time' => date('c'),
@@ -604,6 +608,10 @@ if (in_array($action, $internal_actions, true)) {
         'api_version' => AHOYRIPPER_VERSION,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'source_url' => null,
+        'quota_remaining' => -1,
+        'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
+        'quota_reset' => -1,
+        'quota_reset_unix' => -1,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
