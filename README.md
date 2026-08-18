@@ -248,7 +248,7 @@ docker compose up -d
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
 | `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
 | `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
-| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp and ffprobe version probes. Version information is cached to avoid repeated subprocess invocations. Increase if you restart yt-dlp/ffprobe frequently and want longer-lived cache entries. |
+| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp connectivity probe in the health endpoint. The probe result is cached to avoid hammering YouTube with repeated health checks. Adjust the `PROBE_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
 | `YTDLP_VERSION` | `latest` | yt-dlp version to install in the Docker image. Set to `latest` (default) for the newest release on each build, or pin to a specific version (e.g. `2024.08.06`) for reproducible builds. In non-Docker installs, update yt-dlp via `pip install -U yt-dlp` or `scripts/install-deps.sh`. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
@@ -475,6 +475,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
+| `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. This is a rare server-side issue. Try again or pick a different format. |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
@@ -573,6 +574,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `500` | `YTDLP_NOT_FOUND` | yt-dlp binary could not be started. The server is misconfigured — yt-dlp may not be installed or the path is incorrect. |
 | `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
+| `500` | `FILE_READ_ERROR` | The downloaded file could not be read — rare server-side issue. Try again or pick a different format. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
 | `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
@@ -1101,7 +1103,7 @@ AhoyRipper is a tool. What you do with it is your responsibility. Do not use it 
 | `COOKIES_PATH` | _(none)_ | Path to a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). When set, `--cookies` is passed to yt-dlp automatically. Mount the file into the container and set the path here (e.g. `/cookies.txt`). See [cookies section](#passing-cookies-to-yt-dlp) for setup instructions. |
 | `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
 | `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
-| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp and ffprobe version probes. Version information is cached to avoid repeated subprocess invocations. Increase if you restart yt-dlp/ffprobe frequently and want longer-lived cache entries. |
+| `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp connectivity probe in the health endpoint. The probe result is cached to avoid hammering YouTube with repeated health checks. Adjust the `PROBE_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
 
 Example:
 ```bash
