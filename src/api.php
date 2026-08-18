@@ -4096,10 +4096,21 @@ switch ($action) {
         // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
         // fire-and-forget endpoint that does not consume from the per-minute rate budget.
         // Mirrors the pattern used by action=check and action=health for consistency.
+        // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        // X-RateLimit-*: generic rate-limit header family for API consumers.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
+        // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. The client-error endpoint bypasses
         // the global header block by sending its own response — repeat them here so
