@@ -707,6 +707,16 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 
 `action=client-error` receives client-side JavaScript error reports from the web UI. The frontend calls this via `navigator.sendBeacon` (fire-and-forget) when an uncaught JS exception occurs, providing operational visibility into browser-side failures without affecting UX. The body is a JSON object with fields: `type` (error class name), `message` (error message), `url` (page URL), `page_request_id` (correlates with server-side access logs), and optionally `stack`, `line`, and `col` for stack-trace details. All string fields are truncated to 500 chars before logging to prevent log flooding. This endpoint returns `200 OK` to all POST requests so browsers do not retry. Logged to `/var/log/ahoyripper/access.log`.
 
+**Response** (all client-error POSTs return `200 OK`):
+```json
+{
+  "ok": true,
+  "api_version": "1.0.0",
+  "yt_dlp_version": "2026.06.02",
+  "request_id": "a3f1b2c9d4e5f678"
+}
+```
+
 ### Rate Limits
 
 | Endpoint | Limit | Window |
