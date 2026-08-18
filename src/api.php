@@ -495,7 +495,7 @@ if (in_array($action, $internal_actions, true)) {
             // flushes — set them explicitly here to guarantee they're present.
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
             echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -556,7 +556,7 @@ if (in_array($action, $internal_actions, true)) {
         if (function_exists('fastcgi_finish_request')) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
             echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
