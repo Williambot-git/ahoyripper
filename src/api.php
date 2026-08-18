@@ -3251,6 +3251,10 @@ switch ($action) {
                 header('Retry-After: ' . max(0, $retry_ts));
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Download-Options: noopen');
+                // X-FFProbe-Status: ffprobe was never reached in the classified-error path
+                // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
+                // clients can distinguish this from a ffprobe-verification failure.
+                header('X-FFProbe-Status: skipped');
                 // Compute post-refund quota for the JSON body. refundQuota() is idempotent
                 // (safe to call even if already refunded via the proc_open failure path above).
                 $post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
