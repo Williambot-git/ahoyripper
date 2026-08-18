@@ -2564,7 +2564,13 @@ switch ($action) {
                 'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
                 'SOURCE_SERVER_ERROR' => 502, 'SOURCE_HTTP_ERROR' => 502,
                 'FORBIDDEN_ORIGIN' => 403,
-                'UNKNOWN_ACTION' => 400,
+                // UNKNOWN_ACTION uses 404 (set directly by http_response_code in the
+                // default: block, which bypasses this map). The 404 is intentional:
+                // the action name is an unrecognized endpoint — "Not Found" fits better
+                // than "Bad Request" (malformed syntax). Kept here so the map fully
+                // documents all error codes, even if this entry is reached only
+                // if a future refactor routes unknown actions through the info path.
+                'UNKNOWN_ACTION' => 404,
                 // HTTP 451: Unavailable For Legal Reasons — specifically for content
                 // blocked by legal demand (TOS violations, court orders, etc.).
                 // Distinct from SOURCE_FORBIDDEN (403) which is an access-control failure.
