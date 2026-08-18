@@ -499,8 +499,21 @@ if (in_array($action, $internal_actions, true)) {
         // these headers are present in ALL deployments (FPM and non-FPM), they are
         // set explicitly here in the FPM path alongside the nginx-level headers.
         if (function_exists('fastcgi_finish_request')) {
-            // These location-level nginx headers may be missed after fastcgi_finish_request()
-            // flushes — set them explicitly here to guarantee they're present.
+            // Explicitly re-set ALL standard security headers in the FPM fast-path so
+            // the response is fully hardened regardless of nginx layer-header state.
+            // These complement (not replace) the top-of-script headers already in the
+            // buffer. X-Request-ID is excluded since it was already sent above.
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            // Location-level nginx headers that may be missed after fastcgi_finish_request()
+            // flushes — set them explicitly here to guarantee they're present in all deployments.
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
