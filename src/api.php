@@ -4080,7 +4080,7 @@ switch ($action) {
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
-            // source_url: null — health is a server probe with no source video URL.
+            // source_url: null — check is a read-only server probe with no source video URL.
             'source_url' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
