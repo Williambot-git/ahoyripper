@@ -2557,7 +2557,6 @@ switch ($action) {
             $err_status = 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code($err_status);
-            // retry_after: Unix timestamp when the info request can be retried.
             // retry_after: delta-seconds until the info request can be retried.
             // Use INFO_TIMEOUT as a fixed window so the client has a consistent
             // countdown value regardless of when the response is processed.
