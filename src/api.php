@@ -1106,10 +1106,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  * @param string $json_str       Raw yt-dlp stdout (newline-delimited JSON for playlists).
  * @param string|null &$raw_error_out  Populated with raw yt-dlp error text on parse failure.
  * @param string $sort           Sort key: 'height' (default), 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'.
+ * @param int|null $exit_code    yt-dlp exit code. Passed to classifyYtdlpError so the
+ *                                exit-code fallback (exit 1 → FORMAT_UNAVAILABLE, exit ≥2
+ *                                → YTDLP_ERROR) fires when the error text alone is ambiguous.
  * @return array  ['formats' => [...], 'error' => string|null, 'error_code' => string|null, 'title' => string|null, ...].
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
-function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
+function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit_code = null) {
     // Validate sort key — makes parseFormats self-contained and safe for reuse.
     $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'];
     if (!in_array($sort, $allowed_sorts, true)) {
@@ -1167,7 +1170,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // long errors that may contain the distinguishing keyword (e.g. "login required"
             // at byte 300 of a 500-byte message). The classified['msg'] is always short
             // so it never needs truncation; the user-facing error uses that short message.
-            $classified = classifyYtdlpError($err_msg);
+            $classified = classifyYtdlpError($err_msg, $exit_code);
             if ($classified) {
                 // raw_error_out: truncated only for the raw diagnostic field — the
                 // classified human-readable message (used in 'error') is always concise.
@@ -2510,7 +2513,7 @@ switch ($action) {
             exit;
         }
 
-        $parsed = parseFormats($out, $raw_err, $sort);
+        $parsed = parseFormats($out, $raw_err, $sort, $exit);
         if (!$parsed) {
             // Undo the quota increment — parseFormats returned null means the content
             // could not be parsed; we don't burn the user's daily limit for this.
