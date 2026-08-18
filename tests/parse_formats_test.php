@@ -842,6 +842,21 @@ test('filesize_asc: smallest filesize first (1MB before 5MB before 20MB)',
 test('filesize_asc: combined formats still grouped together (audio excluded)',
     $result_size_asc['formats'][0]['format_type'] === 'combined');
 
+// ─── parseFormats: filesize_asc with null/unknown filesize ───────────────────
+// Unknown filesize (null) must sort LAST in filesize_asc (smallest-first).
+// A null sentinel of PHP_INT_MAX achieves this: unknown = largest = last.
+// A null sentinel of -PHP_INT_MAX would incorrectly sort unknown as smallest.
+$formats_with_null_size = [
+    makeFormat(['format_id' => 'known_1mb', 'height' => 360, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 1048576]),   // 1 MB
+    makeFormat(['format_id' => 'unknown', 'height' => 720, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => null]),         // unknown
+    makeFormat(['format_id' => 'known_5mb', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 5242880]),  // 5 MB
+];
+$json_null_size = makeJson('Null Size Sort', $formats_with_null_size);
+$result_null_size = parseFormats($json_null_size, $raw_err, 'filesize_asc');
+$ids_null_size = array_column($result_null_size['formats'], 'id');
+test('filesize_asc: null/unknown filesize sorts LAST (after all known sizes)',
+    $ids_null_size[0] === 'known_1mb' && $ids_null_size[1] === 'known_5mb' && $ids_null_size[2] === 'unknown');
+
 // ─── parseFormats: fps tiebreaker within same resolution tier ──────────────────
 
 $formats_same_height_diff_fps = [
