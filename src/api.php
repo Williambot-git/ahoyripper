@@ -2380,10 +2380,16 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            // Retry-After: Unix timestamp when the info probe can be retried.
+            // Use INFO_TIMEOUT so the client has the same reset window as other
+            // info failures, giving a consistent future reset point to count down to.
+            $retry_ts = time() + INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_ts));
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
-                'retry_after' => max(0, INFO_TIMEOUT),
+                'action' => 'info',
+                'retry_after' => max(0, $retry_ts),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
