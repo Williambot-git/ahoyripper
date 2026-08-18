@@ -3119,17 +3119,22 @@ switch ($action) {
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            // retry_after: Unix timestamp when the download can be retried.
+            // retry_after: delta-seconds until the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
-            // download failures, giving a consistent future reset point to count down to.
-            $retry_ts = time() + DOWNLOAD_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_ts));
+            // download failures, giving a consistent countdown value.
+            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+            // delta-seconds is simpler and consistent with all other Retry-After
+            // headers in this file (which use $reset_timestamp - time(), not absolute
+            // timestamps). Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
+            // ensures this stays consistent with the delta-seconds format.
+            $retry_delta = DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
-                'retry_after' => max(0, $retry_ts),
+                'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -3675,14 +3680,17 @@ switch ($action) {
                 header('X-FFProbe-Status: failed');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 http_response_code(500);
-                // retry_after: Unix timestamp when the download can be retried.
-                // Set to now + DOWNLOAD_TIMEOUT so the client has a consistent reset window.
-                $retry_ts = time() + DOWNLOAD_TIMEOUT;
-                header('Retry-After: ' . max(0, $retry_ts));
+                // retry_after: delta-seconds until the download can be retried.
+                // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+                // delta-seconds is simpler and consistent with all other Retry-After
+                // headers in this file. Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
+                // keeps this as a delta-seconds value.
+                $retry_delta = DOWNLOAD_TIMEOUT;
+                header('Retry-After: ' . max(0, $retry_delta));
                 echo json_encode([
                     'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
                     'error_code' => 'VERIFICATION_FAILED',
-                    'retry_after' => max(0, $retry_ts),
+                    'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
