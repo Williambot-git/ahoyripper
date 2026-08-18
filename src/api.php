@@ -3536,6 +3536,11 @@ switch ($action) {
                     // failure so the quota is refunded and the user sees a clear error.
                     $probe_exit = -1;
                     $probe_err = 'No video stream found in downloaded file (malformed or empty container).';
+                    // ffprobe exited 0 but found no streams — ffprobe itself did not "fail"
+                    // per se, but verification could not be completed. Use 'skipped' to
+                    // distinguish from a genuine ffprobe execution error (which sets
+                    // 'failed' at line 3597).
+                    header('X-FFProbe-Status: skipped');
                 }
             } else {
                 // ffprobe failed (non-zero exit, timeout, or unreadable output).
