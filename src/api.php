@@ -2404,16 +2404,19 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            // Retry-After: Unix timestamp when the info probe can be retried.
+            // Retry-After: delta-seconds until the info probe can be retried.
             // Use INFO_TIMEOUT so the client has the same reset window as other
             // info failures, giving a consistent future reset point to count down to.
-            $retry_ts = time() + INFO_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_ts));
+            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+            // delta-seconds is simpler and consistent with all other Retry-After
+            // headers in this file ($reset_timestamp - time(), not absolute timestamps).
+            $retry_delta = INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
                 'action' => 'info',
-                'retry_after' => max(0, $retry_ts),
+                'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
