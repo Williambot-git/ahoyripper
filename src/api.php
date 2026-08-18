@@ -2581,13 +2581,17 @@ switch ($action) {
                 'action' => 'info',
                 'request_id' => $request_id,
                 'source_url' => $url,
-                // yt_dlp_version helps clients debug which yt-dlp build is running
-                // when a classified error (GEOBLOCKED, LOGIN_REQUIRED, etc.) is returned.
-                // Included in success responses; add it here for parity on error responses.
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_ts),
             ];
+            // quota fields: consistent with success and other error responses.
+            // Quota was incremented before this error path; the refund above reversed it.
+            // post-refund count is the pre-increment baseline since the increment was undone.
+            $resp['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $info_quota_before_refund) : -1;
+            $resp['quota_limit'] = !$unlimited ? $daily_limit : -1;
+            $resp['quota_reset'] = !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1;
+            $resp['quota_reset_unix'] = !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1;
             // Surface the raw yt-dlp output so the client can show diagnostic info
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
