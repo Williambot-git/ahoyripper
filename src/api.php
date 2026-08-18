@@ -2292,11 +2292,11 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
-            // --compat-options no-warnings: suppress yt-dlp deprecation warnings on stderr.
+            // --no-warnings: suppress yt-dlp deprecation warnings on stderr.
             // These warnings can appear during info fetches on sites with extractor updates
             // and would pollute stderr, potentially interfering with error classification.
             // Mirrors the same flag already used in the download action for consistency.
-            '--compat-options', 'no-warnings',
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
@@ -2994,7 +2994,7 @@ switch ($action) {
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             '--progress-template', 'false',
-            '--compat-options', 'no-warnings',
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -4234,7 +4234,7 @@ switch ($action) {
                     '--no-playlist',
                     '--skip-download',
                     '--progress-template', 'false',
-                    '--compat-options', 'no-warnings',
+                    '--no-warnings',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
