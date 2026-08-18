@@ -3287,7 +3287,7 @@ switch ($action) {
                     header('X-DailyLimit-Window: unlimited');
                 } else {
                     header('X-DailyLimit-Limit: ' . $daily_limit);
-                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $post_refund_count + 1));
+                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $post_refund_count));
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
@@ -3301,7 +3301,7 @@ switch ($action) {
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'retry_after' => max(0, $retry_ts),
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count + 1),
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -3338,7 +3338,7 @@ switch ($action) {
                     header('X-DailyLimit-Window: unlimited');
                 } else {
                     header('X-DailyLimit-Limit: ' . $daily_limit);
-                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $uncl_post_refund_count + 1));
+                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $uncl_post_refund_count));
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
@@ -3353,7 +3353,7 @@ switch ($action) {
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'retry_after' => max(0, $retry_ts),
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count + 1),
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
