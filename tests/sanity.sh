@@ -1284,11 +1284,11 @@ fi
 # Verify both return http_response_code(400) — not 200 or 500
 MISSING_FORMAT_CODE=$(grep -n "'error_code' => 'MISSING_FORMAT'" src/api.php | head -1 | cut -d: -f1)
 INVALID_FORMAT_CODE=$(grep -n "'error_code' => 'INVALID_FORMAT_ID'" src/api.php | head -1 | cut -d: -f1)
-# 15-line context needed: MISSING_FORMAT has http_response_code at line 1521
-# and error_code at line 1536 (15-line gap); INVALID_FORMAT_ID similarly
-# has http_response_code at line 1565 and error_code at line 1580 (15-line gap).
+# 30-line context needed: MISSING_FORMAT has http_response_code at line 1775
+# and error_code at line 1801 (26-line gap with security headers); INVALID_FORMAT_ID
+# similarly has http_response_code at line 1835 and error_code at line 1861 (26-line gap).
 for linenum in "$MISSING_FORMAT_CODE" "$INVALID_FORMAT_CODE"; do
-    context=$(sed -n "$((linenum-15)),${linenum}p" src/api.php)
+    context=$(sed -n "$((linenum-30)),${linenum}p" src/api.php)
     if ! echo "$context" | grep -q "http_response_code(400)"; then
         echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID should return http_response_code(400)"
         exit 1

@@ -1774,6 +1774,17 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if ($format_id === '') {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
+            // Security headers — same set as MISSING_URL / INVALID_URL.
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('X-Request-ID: ' . $request_id);
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             // Rate-limit headers: -1 sentinel since this error occurs before the
             // per-minute rate-limit gate (no rate tracking has occurred yet).
             header('X-RateLimit-Limit: -1');
@@ -1823,6 +1834,17 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
+            // Security headers — same set as MISSING_FORMAT / MISSING_URL.
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('X-Request-ID: ' . $request_id);
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             // Rate-limit headers: -1 sentinel since this error occurs before the
             // per-minute rate-limit gate (no rate tracking has occurred yet).
             header('X-RateLimit-Limit: -1');
