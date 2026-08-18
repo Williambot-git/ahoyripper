@@ -68,12 +68,12 @@ else
 fi
 echo ""
 
-# ─── PHP unit tests (playlist_param_test.php) ──────────
-echo "==> Running playlist_param_test.php (playlist flag resolution)..."
-if php "$SCRIPT_DIR/playlist_param_test.php"; then
-    echo "✓ playlist_param_test.php: passed"
+# ─── PHP unit tests (resolve_playlist_flag_test.php) ──────────
+echo "==> Running resolve_playlist_flag_test.php (playlist flag resolution)..."
+if php "$SCRIPT_DIR/resolve_playlist_flag_test.php"; then
+    echo "✓ resolve_playlist_flag_test.php: passed"
 else
-    echo "✗ playlist_param_test.php: FAILED"
+    echo "✗ resolve_playlist_flag_test.php: FAILED"
     FAILED=1
 fi
 echo ""
