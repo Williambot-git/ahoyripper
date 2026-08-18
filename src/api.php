@@ -2500,11 +2500,11 @@ switch ($action) {
             $version_info = $ytdlp_ver ? " (yt-dlp $ytdlp_ver)" : '';
             logRequest('info', 422, ['reason' => 'ytdlp_fetch_failed', 'exit' => $exit, 'err_preview' => mb_substr($err_msg, 0, 100, 'UTF-8')]);
             http_response_code(422);
-            // retry_after: Unix timestamp when the info request can be retried.
-            // Set to now + INFO_TIMEOUT so the client has a consistent future reset
-            // point matching the server's actual timeout window.
-            $retry_ts = time() + INFO_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_ts));
+            // retry_after: delta-seconds until the info request can be retried.
+            // Use INFO_TIMEOUT as a fixed window so the client has a consistent
+            // countdown value regardless of when the response is processed.
+            $retry_delta = INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
@@ -2513,7 +2513,7 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'retry_after' => max(0, $retry_ts),
+                'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
                 // Quota was incremented before this error path (line 2123); the refund
                 // above reversed it, so show the pre-increment count.
@@ -2540,11 +2540,11 @@ switch ($action) {
             logRequest('info', $err_status, ['reason' => 'parse_formats_failed', 'exit' => $exit]);
             http_response_code($err_status);
             // retry_after: Unix timestamp when the info request can be retried.
-            // PARSE_ERROR is non-retryable in the short term (server-side issue),
-            // but providing retry_after gives the client a consistent field to read
-            // for backoff timing — matching the contract of all other error responses.
-            $retry_ts = time() + INFO_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_ts));
+            // retry_after: delta-seconds until the info request can be retried.
+            // Use INFO_TIMEOUT as a fixed window so the client has a consistent
+            // countdown value regardless of when the response is processed.
+            $retry_delta = INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
@@ -2553,7 +2553,7 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'retry_after' => max(0, $retry_ts),
+                'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
                 // Quota was incremented before this error path; the refund above reversed it.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
@@ -2622,11 +2622,11 @@ switch ($action) {
                 refundQuota($ip, $unlimited, $daily_limit, $info_quota_before_refund);
             }
             http_response_code($err_status);
-            // retry_after: Unix timestamp when the info request can be retried.
-            // Use INFO_TIMEOUT (same as the unclassified error path) so clients have
-            // a consistent future reset point regardless of how the error was classified.
-            $retry_ts = time() + INFO_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_ts));
+            // retry_after: delta-seconds until the info request can be retried.
+            // Use INFO_TIMEOUT as a fixed window so the client has a consistent
+            // countdown value regardless of when the response is processed.
+            $retry_delta = INFO_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             $resp = [
                 'error' => $parsed['error'],
                 'error_code' => $parsed['error_code'] ?? 'YTDLP_ERROR',
@@ -2635,7 +2635,7 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'retry_after' => max(0, $retry_ts),
+                'retry_after' => max(0, $retry_delta),
             ];
             // quota fields: consistent with success and other error responses.
             // Quota was incremented before this error path; the refund above reversed it.
@@ -3190,11 +3190,11 @@ switch ($action) {
                 }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
-                // retry_after: Unix timestamp when the download can be retried.
-                // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
-                // download failures, giving a consistent future reset point to count down to.
-                $retry_ts = time() + DOWNLOAD_TIMEOUT;
-                header('Retry-After: ' . max(0, $retry_ts));
+                // retry_after: delta-seconds until the download can be retried.
+                // Use DOWNLOAD_TIMEOUT as a fixed window so the client has a consistent
+                // countdown value regardless of when the response is processed.
+                $retry_delta = DOWNLOAD_TIMEOUT;
+                header('Retry-After: ' . max(0, $retry_delta));
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
@@ -3208,7 +3208,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
-                    'retry_after' => max(0, $retry_ts),
+                    'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'format_id' => $format_id,
@@ -3288,18 +3288,18 @@ switch ($action) {
                 refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
             }
 
-            // Retry-After: Unix timestamp when the download can be retried.
-            // Set to now + DOWNLOAD_TIMEOUT so transient source-site errors (rate limits,
-            // 5xx, connection failures) have a consistent client-visible retry window.
+            // Retry-After: delta-seconds until the download can be retried.
+            // Use DOWNLOAD_TIMEOUT as a fixed window so the client has a consistent
+            // countdown value regardless of when the response is processed.
             // Permanent failures (GEOBLOCKED 451, COPYRIGHT 451, PRIVATE 403) still
             // carry this header — clients treat it as advisory; the user sees the error
             // message and won't retry a permanent failure even if they ignore the hint.
-            $retry_ts = time() + DOWNLOAD_TIMEOUT;
+            $retry_delta = DOWNLOAD_TIMEOUT;
             if ($err_classified) {
                 $status = $err_classified['status'] ?? 422;
                 logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code($status);
-                header('Retry-After: ' . max(0, $retry_ts));
+                header('Retry-After: ' . max(0, $retry_delta));
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Download-Options: noopen');
                 // X-FFProbe-Status: ffprobe was never reached in the classified-error path
@@ -3332,7 +3332,7 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'retry_after' => max(0, $retry_ts),
+                    'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -3348,7 +3348,7 @@ switch ($action) {
                 // Unclassified error — $err_classified is null; use 422 as safe default.
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
-                header('Retry-After: ' . max(0, $retry_ts));
+                header('Retry-After: ' . max(0, $retry_delta));
                 header('Cache-Control: no-store, must-revalidate');
                 header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
@@ -3393,7 +3393,7 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'retry_after' => max(0, $retry_ts),
+                    'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count),
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
