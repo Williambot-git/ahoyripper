@@ -14,6 +14,7 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 ## [Unreleased]
 
 ### Added
+- **`CONFIG_ERROR` documentation** — Added `CONFIG_ERROR` (503) to the error codes table, HTTP status mapping table, and Troubleshooting section. This error is classified by `classifyYtdlpError()` when the `--impersonate` feature fails due to a missing `curl_cffi` library, but was previously undocumented in the README.
 - **Twitter Card meta tags** — Added `twitter:card`, `twitter:title`,
   `twitter:description`, and `twitter:image` to `public/index.php`. Cards now
   render with a large image preview when links are shared on X/Twitter.

@@ -479,6 +479,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
+| `CONFIG_ERROR` | Browser impersonation is not available on the server. The `curl_cffi` Python library may be missing. | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable impersonation, or contact the server operator. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | Server error — could not start the download process. The server may be restarting or overloaded. | Try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
@@ -578,6 +579,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
 | `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
+| `503` | `CONFIG_ERROR` | Browser impersonation is not available — the `curl_cffi` Python library may be missing. Set `AHOY_IMPERSONATE=` (empty) to disable impersonation, or update yt-dlp and install `pip install curl_cffi`. |
 
 ### Health check / progress
 ```
@@ -906,6 +908,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
+| `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
 | `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video |
 | `SOURCE_SERVER_ERROR` | Source site returned HTTP 5xx | Try again shortly |
 | `SOURCE_HTTP_ERROR` | Source site returned an unexpected HTTP error | Try again shortly |
