@@ -199,6 +199,23 @@ test('classifies "SSL error"',
 test('classifies "TLS handshake failed"',
     assert_classify('ERROR: [YouTube] abc: TLS handshake failed', 'SSL_ERROR', 502));
 
+// ─── CONFIG_ERROR ──────────────────────────────────────────────────────────────
+// yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
+// Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
+// classifyYtdlpError() classifies this as CONFIG_ERROR so operators know it's
+// a deployment/dependency issue, not a video or format problem.
+
+echo "\n==> Testing CONFIG_ERROR\n";
+
+test('classifies "Impersonate target X is not available"',
+    assert_classify('ERROR: [YouTube] abc: Impersonate target chrome is not available', 'CONFIG_ERROR', 503));
+
+test('classifies "impersonate not available" (lowercase, standalone)',
+    assert_classify('ERROR: [YouTube] abc: impersonate is not available on this system', 'CONFIG_ERROR', 503));
+
+test('CONFIG_ERROR is case-insensitive',
+    assert_classify('ERROR: [YouTube] abc: Impersonate Is Not Available On This System', 'CONFIG_ERROR', 503));
+
 // ─── SOURCE_TIMEOUT ───────────────────────────────────────────────────────────
 
 echo "\n==> Testing SOURCE_TIMEOUT\n";
