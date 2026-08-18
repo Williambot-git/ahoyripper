@@ -230,6 +230,13 @@ test('rejects hostname exceeding RFC 1035 limit (253 chars)',
 // - GEOBLOCKED requires "geo restriction" OR "this video is available in" (not just "is available in")
 // - LOGIN_REQUIRED includes "sign in to confirm" (yt-dlp bot-confirm message)
 // - AGE_RESTRICTED includes bare "age restricted" as a catch-all variant
+//
+// MAINTENANCE: This copy is embedded here because api_test.php does not include
+// api.php (standalone test design). The canonical production implementation lives
+// in src/api.php and src/TestUtils.php. When editing this copy, you MUST also
+// update both canonical versions and run tests/classify_ytdlp_error_test.php
+// to verify they stay in sync. classify_ytdlp_error_test.php is the authoritative
+// test suite for this function.
 
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);

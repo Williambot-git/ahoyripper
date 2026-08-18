@@ -400,6 +400,27 @@ test('SOURCE_TIMEOUT text takes precedence over generic "timed out"',
 test('HTTP error code takes precedence over exit code 1',
     classifyYtdlpError('HTTP Error 403', 1)['code'] === 'SOURCE_FORBIDDEN');
 
+// CONFIG_ERROR text should win over exit code 1
+// "Impersonate target chrome is not available" is emitted when curl_cffi is
+// missing (yt-dlp 2024.09+ --impersonate feature). Operators see CONFIG_ERROR
+// (503) not FORMAT_UNAVAILABLE (422), so the text match must take precedence.
+test('CONFIG_ERROR text takes precedence over exit code 1',
+    classifyYtdlpError('Impersonate target chrome is not available', 1)['code'] === 'CONFIG_ERROR');
+
+// CONFIG_ERROR text should win over generic HTTP error text
+// A platform that returns HTTP 503 alongside the impersonate error message
+// should still be classified as CONFIG_ERROR, not SOURCE_SERVER_ERROR.
+test('CONFIG_ERROR text takes precedence over HTTP 503 text',
+    classifyYtdlpError('ERROR: Impersonate target chrome is not available. HTTP Error 503', 1)['code'] === 'CONFIG_ERROR');
+
+// CONFIG_ERROR should NOT shadow genuine geo/copyright/age errors that also
+// happen to mention "available" in a different context.
+test('GEOBLOCKED is not shadowed by CONFIG_ERROR (different error class)',
+    classifyYtdlpError('This video is geo-restricted', 1)['code'] === 'GEOBLOCKED');
+
+test('AGE_RESTRICTED is not shadowed by CONFIG_ERROR',
+    classifyYtdlpError('This video is age-restricted', 1)['code'] === 'AGE_RESTRICTED');
+
 // ─── UNCLASSIFIED INPUT ──────────────────────────────────────────────────────
 
 echo "\n==> Testing unclassified input\n";
