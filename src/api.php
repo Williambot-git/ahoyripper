@@ -167,6 +167,14 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 // Allowed origins for browser-based API calls (SPA fetches land here with proper referer).
 $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
+// Fallback: read referer from query param for direct browser navigation downloads
+// (e.g. window.location.href carrying &referer=https://ahoyripper.com/). This is
+// needed because the download action uses window.location.href navigation rather than
+// fetch(), which means no custom headers (including Referer) are sent. The frontend
+// passes the page URL as &referer=<encoded-url> to work around this limitation.
+if (!$referer && isset($_GET['referer'])) {
+    $referer = $_GET['referer'];
+}
 $blocked = false;
 $block_reason = '';
 

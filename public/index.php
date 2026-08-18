@@ -1063,6 +1063,10 @@ window.addEventListener('appinstalled', function() {
         // starts with a clean guard state too.
         navigateOnSuccess = true;
         var dl = buildDownloadUrl(url, f.id, f.label || f.ext, data.derived_filename || null);
+        // Carry the Referer into the navigation URL so the download request passes
+        // the API's origin check (window.location.href bypasses fetch and cannot
+        // send custom headers). playlistParam already included by buildDownloadUrl.
+        dl.url += '&referer=' + encodeURIComponent(window.location.href);
         var dlHeaders = {};
         if (dl.key) { dlHeaders['Authorization'] = 'Bearer ' + encodeURIComponent(dl.key); }
         // Pass the browser's language preference so yt-dlp can request localized
@@ -1071,10 +1075,6 @@ window.addEventListener('appinstalled', function() {
         // Forward page_request_id so the API and server logs can correlate
         // the download request with the browser's page view.
         dlHeaders['X-Request-ID'] = PAGE_REQUEST_ID;
-        // Referer is required for API origin checks — the info fetch sends it implicitly
-        // via fetch() (uses page URL), but the download fetch also needs it explicitly
-        // since window.location.href navigation bypasses fetch entirely.
-        dlHeaders['Referer'] = window.location.href;
         card.classList.add('downloading');
         setLoading(true);
 
