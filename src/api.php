@@ -2109,6 +2109,12 @@ switch ($action) {
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: invalid key means no quota tracking applies — consistent
+                // with the -1 sent for unlimited-key responses.
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -2695,6 +2701,12 @@ switch ($action) {
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: invalid key means no quota tracking applies — consistent
+                // with the -1 sent for unlimited-key responses.
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
