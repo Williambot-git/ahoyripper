@@ -1002,6 +1002,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
+    // yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
+    // Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
+    // Classify this as a CONFIG_ERROR so operators know it's a deployment/dependency
+    // issue, not a video or format problem — users should not see FORMAT_UNAVAILABLE.
+    if (preg_match('/impersonate.*not available|is not available.*impersonate/i', $err_lower)) {
+        return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'status' => 503];
+    }
 
     // "process timed out" is produced by the PHP-side timeout in the inline
     // proc_open timeout handler (api.php).
