@@ -263,12 +263,46 @@ docker compose down && docker compose up -d
 
 ---
 
+## Analytics
+
+AhoyRipper uses [Plausible Analytics](https://plausible.io) — a self-hosted, cookie-free, and GDPR-compliant analytics platform. No PII leaves the browser, and video URLs in query strings are stripped before any data is sent.
+
+### How it works
+
+The frontend (`public/js/analytics.js`) fires pageview and custom events to AhoyRipper's own `/src/api.php?action=analytics` proxy endpoint. The proxy:
+- Strips the `?url=` query parameter (which may contain a video URL) before forwarding
+- Strips the full referrer URL, keeping only the hostname
+- Strips IP addresses before forwarding (nginx handles this)
+- Forwards sanitised events to the configured Plausible server
+
+This means:
+- **No third-party requests from the browser** — all analytics stay within the same origin
+- **No Plausible domain needed in `connect-src`** — the CSP doesn't need to allow `plausible.io`
+- **No PII in analytics** — video URLs and full referrer URLs never reach Plausible
+- **Server controls the destination** — configure via the `PLAUSIBLE_HOST` environment variable
+
+### Privacy properties
+
+- Cookie-free: Plausible does not use cookies or any client-side storage
+- No IP address tracking: nginx strips IPs before forwarding; Plausible never sees them
+- URL stripping: the `?url=` param (video prefill links) is removed server-side
+- Full referrer stripped: only the hostname is forwarded, never the full URL
+
+### Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PLAUSIBLE_HOST` | `plausible.io` | Hostname of your Plausible server. Set to a custom domain (e.g. `analytics.yourdomain.com`) to route events through the AhoyRipper proxy. Set to `''` (empty string) to disable analytics entirely — the endpoint returns 204 silently and no requests are forwarded. |
+
+To completely disable analytics without removing the script, set `PLAUSIBLE_HOST=''` in your environment. The frontend script will still load but will send events to a null destination.
+
 ## Tech Stack
 
 - **Engine:** yt-dlp + ffmpeg
 - **Web layer:** PHP 8.x
 - **Frontend:** Vanilla JS + CSS (no framework)
 - **Server:** Nginx + PHP-FPM
+- **Analytics:** Plausible (self-hosted, cookie-free, GDPR-compliant)
 
 ---
 
