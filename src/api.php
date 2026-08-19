@@ -3172,6 +3172,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
+                'action' => 'download',
                 'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -3246,6 +3247,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
+                    'action' => 'download',
                     'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
@@ -3475,6 +3477,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => DOWNLOAD_TIMEOUT,
                 'request_id' => $request_id,
@@ -3520,6 +3523,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
+                'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => DOWNLOAD_TIMEOUT,
                 'request_id' => $request_id,
@@ -3728,6 +3732,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
                     'error_code' => 'VERIFICATION_FAILED',
+                    'action' => 'download',
                     'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
@@ -3951,6 +3956,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
                 'error_code' => 'FILE_READ_ERROR',
+                'action' => 'download',
                 'retry_after' => max(0, DOWNLOAD_TIMEOUT),
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -3970,6 +3976,7 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
+                    'action' => 'download',
                     'retry_after' => 0,
                     'request_id' => $request_id,
                     'source_url' => $url,
