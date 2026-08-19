@@ -471,6 +471,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
+| `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If the issue persists, the server's network route to the source may be degraded. |
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
@@ -567,6 +568,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `502` | `SSL_ERROR` | SSL/TLS error when connecting to the source — try again or use AhoyVPN |
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `502` | `CONNECTION_FAILED` | Could not connect to the source |
+| `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
 | `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
@@ -924,6 +926,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `SOURCE_HTTP_ERROR` | Source site returned an unexpected HTTP error | Try again shortly |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
+| `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
 | `INVALID_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
@@ -1017,6 +1020,7 @@ Common reasons:
 - **LOGIN_REQUIRED** — The video requires a platform account. See the cookies section to sign in.
 - **AGE_RESTRICTED** — YouTube requires age verification. Pass your browser cookies to enable this.
 - **SOURCE_TIMEOUT** — The source site is slow or overloaded. Try audio-only (fastest) or a lower resolution.
+- **CONNECTION_TIMEOUT** — The TCP connection to the source stalled before any data was received. This is a network-level issue (distinct from SOURCE_TIMEOUT which fires after data transfer begins). Try again — if it persists, the server's route to the source platform may be degraded.
 - **DOWNLOAD_TIMEOUT** — The file exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). Try a smaller format or audio-only.
 - **VPN blocks** — Many sites (YouTube, TikTok, etc.) block VPN exit IPs. If you get repeated `SOURCE_FORBIDDEN` errors, try a different VPN server location.
 
