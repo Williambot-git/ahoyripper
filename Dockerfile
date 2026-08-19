@@ -137,11 +137,16 @@ COPY deploy/nginx-docker.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
 
-# Docker HEALTHCHECK — uses the built-in /src/api.php?action=check endpoint
+# Docker HEALTHCHECK — uses the built-in /?action=check endpoint
 # which is a zero-dependency JSON ping (no yt-dlp, no syscalls, no /proc).
 # Safe to call every 10s. Fails fast if PHP-FPM or nginx is down.
+# NOTE: uses / (root) not /src/api.php — the nginx config serves the API from
+# root /app/public with "location = /src/api.php", which maps to /app/public/src/api.php
+# (does not exist). The root location ("location /") handles PHP via the ~ \.php$ block
+# and correctly routes /?action=check to api.php. Matches the docker-compose.yml
+# healthcheck which uses "http://localhost:8080/".
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -sf http://localhost:8080/src/api.php?action=check > /dev/null || exit 1
+    CMD curl -sf http://localhost:8080/?action=check > /dev/null || exit 1
 
 # Use php-fpm in foreground mode — correct for single-process Docker containers.
 # DO NOT use "service php*-fpm start" here: the glob pattern is resolved by

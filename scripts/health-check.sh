@@ -9,7 +9,13 @@
 set -euo pipefail
 
 BASE_URL="${1:-http://localhost:8080}"
-API="${BASE_URL}/src/api.php"
+
+# Use / (root) instead of /src/api.php — the Docker nginx config serves the
+# API from root /app/public with "location = /src/api.php", which maps to
+# /app/public/src/api.php (does not exist). The root location handles PHP via
+# the ~ \.php$ block and correctly routes /?action=check to api.php.
+# The docker-compose healthcheck uses http://localhost:8080/ for the same reason.
+API="${BASE_URL}/"
 
 echo "=== AhoyRipper Health Check ==="
 echo "Base URL: $BASE_URL"
