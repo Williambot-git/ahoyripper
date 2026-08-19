@@ -583,10 +583,10 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 
 ### Health check / progress
 ```
-GET /src/api.php?action=check          # lightweight internal ping (Docker healthcheck-safe)
-GET /src/api.php?action=health         # full system status with resource metrics
+GET /src/api.php?action=check           # lightweight internal ping (Docker healthcheck-safe)
+GET /src/api.php?action=health          # full system status with resource metrics
 GET /src/api.php?action=progress        # alias for health (same response shape)
-GET /src/api.php?action=health&probe=1 # include live yt-dlp connectivity probe
+GET /src/api.php?action=health&probe=1  # include live yt-dlp connectivity probe
 POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)
 POST /src/api.php?action=client-error   # client-side JS error reporting (internal)
 ```
