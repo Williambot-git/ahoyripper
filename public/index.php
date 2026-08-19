@@ -384,7 +384,12 @@ header_remove('X-Powered-By');
     </div>
 
     <!-- Progress -->
-    <div class="rip-progress" id="progressBox">
+    <!-- role="status" + aria-live="polite" + aria-atomic="true": screen readers
+         announce every text update inside this region (e.g. "Fetching info...",
+         "Downloading...", "Processing...") without interrupting the user's current
+         task. aria-atomic="true" ensures the full message is read even if only
+         part of the text changes. -->
+    <div class="rip-progress" id="progressBox" role="status" aria-live="polite" aria-atomic="true">
       <div class="spinner"></div>
       <p class="progress-text" id="progressText">Fetching info...</p>
       <div class="progress-bar-wrap">
