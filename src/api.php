@@ -2684,6 +2684,7 @@ switch ($action) {
                 'action' => 'info',
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'source_url_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_delta),
