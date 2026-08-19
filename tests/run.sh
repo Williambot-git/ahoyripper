@@ -18,6 +18,24 @@ echo ""
 # Track overall pass/fail
 FAILED=0
 
+# ─── PHP syntax check (all test files) ─────────────────
+echo "==> Checking PHP syntax in test files..."
+FAILED_SYNTAX=0
+for f in "$SCRIPT_DIR"/*.php; do
+    result=$(php -l "$f" 2>&1 || true)
+    if echo "$result" | grep -q "No syntax errors"; then
+        echo "  ✓ $(basename "$f")"
+    else
+        echo "  ✗ $(basename "$f"): $result"
+        FAILED_SYNTAX=1
+    fi
+done
+if [ "$FAILED_SYNTAX" -eq 1 ]; then
+    echo "PHP syntax errors detected in test files."
+    FAILED=1
+fi
+echo ""
+
 # ─── PHP unit tests (api_test.php) ───────────────────
 echo "==> Running api_test.php (standalone function tests)..."
 if php "$SCRIPT_DIR/api_test.php"; then
