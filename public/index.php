@@ -367,7 +367,7 @@ header_remove('X-Powered-By');
         <noscript><p class="rip-noscript-msg">JavaScript is required to use AhoyRipper. Please enable JavaScript in your browser settings.</p></noscript>
       </form>
       <p class="rip-hint">
-        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN" aria-label="Free rips remaining today"></span>
+        <span id="quotaDisplay" class="quota-count" title="Get unlimited rips with AhoyVPN" aria-label="Free rips remaining today" role="status" aria-live="polite"></span>
         <span id="quotaLimit" class="quota-limit" title="Get unlimited rips with AhoyVPN"></span>
         <span id="quotaLabel"> free rips/day &mdash;</span>
         <a href="https://ahoyvpn.com" id="quotaUpgrade" class="quota-upgrade-link" target="_blank" rel="noopener">get unlimited</a>
@@ -883,6 +883,37 @@ window.addEventListener('appinstalled', function() {
     }, 5000);
   }
 
+  // Inject a visually-hidden live region announcement for screen readers
+  // when quota is exhausted. The live region is inserted into the DOM and
+  // auto-removed after the announcement window so it doesn't persist.
+  // aria-live="assertive" (not polite) because the user must act immediately.
+  function announceQuotaExhausted() {
+    var existing = document.getElementById('quotaExhaustedAlert');
+    if (existing) { existing.remove(); }
+    var el = document.createElement('div');
+    el.id = 'quotaExhaustedAlert';
+    el.setAttribute('role', 'alert');
+    el.setAttribute('aria-live', 'assertive');
+    el.setAttribute('aria-atomic', 'true');
+    // Fully hidden visually but accessible to screen readers and ATs.
+    // position:fixed + off-screen clipping is the standard accessible-hidden pattern
+    // (avoids display:none which ATs skip, and avoids opacity:0 which some ATs skip).
+    el.style.cssText = [
+      'position: fixed',
+      'width: 1px',
+      'height: 1px',
+      'padding: 0',
+      'margin: -1px',
+      'overflow: hidden',
+      'clip: rect(0,0,0,0)',
+      'white-space: nowrap',
+      'border: 0'
+    ].join('; ');
+    el.textContent = 'Daily quota exhausted. Upgrade to AhoyVPN for unlimited rips, or wait until midnight UTC for your next free rip.';
+    document.body.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 10000);
+  }
+
   function formatDuration(secs) {
     if (!secs) return '';
     var h = Math.floor(secs / 3600);
@@ -1231,6 +1262,7 @@ window.addEventListener('appinstalled', function() {
   }
 
   var isFetching = false; // guard against duplicate concurrent fetches (e.g. paste + Enter/Go)
+  var _lastAnnouncedQuota = null; // sentinel: last quota value that triggered a screen-reader announcement
 
   async function fetchInfo() {
     const url = input.value.trim();
@@ -1287,10 +1319,17 @@ window.addEventListener('appinstalled', function() {
         }
         // Fully exhausted: distinct visual state (darker red, faster pulse)
         // signals the user must take action (upgrade or wait) right now.
+        // Only announce via screen-reader live region on the transition TO 0,
+        // not on every info call that returns 0 (avoids repeated announcements).
         if (Number(rem) === 0) {
           el.classList.add('exhausted');
+          if (_lastAnnouncedQuota !== 0) {
+            _lastAnnouncedQuota = 0;
+            announceQuotaExhausted();
+          }
         } else {
           el.classList.remove('exhausted');
+          _lastAnnouncedQuota = null;
         }
         // When quota is exhausted, make the upgrade link more prominent
         if (upgradeEl) {
