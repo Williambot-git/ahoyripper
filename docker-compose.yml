@@ -21,6 +21,7 @@ services:
       - FFPROBE_TIMEOUT=${FFPROBE_TIMEOUT:-10}
       - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
       - RATE_LIMIT=${RATE_LIMIT:-30}
+      - PLAUSIBLE_HOST=${PLAUSIBLE_HOST:-plausible.io}
       # YTDLP_VERSION: yt-dlp release version to install.
       # Use 'latest' (default) to always use the newest release for automatic updates.
       # Pin to a specific version (e.g. '2024.08.06') for reproducible builds and
