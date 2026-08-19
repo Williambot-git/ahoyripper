@@ -13,6 +13,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f0f">
+  <!-- application-name: used by Windows 7+ taskbar jump list and Start menu tile
+       when a user pins the site. Identifies the app independently of the page title.
+       Mirrors the app name from manifest.json. -->
+  <meta name="application-name" content="AhoyRipper">
+  <!-- msapplication-* tiles: Windows 8+ Start screen pinned-site tiles.
+       msapplication-tilecolor sets the background color (matches theme-color).
+       msapplication-tileimage is the 144x144 PNG tile icon (scaled by Windows).
+       msapplication-navbutton-color styles the back button in the tile interface.
+       These are read by Windows to render the pinned site tile. -->
+  <meta name="msapplication-tilecolor" content="#0f0f0f">
+  <meta name="msapplication-tileimage" content="https://ahoyripper.com/favicon-144.png">
+  <meta name="msapplication-navbutton-color" content="#0f0f0f">
   <meta name="referrer" content="no-referrer">
   <!-- HSTS — mirrors the header set by index.php so the policy is enforced
        on 404 responses even if nginx's add_header is ever overridden. -->
