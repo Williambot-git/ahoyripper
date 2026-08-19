@@ -159,7 +159,9 @@ header_remove('X-Powered-By');
        credentials or cookies with the og:image meta tag's fetch (which also uses
        crossorigin="anonymous" behavior implicitly for same-site URLs). Adding
        crossorigin="anonymous" ensures both fetches use the same CORS context,
-       avoiding a double-fetch that wastes bandwidth and can delay LCP. -->
+       avoiding a double-fetch that wastes bandwidth and can delay LCP.
+       The crossorigin attribute here must match the og:image:alt text so the
+       same CORS rules apply to both the preload and the meta tag reference. -->
   <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
