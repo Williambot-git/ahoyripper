@@ -1046,14 +1046,23 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     }
 
     // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
-    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above) and NOT followed by
-    // " after" (PHP timeout format: "Process timed out after 45s"). The negative
+    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above) and NOT followed
+    // by " after" (PHP timeout format: "Process timed out after 45s"). The negative
     // lookahead (?!) at word boundary rejects "Process timed out" at the word level
     // rather than relying solely on the (?<!Process ) lookbehind, making the intent
     // explicit and robust against future variations of the PHP timeout message.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
+    }
+    // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
+    // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
+    // transferred but the source took too long). yt-dlp emits "connection timed out"
+    // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
+    // connection-failure patterns (connection reset, broken pipe, etc.) are caught
+    // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+    if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'status' => 504];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
@@ -2594,11 +2603,13 @@ switch ($action) {
             $err_status_map = [
                 'GEOBLOCKED' => 451, 'COPYRIGHT_REMOVED' => 451, 'DISALLOWED_CONTENT' => 451,
                 'VIDEO_UNAVAILABLE' => 410,
+                'CONNECTION_FAILED' => 502,
+                'CONNECTION_TIMEOUT' => 504,
                 'SOURCE_RATE_LIMITED' => 429,
                 'SOURCE_TIMEOUT' => 504,
                 'PRIVATE_VIDEO' => 403, 'AGE_RESTRICTED' => 403, 'LOGIN_REQUIRED' => 401,
                 'UNSUPPORTED_SITE' => 404, 'PLAYLIST_MISSING' => 404,
-                'SSL_ERROR' => 502, 'CONNECTION_FAILED' => 502,
+                'SSL_ERROR' => 502,
                 'FILE_TOO_LARGE' => 413,
                 'DOWNLOAD_EMPTY' => 500,
                 'FILE_READ_ERROR' => 500,
@@ -2611,7 +2622,6 @@ switch ($action) {
                 'INVALID_FORMAT_ID' => 400,
                 'FORMAT_UNAVAILABLE' => 422,
                 'YTDLP_ERROR' => 422, 'PARSE_ERROR' => 422,
-                'SOURCE_FORBIDDEN' => 403, 'SOURCE_NOT_FOUND' => 404,
                 'SOURCE_SERVER_ERROR' => 502, 'SOURCE_HTTP_ERROR' => 502,
                 'FORBIDDEN_ORIGIN' => 403,
                 // UNKNOWN_ACTION uses 404 (set directly by http_response_code in the
