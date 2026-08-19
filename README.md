@@ -420,6 +420,25 @@ The `source_url` field in the info response is the exact URL that was ripped —
 }
 ```
 
+**Info error response (422 — classified yt-dlp error):**
+```json
+{
+  "error": "This video is geo-restricted in your region.",
+  "error_code": "GEOBLOCKED",
+  "action": "info",
+  "request_id": "a3f1b2c9d4e5f678",
+  "source_url": "https://www.youtube.com/watch?v=...",
+  "yt_dlp_version": "2026.03.17",
+  "api_version": "1.0.0",
+  "retry_after": 300,
+  "quota_remaining": 4,
+  "quota_limit": 5,
+  "quota_reset": 1749254400,
+  "quota_reset_unix": 1749254400,
+  "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
+}
+```
+
 > **Note:** `api_version` appears on `action=check`, `action=info`, `action=download`, and `action=health` responses — consistent across all endpoints so API consumers always have the version.
 
 
