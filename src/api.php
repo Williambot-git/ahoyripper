@@ -4335,6 +4335,7 @@ switch ($action) {
         $api_ok = $yt_dlp_ok && $ffmpeg_ok;
         $out = [
             'status' => $api_ok ? 'ok' : 'degraded',
+            'action' => 'health',
             'api_ok' => $api_ok,
             'server_time' => date('c'),
             'server_time_unix' => time(),
