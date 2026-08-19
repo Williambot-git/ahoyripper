@@ -4489,10 +4489,14 @@ switch ($action) {
                     // Guard: $probe_err === '' distinguishes this from case 2 (PHP-side timeout),
                     // where proc_open succeeds but $probe_err contains "Process timed out...".
                     // Without the guard, strpos('', 'timed out')===0 would incorrectly match case 2
-                    // and classify a missing binary as SOURCE_TIMEOUT instead of YTDLP_NOT_FOUND.
+                    // and classify a missing binary as SOURCE_TIMEOUT instead of PROC_OPEN_FAILED.
+                    // Uses PROC_OPEN_FAILED (not YTDLP_NOT_FOUND) to match the error code used
+                    // in the info and download action paths, so operators get a consistent
+                    // HTTP 500 / PROC_OPEN_FAILED signal regardless of which action triggered
+                    // the startup failure.
                     if ($probe_exit === -1 && $probe_err === '' && $probe_raw_err === '') {
                         $probe_classified = [
-                            'code' => 'YTDLP_NOT_FOUND',
+                            'code' => 'PROC_OPEN_FAILED',
                             'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
                         ];
                     // case 2: PHP-side timeout (proc_open succeeded, process was killed)
