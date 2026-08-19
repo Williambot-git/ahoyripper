@@ -327,7 +327,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             'id' => $format_id,
             'label' => $label,
             'description' => $desc,
-            'format_description' => $format_description,
+            'format_note' => $format_note,
+            'format_description' => $format_description !== 'Unknown' ? $format_description : null,
             'ext' => $ext,
             'filesize_mb' => $filesize_mb,
             'height' => $height,
@@ -1073,6 +1074,33 @@ $result_note = parseFormats($json_note);
 $note_desc = $result_note['formats'][0]['description'] ?? '';
 test('description falls back to format_note when format_description is null/empty',
     strpos($note_desc, '720p60 HDR') !== false);
+
+// format_note must be included in the API response (was silently dropped before this fix).
+// yt-dlp provides format_note for HDR, 60fps, and other quality modifiers.
+$note_only_fmt = makeFormat([
+    'format_note' => 'HDR',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+    'width' => 1920, 'height' => 1080,
+]);
+$json_note_only = makeJson('Note Test', [$note_only_fmt]);
+$result_note_only = parseFormats($json_note_only);
+$fn_val = $result_note_only['formats'][0]['format_note'] ?? 'MISSING';
+test('format_note is present in API response (not silently dropped)',
+    $fn_val === 'HDR');
+
+// format_description must be preserved when non-'Unknown' (not normalized to null
+// just because clean() was called on it).
+$fmt_with_desc = makeFormat([
+    'format_description' => '1080p60 HDR',
+    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'ext' => 'mp4',
+    'width' => 1920, 'height' => 1080,
+    'fps' => 60,
+]);
+$json_with_desc = makeJson('Desc Test', [$fmt_with_desc]);
+$result_with_desc = parseFormats($json_with_desc);
+$fd_val = $result_with_desc['formats'][0]['format_description'] ?? 'MISSING';
+test('format_description is preserved when non-Unknown (not normalized to null)',
+    $fd_val === '1080p60 HDR');
 
 // "0" format_description is truthy and should be used (not treated as absent).
 // empty("0") === true in PHP — this test guards against that PHP gotcha breaking
