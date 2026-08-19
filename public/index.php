@@ -351,6 +351,7 @@ header_remove('X-Powered-By');
           class="rip-input"
           id="urlInput"
           aria-label="Video or audio URL to download"
+          aria-describedby="errorBox"
           placeholder="Paste a link here..."
           value="<?= htmlspecialchars($default_url, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>"
           autocomplete="off"
