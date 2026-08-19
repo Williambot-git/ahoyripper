@@ -2285,11 +2285,12 @@ switch ($action) {
             $info_quota_before_refund = $daily_data['c'];
 
             // Surface daily quota state so the client can display remaining rips.
-            // Show how many rips remain AFTER this request: limit minus the new count,
-            // plus one so the count is from the user's perspective (c=5 after the
-            // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
+            // Show how many rips remain AFTER this request: limit minus the new count.
+            // c=1 (after 1st rip) means 1 rip has been consumed; remaining = limit - c = 5.
+            // c=5 (after 5th rip) means 5 rips consumed; remaining = 1 — the last rip.
+            // The X-DailyLimit-Remaining header must match quota_remaining in the JSON body.
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
             header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
             header('X-DailyLimit-Window: 86400');
         }
@@ -2983,11 +2984,12 @@ switch ($action) {
             $daily_fp = null;
 
             // Surface daily quota state so the client can display remaining rips.
-            // Show how many rips remain AFTER this request: limit minus the new count,
-            // plus one so the count is from the user's perspective (c=5 after the
-            // 5th rip means 1 is left, not 0 — the 6th rip is the one that fails).
+            // Show how many rips remain AFTER this request: limit minus the new count.
+            // c=1 (after 1st rip) means 1 rip has been consumed; remaining = limit - c = 5.
+            // c=5 (after 5th rip) means 5 rips consumed; remaining = 1 — the last rip.
+            // The X-DailyLimit-Remaining header must match quota_remaining in the JSON body.
             header('X-DailyLimit-Limit: ' . $daily_limit);
-            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c'] + 1));
+            header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $daily_data['c']));
             header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
             header('X-DailyLimit-Window: 86400');
         } else {
