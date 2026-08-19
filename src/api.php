@@ -3979,6 +3979,14 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: included for consistency with all other error responses.
+                // The file was downloaded by yt-dlp (quota was charged) but could not be
+                // read back for streaming — this is a server-side issue, not a quota problem.
+                // Quota was not refunded here since the download itself succeeded.
+                'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                'quota_limit' => $unlimited ? -1 : $daily_limit,
+                'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
