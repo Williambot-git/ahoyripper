@@ -2974,6 +2974,7 @@ switch ($action) {
                         ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN."
                         : "Daily limit reached. This server does not offer a free tier. For unlimited access, get AhoyVPN.",
                     'error_code' => 'DAILY_LIMIT',
+                    'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
