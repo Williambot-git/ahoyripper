@@ -731,9 +731,9 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 ```json
 {
   "ok": true,
+  "request_id": "a3f1b2c9d4e5f678",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.06.02",
-  "request_id": "a3f1b2c9d4e5f678"
+  "yt_dlp_version": "2026.06.02"
 }
 ```
 

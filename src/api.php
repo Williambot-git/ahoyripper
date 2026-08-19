@@ -4262,9 +4262,10 @@ switch ($action) {
 
         logRequest('client-error', 200, $entry);
 
-        // Consistent JSON response with api_version for API surface parity.
+        // Consistent JSON response with api_version and request_id for API surface parity.
         echo json_encode([
             'ok' => true,
+            'request_id' => $request_id,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
