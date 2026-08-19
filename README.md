@@ -310,7 +310,6 @@ ahoyripper/
 │   ├── clean_test.php                # Unit tests for the clean() sanitisation function
 │   ├── is_valid_url_test.php         # Unit tests for SSRF URL validation
 │   ├── parse_formats_test.php        # Unit tests for parseFormats()
-│   ├── playlist_param_test.php       # Integration tests for playlist URL parameter
 │   └── resolve_playlist_flag_test.php # Unit tests for resolvePlaylistFlag()
 ├── .env.example                 # Environment variable template (Docker)
 ├── .dockerignore                # Docker build context exclusions
