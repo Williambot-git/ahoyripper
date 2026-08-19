@@ -1826,29 +1826,25 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unavailable');
-            header('X-DL-RateLimit-Limit: -1');
-            header('X-DL-RateLimit-Remaining: -1');
-            header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
                 'action' => 'download',
                 // retry_after: 0 signals "retry immediately once input is corrected" — a
                 // validation error has no server-side backoff; the client just needs to
-                // provide valid input. Consistent with MISSING_URL and INVALID_URL.
+                // provide valid input. Consistent with MISSING_FORMAT and other validation errors.
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'format_id_missing' => true,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                // quota_remaining: -1 signals that quota tracking is not available at this
-                // early validation stage (before the quota file is opened). Matches the
-                // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
-                // same reason. API consumers should treat -1 as "unknown remaining quota".
-                'quota_remaining' => -1,
+                // quota_remaining: the quota was already incremented by the prior info action,
+                // so the actual remaining count is available here (not -1). $post_refund_count
+                // is initialised to $daily_limit and updated by refundQuota() if needed.
+                'quota_remaining' => $post_refund_count,
                 'quota_limit' => $daily_limit,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
