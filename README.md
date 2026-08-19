@@ -1006,6 +1006,7 @@ A `yt_dlp_probe.ok: false` response indicates that yt-dlp itself is failing — 
 - **Daily quota resets at midnight UTC** — The free tier allows 5 total rips per day. Each call to the `info` or `download` API counts as one rip. Quota resets at 00:00 UTC.
 - **API key** — Enter your AhoyVPN unlimited key in the optional field to bypass the daily 5-rip limit.
 - **Add to browser search** — Chrome, Firefox, Safari, and Edge can add AhoyRipper as a search engine via OpenSearch. Once added, type `ahoyripper.com` in the URL bar, press Tab, and paste any video link to rip it instantly. Look for the "Add AhoyRipper" prompt when visiting ahoyripper.com, or search your browser's settings for "search engines."
+- **Share on social media** — Sharing `ahoyripper.com` or `ahoyripper.com/?url=...` on X/Twitter, Facebook, or Reddit renders a rich link preview with the AhoyRipper logo and description via Open Graph and Twitter Card meta tags. Pre-filling `?url=...` in the shared link lets recipients start a rip with one click.
 
 ---
 
