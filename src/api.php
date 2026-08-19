@@ -1728,6 +1728,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $sendDailyLimitHeaders($daily_limit, null);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -1737,6 +1738,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'retry_after' => 0,
             'request_id' => $request_id,
             'source_url' => $url,
+            'source_url_missing' => false,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             // quota_remaining: -1 signals that quota tracking is not available at this
@@ -1778,6 +1780,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unavailable');
         $sendDailyLimitHeaders($daily_limit, null);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
@@ -1787,6 +1790,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'retry_after' => 0,
             'request_id' => $request_id,
             'source_url' => $url,
+            'source_url_missing' => false,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             // quota_remaining: -1 signals that quota tracking is not available at this
@@ -1846,6 +1850,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'source_url_missing' => false,
                 'format_id_missing' => true,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
@@ -1895,6 +1900,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
@@ -1905,6 +1911,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'source_url_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining: -1 signals that quota tracking is not available at this
