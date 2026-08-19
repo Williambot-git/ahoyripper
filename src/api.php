@@ -197,10 +197,10 @@ if ($referer) {
 }
 
 if ($blocked) {
-    // Exempt the check action (zero-dependency monitoring ping used by Docker
-    // HEALTHCHECK and external probes that cannot send a browser Referer header).
-    // info/download remain fully protected — monitoring tools should use action=check.
-    if ($action !== 'check') {
+    // Exempt check and analytics actions (zero-dependency monitoring ping and
+    // analytics beacon used by Docker HEALTHCHECK and external probes that cannot
+    // send a browser Referer header). info/download remain fully protected.
+    if (!in_array($action, ['check', 'analytics'], true)) {
         logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
         error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
         http_response_code(403);
@@ -4659,6 +4659,95 @@ switch ($action) {
         @file_put_contents('/var/log/ahoyripper/csp-reports.log', $log_line . "\n", FILE_APPEND);
         // 204 No Content — the standard response for successful CSP reports.
         // Browsers don't parse the response body and don't retry on 204.
+        http_response_code(204);
+        break;
+    }
+
+    case 'analytics': {
+        // Thin proxy for Plausible analytics — receives browser beacons from
+        // /js/analytics.js and forwards them to the self-hosted Plausible server.
+        // This avoids sending analytics requests to third-party servers from the
+        // browser, keeps all data within the same origin, and lets the server
+        // control the destination (PLAUSIBLE_HOST env var).
+        //
+        // Benefits:
+        //   - No third-party requests from the browser (unlike direct Plausible calls)
+        //   - Server-side rate limiting on the analytics endpoint
+        //   - Server strips PII (IPs, full URLs with video links) before forwarding
+        //   - CSP-compliant: analytics.js loads from same origin, not external domain
+        //   - Fully self-hosted: no plausible.io domain required in connect-src
+        //
+        // To configure: set PLAUSIBLE_HOST env var to your self-hosted Plausible domain
+        // (or 'plausible.io' for the official hosted service). Defaults to 'plausible.io'.
+        //
+        // If no PLAUSIBLE_HOST is configured, the endpoint returns 204 silently so
+        // analytics failures never affect page load or UX.
+
+        // Only accept POST (navigator.sendBeacon uses POST).
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            header('Allow: POST');
+            http_response_code(204); // Always return 204 so beacons don't retry.
+            break;
+        }
+
+        $raw_body = @file_get_contents('php://input');
+        if ($raw_body === false || $raw_body === '') {
+            http_response_code(204);
+            break;
+        }
+
+        $payload = @json_decode($raw_body, true);
+        if (!is_array($payload)) {
+            http_response_code(204);
+            break;
+        }
+
+        // Determine Plausible host — same default as the JS client.
+        $plausible_host = getenv('PLAUSIBLE_HOST') ?: 'plausible.io';
+
+        // Strip PII from the payload before forwarding:
+        //   - URL: remove any ?url= param (contains the video link prefill).
+        //   - referrer: keep only the hostname (strip full URL).
+        //   - IP addresses never reach Plausible (nginx strips them before PHP).
+        if (isset($payload['url']) && is_string($payload['url'])) {
+            $parsed = @parse_url($payload['url']);
+            if (is_array($parsed)) {
+                $payload['url'] = ($parsed['scheme'] ?? 'https') . '://'
+                    . ($parsed['host'] ?? '')
+                    . ($parsed['path'] ?? '');
+            }
+        }
+        if (isset($payload['referrer']) && is_string($payload['referrer'])) {
+            $ref_parsed = @parse_url($payload['referrer']);
+            $payload['referrer'] = is_array($ref_parsed)
+                ? (($ref_parsed['scheme'] ?? 'https') . '://' . ($ref_parsed['host'] ?? ''))
+                : '';
+        }
+
+        // Forward to Plausible API via a local HTTP request.
+        // Use file_get_contents with stream context to avoid adding a dependency.
+        $forward_url = 'https://' . $plausible_host . '/api/event';
+        $forward_body = @json_encode($payload);
+
+        $context = @stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n",
+                'content' => $forward_body,
+                'timeout' => 5, // 5s — analytics delivery is non-critical.
+                'ignore_errors' => true,
+            ],
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $response = @file_get_contents($forward_url, false, $context);
+
+        // Always return 204 to the browser — analytics is fire-and-forget.
+        // Never let Plausible downtime affect user UX.
         http_response_code(204);
         break;
     }

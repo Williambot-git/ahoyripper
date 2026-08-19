@@ -295,6 +295,11 @@ header_remove('X-Powered-By');
 
 <meta name="keywords" content="media ripper, video downloader, audio downloader, video converter, audio converter, download video, download audio, free media converter, ripper tool, online ripper, web ripper, YouTube downloader, TikTok downloader, Twitter video downloader, SoundCloud downloader, Instagram downloader, Facebook video downloader, Vimeo downloader, mp4 downloader, mp3 downloader, FLAC downloader, OGG downloader, M4A downloader, WEBM downloader, video to mp3, extract audio">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<!-- Plausible analytics — self-hosted, cookie-free, GDPR-compliant.
+     No PII leaves the browser. Video URLs in the query string are stripped
+     before sending so the analytics only sees page paths, not video links.
+     To disable, comment out the script below. -->
+<script defer src="/js/analytics.js"></script>
 </head>
 <body>
 
