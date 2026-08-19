@@ -106,6 +106,7 @@ WORKDIR /app
 
 COPY public/ ./public/
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 
 # Bump PWA ServiceWorker cache version on every deploy so returning
 # PWA users fetch fresh static assets (CSS, JS, icons) automatically.
