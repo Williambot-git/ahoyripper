@@ -4589,6 +4589,10 @@ switch ($action) {
         // logs and caches live), which is the correct partition for this app's
         // health check rather than the root partition.
 
+        // X-Request-ID: echo the client-provided ID or the server-generated one.
+        // Set explicitly here (not relying on the top-of-script block) so the health
+        // response always includes it regardless of how the case block is entered.
+        header('X-Request-ID: ' . $request_id);
         // Rate-limit headers for the health endpoint — signals to clients that
         // this endpoint is not subject to download rate limiting (X-DL-RateLimit
         // uses -1/unlimited sentinel values since health is a read-only probe).
