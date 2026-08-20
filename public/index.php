@@ -60,6 +60,11 @@ header('X-Download-Options: noopen');
 // archival) from indexing or following links on this page. The web UI is not
 // useful as a search result and should not be vector for training data scraping.
 header('X-Robots-Tag: noindex, noai, noimage, noydir');
+// Permissions-Policy: disable browser features that are irrelevant to a media ripper
+// (camera, microphone, geolocation, interest-cohort). Mirrors the header set by
+// api.php. The meta tag (line ~205) provides partial coverage for browsers that
+// don't support the HTTP header, but the header call ensures full enforcement.
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
 
 header('X-Request-ID: ' . $page_request_id);
 // Remove the "PHP/x.y.z" Server header that PHP-FPM adds automatically.

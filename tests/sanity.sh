@@ -267,15 +267,17 @@ for header in "${REQUIRED_HEADERS[@]}"; do
 done
 
 echo ""
-echo "==> Checking security headers in index.php (HTML page entry point)... "
+echo "==> Checking security headers in index.php (HTML page entry point)..."
 # index.php must also carry key security headers for defense-in-depth.
-# X-Content-Type-Options, X-Frame-Options, X-Download-Options, X-Robots-Tag
-# are already verified in api.php above; check they are also in index.php.
+# X-Content-Type-Options, X-Frame-Options, X-Download-Options, X-Robots-Tag,
+# Referrer-Policy, Permissions-Policy are already verified in api.php above;
+# check they are also present in index.php via header() calls.
 INDEX_REQUIRED_HEADERS=(
     "X-Content-Type-Options"
     "X-Frame-Options"
     "X-Download-Options"
     "X-Robots-Tag"
+    "Permissions-Policy"
 )
 for header in "${INDEX_REQUIRED_HEADERS[@]}"; do
     if grep -q "$header" public/index.php; then
