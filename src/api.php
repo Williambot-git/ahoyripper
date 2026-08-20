@@ -4048,11 +4048,18 @@ switch ($action) {
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
                     'action' => 'download',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 0,
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // quota fields: included for consistency with all other download error responses.
+                    // Quota was not charged since no usable file was received.
+                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                    'quota_limit' => $unlimited ? -1 : $daily_limit,
+                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
