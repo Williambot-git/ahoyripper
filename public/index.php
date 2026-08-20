@@ -134,10 +134,16 @@ header_remove('X-Powered-By');
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <!-- og:title:alt and og:description:alt provide text alternatives for the Open
+       Graph title and description — used by screen readers, non-visual clients, and
+       indexing bots. Must match twitter:title and twitter:description respectively.
+       Keep all four in sync when updating share copy. -->
+  <meta property="og:title:alt" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
+  <meta property="og:description:alt" content="Download video &amp; audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo &amp; 1872+ platforms. Free, no signup, no ads.">
   <!-- og:image:alt provides a text alternative for the Open Graph image — used by
        screen readers, non-visual social media clients, and indexing bots that cannot
        process images. Must match twitter:image:alt exactly (Twitter Card validation).
-       Keep both in sync when updating share copy. -->
+       Keep og:image:alt and twitter:image:alt in sync when updating share copy. -->
   <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
   <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
        This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
