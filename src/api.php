@@ -3765,6 +3765,7 @@ switch ($action) {
                     'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
                     'error_code' => 'VERIFICATION_FAILED',
                     'action' => 'download',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
