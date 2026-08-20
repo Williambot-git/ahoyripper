@@ -2594,6 +2594,7 @@ switch ($action) {
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
                 // Quota was incremented before this error path; the refund above reversed it.
