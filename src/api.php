@@ -3562,12 +3562,19 @@ switch ($action) {
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // retry_after: delta-seconds until the download can be retried.
+            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+            // delta-seconds is simpler and consistent with all other Retry-After
+            // headers in this file. Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
+            // keeps this as a delta-seconds value.
+            $retry_delta = DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
-                'retry_after' => DOWNLOAD_TIMEOUT,
+                'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -3616,12 +3623,19 @@ switch ($action) {
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // retry_after: delta-seconds until the download can be retried.
+            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+            // delta-seconds is simpler and consistent with all other Retry-After
+            // headers in this file. Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
+            // keeps this as a delta-seconds value.
+            $retry_delta = DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
                 'error_code' => 'DOWNLOAD_EMPTY',
                 'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
-                'retry_after' => DOWNLOAD_TIMEOUT,
+                'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
