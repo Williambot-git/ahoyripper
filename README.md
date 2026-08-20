@@ -485,7 +485,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 | Code | Meaning |
 |------|---------|
-| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`), or missing format on download (`MISSING_FORMAT`) |
+| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`), missing format on download (`MISSING_FORMAT`), or invalid format ID (`INVALID_FORMAT_ID`) |
 | `401` | Invalid API key (`INVALID_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
@@ -602,9 +602,9 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 |------|--------------|---------|
 | `401` | `INVALID_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
 | `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
-| `422` | `MISSING_URL` | No URL was provided on the download request. |
-| `422` | `MISSING_FORMAT` | No format was selected on the download request. |
-| `422` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
+| `400` | `MISSING_URL` | No URL was provided on the download request. |
+| `400` | `MISSING_FORMAT` | No format was selected on the download request. |
+| `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
 | `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. The response body also includes `retry_after` (Unix timestamp), `quota_limit` (integer matching `quota_limit` on all other responses), and `upgrade_url` (AhoyVPN upsell link). |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
