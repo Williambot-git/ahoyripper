@@ -171,6 +171,11 @@ header_remove('X-Powered-By');
   <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
+  <!-- Canonical URL: tells search engines the definitive URL for this page,
+       preventing duplicate content issues when the same page is accessible via
+       multiple URLs (e.g. with/without www, with/without trailing slash,
+       with UTM parameters). Must match og:url for consistency. -->
+  <link rel="canonical" href="<?= $BASE_URL ?>">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">

@@ -2585,7 +2585,7 @@ switch ($action) {
             // countdown value regardless of when the response is processed.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
-            header('X-Download-Timeout: ' . INFO_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
