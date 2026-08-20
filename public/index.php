@@ -1133,18 +1133,21 @@ window.addEventListener('appinstalled', function() {
 
         // navigateOnSuccess guard: set to false when fetch fails so window.location.href
         // is not called (would otherwise download the JSON error body as a file).
-        // Client-side timeout: use the server-reported X-Download-Timeout (ms) so the
-        // client deadline never outlasts the server deadline. Falls back to 300000ms (5 min)
-        // if the header is absent (e.g. direct curl or old server).
-        var clientDownloadTimeout = 300000;
-        var downloadTimeoutHeader = resp.headers ? resp.headers.get('X-Download-Timeout') : null;
-        if (downloadTimeoutHeader !== null) {
-          var serverTimeoutSec = parseInt(downloadTimeoutHeader, 10);
-          if (!isNaN(serverTimeoutSec) && serverTimeoutSec > 0) {
-            clientDownloadTimeout = serverTimeoutSec * 1000;
-          }
-        }
-        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(clientDownloadTimeout) })
+        //
+        // NOTE: The download action (action=download) returns a JSON redirect signal
+        // — it does NOT stream the file bytes. The actual file download happens via
+        // window.location.href (a separate browser navigation request), which carries
+        // the X-Download-Timeout as a query parameter and is handled independently by
+        // the server. The X-Download-Timeout header from the download action response
+        // therefore does NOT apply to this initial fetch — it would incorrectly apply
+        // the download's long timeout (up to DOWNLOAD_TIMEOUT, e.g. 3600s) to what
+        // should be a short validation round-trip. Use a fixed 30-second client timeout
+        // for this fetch: the download action responds quickly (it spawns yt-dlp and
+        // immediately returns), so a 30s deadline is more than sufficient. If this
+        // fetch times out, the download action is genuinely unresponsive and the user
+        // should see the timeout error rather than waiting for the much longer
+        // DOWNLOAD_TIMEOUT to elapse.
+        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(30000) })
           .then(function(resp) {
             if (!resp.ok) {
               navigateOnSuccess = false;
@@ -1205,8 +1208,9 @@ window.addEventListener('appinstalled', function() {
             navigateOnSuccess = false;
             var msg = 'Download failed. Try another format.';
             if (dlErr.name === 'AbortError') {
-              var timeoutSec = downloadTimeoutHeader ? parseInt(downloadTimeoutHeader, 10) : 300;
-              msg = 'Download timed out after ' + timeoutSec + 's. The file may be too large or the source is slow. Try a smaller format.';
+              // The fetch timeout is fixed at 30s (see above). If this fires, the
+              // download action is genuinely unresponsive — not a slow source issue.
+              msg = 'Download timed out after 30s. The server may be overloaded. Try again shortly or pick a smaller format.';
             }
             showError(msg);
             setLoading(false);
