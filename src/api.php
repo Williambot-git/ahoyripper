@@ -2685,6 +2685,7 @@ switch ($action) {
                 'SOURCE_TIMEOUT' => 504,
                 'SSL_ERROR' => 502,
                 'UNSUPPORTED_SITE' => 404,
+                'PROBE_FAILED' => 503,
                 'VERIFICATION_FAILED' => 500,
                 'VIDEO_UNAVAILABLE' => 410,
                 'YTDLP_ERROR' => 422,
@@ -4795,7 +4796,11 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             header('Allow: POST');
-            http_response_code(204); // Always return 204 so beacons don't retry.
+            echo json_encode([
+                'error' => 'Method Not Allowed. Use POST for analytics beacons.',
+                'error_code' => 'METHOD_NOT_ALLOWED',
+                'request_id' => $request_id,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
 
