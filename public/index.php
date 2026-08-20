@@ -129,22 +129,18 @@ header_remove('X-Powered-By');
   <meta property="og:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
   <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
   <meta property="og:site_name" content="AhoyRipper">
-  <meta property="og:image" content="<?= $BASE_URL ?>/og-image.png">
-  <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.png">
-  <meta property="og:image:type" content="image/png">
+  <meta property="og:image" content="<?= $BASE_URL ?>/og-image.webp">
+  <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.webp">
+  <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
   <!-- og:title:alt and og:description:alt provide text alternatives for the Open
        Graph title and description — used by screen readers, non-visual clients, and
        indexing bots. Must match twitter:title and twitter:description respectively.
        Keep all four in sync when updating share copy. -->
   <meta property="og:title:alt" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
   <meta property="og:description:alt" content="Download video &amp; audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo &amp; 1872+ platforms. Free, no signup, no ads.">
-  <!-- og:image:alt provides a text alternative for the Open Graph image — used by
-       screen readers, non-visual social media clients, and indexing bots that cannot
-       process images. Must match twitter:image:alt exactly (Twitter Card validation).
-       Keep og:image:alt and twitter:image:alt in sync when updating share copy. -->
-  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
   <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
        This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
        on social media or linked from external sites, since the og:image is the most
@@ -168,7 +164,7 @@ header_remove('X-Powered-By');
        avoiding a double-fetch that wastes bandwidth and can delay LCP.
        The crossorigin attribute here must match the og:image:alt text so the
        same CORS rules apply to both the preload and the meta tag reference. -->
-  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.png" crossorigin="anonymous">
+  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.webp" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL ?>">
   <!-- Canonical URL: tells search engines the definitive URL for this page,
@@ -185,7 +181,7 @@ header_remove('X-Powered-By');
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
   <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
-  <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.png">
+  <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
   <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
@@ -289,7 +285,7 @@ header_remove('X-Powered-By');
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "softwareVersion": "<?= $VERSION ?>",
-        "image": "<?= $BASE_URL ?>/og-image.png",
+        "image": "<?= $BASE_URL ?>/og-image.webp",
         "author": {
           "@type": "Organization",
           "name": "AhoyVPN",
