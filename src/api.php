@@ -1867,6 +1867,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unavailable');
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
