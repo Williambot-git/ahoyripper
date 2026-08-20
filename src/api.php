@@ -1698,6 +1698,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url_missing' => true,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            'upgrade_url' => UPGRADE_URL,
             // quota_remaining: -1 signals that quota tracking is not available at this
             // early validation stage (before the quota file is opened). Matches the
             // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
