@@ -372,6 +372,7 @@ header_remove('X-Powered-By');
           autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
+          autofocus
         >
         <button type="submit" class="rip-btn" id="submitBtn">Rip It</button>
         <label class="rip-playlist-toggle">
