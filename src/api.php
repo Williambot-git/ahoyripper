@@ -2191,7 +2191,7 @@ switch ($action) {
         // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
         // the quota file. This ensures unlimited-key responses always include
         // the -1 signal regardless of whether the quota file is reachable.
-        // NOTE: $unlimited is declared at line 1872 as `false` by default — it is
+        // NOTE: $unlimited is declared at line 2001 as `false` by default — it is
         // set to true here only when a valid key is present.
         if ($unlimited) {
             header('X-DailyLimit-Limit: -1');
@@ -4417,10 +4417,10 @@ switch ($action) {
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
-            // source_url: self-referencing URL for this API endpoint.
+            // source_url: null for server-probe endpoints (no associated video URL).
             // Mirrors the source_url field in the /check response, giving API consumers
-            // a consistent, always-present reference to the AhoyRipper home page.
-            'source_url' => 'https://ahoyripper.com',
+            // a consistent null reference for probe endpoints rather than a hardcoded URL.
+            'source_url' => null,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
