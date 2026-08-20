@@ -655,6 +655,7 @@ window.addEventListener('appinstalled', function() {
     'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
     'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
     'VERIFICATION_FAILED': 'The downloaded file could not be verified as valid. This is a server-side issue — try another format or try again in a moment.',
+    'FILE_READ_ERROR': 'The server could not read the downloaded file back for streaming. This is a temporary server issue — try again or pick a different format.',
     'PROC_OPEN_FAILED': 'The download could not be started. The server may be restarting or overloaded. Try again in a moment.',
     'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
     'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
