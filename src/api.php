@@ -3818,6 +3818,14 @@ switch ($action) {
                 header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 http_response_code(500);
                 // retry_after: delta-seconds until the download can be retried.
                 // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
