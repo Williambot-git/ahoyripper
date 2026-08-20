@@ -3223,6 +3223,15 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            header('X-RateLimit-Window: unavailable');
+            // X-DL-RateLimit-*: download-specific rate limit.
+            // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
+            // was consumed. Use -1 sentinel to signal "not applicable", consistent
+            // with the same sentinel used for other pre-limit gate errors.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
@@ -3543,6 +3552,14 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
+            // X-DL-RateLimit-*: download-specific rate limit.
+            // yt-dlp exited 0 but produced no/empty file — no download rate limit was
+            // consumed. Use -1 sentinel to signal "not applicable", consistent with
+            // other pre-limit-gate errors in the download action.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
@@ -3589,6 +3606,14 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
+            // X-DL-RateLimit-*: download-specific rate limit.
+            // yt-dlp exited 0 but produced no/empty file — no download rate limit was
+            // consumed. Use -1 sentinel to signal "not applicable", consistent with
+            // other pre-limit-gate errors in the download action.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
@@ -4025,6 +4050,20 @@ switch ($action) {
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('Cache-Control: no-store');
+            // X-DL-RateLimit-*: download-specific rate limit was consumed when the
+            // file was successfully written by yt-dlp, even though it could not be
+            // read back for streaming. Use the actual post-consumption values.
+            if ($unlimited) {
+                header('X-DL-RateLimit-Limit: -1');
+                header('X-DL-RateLimit-Remaining: -1');
+                header('X-DL-RateLimit-Reset: -1');
+                header('X-DL-RateLimit-Window: unlimited');
+            } else {
+                header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+            }
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
                 'error_code' => 'FILE_READ_ERROR',
