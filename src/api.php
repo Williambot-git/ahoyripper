@@ -1747,6 +1747,13 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unavailable');
+        // X-DL-RateLimit-* mirrors the X-RateLimit-* sentinels for download-specific
+        // monitoring. Both sets use -1 (unavailable) since INVALID_URL occurs before
+        // the download action's rate-limit gate and no download is involved.
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $sendDailyLimitHeaders($daily_limit, null);
