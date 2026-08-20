@@ -2691,15 +2691,16 @@ switch ($action) {
                 'source_url_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, $retry_delta),
+                // quota fields: consistent with success and other error responses.
+                // Quota was incremented before this error path; the refund above reversed it.
+                // post-refund count is the pre-increment baseline since the increment was undone.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $info_quota_before_refund) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
-            // quota fields: consistent with success and other error responses.
-            // Quota was incremented before this error path; the refund above reversed it.
-            // post-refund count is the pre-increment baseline since the increment was undone.
-            $resp['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $info_quota_before_refund) : -1;
-            $resp['quota_limit'] = !$unlimited ? $daily_limit : -1;
-            $resp['quota_reset'] = !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1;
-            $resp['quota_reset_unix'] = !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1;
             // Surface the raw yt-dlp output so the client can show diagnostic info
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
