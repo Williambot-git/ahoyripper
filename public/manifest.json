@@ -12,7 +12,9 @@
   "orientation": "any",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["utilities"],
+  "categories": [
+    "utilities"
+  ],
   "related_applications": [
     {
       "platform": "play",
@@ -71,7 +73,12 @@
       "short_name": "Rip Video",
       "description": "Download video or audio from any supported platform",
       "url": "/?utm_source=homescreen&utm_medium=shortcut",
-      "icons": [{ "src": "/favicon-180.png", "sizes": "180x180" }]
+      "icons": [
+        {
+          "src": "/favicon-180.png",
+          "sizes": "180x180"
+        }
+      ]
     }
   ],
   "screenshots": [
@@ -81,6 +88,13 @@
       "type": "image/png",
       "form_factor": "wide",
       "label": "AhoyRipper — paste a URL, pick a format, download"
+    },
+    {
+      "src": "/og-image.webp",
+      "sizes": "1200x630",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "AhoyRipper mobile — paste a URL, pick a format, download"
     },
     {
       "src": "/og-image.png",
