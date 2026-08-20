@@ -451,8 +451,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "api_version": "1.0.0",
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": 1749254400,
-  "quota_reset_unix": 1749254400
+  "quota_reset": 1800000000,
+  "quota_reset_unix": 1800000000
 }
 ```
 
@@ -469,8 +469,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "retry_after": 300,
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": 1749254400,
-  "quota_reset_unix": 1749254400,
+  "quota_reset": 1800000000,
+  "quota_reset_unix": 1800000000,
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
