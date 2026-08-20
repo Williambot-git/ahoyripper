@@ -2460,16 +2460,19 @@ switch ($action) {
                 'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'source_url_missing' => false,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
-                // quota_remaining/quota_limit/quota_reset: quota was refunded before
-                // this response. $post_refund_count is the post-refund daily count.
+                // quota fields: quota was refunded before this response.
                 // Unlimited-key holders ($unlimited=true) were never incremented, so
                 // $post_refund_count is $daily_limit for them (no change from baseline).
-                'quota_limit' => $daily_limit,
-                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                // Use ternary to return -1 for unlimited-key holders, matching the
+                // pattern used by every other info-action error response.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         } else {
@@ -3208,16 +3211,19 @@ switch ($action) {
                 'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
+                'source_url_missing' => false,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                // quota_remaining/quota_limit/quota_reset: quota was refunded before
-                // this response. $post_refund_count is the post-refund daily count.
-                // Unlimited-key holders ($unlimited=true) were never incremented, so
-                // $post_refund_count is $daily_limit for them (no change from baseline).
-                'quota_remaining' => max(0, $daily_limit - $post_refund_count),
-                'quota_limit' => $daily_limit,
-                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                // quota fields: quota was refunded before this response.
+                // $post_refund_count is the post-refund daily count. Unlimited-key
+                // holders ($unlimited=true) were never incremented — use -1 sentinel
+                // to signal \"no quota applies\", matching the pattern used by every
+                // other download-action error response.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
