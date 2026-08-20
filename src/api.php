@@ -382,14 +382,35 @@ header('X-RateLimit-Limit: ' . $rate_limit);
 header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
 header('X-RateLimit-Reset: ' . $reset);
 header('X-RateLimit-Window: ' . $rate_window);
-// X-DL-* mirrors the X-RateLimit-* headers for download-specific monitoring.
-// Set unconditionally so download responses always carry these headers regardless
-// of whether the rate limit was hit. Inside the 429 block (lines 192-196) they
-// are also set to 0/-1 sentinel values for over-limit responses.
-header('X-DL-RateLimit-Limit: ' . $rate_limit);
-header('X-DL-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
-header('X-DL-RateLimit-Reset: ' . $reset);
-header('X-DL-RateLimit-Window: ' . $rate_window);
+
+// X-DL-* headers reflect the download-specific rate limit (DL_RATE_LIMIT).
+// For the 'download' action: read the dl_rate file and report actual state.
+// For all other actions: send -1 sentinels (no download rate limit applies).
+// Inside the download 429 block these are overridden with real values.
+$dl_limit = DL_RATE_LIMIT;
+$dl_window = 60;
+$dl_remaining = -1;
+$dl_reset = -1;
+$dl_window_label = 'unavailable';
+if (($action ?? '') === 'download') {
+    $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
+    $dl_fp2 = @fopen($dl_rate_file, 'r');
+    if ($dl_fp2) {
+        $dl_raw = @fread($dl_fp2, 4096);
+        if ($dl_raw) {
+            $dl_decoded = @json_decode($dl_raw, true);
+            if ($dl_decoded && is_array($dl_decoded)) {
+                $dl_remaining = max(0, $dl_limit - $dl_decoded['c']);
+                $dl_reset = $dl_decoded['t'] + $dl_window;
+            }
+        }
+        fclose($dl_fp2);
+    }
+}
+header('X-DL-RateLimit-Limit: ' . $dl_limit);
+header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
+header('X-DL-RateLimit-Reset: ' . $dl_reset);
+header('X-DL-RateLimit-Window: ' . $dl_window_label);
 
 // Periodic cleanup of stale rate files and cache entries.
 // Proactively removes expired entries from /tmp to prevent indefinite accumulation
