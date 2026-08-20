@@ -4011,6 +4011,9 @@ switch ($action) {
                 fclose($fp);
                 if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
                 logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+                // Content-Type was already set to binary MIME above; override
+                // back to JSON so the error response has the correct Content-Type.
+                header('Content-Type: application/json; charset=utf-8');
                 echo json_encode([
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
