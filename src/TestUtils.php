@@ -160,7 +160,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
-            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'status' => 403];
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
         }
         if ($code === 401 || $code === 407) {
             return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'status' => 401];
@@ -169,10 +169,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
         }
         if ($code === 429) {
-            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
+            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'upgrade_url' => UPGRADE_URL, 'status' => 502];
         }
         // Other HTTP errors — surface the status but give a generic message.
         return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
