@@ -909,10 +909,9 @@ if (!$GLOBALS['__ffmpeg_version']) {
         // rather than persisting an invalid empty hash that masks binary upgrades.
         if ($hash !== false) {
             @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => $hash, 'exp' => time() + VERSION_CACHE_TTL]));
-        } else {
-            // md5_file failed — binary is absent or unreadable.
-            // Write a sentinel so subsequent requests don't re-probe every time.
-            // yt-dlp's version cache uses the same pattern (lines 587-589).
+        } elseif ($GLOBALS['__ffmpeg_version'] === 'not installed') {
+            // md5_file failed AND binary is absent — write a sentinel so subsequent
+            // requests don't re-probe every time (matches yt-dlp pattern at line 848).
             @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => '', 'exp' => time() + VERSION_CACHE_TTL]));
         }
     }
