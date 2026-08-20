@@ -819,11 +819,32 @@ else
     exit 1
 fi
 
+echo "==> Checking og:title:alt text alternative in public/index.php..."
+# og:title:alt (RFC 6947 §4.1) provides a text alternative for the og:title when
+# the page is rendered in a non-visual context (screen readers, search indexers,
+# OpenGraph-only clients). This was added in the 2026-08 caretaker run.
+if grep -q 'meta property="og:title:alt"' public/index.php; then
+    echo "  ✓ og:title:alt present in index.php"
+else
+    echo "  ✗ og:title:alt missing from index.php (RFC 6947 §4.1 text alternative)"
+    exit 1
+fi
+
 echo "==> Checking og:description meta tag in public/index.php..."
 if grep -q 'meta property="og:description"' public/index.php; then
     echo "  ✓ og:description present in index.php"
 else
     echo "  ✗ og:description missing from index.php"
+    exit 1
+fi
+
+echo "==> Checking og:description:alt text alternative in public/index.php..."
+# og:description:alt (RFC 6947 §4.1) provides a text alternative for the
+# og:description in non-visual contexts, matching the og:title:alt pattern above.
+if grep -q 'meta property="og:description:alt"' public/index.php; then
+    echo "  ✓ og:description:alt present in index.php"
+else
+    echo "  ✗ og:description:alt missing from index.php (RFC 6947 §4.1 text alternative)"
     exit 1
 fi
 
