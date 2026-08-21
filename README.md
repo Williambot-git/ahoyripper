@@ -856,46 +856,46 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 
 | Platform | Type | Notes |
 |----------|------|-------|
-| [YouTube](https://youtube.com) {#youtube} | Video + Audio | Largest platform |
-| [X/Twitter](https://x.com) {#twitter} | Video | |
-| [TikTok](https://tiktok.com) {#tiktok} | Video + Audio | |
-| [SoundCloud](https://soundcloud.com) {#soundcloud} | Audio | |
-| [Instagram](https://instagram.com) {#instagram} | Video + Audio | Reels, stories, posts |
-| [Facebook](https://facebook.com) {#facebook} | Video | |
-| [Vimeo](https://vimeo.com) {#vimeo} | Video | |
-| [Reddit](https://reddit.com) {#reddit} | Video + Audio | |
-| [VK](https://vk.com) {#vk} | Video + Audio | |
-| [Dailymotion](https://dailymotion.com) {#dailymotion} | Video | |
-| [Twitch](https://twitch.tv) {#twitch} | Video + Audio | VODs, clips |
-| [Kick](https://kick.com) {#kick} | Video + Audio | |
-| [Rumble](https://rumble.com) {#rumble} | Video | |
-| [Bilibili](https://bilibili.com) {#bilibili} | Video + Audio | Chinese platform |
-| [Niconico](https://nicovideo.jp) {#niconico} | Video + Audio | Japanese platform |
-| [Bandcamp](https://bandcamp.com) {#bandcamp} | Audio | |
-| [Mixcloud](https://mixcloud.com) {#mixcloud} | Audio | |
-| [Spotify](https://spotify.com) {#spotify} | Audio | Requires cookies for full access |
-| [Netflix](https://netflix.com) {#netflix} | Video | Non-DRM only |
-| [Disney+](https://disneyplus.com) {#disney} | Video | Non-DRM only |
-| [Amazon Prime Video](https://amazon.com/prime-video) {#prime} | Video | Non-DRM only |
-| [Hulu](https://hulu.com) {#hulu} | Video | Non-DRM only |
-| [Paramount+](https://paramountplus.com) {#paramount} | Video | Non-DRM only |
-| [Peacock](https://peacocktv.com) {#peacock} | Video | Non-DRM only |
-| [Max/HBO](https://max.com) {#max} | Video | Non-DRM only |
-| [Pinterest](https://pinterest.com) {#pinterest} | Images + Video | |
-| [Tumblr](https://tumblr.com) {#tumblr} | Video + Audio | |
-| [Douyin](https://douyin.com) {#douyin} | Video + Audio | Chinese TikTok |
-| [Kuaishou](https://kuaishou.com) {#kuaishou} | Video + Audio | Chinese platform |
-| [Weibo](https://weibo.com) {#weibo} | Video + Audio | Chinese platform |
-| [Snapchat](https://snapchat.com) {#snapchat} | Video | Stories, spotlight |
-| [Telegram](https://telegram.org) {#telegram} | Video + Audio | Public channels |
-| [Google Drive](https://drive.google.com) {#drive} | Video + Audio | Shared files, Google Photos |
-| [Discord](https://discord.com) {#discord} | Video | Shared video links |
-| [WhatsApp](https://whatsapp.com) {#whatsapp} | Video + Audio | Status, channels |
-| [LinkedIn](https://linkedin.com) {#linkedin} | Video | |
-| [Steam](https://store.steampowered.com) {#steam} | Video | Steam store trailers |
-| [Pornhub](https://pornhub.com) {#pornhub} | Video + Audio | |
-| [XVideos](https://xvideos.com) {#xvideos} | Video + Audio | |
-| [xHamster](https://xhamster.com) {#xhamster} | Video + Audio | |
+| [YouTube](https://youtube.com) | Video + Audio | Largest platform |
+| [X/Twitter](https://x.com) | Video | |
+| [TikTok](https://tiktok.com) | Video + Audio | |
+| [SoundCloud](https://soundcloud.com) | Audio | |
+| [Instagram](https://instagram.com) | Video + Audio | Reels, stories, posts |
+| [Facebook](https://facebook.com) | Video | |
+| [Vimeo](https://vimeo.com) | Video | |
+| [Reddit](https://reddit.com) | Video + Audio | |
+| [VK](https://vk.com) | Video + Audio | |
+| [Dailymotion](https://dailymotion.com) | Video | |
+| [Twitch](https://twitch.tv) | Video + Audio | VODs, clips |
+| [Kick](https://kick.com) | Video + Audio | |
+| [Rumble](https://rumble.com) | Video | |
+| [Bilibili](https://bilibili.com) | Video + Audio | Chinese platform |
+| [Niconico](https://nicovideo.jp) | Video + Audio | Japanese platform |
+| [Bandcamp](https://bandcamp.com) | Audio | |
+| [Mixcloud](https://mixcloud.com) | Audio | |
+| [Spotify](https://spotify.com) | Audio | Requires cookies for full access |
+| [Netflix](https://netflix.com) | Video | Non-DRM only |
+| [Disney+](https://disneyplus.com) | Video | Non-DRM only |
+| [Amazon Prime Video](https://amazon.com/prime-video) | Video | Non-DRM only |
+| [Hulu](https://hulu.com) | Video | Non-DRM only |
+| [Paramount+](https://paramountplus.com) | Video | Non-DRM only |
+| [Peacock](https://peacocktv.com) | Video | Non-DRM only |
+| [Max/HBO](https://max.com) | Video | Non-DRM only |
+| [Pinterest](https://pinterest.com) | Images + Video | |
+| [Tumblr](https://tumblr.com) | Video + Audio | |
+| [Douyin](https://douyin.com) | Video + Audio | Chinese TikTok |
+| [Kuaishou](https://kuaishou.com) | Video + Audio | Chinese platform |
+| [Weibo](https://weibo.com) | Video + Audio | Chinese platform |
+| [Snapchat](https://snapchat.com) | Video | Stories, spotlight |
+| [Telegram](https://telegram.org) | Video + Audio | Public channels |
+| [Google Drive](https://drive.google.com) | Video + Audio | Shared files, Google Photos |
+| [Discord](https://discord.com) | Video | Shared video links |
+| [WhatsApp](https://whatsapp.com) | Video + Audio | Status, channels |
+| [LinkedIn](https://linkedin.com) | Video | |
+| [Steam](https://store.steampowered.com) | Video | Steam store trailers |
+| [Pornhub](https://pornhub.com) | Video + Audio | |
+| [XVideos](https://xvideos.com) | Video + Audio | |
+| [xHamster](https://xhamster.com) | Video + Audio | |
 
 > **DRM note:** Netflix, Disney+, Amazon Prime Video, Hulu, Paramount+, Peacock, and Max content with digital rights management (DRM) cannot be ripped. Only non-DRM content from these platforms will work.
 
