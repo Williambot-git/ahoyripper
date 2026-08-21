@@ -40,6 +40,14 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   deployments. Added a full CSP header to the static assets location block so it matches
   the consistent CSP coverage of all other deployment modes.
 
+- **`src/api.php` per-minute rate-limit 429 block X-DL-RateLimit headers** —
+  Fixed X-DL-RateLimit-* headers on the per-minute request rate-limit 429 response
+  (line ~321). They were incorrectly set to the request rate-limit value ($rate_limit=30)
+  instead of -1 sentinels. The download-rate-limit state is not available at this gate
+  (dl_rate_file is opened later, inside the download action), so -1 sentinels correctly
+  signal "unknown" rather than leaking a misleading per-minute limit value (10) into
+  the download rate-limit field.
+
 - **`.env.example` defaults** — `FFPROBE_TIMEOUT`, `YTDLP_TIMEOUT`, and `HEALTH_PROBE_TIMEOUT`
   are now listed with their uncommented default values, matching what `api.php` actually
   uses at runtime. Operators following `.env.example` now see all configurable env vars
