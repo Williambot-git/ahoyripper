@@ -338,6 +338,18 @@ if ($is_rate_limited) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
+            // Security headers — mirrors the same set sent by the top-of-script
+            // 403/503 error blocks, since this 429 bypasses the normal switch/case.
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('X-Request-ID: ' . $request_id);
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             $rate_quota_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
@@ -356,7 +368,7 @@ if ($is_rate_limited) {
                 'quota_remaining' => -1,
                 'quota_limit' => $rate_quota_limit,
                 'quota_reset' => $rate_quota_reset,
-                'quota_reset_unix' => $rate_quota_reset,
+                'quota_reset_unix' => -1, // -1 signals quota state is unknown at this gate (quota file not yet opened)
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -373,6 +385,13 @@ if ($is_rate_limited) {
     flock($fp, LOCK_UN);
     fclose($fp);
 }
+
+// ─── Daily quota gate ─────────────────────────────────────────────────────
+// Quota is tracked per-IP as a simple counter. Unlimited-key holders bypass it.
+// A HOURLY rate limit (RATE_LIMIT, default 30 req/min) was already applied above;
+// this daily quota is an additional guard against sustained abuse.
+// Applies to info and download actions only — health/progress/check/analytics
+// are exempt (they consume no server resources beyond a JSON response).
 
 // Set rate limit headers unconditionally so they are present on every response,
 // including unlimited-key requests that still pass through this gate.
