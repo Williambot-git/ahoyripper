@@ -712,6 +712,7 @@ if (in_array($action, $internal_actions, true)) {
         'os' => PHP_OS,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'source_url' => null,
+        'upgrade_url' => UPGRADE_URL,
         'quota_remaining' => -1,
         'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
         'quota_reset' => -1,
