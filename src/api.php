@@ -3252,11 +3252,12 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-RateLimit-Window: unavailable');
             // X-DL-RateLimit-*: download-specific rate limit.
             // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
             // was consumed. Use -1 sentinel to signal "not applicable", consistent
-            // with the same sentinel used for other pre-limit gate errors.
+            // with the same sentinel used by other pre-limit-gate errors.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
