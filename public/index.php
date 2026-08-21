@@ -1709,29 +1709,23 @@ window.addEventListener('appinstalled', function() {
   // correlates client errors with server-side access and request logs.
   function reportClientError(type, message, details) {
     try {
-      var payload = JSON.stringify({
+      var hasDetails = details && (
+        details.stack || details.line || details.col || details.source
+      );
+      var payload = JSON.stringify(hasDetails ? {
+        type: type,
+        message: message,
+        url: window.location.href,
+        page_request_id: PAGE_REQUEST_ID,
+        stack: details.stack || null,
+        line: details.line || null,
+        col: details.col || null,
+      } : {
         type: type,
         message: message,
         url: window.location.href,
         page_request_id: PAGE_REQUEST_ID,
       });
-      if (details) {
-        // Stack trace (Error objects), line/col numbers, extra context
-        for (var k in details) {
-          if (Object.prototype.hasOwnProperty.call(details, k)) {
-            payload = JSON.stringify({
-              type: type,
-              message: message,
-              url: window.location.href,
-              page_request_id: PAGE_REQUEST_ID,
-              stack: details.stack || null,
-              line: details.line || null,
-              col: details.col || null,
-            });
-            break;
-          }
-        }
-      }
       navigator.sendBeacon && navigator.sendBeacon(
         '/src/api.php?action=client-error',
         payload
