@@ -2393,7 +2393,6 @@ switch ($action) {
         $socket_timeout = max(1, INFO_TIMEOUT - 5);
         $ytdlp_cmd = [
             YTDLP_PATH,
-            '--newline',
             '--dump-json',
             '--skip-download',
         ];
@@ -3150,7 +3149,6 @@ switch ($action) {
         $socket_timeout = max(1, DOWNLOAD_TIMEOUT - 15);
         $ytdlp_cmd = [
             YTDLP_PATH,
-            '--newline',
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrites',
@@ -4564,7 +4562,6 @@ switch ($action) {
                 // YouTube health checks. Only used when AHOY_IMPERSONATE is non-empty.
                 $probe_cmd = [
                     YTDLP_PATH,
-                    '--newline',
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
