@@ -4183,6 +4183,7 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Cache-Control: no-store');
             // X-DL-RateLimit-*: download-specific rate limit was consumed when the
             // file was successfully written by yt-dlp, even though it could not be
