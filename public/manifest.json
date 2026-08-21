@@ -76,25 +76,18 @@
   ],
   "screenshots": [
     {
+      "src": "/og-image.webp",
+      "sizes": "1200x630",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "AhoyRipper — supports YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms"
+    },
+    {
       "src": "/og-image.png",
       "sizes": "1200x630",
       "type": "image/png",
       "form_factor": "wide",
       "label": "AhoyRipper — paste a URL, pick a format, download"
-    },
-    {
-      "src": "/og-image.webp",
-      "sizes": "1200x630",
-      "type": "image/webp",
-      "form_factor": "narrow",
-      "label": "AhoyRipper mobile — paste a URL, pick a format, download"
-    },
-    {
-      "src": "/og-image.png",
-      "sizes": "1200x630",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "AhoyRipper — supports YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms"
     }
   ]
 }
