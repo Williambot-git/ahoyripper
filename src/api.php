@@ -672,6 +672,11 @@ if (in_array($action, $internal_actions, true)) {
         // whenever a new header is added to the top-of-script block. In non-FPM
         // SAPIs the function doesn't exist and we fall back to manual headers.
         if (function_exists('fastcgi_finish_request')) {
+            // Re-set Content-Type and X-Request-ID since the non-FPM fallback block
+            // below (which runs for all actions) sets them via the top-of-script header
+            // buffer, but this fast-path bypasses that block and must re-set them explicitly.
+            header('Content-Type: application/json; charset=utf-8');
+            header('X-Request-ID: ' . $request_id);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
