@@ -1295,6 +1295,27 @@ else
 fi
 
 echo ""
+echo "==> Checking Cache-Control: no-store on check action (stateless JSON ping)..."
+# The check action (lines 4261-4350) is a stateless Docker healthcheck / load-balancer
+# probe endpoint. It MUST use no-store (not no-cache) to prevent intermediate proxies
+# from caching and revalidating a stale ping response. All other API responses already
+# use no-store; check was the only outlier (was no-cache before 2026-08-21 fix).
+# Verify the check case sets Cache-Control: no-store (grep count >= 1).
+CHECK_CASE=$(sed -n "/case 'check':/,/case '/p" src/api.php | head -n -1)
+check_no_store=$(echo "$CHECK_CASE" | grep -c "Cache-Control: no-store" || true)
+check_no_cache=$(echo "$CHECK_CASE" | grep -c "Cache-Control: no-cache" || true)
+if [ "$check_no_store" -ge 1 ] && [ "$check_no_cache" -eq 0 ]; then
+    echo "  ✓ check action uses Cache-Control: no-store (not no-cache)"
+elif [ "$check_no_cache" -ge 1 ]; then
+    echo "  ✗ check action uses Cache-Control: no-cache — should be no-store"
+    echo "    (fix: change 'Cache-Control: no-cache' to 'Cache-Control: no-store' in the check case)"
+    exit 1
+else
+    echo "  ✗ check action missing Cache-Control header"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID error codes exist..."
 # Both error codes are returned by the download action when format is absent or invalid.
 # Verify they exist and return HTTP 400 (not 200 or 500).

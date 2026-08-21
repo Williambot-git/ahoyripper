@@ -4323,7 +4323,12 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
-        header('Cache-Control: no-cache');
+        // no-store: consistent with all other API responses — prevents intermediate
+        // proxies (CDN, corporate proxies, load balancers) from caching this response.
+        // no-cache would allow caching while revalidating on every request, which is
+        // unnecessary for a stateless JSON ping and inconsistent with the rest of
+        // the API surface (all other responses use no-store).
+        header('Cache-Control: no-store');
         // yt_dlp_version is included in the check response for consistency with
         // health/info/download responses. The version string is pre-cached before
         // the routing switch (lines 535-583) so no additional subprocess call is
