@@ -1246,6 +1246,22 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     if (!in_array($sort, $allowed_sorts, true)) {
         $sort = 'height';
     }
+    // Reject non-string input explicitly. yt-dlp always returns a string; any other
+    // type (null, int, array, object) indicates a caller bug or unexpected state.
+    // Without this guard, e.g. trim(null) produces a PHP warning that leaks into
+    // error_log and could expose implementation details. Return a clean PARSE_ERROR.
+    if (!is_string($json_str)) {
+        $parse_fail_msg = 'Internal parse error — invalid input type.';
+        if ($raw_error_out !== null) {
+            $raw_error_out = $parse_fail_msg;
+        }
+        return [
+            'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
+            'error_code' => 'PARSE_ERROR',
+            'raw_error' => $parse_fail_msg,
+            'formats' => [],
+        ];
+    }
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
     // with one JSON object per video. A single json_decode() on the full multi-line
     // string fails because newlines are not valid JSON separators. Detect and handle
