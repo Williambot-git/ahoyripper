@@ -3259,7 +3259,7 @@ switch ($action) {
             YTDLP_PATH,
             '-f', $format_id,
             '-o', $out_template,
-            '--force-overwrites',
+            '--force-overwrite',
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
             // temporary 5xx, etc.) separately from generic --retries. Useful for
