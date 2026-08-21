@@ -2345,18 +2345,54 @@ switch ($action) {
             $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
+                // All security headers — consistent with every other API error response.
+                header('Content-Type: application/json; charset=utf-8');
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('Cache-Control: no-store');
                 http_response_code(503);
                 header('Retry-After: 5');
-                header('X-Content-Type-Options: nosniff');
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+                echo json_encode([
+                    'error' => 'Service temporarily unavailable.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
+                    'action' => $action ?: 'info',
+                    'retry_after' => 5,
+                    'request_id' => $request_id,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
+                // All security headers — consistent with every other API error response.
+                header('Content-Type: application/json; charset=utf-8');
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('Cache-Control: no-store');
                 http_response_code(503);
                 header('Retry-After: 5');
-                header('X-Content-Type-Options: nosniff');
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+                echo json_encode([
+                    'error' => 'Service temporarily unavailable.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
+                    'action' => $action ?: 'info',
+                    'retry_after' => 5,
+                    'request_id' => $request_id,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             $daily_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
