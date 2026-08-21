@@ -2208,6 +2208,8 @@ switch ($action) {
                 'error_code' => 'INVALID_KEY',
                 'retry_after' => 0,
                 'request_id' => $request_id,
+                'source_url' => $url,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: invalid key means no quota tracking applies — consistent
@@ -2848,6 +2850,8 @@ switch ($action) {
                 'error_code' => 'INVALID_KEY',
                 'retry_after' => 0,
                 'request_id' => $request_id,
+                'source_url' => $url,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: invalid key means no quota tracking applies — consistent
