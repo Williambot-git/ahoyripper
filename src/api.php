@@ -3949,6 +3949,7 @@ switch ($action) {
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 http_response_code(500);
                 // retry_after: delta-seconds until the download can be retried.
                 // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
