@@ -1987,6 +1987,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'format_id_missing' => true,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining: the quota was already incremented by the prior info action,
