@@ -407,6 +407,10 @@ if ($is_rate_limited) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            // X-Download-Timeout: mirrors the header set on all other info/download responses.
+            // Present even on rate-limit 429s so clients can always read the download timeout
+            // value without branching on the response code.
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $rate_quota_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
