@@ -53,6 +53,19 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // X-Frame-Options: prevent clickjacking by blocking the page from being embedded
 // in an iframe on third-party sites. Mirrors the header set by api.php.
 header('X-Frame-Options: SAMEORIGIN');
+// Cross-Origin-Opener-Policy: same-origin — prevents cross-origin documents from
+// navigating the top-level frame or accessing its window. This closes an exploit
+// chain where an XSS on a cross-origin page could use window.open() to reach the
+// AhoyRipper page's DOM. api.php sets this header on all API responses; adding it
+// here completes the coverage across both entry points. COEP is intentionally NOT
+// set: require-corp breaks YouTube thumbnails, TikTok covers, Twitter video cards,
+// and other cross-origin images loaded by the JS frontend via fetch().
+header('Cross-Origin-Opener-Policy: same-origin');
+// Cross-Origin-Resource-Policy: same-origin — prevents this page from being
+// embedded as a cross-origin subresource (e.g. in an iframe on another origin).
+// Complements X-Frame-Options (which blocks same-origin framing) by also blocking
+// cross-origin embedding as a subresource.
+header('Cross-Origin-Resource-Policy: same-origin');
 // X-Download-Options: noopen prevents the file download dialog from automatically
 // opening for downloaded files, reducing drive-by download attacks.
 header('X-Download-Options: noopen');
