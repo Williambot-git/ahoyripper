@@ -281,6 +281,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
         return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
     }
+    // yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
+    // Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
+    // Classify this as a CONFIG_ERROR so operators know it's a deployment/dependency
+    // issue, not a video or format problem — users should not see FORMAT_UNAVAILABLE.
+    if (preg_match('/impersonate.*not available|is not available.*impersonate/i', $err_lower)) {
+        return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'status' => 503];
+    }
     // "process timed out" is produced by PHP-side timeout in the inline
     // proc_open timeout handler (api.php).
     // Distinct from connection-level "timed out" which implies a network failure.
@@ -466,6 +473,22 @@ test('detects SSL_ERROR — "certificate has expired"',
 $result = classifyYtdlpError('ERROR: SSL error');
 test('detects SSL_ERROR — "SSL error"',
     $result !== null && ($result['code'] ?? '') === 'SSL_ERROR');
+
+$result = classifyYtdlpError('ERROR: [YouTube] abc: Impersonate target chrome is not available');
+test('detects CONFIG_ERROR — "Impersonate target chrome is not available"',
+    $result !== null && ($result['code'] ?? '') === 'CONFIG_ERROR' && ($result['status'] ?? 0) === 503);
+
+$result = classifyYtdlpError('ERROR: [YouTube] abc: impersonate is not available on this system');
+test('detects CONFIG_ERROR — "impersonate is not available" (lowercase, standalone)',
+    $result !== null && ($result['code'] ?? '') === 'CONFIG_ERROR');
+
+$result = classifyYtdlpError('Impersonate target chrome is not available', 1);
+test('CONFIG_ERROR text takes precedence over exit code 1',
+    $result !== null && ($result['code'] ?? '') === 'CONFIG_ERROR');
+
+$result = classifyYtdlpError('ERROR: [YouTube] abc: Impersonate target chrome is not available. HTTP Error 503', 1);
+test('CONFIG_ERROR text takes precedence over HTTP 503 text',
+    $result !== null && ($result['code'] ?? '') === 'CONFIG_ERROR');
 
 $result = classifyYtdlpError('ERROR: Connection failed');
 test('detects CONNECTION_FAILED — "connection failed"',
