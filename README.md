@@ -384,6 +384,24 @@ The `sort` parameter (optional, default `height`) controls format sort order:
 - `quality` — quality tier, highest first (video = pixel height, e.g. 1080p > 720p > 480p; audio = bitrate tier, e.g. 320kbps > 256kbps > 192kbps)
 - `audio_quality` — audio formats first, then video/combined; within each group sorts by quality tier descending, then tbr descending
 
+**Sort usage examples:**
+```
+# Default — best quality first (1080p before 720p before 480p, all combined formats)
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+# Smallest file first — useful for bandwidth-constrained or mobile clients
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=filesize_asc
+
+# Largest file first — useful when storage is not a constraint and quality matters most
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=filesize
+
+# Audio-only browsing — music podcasts, audiobooks, sound effect clips
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=audio_quality
+
+# Bitrate-first — high-bitrate streams when bandwidth is plentiful
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=tbr
+```
+
 The `quality` field in each format is a numeric tier that enables cross-format comparisons:
 - **Video formats** (combined or video-only): `quality` equals the pixel height (e.g. `720` = 720p, `1080` = 1080p). This is identical to the `height` field for video formats.
 - **Audio-only formats**: `quality` equals the bitrate tier (kbps mapped to tier: `320` ≥ 320kbps, `256` ≥ 256kbps, `192` ≥ 192kbps, `128` ≥ 128kbps, `96` ≥ 96kbps, `64` ≥ 64kbps, `48` < 64kbps). `null` when bitrate is unknown.
