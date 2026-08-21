@@ -2556,16 +2556,10 @@ switch ($action) {
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            // Retry-After: delta-seconds until the info probe can be retried.
-            // Use INFO_TIMEOUT so the client has the same reset window as other
-            // info failures, giving a consistent future reset point to count down to.
-            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
-            // delta-seconds is simpler and consistent with all other Retry-After
-            // headers in this file ($reset_timestamp - time(), not absolute timestamps).
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
@@ -2662,7 +2656,7 @@ switch ($action) {
             // countdown value regardless of when the response is processed.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
@@ -2800,7 +2794,7 @@ switch ($action) {
             // countdown value regardless of when the response is processed.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             $resp = [
                 'error' => $parsed['error'],
                 'error_code' => $parsed['error_code'] ?? 'YTDLP_ERROR',
