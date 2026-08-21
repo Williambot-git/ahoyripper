@@ -322,10 +322,13 @@ if ($is_rate_limited) {
             header('X-RateLimit-Remaining: 0');
             header('X-RateLimit-Reset: ' . $reset_timestamp);
             header('X-RateLimit-Window: ' . $rate_window);
-            header('X-DL-RateLimit-Limit: ' . $rate_limit);
-            header('X-DL-RateLimit-Remaining: 0');
-            header('X-DL-RateLimit-Reset: ' . $reset_timestamp);
-            header('X-DL-RateLimit-Window: ' . $rate_window);
+            // X-DL-RateLimit sentinels (-1): the download-rate-limit state is not available
+            // at this gate (dl_rate_file is opened later in the download action), so send -1
+            // to signal "unknown" rather than misleadingly echoing the request-rate limit.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unknown');
             // Guard retry_after with max(0, ...) to prevent negative values if the
             // reset timestamp is somehow in the past (clock skew, stale rate file).
             // A negative Retry-After is invalid per HTTP spec and rejected by some clients.
