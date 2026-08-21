@@ -4843,7 +4843,12 @@ switch ($action) {
         }
 
         // Determine Plausible host — same default as the JS client.
-        $plausible_host = getenv('PLAUSIBLE_HOST') ?: 'plausible.io';
+        // Use ?? (null coalescing) instead of ?: (ternary) so that an explicitly
+        // set empty-string PLAUSIBLE_HOST disables analytics and returns 204.
+        // PHP's getenv() returns false (not '') for an unset var, and ?: treats
+        // both false and '' as falsy — ?? distinguishes them by only falling
+        // back on null (unset). README documents '' as the disable value.
+        $plausible_host = getenv('PLAUSIBLE_HOST') ?? 'plausible.io';
 
         // Strip PII from the payload before forwarding:
         //   - URL: remove any ?url= param (contains the video link prefill).
@@ -4866,24 +4871,28 @@ switch ($action) {
 
         // Forward to Plausible API via a local HTTP request.
         // Use file_get_contents with stream context to avoid adding a dependency.
-        $forward_url = 'https://' . $plausible_host . '/api/event';
-        $forward_body = @json_encode($payload);
+        // Skip the HTTP request entirely when analytics is disabled (PLAUSIBLE_HOST='')
+        // so the 204 is returned immediately without a useless outbound connection.
+        if ($plausible_host !== '') {
+            $forward_url = 'https://' . $plausible_host . '/api/event';
+            $forward_body = @json_encode($payload);
 
-        $context = @stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/json\r\n",
-                'content' => $forward_body,
-                'timeout' => 5, // 5s — analytics delivery is non-critical.
-                'ignore_errors' => true,
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
-        ]);
+            $context = @stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => "Content-Type: application/json\r\n",
+                    'content' => $forward_body,
+                    'timeout' => 5, // 5s — analytics delivery is non-critical.
+                    'ignore_errors' => true,
+                ],
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ]);
 
-        $response = @file_get_contents($forward_url, false, $context);
+            $response = @file_get_contents($forward_url, false, $context);
+        }
 
         // Always return 204 to the browser — analytics is fire-and-forget.
         // Never let Plausible downtime affect user UX.
