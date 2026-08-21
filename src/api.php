@@ -204,12 +204,51 @@ if ($blocked) {
         logRequest('cors_block', 403, ['reason' => $block_reason, 'referer' => $referer]);
         error_log("AhoyRipper: blocked request ($block_reason) from referer: " . ($referer ?: '(none)'));
         http_response_code(403);
+        // Security headers — mirrors the same set sent by every other error response
+        // so CORS-blocked responses are equally hardened regardless of gate location.
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Download-Options: noopen');
+        header('X-Robots-Tag: noindex, noai, noimage, noydir');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        // CORS origin validation happens before any action is dispatched, so
+        // quota tracking has not started. Use -1 sentinels consistent with
+        // other pre-quota-gate errors (MISSING_URL, INVALID_URL, etc.).
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unavailable');
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unavailable');
+        $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: ' . $quota_reset_ts);
+        header('X-DailyLimit-Window: unavailable');
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         echo json_encode([
             'error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.',
             'error_code' => 'FORBIDDEN_ORIGIN',
+            'action' => $action ?: null,
+            // retry_after: 0 — CORS validation failure is a client configuration issue
+            // with no server-side backoff needed. The client just needs to use a
+            // browser context with the correct referer.
+            'retry_after' => 0,
             'request_id' => $request_id,
+            'source_url' => null,
+            'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // quota fields: -1 signals that quota tracking is not available at this
+            // early pre-action validation stage (before any action is dispatched).
+            'quota_remaining' => -1,
+            'quota_limit' => -1,
+            'quota_reset' => $quota_reset_ts,
+            'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
