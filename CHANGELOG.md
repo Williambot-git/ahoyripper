@@ -23,6 +23,7 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   of just "quality or file size".
 
 ### Fixed
+- **`PROC_OPEN_FAILED` duplication in error codes table** — The classified error codes table had `PROC_OPEN_FAILED` listed twice (lines 557 and 559) with different explanations (server overload vs. misconfiguration). Merged into a single entry with a clear explanation distinguishing it from `YTDLP_ERROR`. `DOWNLOAD_TIMEOUT` (which had a missing third column in the original) is already correct.
 - **`src/api.php` `default:` case security headers** — Added all missing security headers
   (`X-Request-ID`, `X-Content-Type-Options`, `X-Frame-Options`, `X-Download-Options`,
   `X-Robots-Tag`, `Referrer-Policy`, `Strict-Transport-Security`, `Permissions-Policy`,
