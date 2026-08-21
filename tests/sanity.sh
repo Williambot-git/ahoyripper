@@ -1422,6 +1422,28 @@ else
 fi
 
 echo ""
+echo "==> Checking client-error action has all required response fields..."
+# The client-error action receives browser JS runtime errors and is called by the PWA's
+# window.onerror handler. Its response should include retry_after (consistent with all
+# other API error responses) and the hardening headers. Check that the client-error
+# case block contains both.
+CLIENT_ERROR_BLOCK=$(sed -n "/case 'client-error':/,/[[:space:]]return;/p" src/api.php)
+if echo "$CLIENT_ERROR_BLOCK" | grep -q "'retry_after'"; then
+    echo "  ✓ client-error includes retry_after field"
+else
+    echo "  ✗ client-error is missing retry_after field (inconsistent with all other error responses)"
+    exit 1
+fi
+for header in "X-Content-Type-Options" "X-Frame-Options"; do
+    if echo "$CLIENT_ERROR_BLOCK" | grep -q "$header"; then
+        echo "  ✓ client-error includes $header"
+    else
+        echo "  ✗ client-error missing $header hardening header"
+        exit 1
+    fi
+done
+
+echo ""
 echo "==> Running PHP unit tests..."
 php tests/api_test.php
 PHP_RESULT=$?

@@ -79,7 +79,22 @@ define('RATE_LIMIT', max(1, (int)(getenv('RATE_LIMIT') ?? 30)));
 // to match the env-var convention used throughout this file.
 define('DL_RATE_LIMIT', max(1, (int)(getenv('DL_RATE_LIMIT') ?? 10)));
 
-// Set UTC for all date/time functions — gmdate() and date('c') are used
+// Timeout (seconds) for the info action (metadata fetch). yt-dlp should finish
+// in under 30s for most videos; 45s is generous for slow/unstable sources.
+// An explicit 0 (or any non-positive integer) is passed through as-is;
+// max(1, ...) then clamps it to a minimum of 1 second.
+define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
+
+// Configurable timeout for the download action (file download).
+// Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
+// Defaults to 300 seconds (5 minutes) when the env var is absent or zero/negative.
+// The download action is I/O-bound (large media files) and needs a longer timeout
+// than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
+// controls download so the two can be tuned independently without compromise.
+// Use ?? (not ?:) to match the intent of INFO_TIMEOUT above.
+define('DOWNLOAD_TIMEOUT', max(1, (int)(getenv('YTDLP_DOWNLOAD_TIMEOUT') ?? 300)));
+
+// ─── ORIGIN / REFERER VALIDATION ────────────────────────────────────────────
 // throughout this script without an explicit timezone argument. PHP issues
 // a warning when no default timezone is configured and a date function is
 // called. Setting UTC here ensures consistent, predictable output regardless
@@ -2073,23 +2088,6 @@ define('MAX_FILENAME_LEN', 80);
 // is set to half this value so the inner connection timeout fires before the outer
 // PHP-side loop timeout, producing a clean CONNECTION_TIMEOUT classification.
 define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15));
-
-// Configurable timeout for the info action (metadata fetch).
-// Override via YTDLP_TIMEOUT env var (e.g. YTDLP_TIMEOUT=60 in .env).
-// Defaults to 45 seconds when the env var is absent or zero/negative.
-// This is the PHP-side timeout — distinct from yt-dlp's own connection timeout.
-// An explicit 0 (or any non-positive integer) is passed through as-is;
-// max(1, ...) then clamps it to a minimum of 1 second.
-define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
-
-// Configurable timeout for the download action (file download).
-// Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
-// Defaults to 300 seconds (5 minutes) when the env var is absent or zero/negative.
-// The download action is I/O-bound (large media files) and needs a longer timeout
-// than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
-// controls download so the two can be tuned independently without compromise.
-// Use ?? (not ??) to match the intent of INFO_TIMEOUT above.
-define('DOWNLOAD_TIMEOUT', max(1, (int)(getenv('YTDLP_DOWNLOAD_TIMEOUT') ?? 300)));
 
 // ─── ROUTING ────────────────────────────────────────────────
 
@@ -4495,11 +4493,14 @@ switch ($action) {
         logRequest('client-error', 200, $entry);
 
         // Consistent JSON response with api_version and request_id for API surface parity.
+        // retry_after: 0 — client-error is a fire-and-forget endpoint that does not
+        // consume rate limit or quota budget, so no backoff is needed on the client.
         echo json_encode([
             'ok' => true,
             'request_id' => $request_id,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'retry_after' => 0,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
