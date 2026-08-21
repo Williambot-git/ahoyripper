@@ -205,6 +205,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  *
  * @param string|null $playlist_get  $_GET['playlist'] value
  * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
 function resolvePlaylistFlag($playlist_get) {
     // yt-dlp does NOT support --playlist true/false — that syntax is rejected
