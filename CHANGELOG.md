@@ -53,6 +53,15 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   uses at runtime. Operators following `.env.example` now see all configurable env vars
   with correct defaults rather than guessing which are commented-out vs. actively set.
 
+- **`src/api.php` download daily-quota 429 security headers** — Added the full set of
+  security headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-Download-Options`,
+  `X-Robots-Tag`, `X-Request-ID`, `Referrer-Policy`, `Strict-Transport-Security`,
+  `Permissions-Policy`, `COOP`, `CORP`) and per-minute rate-limit sentinels
+  (`X-RateLimit-*`, `X-DL-RateLimit-*`) to the daily-quota-exceeded 429 response
+  (line ~3050). Previously only `X-DailyLimit-*` and `Retry-After` were set, leaving
+  this response unhardened compared to the per-minute rate-limit 429 which had full
+  coverage. Both 429 paths now return equally hardened responses.
+
 ### Changed
 - **README Environment Variables table** — Added three missing env vars that were
   documented in the Docker setup section but absent from the main Environment
