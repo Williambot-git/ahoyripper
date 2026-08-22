@@ -3649,6 +3649,21 @@ switch ($action) {
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
                 // clients can distinguish this from a ffprobe-verification failure.
                 header('X-FFProbe-Status: skipped');
+                // X-DL-RateLimit-*: surface download-specific rate limit state in classified
+                // error responses so clients always have rate-limit metadata, even when yt-dlp
+                // produces a recognized error (GEOBLOCKED, AGE_RESTRICTED, etc.) instead of an
+                // unclassified exit. Mirrors the headers set at line ~3155 for successful downloads.
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_remaining));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                }
                 // Compute post-refund quota for the JSON body. refundQuota() is idempotent
                 // (safe to call even if already refunded via the proc_open failure path above).
                 $post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
@@ -3704,6 +3719,20 @@ switch ($action) {
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('X-Download-Options: noopen');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
+                // have rate-limit metadata regardless of how the download ends (classified or not).
+                // Mirrors the headers set at line ~3155 for successful downloads.
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_remaining));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                }
                 // Truncate the user-facing error message to match the ~200-char ceiling used
                 // throughout the rest of the API (parseFormats YTDLP_ERROR, classified errors).
                 // The full raw error is preserved in 'raw_error' for diagnostics.
