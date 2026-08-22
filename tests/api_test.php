@@ -1728,6 +1728,43 @@ test('INVALID_FORMAT_ID: format_id_missing is boolean false',
 test('INVALID_FORMAT_ID: error_code is INVALID_FORMAT_ID',
     ($invalid_format_id_response['error_code'] ?? '') === 'INVALID_FORMAT_ID');
 
+// ─── DAILY_LIMIT response source_url / source_url_missing ───────────────────
+// Both DAILY_LIMIT error responses (info and download actions) must include
+// source_url and source_url_missing fields for consistency with all other
+// error responses. source_url_missing is false (not absent) because the client
+// did provide a URL — it simply hit the daily quota before yt-dlp was invoked.
+$daily_limit_info_response = [
+    'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
+    'error_code' => 'DAILY_LIMIT',
+    'action' => 'info',
+    'source_url' => 'https://example.com/video',
+    'source_url_missing' => false,
+];
+test('DAILY_LIMIT (info): source_url_missing key exists',
+    array_key_exists('source_url_missing', $daily_limit_info_response));
+test('DAILY_LIMIT (info): source_url_missing is boolean false',
+    $daily_limit_info_response['source_url_missing'] === false);
+test('DAILY_LIMIT (info): source_url is the provided URL string',
+    ($daily_limit_info_response['source_url'] ?? null) === 'https://example.com/video');
+test('DAILY_LIMIT (info): error_code is DAILY_LIMIT',
+    ($daily_limit_info_response['error_code'] ?? '') === 'DAILY_LIMIT');
+
+$daily_limit_download_response = [
+    'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
+    'error_code' => 'DAILY_LIMIT',
+    'action' => 'download',
+    'source_url' => 'https://example.com/video',
+    'source_url_missing' => false,
+];
+test('DAILY_LIMIT (download): source_url_missing key exists',
+    array_key_exists('source_url_missing', $daily_limit_download_response));
+test('DAILY_LIMIT (download): source_url_missing is boolean false',
+    $daily_limit_download_response['source_url_missing'] === false);
+test('DAILY_LIMIT (download): source_url is the provided URL string',
+    ($daily_limit_download_response['source_url'] ?? null) === 'https://example.com/video');
+test('DAILY_LIMIT (download): error_code is DAILY_LIMIT',
+    ($daily_limit_download_response['error_code'] ?? '') === 'DAILY_LIMIT');
+
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
 $health_response_with_reset = [
     'status' => 'ok',
