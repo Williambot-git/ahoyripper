@@ -5186,7 +5186,25 @@ switch ($action) {
                 : '';
         }
 
-        // Forward to Plausible API via a local HTTP request.
+        // Return 204 to the browser immediately — analytics is fire-and-forget.
+        // Never let Plausible downtime affect user UX. Use fastcgi_finish_request()
+        // (PHP-FPM only) to flush the full response before the outbound HTTP request.
+        // This prevents the slow Plausible call (up to 5s timeout) from blocking
+        // the PHP-FPM worker, keeping it available for other requests.
+        // In non-FPM SAPIs the function doesn't exist so we fall back to inline
+        // execution (the Plausible call is still non-blocking for the browser).
+        http_response_code(204);
+        if (function_exists('fastcgi_finish_request')) {
+            // Re-set standard headers explicitly since the top-of-script header
+            // buffer may not be flushed before fastcgi_finish_request().
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Cache-Control: no-store');
+            header('X-Request-ID: ' . $request_id);
+            echo '';
+            fastcgi_finish_request();
+        }
+
+        // Forward to Plausible API after the response is returned to the browser.
         // Use file_get_contents with stream context to avoid adding a dependency.
         // Skip the HTTP request entirely when analytics is disabled (PLAUSIBLE_HOST='')
         // so the 204 is returned immediately without a useless outbound connection.
@@ -5210,10 +5228,6 @@ switch ($action) {
 
             $response = @file_get_contents($forward_url, false, $context);
         }
-
-        // Always return 204 to the browser — analytics is fire-and-forget.
-        // Never let Plausible downtime affect user UX.
-        http_response_code(204);
         break;
     }
 
