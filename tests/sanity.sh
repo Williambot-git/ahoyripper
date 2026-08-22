@@ -35,6 +35,24 @@ else
 fi
 
 echo ""
+echo "==> Checking curl_cffi Python library (required for yt-dlp --impersonate)..."
+# curl_cffi is required for yt-dlp --impersonate (yt-dlp 2024.09+).
+# Without it, --impersonate silently fails and yt-dlp falls back to its default
+# TLS fingerprint, defeating the anti-bot protection that --impersonate provides.
+# The standalone yt-dlp binary needs this Python library separately — it is not
+# bundled with the standalone binary.
+if command -v python3 > /dev/null 2>&1; then
+    if python3 -c "import curl_cffi; print(curl_cffi.__version__)" 2>/dev/null; then
+        echo "  ✓ curl_cffi installed: $(python3 -c 'import curl_cffi; print(curl_cffi.__version__)' 2>/dev/null || true)"
+    else
+        echo "  ✗ curl_cffi not installed (yt-dlp --impersonate will silently fail)"
+        exit 1
+    fi
+else
+    echo "  ⚠ python3 not found in PATH (skipping — run on production server)"
+fi
+
+echo ""
 echo "==> Checking PHP syntax (all project .php files)..."
 # Check all PHP files: application code, tests, and CLI scripts.
 # Use find to enumerate so new PHP files are automatically included.

@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y \
         php-json \
         php-xml \
         php-gd \
+        python3 \
+        python3-pip \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     # Install yt-dlp as a standalone binary (no Python dependency needed).
@@ -71,6 +73,15 @@ RUN apt-get update && apt-get install -y \
     fi \
     && chmod +x /usr/local/bin/yt-dlp \
     && rm -f /tmp/SHA2-256SUMS
+
+# Install curl_cffi — required for yt-dlp --impersonate (yt-dlp 2024.09+).
+# The standalone binary is used for yt-dlp itself (faster startup, no Python
+# needed for yt-dlp itself), but --impersonate requires the curl_cffi Python
+# library to spoof browser TLS fingerprints. Without it, --impersonate silently
+# fails and yt-dlp falls back to its default TLS fingerprint, defeating the
+# anti-bot protection that --impersonate is meant to provide.
+# --break-system-packages needed on Debian Bookworm (PEP 668 compliance).
+RUN pip3 install --break-system-packages -q curl_cffi 2>&1 | tail -5
 
 # Verify yt-dlp is intact and runs before declaring the image good.
 # A corrupt or incomplete download produces a non-executable file;
