@@ -4352,6 +4352,9 @@ switch ($action) {
                 header('X-DL-RateLimit-Reset: ' . $dl_reset);
                 header('X-DL-RateLimit-Window: ' . $dl_rate_window);
             }
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            $retry_delta = DOWNLOAD_TIMEOUT;
+            header('Retry-After: ' . max(0, $retry_delta));
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
                 'error_code' => 'FILE_READ_ERROR',
@@ -4397,6 +4400,10 @@ switch ($action) {
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('Cache-Control: no-store');
+                header('X-RateLimit-Limit: -1');
+                header('X-RateLimit-Remaining: -1');
+                header('X-RateLimit-Reset: -1');
+                header('X-RateLimit-Window: unavailable');
                 // Download-specific rate limit: client aborted before the file was fully
                 // sent — the quota was charged when yt-dlp completed the download, so
                 // the actual post-consumption values apply here (same as FILE_READ_ERROR).
@@ -4411,6 +4418,8 @@ switch ($action) {
                     header('X-DL-RateLimit-Reset: ' . $dl_reset);
                     header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                 }
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('Retry-After: 0');
                 echo json_encode([
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
