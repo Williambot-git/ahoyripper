@@ -676,7 +676,9 @@ if (in_array($action, $internal_actions, true)) {
     if ($action === 'client-error') {
         $body = file_get_contents('php://input');
         $payload = json_decode($body, true);
-        if (!is_array($payload)) {
+        // json_decode with assoc=true returns null on parse failure (not false).
+        // Guard matches the pattern used by csp-report at line 591.
+        if ($payload === null || !is_array($payload)) {
             error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: malformed payload");
         } else {
             // Log with identifiable prefix and request_id for correlation.
@@ -707,8 +709,18 @@ if (in_array($action, $internal_actions, true)) {
             // Set explicitly here since the top-of-script header block is bypassed.
             header('Cache-Control: no-store');
             // X-Info-Timeout: included for consistency with the rest of the API surface.
-            // Mirrors the header set in the non-FPM fallback block at line ~4580.
+            // Mirrors the header set in the non-FPM fallback block at line ~4615.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-Download-Timeout: mirrors the header set in the non-FPM fallback block.
+            // Also needed here so client-error responses include this header regardless
+            // of SAPI, completing the full set of timeout headers for API surface parity.
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
+            // Mirrors the header set in the non-FPM fallback block at line ~4597.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unlimited');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
