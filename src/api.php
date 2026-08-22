@@ -411,6 +411,9 @@ if ($is_rate_limited) {
             // Present even on rate-limit 429s so clients can always read the download timeout
             // value without branching on the response code.
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-Info-Timeout: consistent with all other info-action error responses.
+            // Clients can use this to set appropriate fetch timeouts on retry.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             $rate_quota_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
