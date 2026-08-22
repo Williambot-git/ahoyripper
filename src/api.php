@@ -2591,12 +2591,15 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
-            // NOTE: --no-warnings is deliberately ABSENT from the info action.
-            // classifyYtdlpError() reads stderr to classify errors (GEOBLOCKED, AGE_RESTRICTED,
-            // etc.) and would return null if stderr is suppressed — causing all errors to fall
-            // through as unclassified YTDLP_ERROR. Warnings from yt-dlp are informational only
-            // and do not interfere with the JSON output; the download action uses --no-warnings
-            // because its error path does not call classifyYtdlpError on full stderr.
+            // --no-warnings: suppress yt-dlp's informational warnings on stderr. Warnings do not
+            // interfere with the JSON output on stdout, but suppressing them keeps stderr clean
+            // for classifyYtdlpError(). Importantly, parseFormats() extracts yt-dlp error messages
+            // directly from stdout (via the 'ERROR:' prefix check at line 1363) before stderr is
+            // ever read — so classifyYtdlpError() on stderr is a secondary fallback path for
+            // cases where parseFormats() could not determine the error from stdout alone. Adding
+            // --no-warnings here is consistent with the download action (line 3376) and health
+            // probe (line 4826); all three now suppress warnings for a cleaner error signal.
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
