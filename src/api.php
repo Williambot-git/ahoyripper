@@ -245,6 +245,19 @@ if ($blocked) {
         header('X-DailyLimit-Reset: ' . $quota_reset_ts);
         header('X-DailyLimit-Window: unavailable');
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // Content-Security-Policy, Reporting-Endpoints, and Report-To are set at
+        // the top of the script (lines ~109-163) but are not inherited into this
+        // exit path because this block calls exit() before the normal script flow
+        // continues. Add them here explicitly so FORBIDDEN_ORIGIN responses are
+        // fully consistent with all other API error responses.
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+        // Cache-Control: no-store is set globally at line 163, but add it here too
+        // for consistency with the MISSING_ACTION default: block which also explicitly
+        // sets it, and to ensure intermediate proxies don't cache this response.
+        header('Cache-Control: no-store');
         echo json_encode([
             'error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.',
             'error_code' => 'FORBIDDEN_ORIGIN',
