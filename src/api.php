@@ -3372,7 +3372,7 @@ switch ($action) {
                 $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
             }
             http_response_code(500);
-            header('Cache-Control: no-store, must-revalidate');
+            header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
@@ -3381,6 +3381,9 @@ switch ($action) {
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unavailable');
             // X-DL-RateLimit-*: download-specific rate limit.
             // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
@@ -4236,6 +4239,10 @@ switch ($action) {
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Cache-Control: no-store');
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
             // X-DL-RateLimit-*: download-specific rate limit was consumed when the
             // file was successfully written by yt-dlp, even though it could not be
             // read back for streaming. Use the actual post-consumption values.
