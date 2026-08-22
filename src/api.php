@@ -37,7 +37,7 @@ define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 // TTL (seconds) for the yt-dlp connectivity probe cache in the health endpoint.
 // PROBE_CACHE_TTL (5 minutes) prevents hammering YouTube with repeated health checks while
 // keeping the probe result fresh enough to detect real outages. Not configurable via
-// env var — increase the constant directly if longer TTL is ever needed.
+// env var — increase the constant directly if a longer TTL is ever needed.
 define('PROBE_CACHE_TTL', 300);
 
 // TTL (seconds) for yt-dlp and ffprobe binary version caches.
