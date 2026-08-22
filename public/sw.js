@@ -83,10 +83,10 @@ self.addEventListener('install', (event) => {
       .then(() => caches.keys())
       .then((names) => Promise.all(
         names
-          // SHELL_CACHE is also versioned and must be purged on each deploy.
-          // Unlike STATIC_CACHE (excluded so newly cached shell isn't deleted),
-          // SHELL_CACHE accumulates stale entries every deploy and must be removed.
-          .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE)
+          // Both STATIC_CACHE and SHELL_CACHE are versioned per-deploy — the current
+          // versions must be preserved (they were just created in this install).
+          // Only OTHER version strings (from prior installs) are stale and removed.
+          .filter((n) => n.startsWith('ahoyrip-') && n !== STATIC_CACHE && n !== SHELL_CACHE)
           .map((n) => caches.delete(n))
       ))
   );
