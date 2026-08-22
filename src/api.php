@@ -4283,6 +4283,32 @@ switch ($action) {
                 // Content-Type was already set to binary MIME above; override
                 // back to JSON so the error response has the correct Content-Type.
                 header('Content-Type: application/json; charset=utf-8');
+                // Full security headers — required on all responses including errors.
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Cache-Control: no-store');
+                // Download-specific rate limit: client aborted before the file was fully
+                // sent — the quota was charged when yt-dlp completed the download, so
+                // the actual post-consumption values apply here (same as FILE_READ_ERROR).
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                }
                 echo json_encode([
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
