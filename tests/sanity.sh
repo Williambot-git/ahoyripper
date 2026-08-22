@@ -1326,6 +1326,35 @@ else
 fi
 
 echo ""
+echo "==> Checking info action uses Cache-Control: no-store (not no-cache)..."
+# The info action (info success at ~line 2901, info error at ~line 2602) must use
+# no-store — the API does not use ETag/Last-Modified revalidation so no-cache is
+# wrong and risks proxy caching of stale JSON responses. All other API responses
+# already correctly use no-store.
+INFO_CASE=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)
+info_no_store=$(echo "$INFO_CASE" | grep -c "Cache-Control: no-store" || true)
+info_no_cache=$(echo "$INFO_CASE" | grep -c "Cache-Control: no-cache" || true)
+if [ "$info_no_cache" -eq 0 ]; then
+    echo "  ✓ info action uses no-cache correctly absent (no-cache found: $info_no_cache)"
+else
+    echo "  ✗ info action uses Cache-Control: no-cache — should be no-store (found $info_no_cache occurrence(s))"
+    exit 1
+fi
+
+echo ""
+echo "==> Checking health action uses Cache-Control: no-store (not no-cache)..."
+# The health action (line ~4918) must use no-store for the same reason as info.
+HEALTH_CASE=$(sed -n "/case 'health':/,/case '/p" src/api.php | head -n -1)
+health_no_store=$(echo "$HEALTH_CASE" | grep -c "Cache-Control: no-store" || true)
+health_no_cache=$(echo "$HEALTH_CASE" | grep -c "Cache-Control: no-cache" || true)
+if [ "$health_no_cache" -eq 0 ]; then
+    echo "  ✓ health action uses no-cache correctly absent (no-cache found: $health_no_cache)"
+else
+    echo "  ✗ health action uses Cache-Control: no-cache — should be no-store (found $health_no_cache occurrence(s))"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID error codes exist..."
 # Both error codes are returned by the download action when format is absent or invalid.
 # Verify they exist and return HTTP 400 (not 200 or 500).

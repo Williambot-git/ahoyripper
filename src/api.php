@@ -2599,7 +2599,7 @@ switch ($action) {
             }
             logRequest('info', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
-            header('Cache-Control: no-cache');
+            header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
@@ -2898,7 +2898,7 @@ switch ($action) {
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
         $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
-        header('Cache-Control: no-cache');
+        header('Cache-Control: no-store');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['platform' => $platform, 'url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
@@ -4915,7 +4915,7 @@ switch ($action) {
         // lets them avoid false-alarm retries when the server is simply slow.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
 
-        header('Cache-Control: no-cache');
+        header('Cache-Control: no-store');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
