@@ -5,10 +5,11 @@
   xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://ahoyripper.com/</loc>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://ahoyripper.com/og-image.png</image:loc>
+      <image:loc>https://ahoyripper.com/og-image.webp</image:loc>
       <image:caption>Rip any video from YouTube, TikTok, X, SoundCloud, Instagram and 1872+ platforms</image:caption>
       <image:title>AhoyRipper - Free Online Media Ripper</image:title>
     </image:image>
