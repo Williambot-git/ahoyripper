@@ -4573,6 +4573,11 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // X-Info-Timeout: the client-error action is a fire-and-forget endpoint that
+        // does not involve yt-dlp directly, but X-Info-Timeout is included for
+        // consistency with the rest of the API surface. API consumers inspecting headers
+        // will always find this field present, simplifying generic response parsers.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. The client-error endpoint bypasses
         // the global header block by sending its own response — repeat them here so
