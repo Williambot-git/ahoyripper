@@ -4802,6 +4802,7 @@ switch ($action) {
                 if ($probe_result) {
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => true,
+                        'action' => 'health',
                         'title' => substr($probe_result['title'] ?? '', 0, 80),
                         'source_url' => HEALTH_PROBE_URL,
                     ];
@@ -4843,6 +4844,7 @@ switch ($action) {
                     }
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
+                        'action' => 'health',
                         'source_url_missing' => false,
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
