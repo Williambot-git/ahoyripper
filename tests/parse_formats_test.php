@@ -178,6 +178,16 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED', 'formats' => []];
             }
+            // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
+            // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
+            // transferred but the source took too long). yt-dlp emits "connection timed out"
+            // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
+            // connection-failure patterns (connection reset, broken pipe, etc.) are caught
+            // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+            if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
+                return ['error' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'error_code' => 'CONNECTION_TIMEOUT', 'formats' => []];
+            }
             if ($raw_error_out !== null) $raw_error_out = $err_msg;
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.

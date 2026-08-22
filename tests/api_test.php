@@ -302,6 +302,15 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again.', 'status' => 502];
     }
+    // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
+    // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
+    // transferred but the source took too long). yt-dlp emits "connection timed out"
+    // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
+    // connection-failure patterns (connection reset, broken pipe, etc.) are caught
+    // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+    if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'status' => 504];
+    }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
     }
