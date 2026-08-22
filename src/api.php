@@ -450,54 +450,12 @@ if ($is_rate_limited) {
     fclose($fp);
 }
 
-// ─── Daily quota gate ─────────────────────────────────────────────────────
-// Quota is tracked per-IP as a simple counter. Unlimited-key holders bypass it.
-// A HOURLY rate limit (RATE_LIMIT, default 30 req/min) was already applied above;
-// this daily quota is an additional guard against sustained abuse.
-// Applies to info and download actions only — health/progress/check/analytics
-// are exempt (they consume no server resources beyond a JSON response).
-
-// Set rate limit headers unconditionally so they are present on every response,
-// including unlimited-key requests that still pass through this gate.
-// This gives clients (monitoring tools, load balancers) consistent metadata.
-$reset = $data['t'] + $rate_window;
-header('X-RateLimit-Limit: ' . $rate_limit);
-header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
-header('X-RateLimit-Reset: ' . $reset);
-header('X-RateLimit-Window: ' . $rate_window);
-
-// X-DL-* headers reflect the download-specific rate limit (DL_RATE_LIMIT).
-// For the 'download' action: read the dl_rate file and report actual state.
-// For all other actions: send -1 sentinels (no download rate limit applies).
-// Inside the download 429 block these are overridden with real values.
-$dl_limit = DL_RATE_LIMIT;
-$dl_window = 60;
-$dl_remaining = -1;
-$dl_reset = -1;
-$dl_window_label = 'unavailable';
-if (($action ?? '') === 'download') {
-    $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
-    $dl_fp2 = @fopen($dl_rate_file, 'r');
-    if ($dl_fp2) {
-        $dl_raw = @fread($dl_fp2, 4096);
-        if ($dl_raw) {
-            $dl_decoded = @json_decode($dl_raw, true);
-            if ($dl_decoded && is_array($dl_decoded)) {
-                $dl_remaining = max(0, $dl_limit - $dl_decoded['c']);
-                $dl_reset = $dl_decoded['t'] + $dl_window;
-            }
-        }
-        fclose($dl_fp2);
-    }
-}
-header('X-DL-RateLimit-Limit: ' . $dl_limit);
-header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
-header('X-DL-RateLimit-Reset: ' . $dl_reset);
-header('X-DL-RateLimit-Window: ' . $dl_window_label);
-
 // Periodic cleanup of stale rate files and cache entries.
 // Proactively removes expired entries from /tmp to prevent indefinite accumulation
 // on servers that run for months without restart.
+// Runs on EVERY request (not just rate-limited actions) so stale files never
+// accumulate regardless of which endpoints are hit — critical for servers that
+// primarily serve health checks or check-only probes.
 // The rate file stores ['t' => timestamp_of_first_request_in_window, 'c' => count].
 // A file is stale when the stored timestamp is older than $rate_window seconds ago
 // (meaning the window has fully expired and no new requests arrived to refresh it).
@@ -551,6 +509,51 @@ foreach (array_merge(
         }
     }
 }
+
+// ─── Daily quota gate ─────────────────────────────────────────────────────
+// Quota is tracked per-IP as a simple counter. Unlimited-key holders bypass it.
+// A HOURLY rate limit (RATE_LIMIT, default 30 req/min) was already applied above;
+// this daily quota is an additional guard against sustained abuse.
+// Applies to info and download actions only — health/progress/check/analytics
+// are exempt (they consume no server resources beyond a JSON response).
+
+// Set rate limit headers unconditionally so they are present on every response,
+// including unlimited-key requests that still pass through this gate.
+// This gives clients (monitoring tools, load balancers) consistent metadata.
+$reset = $data['t'] + $rate_window;
+header('X-RateLimit-Limit: ' . $rate_limit);
+header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+header('X-RateLimit-Reset: ' . $reset);
+header('X-RateLimit-Window: ' . $rate_window);
+
+// X-DL-* headers reflect the download-specific rate limit (DL_RATE_LIMIT).
+// For the 'download' action: read the dl_rate file and report actual state.
+// For all other actions: send -1 sentinels (no download rate limit applies).
+// Inside the download 429 block these are overridden with real values.
+$dl_limit = DL_RATE_LIMIT;
+$dl_window = 60;
+$dl_remaining = -1;
+$dl_reset = -1;
+$dl_window_label = 'unavailable';
+if (($action ?? '') === 'download') {
+    $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
+    $dl_fp2 = @fopen($dl_rate_file, 'r');
+    if ($dl_fp2) {
+        $dl_raw = @fread($dl_fp2, 4096);
+        if ($dl_raw) {
+            $dl_decoded = @json_decode($dl_raw, true);
+            if ($dl_decoded && is_array($dl_decoded)) {
+                $dl_remaining = max(0, $dl_limit - $dl_decoded['c']);
+                $dl_reset = $dl_decoded['t'] + $dl_window;
+            }
+        }
+        fclose($dl_fp2);
+    }
+}
+header('X-DL-RateLimit-Limit: ' . $dl_limit);
+header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
+header('X-DL-RateLimit-Reset: ' . $dl_reset);
+header('X-DL-RateLimit-Window: ' . $dl_window_label);
 
 // ─── Lightweight internal check (no auth, no rate-limit, no referer check) ───
 // Dedicated endpoint for Docker healthchecks and load-balancer probes.
