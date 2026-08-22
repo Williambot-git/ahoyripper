@@ -664,7 +664,7 @@ window.addEventListener('appinstalled', function() {
     'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again.',
     'CONNECTION_TIMEOUT': 'Connection timed out before the source responded. Try again or use AhoyVPN to change your exit IP.',
     'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
-    'DOWNLOAD_TIMEOUT': 'Download timed out after 5 minutes. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
+    'DOWNLOAD_TIMEOUT': 'Download timed out. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
     'DISALLOWED_CONTENT': 'This content is not available due to a terms of service violation.',
     'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
     'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
