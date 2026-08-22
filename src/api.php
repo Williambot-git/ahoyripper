@@ -4910,6 +4910,10 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // Timeout header: health runs yt-dlp --dump-json, which is an info-level
+        // operation subject to INFO_TIMEOUT. Telling clients the server-side limit
+        // lets them avoid false-alarm retries when the server is simply slow.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
 
         header('Cache-Control: no-cache');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
