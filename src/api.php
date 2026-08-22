@@ -4403,6 +4403,7 @@ switch ($action) {
         // needed here — $GLOBALS['__ytdlp_version'] is already set.
         echo json_encode([
             'status' => 'ok',
+            'action' => 'check',
             'server_time' => date('c'),
             'server_time_unix' => time(),
             'request_id' => $request_id,

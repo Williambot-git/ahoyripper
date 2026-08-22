@@ -668,6 +668,7 @@ POST /src/api.php?action=client-error   # client-side JS error reporting (intern
 ```json
 {
   "status": "ok",
+  "action": "check",
   "server_time": "2026-08-17T00:00:00+00:00",
   "server_time_unix": 1752787200,
   "request_id": "a3f1b2c9d4e5f678",
