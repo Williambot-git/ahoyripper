@@ -860,9 +860,9 @@ window.addEventListener('appinstalled', function() {
     retryBtn.classList.remove('visible');
   }
 
-  function setLoading(on) {
+  function setLoading(on, label) {
     btn.disabled = on;
-    btn.textContent = on ? 'Downloading...' : 'Rip It';
+    btn.textContent = on ? (label || 'Ripping...') : 'Rip It';
   }
 
   function showProgress(on) {
@@ -1147,7 +1147,7 @@ window.addEventListener('appinstalled', function() {
         // the download request with the browser's page view.
         dlHeaders['X-Request-ID'] = PAGE_REQUEST_ID;
         card.classList.add('downloading');
-        setLoading(true);
+        setLoading(true, 'Downloading...');
 
         // navigateOnSuccess guard: set to false when fetch fails so window.location.href
         // is not called (would otherwise download the JSON error body as a file).
@@ -1331,7 +1331,7 @@ window.addEventListener('appinstalled', function() {
     }
 
     hideError();
-    setLoading(true);
+    setLoading(true, 'Fetching info...');
     showProgress(true);
     setProgress(30, 'Fetching video info...');
 
