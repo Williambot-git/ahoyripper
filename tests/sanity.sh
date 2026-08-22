@@ -866,6 +866,16 @@ else
     exit 1
 fi
 
+echo "==> Checking twitter:image and twitter:image:alt in public/index.php..."
+# twitter:image provides the card preview image; twitter:image:alt (RFC 9493 §4.9)
+# provides a text alternative for screen readers and non-visual clients.
+if grep -q 'meta name="twitter:image"' public/index.php && grep -q 'meta name="twitter:image:alt"' public/index.php; then
+    echo "  ✓ twitter:image and twitter:image:alt present in index.php"
+else
+    echo "  ✗ twitter:image or twitter:image:alt missing from index.php"
+    exit 1
+fi
+
 echo "==> Checking canonical URL in public/index.php..."
 if grep -q 'link rel="canonical"' public/index.php; then
     echo "  ✓ canonical URL present in index.php"
