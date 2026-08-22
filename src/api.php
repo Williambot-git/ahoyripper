@@ -652,15 +652,18 @@ if (in_array($action, $internal_actions, true)) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        header('Reporting-Endpoints: csp-report="/csp-report"');
-        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        // Cache-Control: no-store — prevents all API responses from being cached.
+        // Set explicitly here since the top-of-script header block is bypassed.
+        header('Cache-Control: no-store');
         // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
         // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
         echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -700,6 +703,12 @@ if (in_array($action, $internal_actions, true)) {
             // buffer, but this fast-path bypasses that block and must re-set them explicitly.
             header('Content-Type: application/json; charset=utf-8');
             header('X-Request-ID: ' . $request_id);
+            // Cache-Control: no-store — prevents all API responses from being cached.
+            // Set explicitly here since the top-of-script header block is bypassed.
+            header('Cache-Control: no-store');
+            // X-Info-Timeout: included for consistency with the rest of the API surface.
+            // Mirrors the header set in the non-FPM fallback block at line ~4580.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
@@ -718,6 +727,27 @@ if (in_array($action, $internal_actions, true)) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
+        // Cache-Control: no-store — prevents all API responses from being cached.
+        // Mirrors the header set in the FPM fast-path block above.
+        header('Cache-Control: no-store');
+        // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
+        // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
+        // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
+        // X-Info-Timeout: mirrors the header set in the FPM fast-path block above.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
