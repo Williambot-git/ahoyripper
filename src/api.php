@@ -2973,11 +2973,11 @@ switch ($action) {
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unlimited');
+            header('X-DL-RateLimit-Window: 60');
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: 60');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
