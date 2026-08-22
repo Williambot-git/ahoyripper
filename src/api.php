@@ -1358,15 +1358,17 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         $data = json_decode(mb_convert_encoding($json_str, 'UTF-8', 'UTF-8'), true);
     }
     if (!$data) {
-        // Differentiate yt-dlp errors from actual parsing failures
+        // Differentiate yt-dlp errors from actual parsing failures.
+        // Clean the raw output first so the ERROR/WARNING prefix check (and all
+        // downstream processing) operates on sanitized text rather than raw bytes.
         $raw = trim($json_str);
-        if (preg_match('/^(ERROR|WARNING)/im', $raw)) {
+        $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
+        $err_msg = strip_tags($err_msg);
+        $err_msg = preg_replace('/\s+/', ' ', $err_msg);
+        if (preg_match('/^(ERROR|WARNING)/im', $err_msg)) {
             // yt-dlp returned an error message — surface it clearly.
-            // Whitespace-normalize the full message first (before truncation), so
-            // classification patterns have the best chance of matching.
-            $err_msg = preg_replace('/[\x00-\x1F\x7F]/', '', $raw);
-            $err_msg = strip_tags($err_msg);
-            $err_msg = preg_replace('/\s+/', ' ', $err_msg);
+            // $err_msg is already whitespace-normalized, so classification patterns
+            // have the best chance of matching.
 
             // Classify on the FULL message — truncation would discard the tail of
             // long errors that may contain the distinguishing keyword (e.g. "login required"
