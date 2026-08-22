@@ -2041,7 +2041,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
                 'action' => 'download',
-                // retry_after: 0 signals "retry immediately once input is corrected" — a
+                // retry_after: 0 signals "retry immediately once input is corrected" —
                 // validation error has no server-side backoff; the client just needs to
                 // provide a valid format_id. Consistent with MISSING_FORMAT and other validation errors.
                 'retry_after' => 0,
@@ -2049,6 +2049,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'format_id' => $format_id,
+                // 'format_id_missing' is false when the client provided a format_id that
+                // failed validation — distinguishing INVALID_FORMAT_ID from MISSING_FORMAT.
+                // API consumers can check this flag for precise error routing without
+                // relying on string matching on the error message.
+                'format_id_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,

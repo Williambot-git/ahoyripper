@@ -1707,10 +1707,15 @@ test('MISSING_FORMAT: error_code is MISSING_FORMAT',
 $invalid_format_id_response = [
     'error' => 'That format ID was not recognized.',
     'error_code' => 'INVALID_FORMAT_ID',
-    // format_id_missing is intentionally absent here
+    // 'format_id_missing' is false when the client provided a format_id that
+    // failed validation — distinguishing INVALID_FORMAT_ID from MISSING_FORMAT.
+    // Mirrors the source_url_missing pattern used for MISSING_URL/INVALID_URL.
+    'format_id_missing' => false,
 ];
-test('INVALID_FORMAT_ID: format_id_missing key is absent',
-    !array_key_exists('format_id_missing', $invalid_format_id_response));
+test('INVALID_FORMAT_ID: format_id_missing key exists',
+    array_key_exists('format_id_missing', $invalid_format_id_response));
+test('INVALID_FORMAT_ID: format_id_missing is boolean false',
+    $invalid_format_id_response['format_id_missing'] === false);
 test('INVALID_FORMAT_ID: error_code is INVALID_FORMAT_ID',
     ($invalid_format_id_response['error_code'] ?? '') === 'INVALID_FORMAT_ID');
 
