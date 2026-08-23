@@ -836,6 +836,10 @@ function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
     }
+    // Trim whitespace — callers are responsible for trimming too, but this
+    // guards against any caller that passes untrimmed input and makes
+    // isValidUrl() self-contained and safe for reuse as a standalone validator.
+    $url = trim($url);
     if (!preg_match('/^https:\/\//', $url)) {
         return false; // Only HTTPS — reject http:// and other schemes
     }

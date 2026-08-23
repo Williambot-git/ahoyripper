@@ -40,6 +40,7 @@ function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
     }
+    $url = trim($url);
     if (!preg_match('/^https:\/\//', $url)) {
         return false; // Only HTTPS
     }
@@ -127,6 +128,11 @@ function isValidUrl($url) {
 echo "\n==> Testing scheme enforcement (HTTPS required)\n";
 
 test('accepts https:// URL',         isValidUrl('https://example.com/'));
+test('accepts URL with surrounding whitespace', isValidUrl('  https://example.com/  '));
+test('accepts URL with leading newline',  isValidUrl("\nhttps://example.com/"));
+test('accepts URL with trailing tab',   isValidUrl("https://example.com/\t"));
+test('accepts URL with leading space (trimmed to valid https://)', isValidUrl(' https://example.com/'));
+test('rejects URL with leading http:// and space',   !isValidUrl(' http://example.com/'));
 test('rejects http:// URL',          !isValidUrl('http://example.com/'));
 test('rejects ftp:// URL',           !isValidUrl('ftp://example.com/'));
 test('rejects file:// URL',          !isValidUrl('file:///etc/passwd'));
