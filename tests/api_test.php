@@ -1765,6 +1765,40 @@ test('DAILY_LIMIT (download): source_url is the provided URL string',
 test('DAILY_LIMIT (download): error_code is DAILY_LIMIT',
     ($daily_limit_download_response['error_code'] ?? '') === 'DAILY_LIMIT');
 
+// ─── INVALID_KEY response source_url_missing ─────────────────────────────────
+// INVALID_KEY error responses (info and download actions) include source_url
+// but were previously missing source_url_missing => false. The client did
+// provide a URL — it was simply rejected as invalid, so source_url_missing is false.
+$invalid_key_info_response = [
+    'error' => 'Invalid API key.',
+    'error_code' => 'INVALID_KEY',
+    'source_url' => 'https://example.com/video',
+    'source_url_missing' => false,
+];
+test('INVALID_KEY (info): source_url_missing key exists',
+    array_key_exists('source_url_missing', $invalid_key_info_response));
+test('INVALID_KEY (info): source_url_missing is boolean false',
+    $invalid_key_info_response['source_url_missing'] === false);
+test('INVALID_KEY (info): source_url is the provided URL string',
+    ($invalid_key_info_response['source_url'] ?? null) === 'https://example.com/video');
+test('INVALID_KEY (info): error_code is INVALID_KEY',
+    ($invalid_key_info_response['error_code'] ?? '') === 'INVALID_KEY');
+
+$invalid_key_download_response = [
+    'error' => 'Invalid API key.',
+    'error_code' => 'INVALID_KEY',
+    'source_url' => 'https://example.com/video',
+    'source_url_missing' => false,
+];
+test('INVALID_KEY (download): source_url_missing key exists',
+    array_key_exists('source_url_missing', $invalid_key_download_response));
+test('INVALID_KEY (download): source_url_missing is boolean false',
+    $invalid_key_download_response['source_url_missing'] === false);
+test('INVALID_KEY (download): source_url is the provided URL string',
+    ($invalid_key_download_response['source_url'] ?? null) === 'https://example.com/video');
+test('INVALID_KEY (download): error_code is INVALID_KEY',
+    ($invalid_key_download_response['error_code'] ?? '') === 'INVALID_KEY');
+
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
 $health_response_with_reset = [
     'status' => 'ok',
