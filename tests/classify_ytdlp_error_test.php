@@ -338,16 +338,16 @@ test('classifies HTTP 429',
     assert_classify('ERROR: [YouTube] abc: HTTP Error 429', 'SOURCE_RATE_LIMITED', 429));
 
 test('classifies HTTP 500',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 500', 'SOURCE_SERVER_ERROR', 502));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 500', 'SOURCE_SERVER_ERROR', 500));
 
 test('classifies HTTP 502',
     assert_classify('ERROR: [YouTube] abc: HTTP Error 502', 'SOURCE_SERVER_ERROR', 502));
 
 test('classifies HTTP 503',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 503', 'SOURCE_SERVER_ERROR', 502));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 503', 'SOURCE_SERVER_ERROR', 503));
 
 test('classifies other HTTP error',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 418', 'SOURCE_HTTP_ERROR', 502));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 418', 'SOURCE_HTTP_ERROR', 418));
 
 // HTTP error code takes precedence over exit_code fallback
 test('HTTP 404 takes precedence over exit code 1',
