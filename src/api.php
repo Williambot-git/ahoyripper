@@ -4626,6 +4626,8 @@ switch ($action) {
         header('X-Download-Options: noopen');
         header('X-Robots-Tag: noindex, noai, noimage, noydir');
         header('X-Request-ID: ' . $request_id);
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
@@ -4886,7 +4888,11 @@ switch ($action) {
     case 'progress':
     case 'health': {
         // Health/progress — full system status with resource metrics.
-        // Note: all security headers are already set at the top of the script.
+        // Note: most security headers are set at the top of the script, but
+        // X-Info-Timeout and X-Download-Timeout are custom app headers only
+        // set per-action — add them here for API-surface consistency.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
 
         $version = $GLOBALS['__ytdlp_version'] ?? 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?? 'not installed';
