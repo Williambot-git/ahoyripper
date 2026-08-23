@@ -3480,19 +3480,16 @@ switch ($action) {
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
-            // Use DOWNLOAD_TIMEOUT so the client has the same reset window as other
-            // download failures, giving a consistent countdown value.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
-            // headers in this file (which use $reset_timestamp - time(), not absolute
-            // timestamps). Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
+            // headers in this file. Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
             // ensures this stays consistent with the delta-seconds format.
             $retry_delta = DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             echo json_encode([
                 'error' => 'Failed to start download process.',
                 'error_code' => 'PROC_OPEN_FAILED',
