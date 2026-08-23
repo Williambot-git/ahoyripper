@@ -2381,6 +2381,12 @@ switch ($action) {
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unlimited');
+            // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
+            // Matches the same pattern used in the download action's invalid-key block.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unlimited');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
