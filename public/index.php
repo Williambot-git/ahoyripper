@@ -441,8 +441,8 @@ header_remove('X-Powered-By');
         </div>
         <div class="results-sort">
           <label for="sortSelect" class="sort-label">Sort:</label>
-          <select id="sortSelect" class="sort-select" aria-label="Sort formats by" disabled>
-            <option value="height">Quality</option>
+          <select id="sortSelect" class="sort-select" aria-label="Sort formats by resolution, size, bitrate, quality tier, or audio quality" disabled>
+            <option value="height">Resolution</option>
             <option value="filesize">Size (largest)</option>
             <option value="filesize_asc">Size (smallest)</option>
             <option value="tbr">Bitrate</option>
