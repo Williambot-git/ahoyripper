@@ -31,8 +31,8 @@ User-agent: PerplexityBot
 User-agent: PetalBot
 User-agent: SemrushBot-Crawler
 User-agent: YouBot
-User-agent: PinterestBot
-Disallow: /
+# PinterestBot is a legitimate social media crawler — allow it to crawl the site
+# so AhoyRipper pages can be shared and pinned on Pinterest normally.
 
 # AhoyBot is our own crawler — allow it to crawl the site normally so our
 # own SEO and indexing pipelines work correctly.
