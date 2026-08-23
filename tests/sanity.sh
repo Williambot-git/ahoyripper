@@ -884,13 +884,17 @@ else
     exit 1
 fi
 
-echo "==> Checking twitter:image and twitter:image:alt in public/index.php..."
-# twitter:image provides the card preview image; twitter:image:alt (RFC 9493 §4.9)
-# provides a text alternative for screen readers and non-visual clients.
-if grep -q 'meta name="twitter:image"' public/index.php && grep -q 'meta name="twitter:image:alt"' public/index.php; then
-    echo "  ✓ twitter:image and twitter:image:alt present in index.php"
+echo "==> Checking twitter:image dimensions in public/index.php (Twitter Card rendering)..."
+# twitter:image:width and twitter:image:height (Open Graph spec) are required by
+# Twitter Card validator for accurate rendering. Without them the card may show a
+# placeholder or be rejected. Also guard twitter:image and twitter:image:alt.
+if grep -q 'meta name="twitter:image"' public/index.php \
+    && grep -q 'meta name="twitter:image:alt"' public/index.php \
+    && grep -q 'meta name="twitter:image:width"' public/index.php \
+    && grep -q 'meta name="twitter:image:height"' public/index.php; then
+    echo "  ✓ twitter:image, twitter:image:alt, twitter:image:width, twitter:image:height present"
 else
-    echo "  ✗ twitter:image or twitter:image:alt missing from index.php"
+    echo "  ✗ twitter:image, twitter:image:alt, or dimension tags missing from index.php"
     exit 1
 fi
 
