@@ -4167,7 +4167,7 @@ switch ($action) {
                     // ffprobe exited 0 but found no streams — ffprobe itself did not "fail"
                     // per se, but verification could not be completed. Use 'skipped' to
                     // distinguish from a genuine ffprobe execution error (which sets
-                    // 'failed' at line 3597).
+                    // 'failed' at line 4230).
                     header('X-FFProbe-Status: skipped');
                 }
             } else {
@@ -4213,11 +4213,11 @@ switch ($action) {
                     header('X-DailyLimit-Window: unlimited');
                 } else {
                     header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
-                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                    header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
                     header('X-DL-RateLimit-Reset: ' . $dl_reset);
                     header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                     header('X-RateLimit-Limit: ' . $dl_rate_limit);
-                    header('X-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                    header('X-RateLimit-Remaining: ' . $dl_remaining);
                     header('X-RateLimit-Reset: ' . $dl_reset);
                     header('X-RateLimit-Window: ' . $dl_rate_window);
                     header('X-DailyLimit-Limit: ' . $daily_limit);
