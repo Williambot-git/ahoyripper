@@ -3147,6 +3147,9 @@ switch ($action) {
                 header('X-DailyLimit-Reset: -1');
                 header('X-DailyLimit-Window: unlimited');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                // X-Info-Timeout: present on every download-action error response so clients
+                // can always read the info timeout value without branching on the response code.
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
