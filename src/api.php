@@ -4711,7 +4711,9 @@ switch ($action) {
             'server_uptime_seconds' => null,
             'load_avg' => null,
             'memory_available_pct' => null,
+            'disk_total_gb' => null,
             'disk_free_gb' => null,
+            'disk_free_pct' => null,
         ];
         // Uptime: /proc/uptime is text file, first token is seconds.
         // Falls back to PHP's $_SERVER['REQUEST_TIME'] (relative to request, not boot).
@@ -4750,9 +4752,21 @@ switch ($action) {
         }
         // Disk: check the /tmp partition (where logs and caches live) rather than
         // root — a separate /tmp mount is common in containerized deployments.
+        // disk_free_space() returns bytes available to the caller (accounting for
+        // filesystem quotas and reserved blocks); disk_total_space() returns total
+        // bytes in the partition. Together they derive disk_free_pct, which is
+        // more immediately useful than free bytes alone (1 GB free could be 1%
+        // on a 100 GB partition or 99% on a 1.1 GB partition).
         $df = @disk_free_space('/tmp');
+        $dt = @disk_total_space('/tmp');
         if ($df !== false) {
             $metrics['disk_free_gb'] = round($df / (1024 ** 3), 2);
+        }
+        if ($dt !== false && $dt > 0) {
+            $metrics['disk_total_gb'] = round($dt / (1024 ** 3), 2);
+            if ($df !== false) {
+                $metrics['disk_free_pct'] = round(($df / $dt) * 100, 1);
+            }
         }
         return $metrics;
     }
@@ -4974,7 +4988,9 @@ switch ($action) {
             'server_uptime_seconds' => $sys['server_uptime_seconds'],
             'load_avg' => $sys['load_avg'],
             'memory_available_pct' => $sys['memory_available_pct'],
+            'disk_total_gb' => $sys['disk_total_gb'],
             'disk_free_gb' => $sys['disk_free_gb'],
+            'disk_free_pct' => $sys['disk_free_pct'],
             // Daily quota fields — health is a read-only probe (does not consume quota)
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency with info/download

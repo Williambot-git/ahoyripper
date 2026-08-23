@@ -1935,12 +1935,16 @@ test('unlimited-key holder → no quota refund (even when ffprobe fails)',
 // without including api.php (standalone test design).
 
 // Replicate the function locally so tests are isolated from api.php's scope.
-function getSystemMetricsTest($uptime_content, $loadavg_content, $meminfo_content, $disk_free_result) {
+// Accepts $disk_free_result (bytes or false) and $disk_total_result (bytes or false)
+// to simulate both disk_free_space() and disk_total_space() return values.
+function getSystemMetricsTest($uptime_content, $loadavg_content, $meminfo_content, $disk_free_result, $disk_total_result) {
     $metrics = [
         'server_uptime_seconds' => null,
         'load_avg' => null,
         'memory_available_pct' => null,
+        'disk_total_gb' => null,
         'disk_free_gb' => null,
+        'disk_free_pct' => null,
     ];
     @[$up] = explode(' ', $uptime_content ?: '', 2);
     if ($up !== null) {
@@ -1971,8 +1975,16 @@ function getSystemMetricsTest($uptime_content, $loadavg_content, $meminfo_conten
             $metrics['memory_available_pct'] = round(($avail / $total) * 100, 1);
         }
     }
-    if ($disk_free_result !== false) {
-        $metrics['disk_free_gb'] = round($disk_free_result / (1024 ** 3), 2);
+    $df = $disk_free_result;
+    $dt = $disk_total_result;
+    if ($df !== false) {
+        $metrics['disk_free_gb'] = round($df / (1024 ** 3), 2);
+    }
+    if ($dt !== false && $dt > 0) {
+        $metrics['disk_total_gb'] = round($dt / (1024 ** 3), 2);
+        if ($df !== false) {
+            $metrics['disk_free_pct'] = round(($df / $dt) * 100, 1);
+        }
     }
     return $metrics;
 }
@@ -1983,13 +1995,13 @@ function getSystemMetricsTest($uptime_content, $loadavg_content, $meminfo_conten
 
 echo "\n==> Testing getSystemMetrics() — parsing logic\n";
 
-$all_keys = ['server_uptime_seconds', 'load_avg', 'memory_available_pct', 'disk_free_gb'];
+$all_keys = ['server_uptime_seconds', 'load_avg', 'memory_available_pct', 'disk_total_gb', 'disk_free_gb', 'disk_free_pct'];
 
 // 1. All metrics present — full happy path
 $uptime  = "12345.67 8901.23\n";
 $loadavg = "1.50 0.75 0.50 3/142 9876\n";
 $meminfo = "MemTotal:       16384000 kB\nMemAvailable:   8192000 kB\nMemFree:        2048000 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 50 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 50 * 1024**3, 100 * 1024**3);
 test('all keys present: server_uptime_seconds is integer (12345)',
     $result['server_uptime_seconds'] === 12345);
 test('all keys present: server_uptime_seconds parsed from float string',
@@ -2000,12 +2012,16 @@ test('all keys present: memory_available_pct = (8192000/16384000)*100 = 50.0',
     $result['memory_available_pct'] === 50.0);
 test('all keys present: disk_free_gb rounded to 2 decimal places',
     $result['disk_free_gb'] === 50.0);
-test('all keys present: all four keys present',
+test('all keys present: disk_total_gb rounded to 2 decimal places',
+    $result['disk_total_gb'] === 100.0);
+test('all keys present: disk_free_pct = (50/100)*100 = 50.0',
+    $result['disk_free_pct'] === 50.0);
+test('all keys present: all six keys present',
     array_keys($result) === $all_keys);
 
 // 2. No /proc content — /proc/uptime is empty (1-token: ''), so parsing yields 0.
 //    /proc/loadavg empty → load_avg stays null. meminfo empty → memory stays null.
-$result = getSystemMetricsTest('', '', '', false);
+$result = getSystemMetricsTest('', '', '', false, false);
 test('empty /proc/uptime: server_uptime_seconds is 0 (not null)',
     $result['server_uptime_seconds'] === 0);
 test('empty /proc/loadavg: load_avg is 0.0 (empty string cast to float zero)',
@@ -2017,49 +2033,68 @@ test('disk_free_space returns false: disk_free_gb is null',
 
 // 3. Uptime with non-numeric second field (edge case — real /proc/uptime is always float)
 $uptime = "99999.99 one_more_field\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 50 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 50 * 1024**3, 100 * 1024**3);
 test('uptime second token non-numeric: first token parsed correctly',
     $result['server_uptime_seconds'] === 99999);
 
 // 4. MemAvailable absent — falls back to MemFree
 $meminfo = "MemTotal:       4096000 kB\nMemFree:        1024000 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3, 50 * 1024**3);
 test('MemAvailable absent: falls back to MemFree (1024000/4096000)*100 = 25.0',
     $result['memory_available_pct'] === 25.0);
 
 // 5. Neither MemAvailable nor MemFree — memory_available_pct stays null
 $meminfo = "MemTotal:       4096000 kB\nBuffers:        102400 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3, 50 * 1024**3);
 test('MemAvailable and MemFree absent: memory_available_pct is null',
     $result['memory_available_pct'] === null);
 
 // 6. Memory percentage rounding
 $meminfo = "MemTotal:       3000000 kB\nMemAvailable:   1000000 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false, false);
 test('memory_available_pct rounds to 1 decimal place (1000000/3000000)*100 = 33.3',
     $result['memory_available_pct'] === 33.3);
 
 // 7. disk_free_space returns false — disk_free_gb stays null
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false, false);
 test('disk_free_space returns false: disk_free_gb is null',
     $result['disk_free_gb'] === null);
 
 // 8. Very small disk space — verify rounding
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 1 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 1 * 1024**3, 100 * 1024**3);
 test('disk_free_gb rounds 1GB to 1.00',
     $result['disk_free_gb'] === 1.0);
 
 // 9. Only MemTotal (no MemAvailable, no MemFree) — null percentage
 $meminfo = "MemTotal:       8192000 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 20 * 1024**3);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 20 * 1024**3, 100 * 1024**3);
 test('only MemTotal: memory_available_pct is null (no available metric)',
     $result['memory_available_pct'] === null);
 
 // 10. Zero total memory — guards division by zero
 $meminfo = "MemTotal:              0 kB\nMemAvailable:           0 kB\n";
-$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false);
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, false, false);
 test('zero total memory: guards division by zero, memory_available_pct is null',
     $result['memory_available_pct'] === null);
+
+// 11. disk_total_space returns false — disk_total_gb stays null, disk_free_pct also null
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3, false);
+test('disk_total_space false: disk_total_gb is null',
+    $result['disk_total_gb'] === null);
+test('disk_total_space false: disk_free_pct is null even with valid free',
+    $result['disk_free_pct'] === null);
+
+// 12. disk_total_gb present — disk_free_pct derived correctly
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 20 * 1024**3, 100 * 1024**3);
+test('disk_free_pct = (20/100)*100 = 20.0',
+    $result['disk_free_pct'] === 20.0);
+
+// 13. Zero disk total — guards division by zero, disk_free_pct stays null
+$result = getSystemMetricsTest($uptime, $loadavg, $meminfo, 10 * 1024**3, 0);
+test('zero disk total: disk_total_gb is null (rounds to 0, then null-check catches it)',
+    $result['disk_total_gb'] === null);
+test('zero disk total: disk_free_pct is null',
+    $result['disk_free_pct'] === null);
 
 // ─── logRequest for ffprobe failure status code ─────────────────────────────
 // Standalone reproduction of the logRequest signature used in api.php.
