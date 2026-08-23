@@ -27,6 +27,11 @@ $tests_passed = 0;
 // api.php uses: define('AHOYRIPPER_VERSION', require __DIR__ . '/../src/version.php');
 define('AHOYRIPPER_VERSION', require __DIR__ . '/../src/version.php');
 
+// Shared constant: maximum filename length (mirrors api.php MAX_FILENAME_LEN).
+// Duplicated here so that the inline sanitizeFilename() helper stays in sync with
+// the production implementation without requiring the full api.php include.
+define('MAX_FILENAME_LEN', 80);
+
 function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
@@ -983,7 +988,7 @@ function sanitizeFilename($input) {
     $v = preg_replace('/[^\w\s._-]/', '', $input);
     $v = preg_replace('/\s+/', '_', trim($v));
     $trimmed = trim($v);
-    if (strlen($trimmed) === 0 || strlen($trimmed) > 80) {
+    if (strlen($trimmed) === 0 || strlen($trimmed) > MAX_FILENAME_LEN) {
         return 'ahoyrip';
     }
     return $trimmed;
@@ -1037,7 +1042,7 @@ function sanitizeFilenameForTest($input) {
     $v = preg_replace('/[^\w\s._-]/', '', $v);
     $v = preg_replace('/\s+/', '_', trim($v));
     $trimmed = trim($v);
-    if (strlen($trimmed) === 0 || strlen($trimmed) > 80) {
+    if (strlen($trimmed) === 0 || strlen($trimmed) > MAX_FILENAME_LEN) {
         return 'ahoyrip';
     }
     return $trimmed;
