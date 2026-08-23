@@ -81,7 +81,16 @@ RUN apt-get update && apt-get install -y \
 # fails and yt-dlp falls back to its default TLS fingerprint, defeating the
 # anti-bot protection that --impersonate is meant to provide.
 # --break-system-packages needed on Debian Bookworm (PEP 668 compliance).
+# -q suppresses progress output; the verification step immediately after confirms
+# the install actually succeeded rather than silently proceeding on partial failure.
 RUN pip3 install --break-system-packages -q curl_cffi 2>&1 | tail -5
+# Verify curl_cffi is actually importable before the build continues.
+# Without this check, a broken or partial installation (e.g. missing shared
+# library, wrong Python version, pip bug) silently proceeds and --impersonate
+# fails at runtime with 403 errors on protected sites — with no indication
+# from the build that curl_cffi is broken. The import check fails fast and
+# loud if the install did not succeed.
+RUN python3 -c "import curl_cffi; print(f'curl_cffi {curl_cffi.__version__} installed')"
 
 # Verify yt-dlp is intact and runs before declaring the image good.
 # A corrupt or incomplete download produces a non-executable file;
