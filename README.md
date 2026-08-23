@@ -556,7 +556,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | The download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). The server may be restarting or overloaded. Try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
-| `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `health`, or `progress` |
+| `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `check`, `health`, `progress`, `analytics`, `csp-report`, or `client-error` |
 
 ### Download a format
 ```
@@ -662,6 +662,7 @@ GET /src/api.php?action=progress        # alias for health (same response shape)
 GET /src/api.php?action=health&probe=1  # include live yt-dlp connectivity probe
 POST /src/api.php?action=csp-report     # CSP violation report receiver (nginx report-uri)
 POST /src/api.php?action=client-error   # client-side JS error reporting (internal)
+POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → server → Plausible)
 ```
 
 `action=check` is a minimal ping with zero server overhead — no dependency on yt-dlp, ffmpeg, or /proc/sys calls. It returns instantly and is safe to call every 10 seconds. Use it for Docker healthchecks and load-balancer probes:
