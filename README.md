@@ -497,7 +497,28 @@ The `source_url` field in the info response is the exact URL that was ripped —
 
 > **Note:** `api_version` appears on `action=check`, `action=info`, `action=download`, and `action=health` responses — consistent across all endpoints so API consumers always have the version.
 
+### Info Response Headers
 
+Every `action=info` response — success and error — includes these HTTP headers:
+
+| Header | Description |
+|--------|-------------|
+| `X-Request-ID` | Unique per-request correlation ID (16 hex chars); use this to correlate browser, API, and server-side logs |
+| `X-RateLimit-Limit` | Max requests allowed per window (default 30/min for `info`) |
+| `X-RateLimit-Remaining` | Requests left in the current window |
+| `X-RateLimit-Reset` | Unix timestamp when the rate limit window resets |
+| `X-RateLimit-Window` | Window size in seconds (`60`) |
+| `X-Info-Timeout` | Server-side info timeout in seconds (integer). Clients should set their fetch timeout to at least this value so the client deadline never exceeds the server deadline. The value matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). Present on every `info` response — success and error — so clients can always read it for retry timeout guidance. |
+| `X-DailyLimit-Limit` | Daily rip limit (default 5, unlimited-key holders see `-1`) |
+| `X-DailyLimit-Remaining` | Rips left in the current day (`-1` for unlimited-key holders) |
+| `X-DailyLimit-Reset` | Unix timestamp of the next daily reset (midnight UTC) |
+| `X-DailyLimit-Window` | Reset window in seconds (`86400`, or `unlimited` for unlimited-key holders) |
+
+The `X-Info-Timeout` header is analogous to `X-Download-Timeout` (documented in the Download Response Headers section) — both tell clients the server-side timeout value so they can size their fetch timeouts appropriately and avoid premature client-side aborts.
+
+**Info success responses** additionally include `Content-Type: application/json` and `Cache-Control: no-store`. Binary download headers are never present on `info` responses — those only apply to `action=download` success (200) responses.
+
+**Info error responses** (any non-200 status) return JSON with the standard error shape — the binary download headers are absent, consistent with all non-200 responses.
 
 The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_type: "audio"`) and `null` on video formats. The `tbr` (total bitrate, in kbps) is available on most formats and can be used as a proxy for quality when `height` is not available.
 
