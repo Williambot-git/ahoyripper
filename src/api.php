@@ -2555,8 +2555,8 @@ switch ($action) {
                 header('X-DailyLimit-Window: 86400');
                 echo json_encode([
                     'error' => $daily_limit > 0
-                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN."
-                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, get AhoyVPN.",
+                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, visit " . UPGRADE_URL
+                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, visit " . UPGRADE_URL,
                     'error_code' => 'DAILY_LIMIT',
                     'action' => 'info',
                     'source_url' => $url,
@@ -3381,8 +3381,8 @@ switch ($action) {
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => $daily_limit > 0
-                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, get AhoyVPN."
-                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, get AhoyVPN.",
+                        ? "Daily limit reached. You get {$daily_limit} free lookups per day. For unlimited access, visit " . UPGRADE_URL
+                        : "Daily limit reached. This server does not offer a free tier. For unlimited access, visit " . UPGRADE_URL,
                     'error_code' => 'DAILY_LIMIT',
                     'action' => 'download',
                     'source_url' => $url,
