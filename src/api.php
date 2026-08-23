@@ -5050,6 +5050,16 @@ switch ($action) {
                     $probe_cmd[] = '--impersonate';
                     $probe_cmd[] = AHOY_IMPERSONATE;
                 }
+                // --cookies: pass authenticated cookies if COOKIES_PATH is configured.
+                // Mirrors the cookie handling in the info and download actions so the
+                // health probe accurately reflects real ripping capability (including
+                // cookie-gated platforms like age-restricted YouTube).
+                if (COOKIES_PATH !== '') {
+                    $probe_cmd[] = '--cookies';
+                    $probe_cmd[] = COOKIES_PATH;
+                }
+                $probe_cmd[] = '--add-header';
+                $probe_cmd[] = 'Accept-Language: ' . preg_replace('/[^\x20-\x7E;,=]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5');
                 $probe_cmd[] = '--';
                 $probe_cmd[] = HEALTH_PROBE_URL;
                 $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
