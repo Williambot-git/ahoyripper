@@ -92,13 +92,25 @@ function isValidUrl($url) {
         // false and are incorrectly rejected.
         $resolved = @dns_get_record($parsed, DNS_A | DNS_AAAA);
         if ($resolved === false || empty($resolved)) {
-            return false;
+            return false; // Cannot resolve — reject
         }
+        // Validate every IP the domain resolves to. Reject if ANY is private/reserved/multicast.
+        // Collect IPv4 from 'ip' key and IPv6 from 'ipv6' key.
+        // CNAME-only responses (no A/AAAA records) yield an empty 'ip'/'ipv6' field —
+        // explicitly reject those so a CNAME pointing to a private IP can't bypass SSRF guards.
+        $found_ip = false;
         foreach ($resolved as $record) {
             $ip = $record['ip'] ?? $record['ipv6'] ?? null;
-            if ($ip === null || !$isPublicIp($ip)) {
+            if ($ip === null || $ip === '') {
+                continue; // CNAME-only record, no IP to check
+            }
+            $found_ip = true;
+            if (!$isPublicIp($ip)) {
                 return false;
             }
+        }
+        if (!$found_ip) {
+            return false; // Domain resolves to CNAMEs only — no public IPs found
         }
         return true;
     }
