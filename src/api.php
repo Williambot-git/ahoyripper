@@ -3478,10 +3478,14 @@ switch ($action) {
             foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
         });
 
-        // Prevent the user's video URL from leaking as HTTP Referer to the source.
-        // yt-dlp sends the URL itself as referer by default; using the generic
-        // ahoyripper.com referer hides the actual video URL from third-party servers.
-        $referer = 'https://ahoyripper.com/';
+        // yt-dlp sends the URL itself as referer by default. Allow per-request override
+        // via ?referer= URL param (same pattern used by the info action at line 184).
+        // A platform-specific referer (e.g. youtube.com) can improve extraction success
+        // on sites that validate the referer header. Falls back to ahoyripper.com if
+        // no override is provided, preventing the user's video URL from leaking.
+        $referer = isset($_GET['referer']) && $_GET['referer'] !== ''
+            ? $_GET['referer']
+            : 'https://ahoyripper.com/';
 
         // --progress-template false: yt-dlp accepts 'false' as the canonical modern
         //   syntax to suppress all progress output to stderr. Without this, yt-dlp

@@ -573,6 +573,7 @@ Authorization: Bearer YOUR_API_KEY
 | `filename` | `ahoyrip.<ext>` | Custom output filename (alphanumeric, spaces, dots, underscores, hyphens only) |
 | `playlist` | `0` | Set to `1` to download all videos in a playlist (`--yes-playlist` flag). Each video counts as a separate rip. |
 | `key` | — | AhoyVPN unlimited API key to bypass the daily 5-rip quota |
+| `referer` | `https://ahoyripper.com/` | Custom HTTP Referer sent to the source platform. Useful for platforms that validate the referer header. Defaults to `https://ahoyripper.com/` which hides the user's video URL from third-party servers. |
 
 The `format_id` comes from the `id` field in the info response. The API reads the key from the `Authorization: Bearer` header (preferred — keeps the key out of URLs and server logs). A `key` query parameter is also accepted for backwards compatibility but is discouraged.
 
