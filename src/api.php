@@ -2522,6 +2522,33 @@ switch ($action) {
                 http_response_code(429);
                 $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
+                // Security headers — mirrors the same set sent by the per-minute
+                // rate-limit 429 block so daily-quota 429 responses are equally
+                // hardened regardless of which limit was hit first.
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('X-Request-ID: ' . $request_id);
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // X-RateLimit-*: -1 sentinels since the per-minute rate-limit gate was
+                // not yet passed when this daily-quota check fires (for info action).
+                header('X-RateLimit-Limit: -1');
+                header('X-RateLimit-Remaining: -1');
+                header('X-RateLimit-Reset: -1');
+                header('X-RateLimit-Window: unlimited');
+                // X-DL-RateLimit-*: -1 sentinels — dl_rate_file is opened later in the
+                // download action, so not yet available here for the info action.
+                header('X-DL-RateLimit-Limit: -1');
+                header('X-DL-RateLimit-Remaining: -1');
+                header('X-DL-RateLimit-Reset: -1');
+                header('X-DL-RateLimit-Window: unlimited');
                 header('X-DailyLimit-Limit: ' . $daily_limit);
                 header('X-DailyLimit-Remaining: 0');
                 header('X-DailyLimit-Reset: ' . $reset_timestamp);
