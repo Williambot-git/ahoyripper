@@ -700,30 +700,45 @@ if (in_array($action, $internal_actions, true)) {
         // whenever a new header is added to the top-of-script block. In non-FPM
         // SAPIs the function doesn't exist and we fall back to manual headers.
         if (function_exists('fastcgi_finish_request')) {
-            // Re-set Content-Type and X-Request-ID since the non-FPM fallback block
-            // below (which runs for all actions) sets them via the top-of-script header
-            // buffer, but this fast-path bypasses that block and must re-set them explicitly.
+            // Re-set ALL standard security headers in the FPM fast-path so the
+            // response is fully hardened regardless of nginx layer-header state.
+            // These complement the top-of-script headers in the output buffer.
             header('Content-Type: application/json; charset=utf-8');
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Request-ID: ' . $request_id);
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             // Cache-Control: no-store — prevents all API responses from being cached.
-            // Set explicitly here since the top-of-script header block is bypassed.
             header('Cache-Control: no-store');
-            // X-Info-Timeout: included for consistency with the rest of the API surface.
-            // Mirrors the header set in the non-FPM fallback block at line ~4615.
+            // X-Info-Timeout: mirrors the header set in the non-FPM fallback block.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: mirrors the header set in the non-FPM fallback block.
-            // Also needed here so client-error responses include this header regardless
-            // of SAPI, completing the full set of timeout headers for API surface parity.
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
-            // Mirrors the header set in the non-FPM fallback block at line ~4597.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unlimited');
+            // Rate-limit headers: -1 sentinel (unlimited) since client-error is a
+            // read-only fire-and-forget endpoint.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unlimited');
+            // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
             echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
