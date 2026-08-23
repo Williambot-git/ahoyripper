@@ -2750,7 +2750,9 @@ switch ($action) {
                 // $post_refund_count is $daily_limit for them (no change from baseline).
                 // Use ternary to return -1 for unlimited-key holders, matching the
                 // pattern used by every other info-action error response.
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                // $post_refund_count is the post-refund daily count returned by
+                // refundQuota() — it IS the remaining quota, not an offset from the limit.
+                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
@@ -3617,11 +3619,12 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: quota was refunded before this response.
-                // $post_refund_count is the post-refund daily count. Unlimited-key
-                // holders ($unlimited=true) were never incremented — use -1 sentinel
-                // to signal \"no quota applies\", matching the pattern used by every
-                // other download-action error response.
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                // $post_refund_count is the post-refund daily count returned by
+                // refundQuota() — it IS the remaining quota, not an offset from the limit.
+                // Unlimited-key holders ($unlimited=true) were never incremented — use -1 sentinel
+                // for quota_remaining to match the pattern used by every other
+                // download-action error response.
+                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
@@ -3662,9 +3665,11 @@ switch ($action) {
                 // Refund daily quota since the download never started successfully.
                 // Only refund when the baseline was set (proc_open was attempted after
                 // quota increment). Unlimited-key holders ($unlimited=true) skip
-                // increment so no refund needed.
+                // increment so no refund needed. Capture return value — refundQuota()
+                // returns the post-refund daily count (the remaining quota).
+                $post_refund_count = $daily_limit;
                 if (!$unlimited && isset($dl_quota_before_refund)) {
-                    refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+                    $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
                 }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
@@ -3693,10 +3698,10 @@ switch ($action) {
                     'format_id' => $format_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'quota_remaining' => max(0, $daily_limit - $post_refund_count),
-                    'quota_limit' => $daily_limit,
-                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_remaining' => !$unlimited ? $post_refund_count : -1,
+                    'quota_limit' => !$unlimited ? $daily_limit : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -3813,7 +3818,7 @@ switch ($action) {
                     header('X-DailyLimit-Window: unlimited');
                 } else {
                     header('X-DailyLimit-Limit: ' . $daily_limit);
-                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $post_refund_count));
+                    header('X-DailyLimit-Remaining: ' . ($unlimited ? -1 : $post_refund_count));
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
@@ -3828,10 +3833,10 @@ switch ($action) {
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'retry_after' => max(0, $retry_delta),
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
-                    'quota_limit' => $daily_limit,
-                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_remaining' => $unlimited ? -1 : $post_refund_count,
+                    'quota_limit' => !$unlimited ? $daily_limit : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -3888,7 +3893,7 @@ switch ($action) {
                     header('X-DailyLimit-Window: unlimited');
                 } else {
                     header('X-DailyLimit-Limit: ' . $daily_limit);
-                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $uncl_post_refund_count));
+                    header('X-DailyLimit-Remaining: ' . $uncl_post_refund_count);
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
@@ -3904,10 +3909,10 @@ switch ($action) {
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'retry_after' => max(0, $retry_delta),
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $uncl_post_refund_count),
-                    'quota_limit' => $daily_limit,
-                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_remaining' => $unlimited ? -1 : $uncl_post_refund_count,
+                    'quota_limit' => !$unlimited ? $daily_limit : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
@@ -3970,7 +3975,7 @@ switch ($action) {
                 'source_url_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
@@ -4032,7 +4037,7 @@ switch ($action) {
                 'source_url_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $post_refund_count) : -1,
+                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
@@ -4216,7 +4221,7 @@ switch ($action) {
                     header('X-RateLimit-Reset: ' . $dl_reset);
                     header('X-RateLimit-Window: ' . $dl_rate_window);
                     header('X-DailyLimit-Limit: ' . $daily_limit);
-                    header('X-DailyLimit-Remaining: ' . max(0, $daily_limit - $ffprobe_post_refund_count));
+                    header('X-DailyLimit-Remaining: ' . $ffprobe_post_refund_count);
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
@@ -4255,7 +4260,7 @@ switch ($action) {
                     // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
                     // quota was refunded above. Unlimited-key holders ($unlimited=true) were never
                     // incremented, so quota fields use -1 sentinel values.
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $ffprobe_post_refund_count),
+                    'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -4504,7 +4509,7 @@ switch ($action) {
                 // The file was downloaded by yt-dlp (quota was charged) but could not be
                 // read back for streaming — this is a server-side issue, not a quota problem.
                 // Quota was not refunded here since the download itself succeeded.
-                'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                'quota_remaining' => $unlimited ? -1 : $post_refund_count,
                 'quota_limit' => $unlimited ? -1 : $daily_limit,
                 'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
@@ -4566,7 +4571,7 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     // quota fields: included for consistency with all other download error responses.
                     // Quota was not charged since no usable file was received.
-                    'quota_remaining' => $unlimited ? -1 : max(0, $daily_limit - $post_refund_count),
+                    'quota_remaining' => $unlimited ? -1 : $post_refund_count,
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
