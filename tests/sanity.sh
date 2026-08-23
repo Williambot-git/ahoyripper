@@ -1500,6 +1500,55 @@ else
 fi
 
 echo ""
+echo "==> Checking download action 503 blocks (fopen/flock failure) include all hardening headers..."
+# The download action's dl_rate_file fopen and flock failure handlers must return
+# fully hardened 503 responses — all security headers, rate-limit context headers,
+# X-Download-Timeout, X-Info-Timeout, error_code field, and upgrade_url.
+# This test extracts both failure blocks and verifies each contains the critical fields.
+# Vulnerable 503 responses (missing headers, no error_code) are a security regression.
+DOWNLOAD_BLOCK=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
+DL_503_BLOCK=$(echo "$DOWNLOAD_BLOCK" | sed -n '/Could not open the download rate/,/exit;/{ /exit;/q; p }')
+DL_503_BLOCK="${DL_503_BLOCK}$(echo "$DOWNLOAD_BLOCK" | sed -n '/Could not acquire an exclusive lock/,/exit;/{ /exit;/q; p }')"
+MISSING_HARDENING=0
+for header in \
+    "X-Frame-Options" \
+    "X-Download-Options" \
+    "X-Robots-Tag" \
+    "Referrer-Policy" \
+    "Strict-Transport-Security" \
+    "Permissions-Policy" \
+    "Cross-Origin-Opener-Policy" \
+    "Cross-Origin-Resource-Policy" \
+    "X-Download-Timeout" \
+    "X-Info-Timeout" \
+    "X-DL-RateLimit-Limit" \
+    "X-DL-RateLimit-Remaining" \
+    "X-RateLimit-Limit" \
+    "X-DailyLimit-Limit"; do
+    if ! echo "$DL_503_BLOCK" | grep -q "$header"; then
+        echo "  ✗ download 503 block missing hardening header: $header"
+        MISSING_HARDENING=1
+    fi
+done
+if echo "$DL_503_BLOCK" | grep -q "'error_code'"; then
+    echo "  ✓ download 503 blocks include error_code field"
+else
+    echo "  ✗ download 503 blocks missing error_code field"
+    MISSING_HARDENING=1
+fi
+if echo "$DL_503_BLOCK" | grep -q "'upgrade_url'"; then
+    echo "  ✓ download 503 blocks include upgrade_url field"
+else
+    echo "  ✗ download 503 blocks missing upgrade_url field"
+    MISSING_HARDENING=1
+fi
+if [ "$MISSING_HARDENING" -eq 1 ]; then
+    echo "  Fix: add missing hardening headers and fields to download action 503 responses"
+    exit 1
+fi
+echo "  ✓ download 503 blocks are fully hardened"
+
+echo ""
 echo "==> Checking client-error action has all required response fields..."
 # The client-error action receives browser JS runtime errors and is called by the PWA's
 # window.onerror handler. Its response should include retry_after (consistent with all
