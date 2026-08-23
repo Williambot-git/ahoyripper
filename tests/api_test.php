@@ -1814,6 +1814,32 @@ test('INVALID_KEY (download): source_url is the provided URL string',
 test('INVALID_KEY (download): error_code is INVALID_KEY',
     ($invalid_key_download_response['error_code'] ?? '') === 'INVALID_KEY');
 
+// ─── YTDLP_ERROR (info action) source_url_missing / upgrade_url ────────────────
+// The YTDLP_ERROR info response (yt-dlp fetch failed: non-zero exit, non-empty
+// stderr) was missing source_url_missing => false and upgrade_url fields.
+// All other info-action error responses include both; YTDLP_ERROR now does too.
+// The client provided a URL (it just failed to fetch), so source_url_missing is false.
+$ytdlp_error_info_response = [
+    'error' => 'Could not fetch that URL. HTTP error 403.',
+    'error_code' => 'YTDLP_ERROR',
+    'action' => 'info',
+    'source_url' => 'https://example.com/video',
+    'source_url_missing' => false,
+    'upgrade_url' => 'https://ahoyvpn.com',
+];
+test('YTDLP_ERROR (info): source_url_missing key exists',
+    array_key_exists('source_url_missing', $ytdlp_error_info_response));
+test('YTDLP_ERROR (info): source_url_missing is boolean false',
+    $ytdlp_error_info_response['source_url_missing'] === false);
+test('YTDLP_ERROR (info): source_url is the provided URL string',
+    ($ytdlp_error_info_response['source_url'] ?? null) === 'https://example.com/video');
+test('YTDLP_ERROR (info): upgrade_url key exists',
+    array_key_exists('upgrade_url', $ytdlp_error_info_response));
+test('YTDLP_ERROR (info): upgrade_url is a non-empty string',
+    is_string($ytdlp_error_info_response['upgrade_url'] ?? null) && $ytdlp_error_info_response['upgrade_url'] !== '');
+test('YTDLP_ERROR (info): error_code is YTDLP_ERROR',
+    ($ytdlp_error_info_response['error_code'] ?? '') === 'YTDLP_ERROR');
+
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
 $health_response_with_reset = [
     'status' => 'ok',
