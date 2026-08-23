@@ -951,13 +951,13 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 ## Troubleshooting
 
 ### Update yt-dlp first
-yt-dlp releases are frequent — an outdated version often causes `YTDLP_ERROR` or `UNSUPPORTED_SITE` on platforms that have since changed their APIs. Update before trying anything else:
+- **Update yt-dlp first**: yt-dlp releases are frequent — an outdated version often causes `YTDLP_ERROR` or `UNSUPPORTED_SITE` on platforms that have since changed their APIs. Update before trying anything else:
 
 ```bash
-# Self-hosted: update via pip
-pip install -U yt-dlp
+# Self-hosted: update via pip (includes curl_cffi for --impersonate)
+pip install -U yt-dlp curl-cffi
 
-# Docker: rebuild to pull the latest yt-dlp
+# Docker: rebuild to pull the latest yt-dlp and curl_cffi
 docker compose down && docker compose build --no-cache && docker compose up -d
 ```
 
@@ -1213,6 +1213,7 @@ The default key is only suitable for local development — never deploy with it 
 
 - Ubuntu 22.04+ (or any Linux with apt)
 - yt-dlp (standalone binary — see `scripts/install-deps.sh` for the automated install/update script)
+- curl_cffi (Python library for browser impersonation — dramatically reduces 403/422 errors on protected sites; included by `scripts/install-deps.sh`)
 - ffmpeg
 - PHP 8.x + php-fpm + php-mbstring + php-curl
 - Nginx

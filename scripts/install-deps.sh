@@ -203,6 +203,19 @@ if command -v yt-dlp &>/dev/null; then
     fi
 fi
 
+# curl_cffi is required for yt-dlp --impersonate (browser TLS fingerprint spoofing,
+# dramatically reduces 403/422 errors on protected sites like YouTube, Twitter, etc.).
+# Install it unconditionally — pip will skip if already satisfied. api.php will only
+# use --impersonate when AHOY_IMPERSONATE is set, but having curl_cffi available
+# means the flag is always valid if the env var is set.
+echo "==> Installing curl_cffi (required for --impersonate)..."
+$PIP_BIN install -q curl-cffi 2>&1 | tail -1
+if python3 -c "import curl_cffi; print('  curl_cffi version:', curl_cffi.__version__)" 2>/dev/null; then
+    echo "  curl_cffi installed."
+else
+    echo "  ! curl_cffi not installed (yt-dlp --impersonate will silently fail)"
+fi
+
 echo "==> Installing ffmpeg..."
 apt-get install -y ffmpeg > /dev/null 2>&1
 ffmpeg -version | head -1
