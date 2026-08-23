@@ -83,11 +83,11 @@
         : '/src/api.php?action=analytics';
 
     // navigator.sendBeacon is fire-and-forget and survives page unload.
-    // Fallback to fetch with keepalive for older browsers.
     var body = JSON.stringify(payload);
     if (navigator.sendBeacon) {
       navigator.sendBeacon(url, body);
     } else {
+      // Fallback for older browsers that don't support sendBeacon.
       fetch(url, {
         method: 'POST',
         body: body,
