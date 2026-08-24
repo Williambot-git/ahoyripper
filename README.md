@@ -63,7 +63,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=download&url=https://w
 ```bash
 # Pass key via Authorization header (preferred — keeps key out of logs)
 curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer ***" \
   -H "Referer: https://ahoyripper.com/"
 
 # Or via query parameter (key appears in server URLs)
