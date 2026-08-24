@@ -2407,6 +2407,9 @@ switch ($action) {
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unlimited');
+            // X-Info-Timeout: mirrors the header set on all other info-action responses.
+            // Clients can use this to set appropriate fetch timeouts on retry.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
@@ -3125,6 +3128,10 @@ switch ($action) {
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: 60');
+            // X-Info-Timeout: mirrors the header set on all other info-action responses.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-Download-Timeout: mirrors the header set on all other download-action responses.
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
