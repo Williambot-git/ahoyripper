@@ -4305,7 +4305,10 @@ switch ($action) {
                     header('X-RateLimit-Limit: ' . $dl_rate_limit);
                     header('X-RateLimit-Remaining: ' . $dl_remaining);
                     header('X-RateLimit-Reset: ' . $dl_reset);
-                    header('X-RateLimit-Window: ' . $dl_rate_window);
+                    // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window,
+                    // so the generic header accurately reflects the per-minute request
+                    // rate limit (not the download-specific rate limit).
+                    header('X-RateLimit-Window: ' . $rate_window);
                     header('X-DailyLimit-Limit: ' . $daily_limit);
                     header('X-DailyLimit-Remaining: ' . $ffprobe_post_refund_count);
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
