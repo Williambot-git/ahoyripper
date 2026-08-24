@@ -41,10 +41,12 @@ define('FFPROBE_TIMEOUT', max(1, (int)getenv('FFPROBE_TIMEOUT') ?: 10));
 define('PROBE_CACHE_TTL', 300);
 
 // TTL (seconds) for yt-dlp and ffprobe binary version caches.
-// Cached for 1 hour — version rarely changes and probing on every health check
-// is unnecessary overhead. Not configurable via env var — adjust the constant
-// directly if a different balance of freshness vs overhead is needed.
-define('VERSION_CACHE_TTL', 3600);
+// Cached for 1 hour by default — version rarely changes and probing on every health check
+// is unnecessary overhead. Override via VERSION_CACHE_TTL env var in .env or docker-compose
+// (e.g. VERSION_CACHE_TTL=7200 for 2-hour cache, VERSION_CACHE_TTL=300 for 5-minute cache).
+// Use ?? (not ?:) so that "0" (a string, evaluated as non-empty in PHP) is not mistaken
+// for an unset variable — consistent with the pattern used by INFO_TIMEOUT and DOWNLOAD_TIMEOUT.
+define('VERSION_CACHE_TTL', max(1, (int)(getenv('VERSION_CACHE_TTL') ?? 3600)));
 
 // YouTube video ID used for the /health endpoint connectivity probe. Rick Astley's
 // "Never Gonna Give You Up" is reliably available, long enough to detect stream stalls,
