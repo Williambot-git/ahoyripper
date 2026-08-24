@@ -78,18 +78,11 @@
   ],
   "screenshots": [
     {
-      "src": "/og-image.webp",
-      "sizes": "1200x630",
-      "type": "image/webp",
-      "form_factor": "wide",
-      "label": "AhoyRipper — supports YouTube, TikTok, Twitter, SoundCloud and 1872+ platforms"
-    },
-    {
-      "src": "/og-image.png",
-      "sizes": "1200x630",
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "AhoyRipper — paste a URL, pick a format, download"
+      "label": "AhoyRipper - supports YouTube, TikTok, X, SoundCloud and 1872+ platforms"
     }
   ]
 }
