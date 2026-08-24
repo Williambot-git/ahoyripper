@@ -2107,6 +2107,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         // accidentally include ; ` { } | . This mirrors the validation already
         // present in the download action and is checked here so the info action fails
         // fast with INVALID_FORMAT_ID before wasting any yt-dlp cycles.
+        //
+        // NOTE: this block is inside the if ($action === 'download') guard because
+        // format_id is null for info requests. Calling preg_match with a null subject
+        // issues a PHP warning and returns false, incorrectly triggering INVALID_FORMAT_ID.
         if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
