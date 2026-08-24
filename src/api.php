@@ -1896,8 +1896,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-        // X-Info-Timeout: present on every info-action error response for client timeout
-        // guidance. MISSING_URL was the only info-action error missing this header.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
@@ -1955,6 +1953,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -2007,6 +2006,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-DL-RateLimit-Window: unavailable');
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
