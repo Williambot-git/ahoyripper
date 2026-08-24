@@ -2971,6 +2971,7 @@ switch ($action) {
                 'SOURCE_RATE_LIMITED' => 429,
                 'SOURCE_SERVER_ERROR' => 502,
                 'SOURCE_TIMEOUT' => 504,
+                'CONNECTION_TIMEOUT' => 504,
                 'SSL_ERROR' => 502,
                 'UNSUPPORTED_SITE' => 404,
                 'PROBE_FAILED' => 503,
