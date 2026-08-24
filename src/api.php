@@ -3873,7 +3873,13 @@ switch ($action) {
                 http_response_code($status);
                 header('Retry-After: ' . max(0, $retry_delta));
                 header('Cache-Control: no-store, must-revalidate');
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
                 header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 // X-FFProbe-Status: ffprobe was never reached in the classified-error path
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
                 // clients can distinguish this from a ffprobe-verification failure.
