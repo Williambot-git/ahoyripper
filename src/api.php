@@ -665,6 +665,12 @@ if (in_array($action, $internal_actions, true)) {
         header('X-RateLimit-Window: unlimited');
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+        // Content-Security-Policy-Report-Only: mirrors the nginx-layer header so non-FPM
+        // SAPIs (CLI, built-in server) also enforce report-only mode for the CSP endpoint.
+        // Required alongside the CSP header below so the /csp-report endpoint can receive
+        // violation reports in report-only mode without blocking legitimate reports.
+        // Matches the FPM-path header set at line 641.
+        header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
         echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
