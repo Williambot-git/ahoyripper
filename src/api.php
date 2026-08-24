@@ -3700,6 +3700,8 @@ switch ($action) {
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
@@ -3872,6 +3874,8 @@ switch ($action) {
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('X-Download-Options: noopen');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
                 // have rate-limit metadata regardless of how the download ends (classified or not).
                 // Mirrors the headers set at line ~3155 for successful downloads.
@@ -3960,6 +3964,7 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             // X-DL-RateLimit-*: download-specific rate limit.
             // yt-dlp exited 0 but produced no/empty file — no download rate limit was
             // consumed. Use -1 sentinel to signal "not applicable", consistent with
@@ -4022,6 +4027,7 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             // X-DL-RateLimit-*: download-specific rate limit.
             // yt-dlp exited 0 but produced no/empty file — no download rate limit was
             // consumed. Use -1 sentinel to signal "not applicable", consistent with
