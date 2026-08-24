@@ -265,6 +265,29 @@ else
 fi
 
 echo ""
+echo "==> Checking PWA manifest screenshots use UI assets (not brand/social share images)... "
+# PWA screenshots must show the app UI, not brand/logo images (og-image, logos).
+# Use favicon-512.png (the app icon) as the screenshot — it exists and is a valid UI
+# representation. og-image.webp (social share card) is a brand asset and non-compliant.
+# Guard against regression: the screenshot src must NOT be og-image.*
+MANIFEST_PATH="$PROJECT_ROOT/public/manifest.json"
+SCREENSHOT_SRC=$(php -r 'echo json_decode(file_get_contents($argv[1]))->screenshots[0]->src ?? "";' "$MANIFEST_PATH")
+if echo "$SCREENSHOT_SRC" | grep -qE '^/(og-image|og-image\.webp|og-image\.png)$'; then
+    echo "  ✗ manifest screenshots uses brand asset '"'"'$SCREENSHOT_SRC'"'"' (non-compliant PWA screenshot)"
+    echo "    Use favicon-512.png or an actual UI screenshot instead."
+    exit 1
+fi
+if [ -z "$SCREENSHOT_SRC" ]; then
+    echo "  ✗ manifest screenshots array is empty or missing"
+    exit 1
+fi
+if [ ! -f "$PROJECT_ROOT/public/$SCREENSHOT_SRC" ]; then
+    echo "  ✗ manifest screenshot src='"'"'$SCREENSHOT_SRC'"'"' does not exist in public/"
+    exit 1
+fi
+echo "  ✓ manifest screenshots uses a valid UI asset ($SCREENSHOT_SRC)"
+
+echo ""
 echo "==> Checking security headers in api.php..."
 REQUIRED_HEADERS=(
     "Date"
