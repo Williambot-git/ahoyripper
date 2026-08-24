@@ -3303,9 +3303,9 @@ switch ($action) {
                 // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window,
                 // so the generic header accurately reflects the per-minute request
                 // rate limit (not the download-specific rate limit).
-                header('X-RateLimit-Limit: ' . $dl_rate_limit);
-                header('X-RateLimit-Remaining: 0');
-                header('X-RateLimit-Reset: ' . $dl_reset_ts);
+                header('X-RateLimit-Limit: ' . $rate_limit);
+                header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+                header('X-RateLimit-Reset: ' . $reset);
                 header('X-RateLimit-Window: ' . $rate_window);
                 // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
                 // not a daily quota hit — allows the UI to distinguish the two cases without
