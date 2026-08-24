@@ -69,7 +69,7 @@
     var payload = {
       name: name,
       url: sanitiseUrl(window.location.href),
-      domain: 'ahoyripper.com',
+      domain: window.location.hostname || 'ahoyripper.com',
       referrer: document.referrer || undefined,
     };
 
