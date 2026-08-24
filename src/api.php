@@ -4315,6 +4315,9 @@ switch ($action) {
                 header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                // X-Info-Timeout: present on every download-action error response so clients
+                // can set appropriate timeouts on retry (mirrors all other error paths).
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
                 header('Referrer-Policy: strict-origin-when-cross-origin');
