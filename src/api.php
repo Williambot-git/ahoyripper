@@ -2200,13 +2200,15 @@ define('COOKIES_PATH', getenv('COOKIES_PATH') ?: '');
 // Shared constant: maximum URL length in characters.
 // Both info and download actions enforce this same limit so clients get
 // consistent error codes (INVALID_URL) regardless of which action they call.
-define('MAX_URL_LEN', 2048);
+// Override via MAX_URL_LEN env var in .env or Docker environment.
+define('MAX_URL_LEN', max(1, (int)(getenv('MAX_URL_LEN') ?: 2048)));
 
 // Shared constant: maximum filename length in characters for user-supplied filenames.
 // Enforced during filename sanitization so that excessively long filenames are truncated
 // to a safe length before being passed to yt-dlp. yt-dlp itself also enforces a
 // reasonable limit internally, but setting it here gives us a predictable ceiling.
-define('MAX_FILENAME_LEN', 80);
+// Override via MAX_FILENAME_LEN env var in .env or Docker environment.
+define('MAX_FILENAME_LEN', max(1, (int)(getenv('MAX_FILENAME_LEN') ?: 80)));
 
 // Configurable timeout for the health probe (lightweight yt-dlp metadata fetch).
 // Override via HEALTH_PROBE_TIMEOUT env var (e.g. HEALTH_PROBE_TIMEOUT=20 in .env).
