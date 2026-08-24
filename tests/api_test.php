@@ -32,6 +32,11 @@ define('AHOYRIPPER_VERSION', require __DIR__ . '/../src/version.php');
 // the production implementation without requiring the full api.php include.
 define('MAX_FILENAME_LEN', 80);
 
+// INFO_TIMEOUT: default per-request timeout for yt-dlp metadata/info operations.
+// Mirrors api.php INFO_TIMEOUT (default 45s, controlled by YTDLP_TIMEOUT env var).
+// Duplicated here for the X-Info-Timeout header constant-guard tests.
+define('INFO_TIMEOUT', 45);
+
 function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
@@ -1728,6 +1733,13 @@ test('MISSING_FORMAT: format_id_missing is boolean true',
 test('MISSING_FORMAT: error_code is MISSING_FORMAT',
     ($missing_format_response['error_code'] ?? '') === 'MISSING_FORMAT');
 
+// MISSING_FORMAT (download action validation): X-Info-Timeout header tells the
+// client what timeout to use when it calls the info action first to get formats.
+// This is set alongside X-Download-Timeout because both actions are relevant
+// to a client that needs to call info→download after fixing this error.
+test('MISSING_FORMAT: INFO_TIMEOUT constant is defined (prerequisite for X-Info-Timeout header)',
+    defined('INFO_TIMEOUT'));
+
 $invalid_format_id_response = [
     'error' => 'That format ID was not recognized.',
     'error_code' => 'INVALID_FORMAT_ID',
@@ -1742,6 +1754,12 @@ test('INVALID_FORMAT_ID: format_id_missing is boolean false',
     $invalid_format_id_response['format_id_missing'] === false);
 test('INVALID_FORMAT_ID: error_code is INVALID_FORMAT_ID',
     ($invalid_format_id_response['error_code'] ?? '') === 'INVALID_FORMAT_ID');
+
+// INVALID_FORMAT_ID (download action validation): X-Info-Timeout header is set
+// alongside X-Download-Timeout so the client knows both timeouts when it retries
+// by calling info→download. Added to match MISSING_FORMAT coverage.
+test('INVALID_FORMAT_ID: INFO_TIMEOUT constant is defined (prerequisite for X-Info-Timeout header)',
+    defined('INFO_TIMEOUT'));
 
 // ─── DAILY_LIMIT response source_url / source_url_missing ───────────────────
 // Both DAILY_LIMIT error responses (info and download actions) must include

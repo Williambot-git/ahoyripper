@@ -2070,6 +2070,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
@@ -2132,6 +2133,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-DL-RateLimit-Window: unavailable');
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
