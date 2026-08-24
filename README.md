@@ -860,6 +860,7 @@ When `action=download` succeeds (HTTP 200), the response includes binary file da
 | `X-Content-Type-Options: nosniff` | Prevents browsers from MIME-sniffing the response away from the declared `Content-Type`. |
 | `X-Download-Options: noopen` | Prevents the file from automatically opening in the browser context (forces a save dialog). |
 | `X-Download-Timeout` | Server-side download timeout in seconds (integer). Clients should set their fetch timeout to this value so the client deadline never exceeds the server deadline — preventing premature client-side aborts that waste server resources. The value matches `DOWNLOAD_TIMEOUT` (default: 300 seconds). |
+| `X-Info-Timeout` | Server-side info timeout in seconds (integer). Present on download error responses alongside `X-Download-Timeout` so clients have the info-action timeout value available when retrying a failed download. The value matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). |
 | `X-FFProbe-Status` | Set on every download response. `success` means ffprobe confirmed a video stream was present in the downloaded file. `failed` means ffprobe could not verify the file (corrupt, empty, or ffprobe error) — the user's quota is refunded in this case. Allows clients to distinguish between a successful download and an unverifiable one. |
 | `X-Format-Substituted` | Set only when ffprobe detected the downloaded file differs materially from what was requested (different resolution, codec, or container). The value is the actual quality label (e.g. `720p` or `1280x720 vp9`). Absent on all normal downloads — only present when yt-dlp silently substituted a format. |
 | `X-DL-RateLimit-Limit` | Download-specific rate limit (10/min). |
@@ -870,7 +871,7 @@ When `action=download` succeeds (HTTP 200), the response includes binary file da
 | `X-RateLimit-Reset` | Shared rate-limit reset timestamp (same value as `X-DL-RateLimit-Reset`). |
 | `X-DailyLimit-*` | Daily quota headers for non-unlimited users (same pattern as `info`). |
 
-On `action=download` failure (any non-200 status), the response is always JSON with the standard error shape — the binary download headers above are never sent on error responses.
+On `action=download` failure (any non-200 status), the response is always JSON with the standard error shape. The binary download headers above (`Content-Type`, `Content-Length`, `Content-Disposition`, etc.) are never sent on error responses, but rate-limit headers, quota headers, `X-Info-Timeout`, and `X-Download-Timeout` are included so clients have full context for retry logic.
 
 ---
 
