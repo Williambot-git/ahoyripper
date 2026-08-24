@@ -2744,6 +2744,21 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            // Rate-limit sentinels (-1): no rate limit was consumed because proc_open
+            // itself failed before yt-dlp could run. Consistent with other pre-gate errors.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unavailable');
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
@@ -3622,6 +3637,13 @@ switch ($action) {
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-DailyLimit-*: daily quota sentinels (-1) since proc_open failure means
+            // no quota was consumed. Consistent with other pre-gate error responses.
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unavailable');
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
