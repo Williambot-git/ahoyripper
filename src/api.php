@@ -2266,9 +2266,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
         'request_id' => $request_id,
-         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-         'api_version' => AHOYRIPPER_VERSION,
-     ], JSON_INVALID_UTF8_SUBSTITUTE);
+        'upgrade_url' => UPGRADE_URL,
+        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        'api_version' => AHOYRIPPER_VERSION,
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
      exit;
  }
 
@@ -2322,6 +2323,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'request_id' => $request_id,
         'received_accept' => $accept,
         'hint' => 'Send Accept: */* or Accept: application/json',
+        'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
