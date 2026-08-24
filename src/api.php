@@ -2659,16 +2659,25 @@ switch ($action) {
         // yt-dlp's --socket-timeout is the inner limit. Set to INFO_TIMEOUT - 5s so
         // PHP always fires first and classifies as SOURCE_TIMEOUT rather than CONNECTION_FAILED.
         $socket_timeout = max(1, INFO_TIMEOUT - 5);
+        // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
+        // --no-playlist is the safe default (single video); --yes-playlist is
+        // added only when playlist=1 is explicitly requested.
+        // NOTE: playlist flags must appear BEFORE the URL (the positional argument).
+        // The foreach comes first so that $ytdlp_cmd starts with the binary + flags,
+        // then array_merge appends the network/header flags, then URL goes last.
         $ytdlp_cmd = [
             YTDLP_PATH,
             '--dump-json',
             '--skip-download',
-        ];
-        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             // --no-playlist / --yes-playlist: prevent accidental playlist fetching when
             // the user pastes a playlist URL intending only the single video. resolvePlaylistFlag()
             // returns exactly one flag: --yes-playlist (when playlist=1) or --no-playlist
-            // (all other cases). Uses foreach to mirror the download action pattern.
+            // (all other cases). Mirrors the download action pattern.
+        ];
+        foreach ($playlist_flags as $flag) {
+            $ytdlp_cmd[] = $flag;
+        }
+        $ytdlp_cmd = array_merge($ytdlp_cmd, [
             // --progress-template false: suppress all progress output (replaces the
             // deprecated --no-progress flag). yt-dlp emits progress template noise
             // even during --skip-download which would prepend garbage to stderr
@@ -2686,12 +2695,6 @@ switch ($action) {
             '--referer', 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ]);
-        // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
-        // --no-playlist is the safe default (single video); --yes-playlist is
-        // added only when playlist=1 is explicitly requested.
-        foreach ($playlist_flags as $flag) {
-            $ytdlp_cmd[] = $flag;
-        }
         // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
         // Dramatically reduces 403/422 bot-detection errors on protected sites.
         if (AHOY_IMPERSONATE !== '') {
