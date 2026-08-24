@@ -1147,6 +1147,13 @@ function clean($s) {
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
 function resolvePlaylistFlag($playlist_get) {
+    // Reject booleans explicitly — isset(true) is true and 1&&!is_string(true)
+    // is true, causing boolean true to incorrectly return --yes-playlist via
+    // the ($playlist_get === 1 && !is_string()) arm. URL params are always
+    // strings; booleans should never reach this function.
+    if (is_bool($playlist_get)) {
+        return ['--no-playlist'];
+    }
     // yt-dlp does NOT support --playlist true/false — that syntax is rejected
     // as ambiguous. Only --yes-playlist and --no-playlist are valid.
     // Treat playlist=1 as the only truthy value.
