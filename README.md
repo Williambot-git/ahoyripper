@@ -251,6 +251,7 @@ docker compose up -d
 | `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
 | `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
 | `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp connectivity probe in the health endpoint. The probe result is cached to avoid hammering YouTube with repeated health checks. Adjust the `PROBE_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
+| `VERSION_CACHE_TTL` | `3600` | Cache TTL in seconds for yt-dlp and ffmpeg version checks. Both the yt-dlp version (checked on every `info`/`download` request) and ffmpeg version (checked on every `download` request) are cached to avoid repeated subprocess calls. Adjust the `VERSION_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
 | `YTDLP_VERSION` | `latest` | yt-dlp version to install in the Docker image. Set to `latest` (default) for the newest release on each build, or pin to a specific version (e.g. `2024.08.06`) for reproducible builds. In non-Docker installs, update yt-dlp via `pip install -U yt-dlp` or `scripts/install-deps.sh`. |
 
 All environment variables are read from the `.env` file in the project root (created above). To update a value after the container is running, edit `.env` and restart:
@@ -1220,6 +1221,7 @@ AhoyRipper is a tool. What you do with it is your responsibility. Do not use it 
 | `MAX_URL_LEN` | `2048` | Maximum URL length in characters. URLs exceeding this limit receive an `INVALID_URL` (400) response. Prevents excessively long URLs from reaching yt-dlp. |
 | `MAX_FILENAME_LEN` | `80` | Maximum filename length in characters after sanitization. Filenames longer than this are truncated to this limit. Prevents overly long filenames on filesystems with path length limits. |
 | `PROBE_CACHE_TTL` | `300` | Cache TTL in seconds for the yt-dlp connectivity probe in the health endpoint. The probe result is cached to avoid hammering YouTube with repeated health checks. Adjust the `PROBE_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
+| `VERSION_CACHE_TTL` | `3600` | Cache TTL in seconds for yt-dlp and ffmpeg version checks. Both the yt-dlp version (checked on every `info`/`download` request) and ffmpeg version (checked on every `download` request) are cached to avoid repeated subprocess calls. Adjust the `VERSION_CACHE_TTL` constant directly in `api.php` if a different TTL is needed. (Not configurable via env var — the constant must be changed in source.) |
 
 Example:
 ```bash
