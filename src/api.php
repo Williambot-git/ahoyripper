@@ -3707,10 +3707,25 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
+                // have rate-limit metadata regardless of how the download ends (classified or not).
+                // Mirrors the headers set at line ~3822 for classified YTDLP_ERROR downloads.
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_remaining));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                }
                 echo json_encode([
                     'error' => 'Download timed out after ' . $timeout . ' seconds. The file may be too large or the source is slow. Try a smaller format.',
                     'error_code' => 'DOWNLOAD_TIMEOUT',
                     'action' => 'download',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, $retry_delta),
                     'request_id' => $request_id,
                     'source_url' => $url,
