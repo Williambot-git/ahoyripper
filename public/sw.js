@@ -171,7 +171,7 @@ self.addEventListener('fetch', (event) => {
             caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
           }
           return response;
-        });
+        }).catch(() => caches.match(request));
       })
     );
     return;
