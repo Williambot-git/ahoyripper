@@ -5533,6 +5533,12 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // X-Info-Timeout and X-Download-Timeout: present on all other API error
+        // responses so clients can set appropriate fetch timeouts on retry.
+        // The default: case has no associated video URL, but the timeout headers
+        // are included for consistency with the rest of the API surface.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // Prevent caching of the unknown-action JSON response.
         // All other API responses (success and error) set Cache-Control: no-store
         // globally or in their respective case blocks. This case was missing it,
