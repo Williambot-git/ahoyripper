@@ -2093,7 +2093,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
-                'error' => 'Select a format from the list above first, then click it to download.',
+                'error' => 'Select a format from the list above first, then click it to download. For unlimited downloads, visit ' . UPGRADE_URL,
                 'error_code' => 'MISSING_FORMAT',
                 'action' => 'download',
                 // retry_after: 0 signals "retry immediately once input is corrected" —
