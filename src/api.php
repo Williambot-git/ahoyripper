@@ -2824,7 +2824,8 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // Info action: use INFO_TIMEOUT (not DOWNLOAD_TIMEOUT) and omit
+            // X-Download-Timeout header which belongs to the download action.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
