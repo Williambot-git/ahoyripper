@@ -2512,6 +2512,7 @@ switch ($action) {
                 header('Cache-Control: no-store');
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 echo json_encode([
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
@@ -2549,6 +2550,7 @@ switch ($action) {
                 header('Cache-Control: no-store');
                 http_response_code(503);
                 header('Retry-After: 5');
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 echo json_encode([
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
