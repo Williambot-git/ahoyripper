@@ -5151,6 +5151,7 @@ switch ($action) {
                     '--skip-download',
                     '--progress-template', 'false',
                     '--no-warnings',
+                    '--retries', '3',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
