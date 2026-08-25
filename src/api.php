@@ -1013,7 +1013,7 @@ if (!$GLOBALS['__ytdlp_version']) {
     // ("sh: 1: /usr/local/bin/yt-dlp: not found"), proc_open with bypass_shell
     // does not generate a shell error message — the absence is indicated by
     // $ver === '' alone. The strpos($ver, 'not installed') check handles the
-    // sentinel string (used by the ffmpeg probe). The health check (line 2510)
+    // sentinel string (used by the ffmpeg probe). The health check (line 5224)
     // uses strpos($version, 'not installed') === false to detect "not installed",
     // so this sentinel must be consistent.
     if ($ver === '' || strpos($ver, 'not installed') !== false) {
@@ -2453,7 +2453,7 @@ switch ($action) {
         // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
         // the quota file. This ensures unlimited-key responses always include
         // the -1 signal regardless of whether the quota file is reachable.
-        // NOTE: $unlimited is declared at line 2001 as `false` by default — it is
+        // NOTE: $unlimited is declared at line 2249 as `false` by default — it is
         // set to true here only when a valid key is present.
         if ($unlimited) {
             header('X-DailyLimit-Limit: -1');
@@ -2895,7 +2895,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
-                // Quota was incremented before this error path (line 2123); the refund
+                // Quota was incremented before this error path (line 2608); the refund
                 // above reversed it, so show the pre-increment count.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
@@ -4258,7 +4258,7 @@ switch ($action) {
                     // Surface ffprobe verification outcome in response headers for client
                     // diagnostics. 'success' means ffprobe confirmed a video stream was
                     // present in the file. The failure case sets 'failed' in the early-exit
-                    // block at line 2975.
+                    // block at line 4335.
                     header('X-FFProbe-Status: success');
                 } else {
                     // ffprobe succeeded (exit 0, valid JSON) but found no video stream —
@@ -4455,7 +4455,7 @@ switch ($action) {
         // control) deserve the same treatment.
         // Skip when: ffprobe succeeded ($probe_exit === 0), audio-only (no probe ran),
         // or user is unlimited-key holder ($unlimited=true — never had quota incremented).
-        // $probe_exit is only set inside the ffprobe block (line 2773), so isset() distinguishes
+        // $probe_exit is only set inside the ffprobe block (line 4245), so isset() distinguishes
         // "ffprobe ran and exited 0" (no refund) from "ffprobe ran and failed" or "ffprobe
         // was skipped" (both get a refund). The distinction between failure and skip is
         // made by the probe_exit value: 0 = success (no refund), -1 or non-zero = fail/refund.
@@ -4467,7 +4467,7 @@ switch ($action) {
             $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
         }
         // Surface ffprobe verification outcome in response headers for client diagnostics.
-        // Matches the failure header set in the early-exit block at line 2981.
+        // Matches the failure header set in the early-exit block at line 4335.
         // X-Request-ID is always set on every API response; add it here for consistency
         // with all other download response paths (empty-file, timeout, proc failure, etc.).
         // Retry-After: 0 on success — the request succeeded, no retry needed.
