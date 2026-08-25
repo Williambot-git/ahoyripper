@@ -1529,8 +1529,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     // Sanitize a derived filename from the title for use in Content-Disposition.
     // yt-dlp would name the file this way; we use it so the browser saves a
     // meaningful name instead of the generic "ahoyrip.mp4".
-    $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
-    $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
+    // Use \p{L}\p{N} (Unicode letters and numbers) instead of \w which only
+    // matches ASCII letters in PHP. This preserves non-Latin titles
+    // (Japanese, Chinese, Arabic, Cyrillic, etc.) in the derived filename.
+    // The /u flag enables UTF-8 mode for Unicode property escapes.
+    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $title);
+    $raw_fn = preg_replace('/\s+/u', '_', trim($raw_fn));
     if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Fall back to 'ahoyrip' when the title was entirely numeric (e.g. "0", "1080")
     // and all digits were stripped by the sanitization regex above. Also guard

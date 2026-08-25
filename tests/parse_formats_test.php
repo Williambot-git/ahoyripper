@@ -223,8 +223,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         ? (string)$data['uploader_url']
         : null;
     $platform = clean($data['extractor_key'] ?? '');
-    $raw_fn = preg_replace('/[^\w\s.-]/', '', $title);
-    $raw_fn = preg_replace('/\s+/', '_', trim($raw_fn));
+    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $title);
+    $raw_fn = preg_replace('/\s+/u', '_', trim($raw_fn));
     if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Use ctype_digit() to catch ALL purely-numeric titles, not just "0".
     $derived_filename = ($raw_fn !== '' && !ctype_digit($raw_fn)) ? $raw_fn : 'ahoyrip';
@@ -488,6 +488,26 @@ $json3 = makeJson('Audio Test', [], ['title' => '']);
 $result3 = parseFormats($json3);
 test('defaults empty title to "Unknown"',
     $result3 && ($result3['title'] ?? '') === 'Unknown');
+
+// Regression: non-Latin Unicode titles (Japanese, Chinese, Cyrillic, Arabic, etc.)
+// must produce a non-empty derived_filename. The \w character class in PHP only
+// matches ASCII letters, so using it in preg_replace stripped all non-Latin
+// characters and produced an empty string that fell back to 'ahoyrip'.
+// The fix is \p{L}\p{N} (Unicode letters + numbers) with the /u flag.
+$unicode_titles = [
+    '日本語タイトル' => '日本語タイトル',
+    'Видео с Ютуба' => 'Видео_с_Ютуба',
+    '中文标题测试' => '中文标题测试',
+    'العنوان العربي' => 'العنوان_العربي',
+    '🎬 Emoji Title' => 'Emoji_Title',
+    'Video 123 测试' => 'Video_123_测试',
+];
+foreach ($unicode_titles as $title => $expected) {
+    $json_unicode = makeJson($title, []);
+    $result_unicode = parseFormats($json_unicode);
+    test("Unicode title \"{$title}\" preserves characters in derived_filename",
+        $result_unicode && ($result_unicode['derived_filename'] ?? '') === $expected);
+}
 
 // ─── parseFormats: playlist (newline-delimited JSON) ─────────────────────────────
 // When --yes-playlist is used, yt-dlp outputs one JSON object per line.
