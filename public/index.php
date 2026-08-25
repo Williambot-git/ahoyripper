@@ -1489,8 +1489,7 @@ window.addEventListener('appinstalled', function() {
                 msg = ERROR_HINTS[statusKey];
               }
             }
-            // Append human-readable retry countdown when retry_after is available.
-            // DOWNLOAD_TIMEOUT and SOURCE_TIMEOUT include retry_after as a Unix timestamp.
+            // retry_after handling (inside if(err.error_code))
             if (typeof err.retry_after === 'number' && err.retry_after > Date.now() / 1000) {
               retryAfterTs = err.retry_after;
               var secs = Math.ceil(err.retry_after - Date.now() / 1000);
@@ -1501,11 +1500,14 @@ window.addEventListener('appinstalled', function() {
                 msg += ' Try again in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '.';
               }
             }
-            // Surface the upgrade_url from the API response when the error code
-            // indicates an upgradable condition (DAILY_LIMIT, RATE_LIMIT_EXCEEDED,
-            // INVALID_KEY, FORBIDDEN_ORIGIN). The API returns upgrade_url as an
-            // actionable link — use it instead of the generic AhoyVPN URL.
-            // Skip if msg already contains a URL (avoid duplicating links).
+          } else {
+            // No error_code — fall back to HTTP status lookup and surface upgrade_url
+            // so rate-limit/geo-blocked users get the upsell link even when their
+            // error_code is unclassified (e.g. 429 from nginx with no body).
+            var statusKey = String(resp.status);
+            if (ERROR_HINTS[statusKey]) {
+              msg = ERROR_HINTS[statusKey];
+            }
             if (typeof err.upgrade_url === 'string' && err.upgrade_url.length > 0) {
               if (msg.indexOf('://') === -1) {
                 msg += ' ' + err.upgrade_url;
