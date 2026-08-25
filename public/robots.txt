@@ -59,6 +59,10 @@ User-agent: *
 Allow: /
 Disallow: /src/
 Allow: /.well-known/security.txt
+# og-image.webp is the high-quality og:image referenced by index.php's
+# og:image meta tag and used in social shares. Allowing it explicitly
+# ensures crawlers can fetch the preview image for link previews.
+Allow: /og-image.webp
 
 # Security contact — RFC 9116
 Sitemap: https://ahoyripper.com/sitemap.xml
