@@ -578,7 +578,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
 | `CONFIG_ERROR` | Browser impersonation is not available on the server. The `curl_cffi` Python library may be missing. | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable impersonation, or contact the server operator. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
-| `PROC_OPEN_FAILED` | The download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). The server may be restarting or overloaded. Try again shortly. |
+| `PROC_OPEN_FAILED` | The info or download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). Applies to both `info` and `download` actions. The server may be restarting or overloaded — try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `check`, `health`, `progress`, `analytics`, `csp-report`, or `client-error` |
 
