@@ -1256,7 +1256,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
     // (502) which implies a network or DNS issue on our end.
     if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
-        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'status' => 504];
+        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
 
     // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
@@ -1319,10 +1319,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => $code];
+            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
         }
         // Other HTTP errors — surface the status but give a generic message.
-        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => $code];
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
     }
     // yt-dlp exit codes carry semantic meaning that supplements text classification.
     // Exit code 1 is the most common error code — it means "there was a problem" but often
