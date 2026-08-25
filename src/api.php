@@ -2435,6 +2435,7 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
+                'action' => $action,
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
