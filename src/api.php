@@ -2505,8 +2505,19 @@ switch ($action) {
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => $action ?: 'info',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
+                    'source_url' => $url ?? null,
+                    'source_url_missing' => ($url ?? '') === '',
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                    // quota fields: unavailable — the quota file could not be opened.
+                    // Use -1 sentinels so clients can distinguish this from a known limit.
+                    'quota_remaining' => -1,
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => -1,
+                    'quota_reset_unix' => -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -2531,8 +2542,19 @@ switch ($action) {
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => $action ?: 'info',
+                    'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
+                    'source_url' => $url ?? null,
+                    'source_url_missing' => ($url ?? '') === '',
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                    // quota fields: unavailable — the quota file could not be locked.
+                    // Use -1 sentinels so clients can distinguish this from a known limit.
+                    'quota_remaining' => -1,
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => -1,
+                    'quota_reset_unix' => -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
