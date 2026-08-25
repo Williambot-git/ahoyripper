@@ -5475,7 +5475,7 @@ switch ($action) {
         //   - Fully self-hosted: no plausible.io domain required in connect-src
         //
         // To configure: set PLAUSIBLE_HOST env var to your self-hosted Plausible domain
-        // (or 'plausible.io' for the official hosted service). Defaults to 'plausible.io'.
+        // (or 'plausible.io' for the official hosted service). Defaults to '' (self-hosted proxy).
         //
         // If no PLAUSIBLE_HOST is configured, the endpoint returns 204 silently so
         // analytics failures never affect page load or UX.
