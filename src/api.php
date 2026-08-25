@@ -3145,7 +3145,7 @@ switch ($action) {
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: 60');
+            header('X-DL-RateLimit-Window: unavailable');
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
