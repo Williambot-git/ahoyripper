@@ -7,8 +7,11 @@
 # Daily quota resets: /tmp/ahoyrip_daily_<md5(ip)>
 /tmp/ahoyrip_daily_*
 # Version caches written by the health/check action
-/tmp/ahoyrip_ytdlp_ver.cache
-/tmp/ahoyrip_ffmpeg_ver.cache
+# Pattern: /tmp/ahoyrip_ytdlp_<md5-of-YTDLP_PATH>.cache
+/tmp/ahoyrip_ytdlp_*.cache
+# Pattern: /tmp/ahoyrip_ffprobe_<md5-of-FFPROBE_PATH>.cache
+/tmp/ahoyrip_ffprobe_*.cache
+# Connectivity probe cache
 /tmp/ahoyrip_ytdlp_probe.cache
 
 # OS artifacts
