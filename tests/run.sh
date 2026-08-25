@@ -96,6 +96,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (quota_timezone_test.php) ──────────
+echo "==> Running quota_timezone_test.php (daily quota UTC midnight timezone invariance)..."
+if php "$SCRIPT_DIR/quota_timezone_test.php"; then
+    echo "✓ quota_timezone_test.php: passed"
+else
+    echo "✗ quota_timezone_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── Shell sanity checks ──────────────────────────────
 echo "==> Running sanity.sh (binary/syntax/deprecated-flag checks)..."
 if bash "$SCRIPT_DIR/sanity.sh"; then
