@@ -336,6 +336,7 @@ if ($is_rate_limited) {
         // from a generic 503 and know it is a rate-limit subsystem failure.
         header('X-RateLimit-Limit: ' . $rate_limit);
         header('X-RateLimit-Remaining: 0');
+        header('X-RateLimit-Reset: ' . (time() + 5));
         header('X-RateLimit-Window: ' . $rate_window);
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
@@ -364,6 +365,7 @@ if ($is_rate_limited) {
         // from a generic 503 and know it is a rate-limit subsystem failure.
         header('X-RateLimit-Limit: ' . $rate_limit);
         header('X-RateLimit-Remaining: 0');
+        header('X-RateLimit-Reset: ' . (time() + 5));
         header('X-RateLimit-Window: ' . $rate_window);
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
@@ -5005,6 +5007,10 @@ switch ($action) {
         // Note: most security headers are set at the top of the script, but
         // X-Info-Timeout and X-Download-Timeout are custom app headers only
         // set per-action — add them here for API-surface consistency.
+        // Cache-Control: no-store — health is a live system probe; responses must
+        // not be cached by intermediaries (CDNs, proxies) since system state
+        // changes on every call. Explicit here matches the check action pattern.
+        header('Cache-Control: no-store');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
 
