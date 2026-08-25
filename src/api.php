@@ -5495,13 +5495,16 @@ switch ($action) {
             break;
         }
 
-        // Determine Plausible host — same default as the JS client.
-        // Use ?? (null coalescing) instead of ?: (ternary) so that an explicitly
-        // set empty-string PLAUSIBLE_HOST disables analytics and returns 204.
-        // PHP's getenv() returns false (not '') for an unset var, and ?: treats
-        // both false and '' as falsy — ?? distinguishes them by only falling
-        // back on null (unset). README documents '' as the disable value.
-        $plausible_host = getenv('PLAUSIBLE_HOST') ?? 'plausible.io';
+        // Determine Plausible host — same default as the JS client (self-hosted proxy).
+        // Use ?: (empty-coalescing) instead of ?? (null-coalescing) because
+        // PHP's getenv() returns false (not null) for an unset var, and ??'s
+        // behavior with false is inconsistent across PHP versions.
+        // - Unset PLAUSIBLE_HOST: getenv()→false, false?:'' → '' (proxy, default)
+        // - Set PLAUSIBLE_HOST='': getenv()→'', ''?:'' → '' (disabled)
+        // - Set PLAUSIBLE_HOST='plausible.io': getenv()→'plausible.io', 'plausible.io':'' → 'plausible.io'
+        // This makes self-hosted deployments privacy-safe by default (no third-party
+        // Plausible calls without explicit PLAUSIBLE_HOST configuration).
+        $plausible_host = getenv('PLAUSIBLE_HOST') ?: '';
 
         // Strip PII from the payload before forwarding:
         //   - URL: remove any ?url= param (contains the video link prefill).
