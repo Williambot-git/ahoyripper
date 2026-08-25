@@ -3697,16 +3697,16 @@ switch ($action) {
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-DailyLimit-*: daily quota sentinels (-1) since proc_open failure means
             // no quota was consumed. Consistent with other pre-gate error responses.
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
@@ -4156,6 +4156,12 @@ switch ($action) {
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
+            // X-DailyLimit-*: daily quota sentinels (-1) since empty-file means no
+            // valid download was consumed. Consistent with other pre-gate error responses.
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
