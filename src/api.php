@@ -3302,13 +3302,13 @@ switch ($action) {
                 header('X-DL-RateLimit-Reset: ' . $dl_reset_ts);
                 header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                 // Standard X-RateLimit-* family for generic API consumers.
-                // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window,
-                // so the generic header accurately reflects the per-minute request
-                // rate limit (not the download-specific rate limit).
-                header('X-RateLimit-Limit: ' . $rate_limit);
-                header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
-                header('X-RateLimit-Reset: ' . $reset);
-                header('X-RateLimit-Window: ' . $rate_window);
+                // Uses download-specific values (dl_rate_limit, dl_data) since this is
+                // the download-action rate-limit gate. $dl_reset_ts is the authoritative
+                // reset timestamp for this gate — not the request-level $reset.
+                header('X-RateLimit-Limit: ' . $dl_rate_limit);
+                header('X-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
+                header('X-RateLimit-Reset: ' . $dl_reset_ts);
+                header('X-RateLimit-Window: ' . $dl_rate_window);
                 // Daily-limit sentinels (-1) signal clients this is a per-minute rate limit,
                 // not a daily quota hit — allows the UI to distinguish the two cases without
                 // parsing the error message. The daily-quota 429 block sends the real values.
@@ -3323,12 +3323,20 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
+                    'action' => 'download',
+                    'source_url' => $url,
+                    'source_url_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'source_url' => null,
+                    // quota fields: included for consistency with other download error responses.
+                    // Quota state is not available at this gate (quota file not yet opened).
+                    'quota_remaining' => -1,
+                    'quota_limit' => -1,
+                    'quota_reset' => -1,
+                    'quota_reset_unix' => -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
