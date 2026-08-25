@@ -5422,7 +5422,10 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for CSP reports.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
+                'action' => 'csp-report',
+                'retry_after' => 0,
                 'request_id' => $request_id,
+                'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -5478,7 +5481,10 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for analytics beacons.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
+                'action' => 'analytics',
+                'retry_after' => 0,
                 'request_id' => $request_id,
+                'upgrade_url' => UPGRADE_URL,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
