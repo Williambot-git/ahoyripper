@@ -1276,13 +1276,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // connection-failure patterns (connection reset, broken pipe, etc.) are caught
     // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
     if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
-        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'status' => 504];
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
-        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
+        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413];
     }
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
-        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
     }
     // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
     // the source blocks content on legal/TOS grounds — distinct from HTTP 403 which
@@ -1297,7 +1297,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // (?<!\bdisallowed\s) prevents "content" preceded by "disallowed " from matching
     // (same intent as the negative lookahead above, belt-and-suspenders).
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'status' => 451];
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
     // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
     // yt-dlp emits these when the source returns a non-2xx status. The numeric
@@ -1310,10 +1310,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
         }
         if ($code === 401 || $code === 407) {
-            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'status' => 401];
+            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'upgrade_url' => UPGRADE_URL, 'status' => 401];
         }
         if ($code === 404) {
-            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404];
         }
         if ($code === 429) {
             return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
