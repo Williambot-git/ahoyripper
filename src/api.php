@@ -2096,13 +2096,18 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'error' => 'Select a format from the list above first, then click it to download.',
                 'error_code' => 'MISSING_FORMAT',
                 'action' => 'download',
-                // retry_after: 0 signals "retry immediately once input is corrected" — a
+                // retry_after: 0 signals "retry immediately once input is corrected" —
                 // validation error has no server-side backoff; the client just needs to
                 // provide valid input. Consistent with MISSING_FORMAT and other validation errors.
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                'format_id' => null,
+                // 'format_id_missing' is true when no format was selected at all —
+                // distinguishing MISSING_FORMAT from INVALID_FORMAT_ID (format was
+                // provided but failed validation). API consumers can check this flag
+                // for precise error routing without relying on string matching.
                 'format_id_missing' => true,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
