@@ -297,7 +297,7 @@ $is_rate_limited = in_array($action, $rate_limited_actions, true);
 // Rate limiting - atomic IP-based gate using flock
 // $ip is used for both rate limiting and daily quota; declared early so it is
 // available for both the rate-limit block and the daily-quota block (info action
-// reads it at line 593, download action at line 818).
+// reads it at line 2365, download action at line 3115).
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
 $rate_limit = RATE_LIMIT; // requests per minute (configurable via RATE_LIMIT env var)
@@ -1015,7 +1015,7 @@ if (!$GLOBALS['__ytdlp_version']) {
     // ("sh: 1: /usr/local/bin/yt-dlp: not found"), proc_open with bypass_shell
     // does not generate a shell error message — the absence is indicated by
     // $ver === '' alone. The strpos($ver, 'not installed') check handles the
-    // sentinel string (used by the ffmpeg probe). The health check (line 5224)
+    // sentinel string (used by the ffmpeg probe). The health check (line 5116)
     // uses strpos($version, 'not installed') === false to detect "not installed",
     // so this sentinel must be consistent.
     if ($ver === '' || strpos($ver, 'not installed') !== false) {
@@ -2461,7 +2461,7 @@ switch ($action) {
         // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
         // the quota file. This ensures unlimited-key responses always include
         // the -1 signal regardless of whether the quota file is reachable.
-        // NOTE: $unlimited is declared at line 2249 as `false` by default — it is
+        // NOTE: $unlimited is declared at line 2256 as `false` by default — it is
         // set to true here only when a valid key is present.
         if ($unlimited) {
             header('X-DailyLimit-Limit: -1');
@@ -2606,7 +2606,7 @@ switch ($action) {
                 header('X-RateLimit-Reset: -1');
                 header('X-RateLimit-Window: unlimited');
                 // X-DL-RateLimit-*: -1 sentinels — dl_rate_file is opened later in the
-                // download action, so not yet available here for the info action.
+                // download action (line 3185), so not yet available here for the info action.
                 header('X-DL-RateLimit-Limit: -1');
                 header('X-DL-RateLimit-Remaining: -1');
                 header('X-DL-RateLimit-Reset: -1');
@@ -2928,7 +2928,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
-                // Quota was incremented before this error path (line 2608); the refund
+                // Quota was incremented before this error path (line 2614); the refund
                 // above reversed it, so show the pre-increment count.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
@@ -4517,7 +4517,7 @@ switch ($action) {
         // Matches the failure header set in the early-exit block at line 4335.
         // X-Request-ID is always set on every API response; add it here for consistency
         // with all other download response paths (empty-file, timeout, proc failure, etc.).
-        // Retry-After: 0 on success — the request succeeded, no retry needed.
+        // NOTE: Connection: close was already sent before the streaming loop (line 3692).
         header('X-FFProbe-Status: ' . ($ffprobe_ok ? 'success' : 'skipped'));
         header('X-Request-ID: ' . $request_id);
         header('Retry-After: 0');
@@ -4740,7 +4740,7 @@ switch ($action) {
         // Detect client abort AFTER the loop — feof() exits when the client disconnects,
         // so connection_aborted() here catches the abort cleanly. An aborted transfer
         // means the client gave up; no quota is burned since no usable file was received.
-        // NOTE: Connection: close was already sent before the streaming loop (line 3685).
+        // NOTE: Connection: close was already sent before the streaming loop (line 3692).
         // The server will close the connection immediately after the last chunk is sent.
         // Sending a JSON error body after binary data on a half-closed connection is
         // at best a protocol violation and at worst causes the JSON to be received as
