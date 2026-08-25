@@ -18,6 +18,7 @@ services:
       - YTDLP_TIMEOUT=${YTDLP_TIMEOUT:-45}
       - YTDLP_DOWNLOAD_TIMEOUT=${YTDLP_DOWNLOAD_TIMEOUT:-300}
       - HEALTH_PROBE_TIMEOUT=${HEALTH_PROBE_TIMEOUT:-15}
+      - HEALTH_PROBE_VIDEO_ID=${HEALTH_PROBE_VIDEO_ID:-dQw4w9WgXcQ}
       - FFPROBE_TIMEOUT=${FFPROBE_TIMEOUT:-10}
       - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
       - RATE_LIMIT=${RATE_LIMIT:-30}
@@ -29,6 +30,7 @@ services:
       # checksum and validates the installed version matches the pinned version.
       # See: https://github.com/yt-dlp/yt-dlp/releases
       - YTDLP_VERSION=${YTDLP_VERSION:-latest}
+      - VERSION_CACHE_TTL=${VERSION_CACHE_TTL:-3600}
     restart: unless-stopped
     healthcheck:
       # Use / (root) instead of /src/api.php — the nginx Docker config serves the
