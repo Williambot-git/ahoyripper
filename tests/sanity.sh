@@ -900,8 +900,16 @@ else
 fi
 
 echo "==> Checking Twitter Card meta tags in public/index.php..."
-if grep -q 'meta name="twitter:card"' public/index.php && grep -q 'meta name="twitter:title"' public/index.php && grep -q 'meta name="twitter:description"' public/index.php; then
-    echo "  ✓ Twitter Card meta tags present in index.php"
+# twitter:site (@username) and twitter:creator (@username) identify the content publisher
+# and creator respectively — required for proper attribution on Twitter Cards.
+# twitter:domain helps Twitter consolidate link metadata for the publisher's domain.
+if grep -q 'meta name="twitter:card"' public/index.php \
+    && grep -q 'meta name="twitter:title"' public/index.php \
+    && grep -q 'meta name="twitter:description"' public/index.php \
+    && grep -q 'meta name="twitter:site"' public/index.php \
+    && grep -q 'meta name="twitter:creator"' public/index.php \
+    && grep -q 'meta name="twitter:domain"' public/index.php; then
+    echo "  ✓ Twitter Card meta tags (card, title, description, site, creator, domain) present in index.php"
 else
     echo "  ✗ Twitter Card meta tags missing from index.php"
     exit 1
