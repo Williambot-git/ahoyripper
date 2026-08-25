@@ -20,7 +20,9 @@ define('MAX_FILENAME_LEN', 80);
 /**
  * Sanitize a value for JSON output.
  * @param mixed $s
- * @return string
+ * @return string|null  'Unknown' for null/empty/whitespace-only strings;
+ *   (string)$s for scalar values (int, float, non-empty string);
+ *   null for booleans, arrays, and objects (prevents "1"/""/"Array" corruption).
  */
 function clean($s) {
     // Return 'Unknown' for null, empty string, or whitespace-only string.

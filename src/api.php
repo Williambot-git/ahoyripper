@@ -1109,7 +1109,9 @@ if (!$GLOBALS['__ffmpeg_version']) {
  * Sanitize a value from yt-dlp metadata for safe JSON output.
  *
  * @param mixed $s  Any value from yt-dlp JSON output.
- * @return string  'Unknown' for null/empty/whitespace-only strings; (string)$s for all other scalar values.
+ * @return string|null  'Unknown' for null/empty/whitespace-only strings;
+ *   (string)$s for scalar values (int, float, non-empty string);
+ *   null for booleans, arrays, and objects (prevents "1"/""/"Array" corruption).
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
 function clean($s) {
