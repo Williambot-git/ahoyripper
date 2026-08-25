@@ -5287,6 +5287,12 @@ switch ($action) {
                         'action' => 'health',
                         'title' => substr($probe_result['title'] ?? '', 0, 80),
                         'source_url' => HEALTH_PROBE_URL,
+                        // yt_dlp_version and api_version are included on all API responses —
+                        // add them here for consistency even though the probe result is
+                        // not a full info response (avoids clients having to check for
+                        // missing fields when inspecting probe results).
+                        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                        'api_version' => AHOYRIPPER_VERSION,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
