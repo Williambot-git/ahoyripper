@@ -1016,6 +1016,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `METHOD_NOT_ALLOWED` | HTTP method not allowed for this endpoint | Use GET for info/download/health; POST for CSP report submission |
 | `NOT_ACCEPTABLE` | Client requested an unsupported response format | API only returns application/json — ensure Accept: application/json header is sent |
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
+| `SERVICE_UNAVAILABLE` | Rate-limit or quota file could not be opened or locked | The server's quota system is temporarily unavailable — retry after 5 seconds (`retry_after` field in response). If persistent, the server may be overloaded or the quota storage may be inaccessible. |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
 | `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
