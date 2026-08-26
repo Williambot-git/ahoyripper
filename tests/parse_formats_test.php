@@ -888,6 +888,119 @@ $ids_null_size = array_column($result_null_size['formats'], 'id');
 test('filesize_asc: null/unknown filesize sorts LAST (after all known sizes)',
     $ids_null_size[0] === 'known_1mb' && $ids_null_size[1] === 'known_5mb' && $ids_null_size[2] === 'unknown');
 
+// ─── parseFormats: filesize sort (largest first) ──────────────────────────────────
+// filesize sort: descending — largest file first within each type group.
+
+$formats_for_size_desc = [
+    makeFormat(['format_id' => 'small_5mb',  'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 5242880]),    // 5 MB
+    makeFormat(['format_id' => 'big_20mb',   'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 20971520]),   // 20 MB
+    makeFormat(['format_id' => 'medium_10mb', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 10485760]),  // 10 MB
+];
+$json_size_desc = makeJson('Size Sort Desc', $formats_for_size_desc);
+$raw_err = null;
+$result_size_desc = parseFormats($json_size_desc, $raw_err, 'filesize');
+$ids_size_desc = array_column($result_size_desc['formats'], 'id');
+test('filesize sort (desc): largest first (20MB before 10MB before 5MB)',
+    $ids_size_desc[0] === 'big_20mb' && $ids_size_desc[1] === 'medium_10mb' && $ids_size_desc[2] === 'small_5mb');
+test('filesize sort (desc): combined formats still grouped together',
+    $result_size_desc['formats'][0]['format_type'] === 'combined');
+
+// ─── parseFormats: quality sort (numeric quality tier) ─────────────────────────────
+// quality sort: video formats by pixel height, audio by bitrate tier.
+// Within video: height desc (1080 > 720 > 480 > 240).
+// Within audio: abr desc (320 > 256 > 128 > 48).
+// All video tiers sort above all audio tiers (1080 > 320kbps).
+// Tiebreaker within same tier: fps desc.
+
+$formats_for_quality2 = [
+    makeFormat(['format_id' => 'v_240',    'height' => 240, 'fps' => 24, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 1000]),
+    makeFormat(['format_id' => 'a_320',   'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 320, 'tbr' => null]),
+    makeFormat(['format_id' => 'v_720_60','height' => 720, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 6000]),
+    makeFormat(['format_id' => 'a_48',    'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 48, 'tbr' => null]),
+    makeFormat(['format_id' => 'v_720_30','height' => 720, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 3000]),
+    makeFormat(['format_id' => 'v_480',   'height' => 480, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 2000]),
+    makeFormat(['format_id' => 'a_128',   'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 128, 'tbr' => null]),
+    makeFormat(['format_id' => 'v_1080_30','height'=> 1080,'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 8000]),
+    makeFormat(['format_id' => 'a_256',   'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 256, 'tbr' => null]),
+];
+$json_quality2 = makeJson('Quality Sort 2', $formats_for_quality2);
+$result_quality2 = parseFormats($json_quality2, $raw_err, 'quality');
+$ids_quality2 = array_column($result_quality2['formats'], 'id');
+// All video formats precede all audio formats (1080p > 720p > 480p > 240p > audio)
+test('quality sort: all video formats appear before all audio formats',
+    array_search('v_1080_30', $ids_quality2) < array_search('a_320', $ids_quality2)
+    && array_search('v_720_60', $ids_quality2) < array_search('a_48', $ids_quality2)
+    && array_search('a_320', $ids_quality2) < array_search('a_256', $ids_quality2)
+    && array_search('a_256', $ids_quality2) < array_search('a_128', $ids_quality2)
+    && array_search('a_128', $ids_quality2) < array_search('a_48', $ids_quality2));
+// Within video: height desc — 1080 > 720 > 480 > 240
+test('quality sort: video height descending (1080 > 720 > 480 > 240)',
+    array_search('v_1080_30', $ids_quality2) < array_search('v_720_60', $ids_quality2)
+    && array_search('v_720_60', $ids_quality2) < array_search('v_480', $ids_quality2)
+    && array_search('v_480', $ids_quality2) < array_search('v_240', $ids_quality2));
+// Within same height: fps desc — 60fps > 30fps
+test('quality sort: same height tiebreak by fps desc (720p60 > 720p30)',
+    array_search('v_720_60', $ids_quality2) < array_search('v_720_30', $ids_quality2));
+// Within audio: abr desc — 320 > 256 > 128 > 48
+test('quality sort: audio abr descending (320 > 256 > 128 > 48)',
+    array_search('a_320', $ids_quality2) < array_search('a_256', $ids_quality2)
+    && array_search('a_256', $ids_quality2) < array_search('a_128', $ids_quality2)
+    && array_search('a_128', $ids_quality2) < array_search('a_48', $ids_quality2));
+
+// quality sort: unknown/missing abr for audio — treated as lowest tier, sorts last within audio
+$formats_quality_no_abr = [
+    makeFormat(['format_id' => 'a_320', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 320, 'tbr' => null]),
+    makeFormat(['format_id' => 'a_none', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => null, 'tbr' => null]),
+    makeFormat(['format_id' => 'a_128', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 128, 'tbr' => null]),
+];
+$json_quality_no_abr = makeJson('Quality No ABR', $formats_quality_no_abr);
+$result_no_abr = parseFormats($json_quality_no_abr, $raw_err, 'quality');
+$ids_no_abr = array_column($result_no_abr['formats'], 'id');
+test('quality sort: audio with unknown abr sorts last within audio group',
+    array_search('a_320', $ids_no_abr) < array_search('a_128', $ids_no_abr)
+    && array_search('a_128', $ids_no_abr) < array_search('a_none', $ids_no_abr));
+
+// quality sort: video with no height (should not happen in practice but guard against it)
+$formats_quality_no_height = [
+    makeFormat(['format_id' => 'v_1080', 'height' => 1080, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 8000]),
+    makeFormat(['format_id' => 'v_none', 'height' => 0,    'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 2000]),
+];
+$json_quality_no_h = makeJson('Quality No Height', $formats_quality_no_height);
+$result_quality_no_h = parseFormats($json_quality_no_h, $raw_err, 'quality');
+$ids_quality_no_h = array_column($result_quality_no_h['formats'], 'id');
+test('quality sort: video with height=0 sorts after known height (lowest video tier)',
+    array_search('v_1080', $ids_quality_no_h) < array_search('v_none', $ids_quality_no_h));
+
+// ─── parseFormats: tbr sort with audio formats ─────────────────────────────────────
+// tbr sort: audio formats by abr descending (320 > 256 > 128 > 48).
+// Note: audio formats (vcodec=none) store abr in the 'tbr' field internally, so
+// we set tbr directly here to match what parseFormats would derive from abr.
+
+$formats_tbr_audio = [
+    makeFormat(['format_id' => 'a_48',  'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 48,  'tbr' => 48]),
+    makeFormat(['format_id' => 'a_320', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 320, 'tbr' => 320]),
+    makeFormat(['format_id' => 'a_128', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 128, 'tbr' => 128]),
+    makeFormat(['format_id' => 'a_256', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 256, 'tbr' => 256]),
+];
+$json_tbr_audio = makeJson('TBR Audio', $formats_tbr_audio);
+$result_tbr_audio = parseFormats($json_tbr_audio, $raw_err, 'tbr');
+$ids_tbr_audio = array_column($result_tbr_audio['formats'], 'id');
+test('tbr sort: audio sorted by tbr descending (320 > 256 > 128 > 48)',
+    $ids_tbr_audio[0] === 'a_320' && $ids_tbr_audio[1] === 'a_256'
+    && $ids_tbr_audio[2] === 'a_128' && $ids_tbr_audio[3] === 'a_48');
+
+// tbr sort: within same type group, same tbr tiebreak by fps desc
+$formats_tbr_same = [
+    makeFormat(['format_id' => 'a24', 'height' => 1080, 'fps' => 24, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 5000]),
+    makeFormat(['format_id' => 'a60', 'height' => 1080, 'fps' => 60, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 5000]),
+    makeFormat(['format_id' => 'a30', 'height' => 1080, 'fps' => 30, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 5000]),
+];
+$json_tbr_same = makeJson('TBR Same', $formats_tbr_same);
+$result_tbr_same = parseFormats($json_tbr_same, $raw_err, 'tbr');
+$ids_tbr_same = array_column($result_tbr_same['formats'], 'id');
+test('tbr sort: same tbr tiebreak by fps desc (60 > 30 > 24)',
+    $ids_tbr_same[0] === 'a60' && $ids_tbr_same[1] === 'a30' && $ids_tbr_same[2] === 'a24');
+
 // ─── parseFormats: fps tiebreaker within same resolution tier ──────────────────
 
 $formats_same_height_diff_fps = [
