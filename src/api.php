@@ -5541,6 +5541,17 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             header('Allow: POST');
+            // Standard security headers for consistency with all other API responses.
+            // Mirrors the headers set in the action=check and action=analytics 405 blocks.
+            header('Cache-Control: no-store');
+            header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for CSP reports.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
@@ -5600,6 +5611,17 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             header('Allow: POST');
+            // Standard security headers for consistency with all other API responses.
+            // Mirrors the headers set in the action=check and action=csp-report 405 blocks.
+            header('Cache-Control: no-store');
+            header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for analytics beacons.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
