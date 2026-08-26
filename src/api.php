@@ -2308,9 +2308,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // quota fields: -1 signals that quota tracking is not applicable at this
+        // early pre-action validation stage (before any action is dispatched).
+        'quota_remaining' => -1,
+        'quota_limit' => -1,
+        'quota_reset' => -1,
+        'quota_reset_unix' => -1,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
-     exit;
- }
+    exit;
+}
 
 // Verify the Accept header expects JSON — reject non-JSON requests
 // to prevent the API from returning HTML/error pages to API clients.
@@ -2365,12 +2371,19 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // quota fields: -1 signals that quota tracking is not applicable at this
+        // early pre-action validation stage (before any action is dispatched).
+        'quota_remaining' => -1,
+        'quota_limit' => -1,
+        'quota_reset' => -1,
+        'quota_reset_unix' => -1,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
-switch ($action) {
+// ─── Daily quota gate ─────────────────────────────────────────────────
 // ─── Daily download quota (free tier limit, skip if unlimited key) ───
+switch ($action) {
     case 'info': {
         // Get video info + formats
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
