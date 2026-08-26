@@ -3459,6 +3459,12 @@ switch ($action) {
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
+                // X-DL-RateLimit-*: download-specific rate limit — not applicable here
+                // (daily quota file open failed, no download is possible). Use -1 sentinel.
+                header('X-DL-RateLimit-Limit: -1');
+                header('X-DL-RateLimit-Remaining: -1');
+                header('X-DL-RateLimit-Reset: -1');
+                header('X-DL-RateLimit-Window: unavailable');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 // Daily-limit state is unavailable (file couldn't be opened).
