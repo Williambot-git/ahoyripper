@@ -1555,7 +1555,18 @@ window.addEventListener('appinstalled', function() {
         return;
       }
 
-      const data = await resp.json();
+      // resp.json() can throw if the server returns 200 with a non-JSON body
+      // (e.g. nginx error page, PHP warning, or corrupt response). Without a
+      // try/catch here, the uncaught exception becomes an unhandled promise
+      // rejection with no user-facing error — the UI silently stays on loading.
+      let data;
+      try {
+        data = await resp.json();
+      } catch (jsonErr) {
+        var msg = 'Received an unexpected response from the server. Please try again.';
+        showError(msg);
+        return;
+      }
       setProgress(100, 'Done.');
 
       showProgress(false);
