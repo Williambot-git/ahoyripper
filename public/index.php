@@ -1367,9 +1367,17 @@ window.addEventListener('appinstalled', function() {
             _lastAnnouncedQuota = 0;
             announceQuotaExhausted();
           }
+          // Hide the "/5" limit suffix when quota is exhausted — it is
+          // irrelevant and visually misleading once the counter reads 0.
+          if (limEl) limEl.style.display = 'none';
         } else {
           el.classList.remove('exhausted');
           _lastAnnouncedQuota = null;
+          // Restore the limit suffix if quota is no longer exhausted.
+          if (limEl) {
+            var limNum = parseInt(lim, 10);
+            limEl.style.display = (limNum > 0) ? '' : 'none';
+          }
         }
         // When quota is exhausted, make the upgrade link more prominent
         if (upgradeEl) {
