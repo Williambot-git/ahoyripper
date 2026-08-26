@@ -2771,9 +2771,6 @@ switch ($action) {
             // and corrupt json_decode on stdout. 'false' is the canonical modern
             // yt-dlp syntax for this (not the empty-string form).
             '--progress-template', 'false',
-            '--no-warnings',   // suppress yt-dlp warnings — they pollute stderr and can
-                                // interfere with classifyYtdlpError() pattern matching on
-                                // real error messages (mirrors download action at line 3636).
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
