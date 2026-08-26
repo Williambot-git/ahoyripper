@@ -5522,19 +5522,23 @@ switch ($action) {
             // whether it came from cache or was just computed.
             // Add probe_age_seconds so clients can determine how stale a cached
             // result is without reading the cache file directly.
-            if (isset($GLOBALS['__ytdlp_probe'])) {
-                $probe_result = $GLOBALS['__ytdlp_probe'];
-                if (is_readable($probe_cache_file)) {
-                    $cached = @json_decode(@file_get_contents($probe_cache_file), true);
-                    if ($cached && isset($cached['cached_at'])) {
-                        $probe_result['probe_age_seconds'] = max(0, time() - (int)$cached['cached_at']);
-                    }
+            // Read from the cache file directly (not $GLOBALS) to get the actual
+            // cached_at timestamp — this ensures probe_age_seconds is always
+            // meaningful, even when the response was served from a stale cache
+            // (GLOBALS holds the freshly-computed probe result, but a previous
+            // request's cache file might be older than the computed one, and we
+            // want the age relative to when it was actually cached, not computed).
+            $probe_result = $GLOBALS['__ytdlp_probe'];
+            if (is_readable($probe_cache_file)) {
+                $cached = @json_decode(@file_get_contents($probe_cache_file), true);
+                if ($cached && isset($cached['cached_at'])) {
+                    $probe_result['probe_age_seconds'] = max(0, time() - (int)$cached['cached_at']);
                 }
-                if (!isset($probe_result['probe_age_seconds'])) {
-                    $probe_result['probe_age_seconds'] = 0; // freshly computed
-                }
-                $out['yt_dlp_probe'] = $probe_result;
             }
+            if (!isset($probe_result['probe_age_seconds'])) {
+                $probe_result['probe_age_seconds'] = 0; // freshly computed
+            }
+            $out['yt_dlp_probe'] = $probe_result;
         }
         // When no probe is requested, the yt_dlp_probe field is intentionally
         // omitted from the response (not null, absent) so the response shape
