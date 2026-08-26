@@ -1645,6 +1645,14 @@ window.addEventListener('appinstalled', function() {
           var tick = function() {
             var secs = Math.ceil(retryAfterTs - Date.now() / 1000);
             if (secs <= 0) {
+              // NOTE: No `var` here — removing the inner `var` from `retryAfterTs`
+              // is intentional. Due to JS hoisting, `var retryAfterTs` inside the
+              // closure creates a LOCAL variable that shadows the outer-scope
+              // `retryAfterTs`, leaving the outer binding permanently set to the
+              // old timestamp and the retry button permanently disabled after the
+              // first countdown. Removing `var` makes the assignment write to the
+              // outer scope (closure captures the binding, not a copy), so the
+              // button correctly resets on expiry.
               retryAfterTs = null;
               retryBtn.textContent = 'Try again';
               retryBtn.classList.remove('visible');
@@ -1653,6 +1661,8 @@ window.addEventListener('appinstalled', function() {
             }
             retryBtn.textContent = 'Retry in ' + secs + 's';
             retryBtn.disabled = true;
+            // NOTE: No `var` here for the same reason — `retryAfterTimer` must
+            // be assigned to the outer scope so clearTimeout can cancel it.
             retryAfterTimer = setTimeout(tick, 500);
           };
           tick();
