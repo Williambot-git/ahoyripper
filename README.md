@@ -580,6 +580,9 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `PROC_OPEN_FAILED` | The info or download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). Applies to both `info` and `download` actions. The server may be restarting or overloaded — try again shortly. |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
+| `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. | Try again in a few seconds. |
+| `NOT_ACCEPTABLE` | Request did not send an `Accept: application/json` header. The API only serves JSON. | Send `Accept: application/json` on your request. |
+| `METHOD_NOT_ALLOWED` | Request used an HTTP method other than GET. The API accepts GET only. | Use GET to call the API. |
 | `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `check`, `health`, or `analytics` |
 
 ### Download a format
