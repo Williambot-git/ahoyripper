@@ -26,7 +26,7 @@ $tests_passed = 0;
 // Save the original timezone
 $original_tz = date_default_timezone_get();
 
-function test($name, $condition) {
+function test($name, $condition, $debug = '') {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
     if ($condition) {
@@ -34,6 +34,9 @@ function test($name, $condition) {
         $tests_passed++;
     } else {
         echo "  ✗ $name\n";
+        if ($debug !== '') {
+            echo "    $debug\n";
+        }
         $failures++;
     }
 }
