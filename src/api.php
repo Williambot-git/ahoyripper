@@ -4399,12 +4399,12 @@ switch ($action) {
                     header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
                     header('X-DL-RateLimit-Reset: ' . $dl_reset);
                     header('X-DL-RateLimit-Window: ' . $dl_rate_window);
-                    header('X-RateLimit-Limit: ' . $dl_rate_limit);
-                    header('X-RateLimit-Remaining: ' . $dl_remaining);
-                    header('X-RateLimit-Reset: ' . $dl_reset);
-                    // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window,
-                    // so the generic header accurately reflects the per-minute request
-                    // rate limit (not the download-specific rate limit).
+                    // X-RateLimit-*: mirrors the per-minute request rate limit (not the
+                    // download-specific rate limit), consistent with the download-rate-limit
+                    // 429 block at line ~3365 which also uses $rate_limit and $data.
+                    header('X-RateLimit-Limit: ' . $rate_limit);
+                    header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
+                    header('X-RateLimit-Reset: ' . $reset_timestamp);
                     header('X-RateLimit-Window: ' . $rate_window);
                     header('X-DailyLimit-Limit: ' . $daily_limit);
                     header('X-DailyLimit-Remaining: ' . $ffprobe_post_refund_count);
