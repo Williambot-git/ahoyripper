@@ -5071,14 +5071,27 @@ switch ($action) {
     case 'health': {
         // Health/progress — full system status with resource metrics.
         // Note: most security headers are set at the top of the script, but
-        // X-Info-Timeout and X-Download-Timeout are custom app headers only
-        // set per-action — add them here for API-surface consistency.
+        // this action bypasses that block by sending its own response — so
+        // set the full security header family here too so health responses
+        // are always fully hardened regardless of how the endpoint is served
+        // (nginx, PHP built-in server, reverse proxy, etc.). This mirrors the
+        // approach taken by the 'check' action at line ~4796.
+        //
         // Cache-Control: no-store — health is a live system probe; responses must
         // not be cached by intermediaries (CDNs, proxies) since system state
         // changes on every call. Explicit here matches the check action pattern.
         header('Cache-Control: no-store');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // CSP and Reporting headers — set here explicitly (not relying on the
+        // top-of-script block) so health responses are always fully hardened.
+        // NOTE: 'upgrade-insecure-requests' is intentionally ABSENT from this
+        // JSON API endpoint — that directive only applies to HTML documents.
+        // It has no effect on JSON responses and could cause unexpected browser
+        // behavior if left in. It belongs only in HTML page CSP headers.
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report;');
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
 
         // $daily_limit is not defined in the health action scope (it lives inside the
         // info/download/validation closures). Declare it locally here so the health
@@ -5438,10 +5451,6 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
-        // Timeout header: health runs yt-dlp --dump-json, which is an info-level
-        // operation subject to INFO_TIMEOUT. Telling clients the server-side limit
-        // lets them avoid false-alarm retries when the server is simply slow.
-        header('X-Info-Timeout: ' . INFO_TIMEOUT);
 
         header('Cache-Control: no-store');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
