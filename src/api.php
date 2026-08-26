@@ -3796,8 +3796,6 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
