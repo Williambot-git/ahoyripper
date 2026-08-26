@@ -449,7 +449,14 @@ if ($is_rate_limited) {
                 'quota_remaining' => -1,
                 'quota_limit' => $rate_quota_limit,
                 'quota_reset' => $rate_quota_reset,
-                'quota_reset_unix' => -1, // -1 signals quota state is unknown at this gate (quota file not yet opened)
+                // quota_reset_unix carries the same Unix timestamp as quota_reset.
+                // Both fields must always contain the same reset timestamp so clients
+                // can use either field interchangeably without special-casing -1.
+                // The -1 sentinel pattern is reserved for quota_remaining (which uses
+                // -1 to signal "unknown" or "unlimited") — quota_reset always has
+                // a concrete reset timestamp or -1 only when the daily-quota concept
+                // itself does not apply (e.g. check/health actions).
+                'quota_reset_unix' => $rate_quota_reset,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
