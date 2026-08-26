@@ -3282,9 +3282,12 @@ switch ($action) {
             echo json_encode([
                 'error' => 'Service temporarily unavailable.',
                 'error_code' => 'SERVICE_UNAVAILABLE',
+                'action' => $action ?? 'download',
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => 5,
                 'request_id' => $request_id,
+                'source_url' => $url ?? null,
+                'source_url_missing' => ($url ?? '') === '',
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -3499,9 +3502,12 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
+                    'action' => $action ?? 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
+                    'source_url' => $url ?? null,
+                    'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
