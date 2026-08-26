@@ -695,6 +695,8 @@ window.addEventListener('appinstalled', function() {
     '502': 'The source site is having issues. Try again in a few minutes.',
     '504': 'The request timed out. The video might be too large or unavailable. Try a smaller format.',
     '503': 'Service temporarily unavailable. Please try again shortly.',
+    '500': 'The server encountered an error. Please try again in a moment.',
+    '422': 'The server could not process this request. The video may not be supported or the site may be temporarily unavailable.',
   };
 
   const form = document.getElementById('ripForm');
