@@ -5369,6 +5369,11 @@ switch ($action) {
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
                         'source_url' => HEALTH_PROBE_URL,
+                        // yt_dlp_version and api_version are included on all API responses;
+                        // add them here for consistency even though the probe failed,
+                        // so clients always have version info regardless of probe outcome.
+                        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                        'api_version' => AHOYRIPPER_VERSION,
                     ];
                 }
                 if ($probe_cache_file) {
