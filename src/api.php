@@ -5081,6 +5081,12 @@ switch ($action) {
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
 
+        // $daily_limit is not defined in the health action scope (it lives inside the
+        // info/download/validation closures). Declare it locally here so the health
+        // response uses the same configured limit as info/download responses, avoiding
+        // the inconsistency of a separate getenv() call for the same value.
+        $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+
         $version = $GLOBALS['__ytdlp_version'] ?? 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?? 'not installed';
 
@@ -5195,7 +5201,7 @@ switch ($action) {
             // configured daily limit for API surface consistency with info/download
             // responses, allowing clients to always determine the limit from the body.
             'quota_remaining' => -1,
-            'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
+            'quota_limit' => $daily_limit,
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
             // source_url: null for server-probe endpoints (no associated video URL).
