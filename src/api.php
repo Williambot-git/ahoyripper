@@ -5668,7 +5668,7 @@ switch ($action) {
         // creating a cacheable response surface for a security-sensitive JSON endpoint.
         header('Cache-Control: no-store');
         echo json_encode([
-            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
+            'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, or ?action=analytics.',
             'error_code' => 'UNKNOWN_ACTION',
             'action' => $action,
             'request_id' => $request_id,

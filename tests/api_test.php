@@ -1572,7 +1572,7 @@ test('health endpoint api_version is non-empty string',
 // The default: case in api.php also includes api_version (line 3373).
 // Verify the unknown-action error response includes api_version.
 $default_response = [
-    'error' => 'Unknown action.',
+    'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, or ?action=analytics.',
     'error_code' => 'UNKNOWN_ACTION',
     'request_id' => 'test-request-id',
     'yt_dlp_version' => null,

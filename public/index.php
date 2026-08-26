@@ -687,7 +687,7 @@ window.addEventListener('appinstalled', function() {
     'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
     'MISSING_URL': 'No URL was provided. Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit.',
-    'UNKNOWN_ACTION': 'The requested action is not recognized. Use info, download, check, or health.',
+    'UNKNOWN_ACTION': 'The requested action is not recognized. Use info, download, check, health, or analytics.',
     'CONFIG_ERROR': 'The server is misconfigured — browser impersonation is not available. Contact the server operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.',
     '403': 'The server understood the request but refused to fulfill it. Try again or use AhoyVPN to change your exit IP.',
     '404': 'The requested resource was not found. The content may have been removed or the URL may be incorrect.',
