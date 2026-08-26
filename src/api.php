@@ -699,16 +699,14 @@ if (in_array($action, $internal_actions, true)) {
             error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: malformed payload");
         } else {
             // Log with identifiable prefix and request_id for correlation.
-            // Omit the url field (contains the page URL which may have video URLs in query params).
-            $safe = [
-                'type' => $payload['type'] ?? null,
-                'message' => $payload['message'] ?? null,
-                'page_request_id' => $payload['page_request_id'] ?? null,
-                'stack' => $payload['stack'] ?? null,
-                'line' => $payload['line'] ?? null,
-                'col' => $payload['col'] ?? null,
+            // Omit document-uri and referrer which may contain video URLs.
+            $client_error_code = $payload['error'] ?? $payload['message'] ?? null;
+            $client_error_info = [
+                'error' => $client_error_code,
+                'page_url' => $payload['pageUrl'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
             ];
-            error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: " . json_encode($safe));
+            error_log("AhoyRipper CLIENT-ERROR [{$request_id}]: " . json_encode($client_error_info));
         }
         // Harden the client-error response to match the rest of the API.
         // Use fastcgi_finish_request() (PHP-FPM only) to flush the full response
