@@ -89,6 +89,30 @@ fi
 echo "  ✓ --no-warnings correctly absent from info action"
 
 echo ""
+echo "==> Checking --no-warnings is NOT used in the download action..."
+# The download action's yt-dlp command captures $proc_stderr and passes it to
+# classifyYtdlpError() to classify failures. --no-warnings would suppress
+# genuine error messages that classifyYtdlpError() needs, breaking error
+# classification for download failures (GEOBLOCKED, AGE_RESTRICTED, etc.).
+DOWNLOAD_YTDLP_BLOCK=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
+if echo "$DOWNLOAD_YTDLP_BLOCK" | grep -qE "'\\-\\-no-warnings',?$" || echo "$DOWNLOAD_YTDLP_BLOCK" | grep -qE "^\\s*'\\-\\-no-warnings',?$"; then
+    echo "  ✗ --no-warnings found in download action (breaks classifyYtdlpError on \$proc_stderr)"
+    exit 1
+fi
+echo "  ✓ --no-warnings correctly absent from download action"
+
+echo ""
+echo "==> Checking --no-warnings is NOT used in the health probe..."
+# The health probe (health action's yt-dlp probe) captures $probe_stderr and
+# passes it to classifyYtdlpError() for error classification. --no-warnings
+# would suppress error messages the classifier needs.
+if grep -A 30 "HEALTH_PROBE_VIDEO_ID" src/api.php | grep -qE "'\\-\\-no-warnings',?$"; then
+    echo "  ✗ --no-warnings found in health probe (breaks classifyYtdlpError)"
+    exit 1
+fi
+echo "  ✓ --no-warnings correctly absent from health probe"
+
+echo ""
 echo "==> Checking --playlist false is NOT used in health probe (invalid — use --no-playlist)..."
 # --playlist false is rejected by yt-dlp as "ambiguous option" on yt-dlp 2025+.
 # The correct flag is --no-playlist. This regression was introduced when sanity.sh
