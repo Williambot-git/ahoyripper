@@ -3447,7 +3447,32 @@ switch ($action) {
                 http_response_code(503);
                 header('Retry-After: 5');
                 header('X-Content-Type-Options: nosniff');
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('X-Request-ID: ' . $request_id);
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // Daily-limit state is unavailable (file couldn't be opened).
+                // Send -1 sentinels so clients can distinguish this from a known limit.
+                header('X-DailyLimit-Limit: -1');
+                header('X-DailyLimit-Remaining: -1');
+                header('X-DailyLimit-Reset: -1');
+                header('X-DailyLimit-Window: unavailable');
+                echo json_encode([
+                    'error' => 'Service temporarily unavailable.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
+                    'upgrade_url' => UPGRADE_URL,
+                    'retry_after' => 5,
+                    'request_id' => $request_id,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             if (!flock($daily_fp, LOCK_EX)) {
@@ -3455,7 +3480,31 @@ switch ($action) {
                 http_response_code(503);
                 header('Retry-After: 5');
                 header('X-Content-Type-Options: nosniff');
-                echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('X-Request-ID: ' . $request_id);
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // Daily-limit state unavailable (could not acquire lock).
+                header('X-DailyLimit-Limit: -1');
+                header('X-DailyLimit-Remaining: -1');
+                header('X-DailyLimit-Reset: -1');
+                header('X-DailyLimit-Window: unavailable');
+                echo json_encode([
+                    'error' => 'Service temporarily unavailable.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
+                    'upgrade_url' => UPGRADE_URL,
+                    'retry_after' => 5,
+                    'request_id' => $request_id,
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    'api_version' => AHOYRIPPER_VERSION,
+                ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
             $daily_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
