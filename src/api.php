@@ -3484,6 +3484,7 @@ switch ($action) {
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
+                header('Cache-Control: no-store');
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (daily quota file open failed, no download is possible). Use -1 sentinel.
                 header('X-DL-RateLimit-Limit: -1');
@@ -3501,11 +3502,20 @@ switch ($action) {
                 echo json_encode([
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
+                    'action' => $action ?? 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
+                    'source_url' => $url ?? null,
+                    'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // quota fields: unavailable — the quota file could not be opened.
+                    // Use -1 sentinels so clients can distinguish this from a known limit.
+                    'quota_remaining' => -1,
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => -1,
+                    'quota_reset_unix' => -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -3523,6 +3533,7 @@ switch ($action) {
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
+                header('Cache-Control: no-store');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 // Daily-limit state unavailable (could not acquire lock).
@@ -3541,6 +3552,12 @@ switch ($action) {
                     'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // quota fields: unavailable — the quota file could not be locked.
+                    // Use -1 sentinels so clients can distinguish this from a known limit.
+                    'quota_remaining' => -1,
+                    'quota_limit' => $daily_limit,
+                    'quota_reset' => -1,
+                    'quota_reset_unix' => -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
