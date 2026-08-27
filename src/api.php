@@ -2260,7 +2260,12 @@ define('MAX_FILENAME_LEN', max(1, (int)(getenv('MAX_FILENAME_LEN') ?: 80)));
 // the /health endpoint responsive under load. The yt-dlp --socket-timeout flag
 // is set to half this value so the inner connection timeout fires before the outer
 // PHP-side loop timeout, producing a clean CONNECTION_TIMEOUT classification.
-define('HEALTH_PROBE_TIMEOUT', max(5, (int)getenv('HEALTH_PROBE_TIMEOUT') ?: 15));
+// Note: the env var is read raw and tested for empty-string first, because
+// getenv() returns false for unset AND empty-string (both are "not set" from a
+// shell perspective). max(5, ...) then clamps the result to a minimum of 5s.
+$_hp_raw = getenv('HEALTH_PROBE_TIMEOUT');
+define('HEALTH_PROBE_TIMEOUT', ($_hp_raw !== false && $_hp_raw !== '') ? max(5, (int)$_hp_raw) : 15);
+unset($_hp_raw);
 
 // ─── ROUTING ────────────────────────────────────────────────
 
