@@ -2526,7 +2526,7 @@ switch ($action) {
         // Send X-DailyLimit: -1 headers for unlimited-key holders BEFORE opening
         // the quota file. This ensures unlimited-key responses always include
         // the -1 signal regardless of whether the quota file is reachable.
-        // NOTE: $unlimited is declared at line 2256 as `false` by default — it is
+        // NOTE: $unlimited is declared at line 2299 as `false` by default — it is
         // set to true here only when a valid key is present.
         if ($unlimited) {
             header('X-DailyLimit-Limit: -1');
