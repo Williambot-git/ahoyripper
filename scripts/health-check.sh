@@ -9,6 +9,7 @@
 set -euo pipefail
 
 BASE_URL="${1:-http://localhost:8080}"
+HEALTH_PROBE_URL="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 # Use / (root) instead of /src/api.php — the Docker nginx config serves the
 # API from root /app/public with "location = /src/api.php", which maps to
@@ -40,15 +41,24 @@ for field in status server_time request_id yt_dlp_version ffmpeg_version; do
 done
 echo "[2/5] ✓ Health response contains all required fields"
 
-# 3. yt-dlp binary check via health probe
-# The API enforces origin checks (Referer must be from ahoyripper.com or ahoyvpn.com).
-# Without a Referer, health requests return 403 and the probe silently fails.
-PROBE_JSON=$(curl -s "${API}?action=health&probe=1" \
-  -H "Referer: https://ahoyripper.com/" 2>/dev/null || echo "{}")
-if echo "$PROBE_JSON" | grep -q '"yt_dlp_probe"'; then
-  echo "[3/5] ✓ yt-dlp probe endpoint available"
+# 3. yt-dlp can reach YouTube (actual network probe)
+# This is a mandatory check — not optional. A "passing" health check that
+# can't reach YouTube means yt-dlp is blocked or misconfigured.
+# yt-dlp --simulate fetches only metadata (no download), is fast, and is safe
+# to run against a known-stable public video (dQw4w9WgXcQ = Rick Astley).
+# --no-warnings suppresses the ASCII banner in output so we can grep cleanly.
+# This step does NOT use the API (no Referer needed — yt-dlp speaks directly).
+if command -v yt-dlp >/dev/null 2>&1; then
+  if yt-dlp --no-warnings --simulate "$HEALTH_PROBE_URL" >/dev/null 2>&1; then
+    echo "[3/5] ✓ yt-dlp can reach YouTube"
+  else
+    echo "FAIL — yt-dlp cannot reach YouTube (blocked, DNS filtered, or network unreachable)"
+    echo "       Verify: yt-dlp --simulate $HEALTH_PROBE_URL"
+    exit 1
+  fi
 else
-  echo "[3/5] ⚠ yt-dlp probe not tested (network may be restricted)"
+  echo "FAIL — yt-dlp not found in PATH (already checked in step 4, but catching here for ordering)"
+  exit 1
 fi
 
 # 4. yt-dlp binary check
