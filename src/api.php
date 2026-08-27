@@ -257,7 +257,7 @@ if ($blocked) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Cache-Control: no-store is set globally at line 163, but add it here too
-        // for consistency with the MISSING_ACTION default: block which also explicitly
+        // for consistency with the default: block (UNKNOWN_ACTION) which also explicitly
         // sets it, and to ensure intermediate proxies don't cache this response.
         header('Cache-Control: no-store');
         echo json_encode([
@@ -5960,7 +5960,7 @@ switch ($action) {
             'source_url' => null,
             // source_url_missing: false — URL validation has not run for unknown actions.
             // An unknown action rejects the request before URL processing, so the URL
-            // field (if any) is not validated. Matches MISSING_ACTION pattern.
+            // field (if any) is not validated. Matches UNKNOWN_ACTION default: block.
             'source_url_missing' => false,
             // format_id_missing: false — format ID is not relevant to unknown actions.
             'format_id_missing' => false,
