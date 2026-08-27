@@ -1601,6 +1601,17 @@ else
     echo "  ✗ download 503 blocks missing upgrade_url field"
     MISSING_HARDENING=1
 fi
+# Verify the JSON response body includes the four quota fields — all other API
+# error responses include these; omitting them from download 503 blocks is a
+# regression that breaks client quota-display logic.
+for quota_field in "'quota_remaining'" "'quota_limit'" "'quota_reset'" "'quota_reset_unix'"; do
+    if echo "$DL_503_BLOCK" | grep -q "$quota_field"; then
+        echo "  ✓ download 503 blocks include $quota_field"
+    else
+        echo "  ✗ download 503 blocks missing $quota_field"
+        MISSING_HARDENING=1
+    fi
+done
 if [ "$MISSING_HARDENING" -eq 1 ]; then
     echo "  Fix: add missing hardening headers and fields to download action 503 responses"
     exit 1

@@ -3330,6 +3330,12 @@ switch ($action) {
                 'source_url_missing' => ($url ?? '') === '',
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: daily quota was not consumed since the file couldn't be opened.
+                // Use -1 sentinels consistent with other pre-quota-gate errors.
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3375,6 +3381,12 @@ switch ($action) {
                 'request_id' => $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // quota fields: daily quota was not consumed since lock couldn't be acquired.
+                // Use -1 sentinels consistent with other pre-quota-gate errors.
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
