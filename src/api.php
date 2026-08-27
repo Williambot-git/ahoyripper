@@ -4418,13 +4418,21 @@ switch ($action) {
                 // a successful download, rather than silently sending an unverifiable file.
                 // Refund the quota since the file could not be verified.
                 $probe_err_clean = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $probe_err ?: ''));
+                // Truncate ffprobe stderr for both the log entry and the JSON response.
+                // Use strlen (byte count) not mb_strlen for the length check — $probe_err_clean
+                // may contain invalid UTF-8 bytes after control-char stripping; mb_strlen with
+                // UTF-8 mode can return false on invalid sequences, making the >150 comparison
+                // unreliable. strlen() always returns the byte length regardless of encoding.
+                if (strlen($probe_err_clean) > 150) {
+                    $probe_err_truncated = substr($probe_err_clean, 0, 150) . '...';
+                } else {
+                    $probe_err_truncated = $probe_err_clean;
+                }
                 logRequest('download', 500, [
                     'reason' => 'ffprobe_verification_failed',
                     'format_id' => $format_id,
                     'ffprobe_exit' => $probe_exit,
-                    'ffprobe_err' => mb_strlen($probe_err_clean, 'UTF-8') > 150
-                        ? mb_substr($probe_err_clean, 0, 150, 'UTF-8') . '...'
-                        : $probe_err_clean,
+                    'ffprobe_err' => $probe_err_truncated,
                 ]);
                 foreach (glob($glob_pattern) as $f) { @unlink($f); }
                 // Refund quota inline — the conditional refund block below (which sets
@@ -4512,9 +4520,10 @@ switch ($action) {
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     // Surface ffprobe failure details for client diagnostics — the early-exit path
-                    // (ffprobe exit !== 0) sets $probe_err to a descriptive string. The no-stream
-                    // path (ffprobe exit === 0 but vstream missing) sets $probe_err explicitly above.
-                    'verification_error' => $probe_err ?? null,
+                    // (ffprobe exit !== 0) uses $probe_err_truncated (truncated to 150 bytes).
+                    // The no-stream path (ffprobe exit === 0 but vstream missing) sets
+                    // $probe_err to a descriptive string directly (short by nature).
+                    'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
