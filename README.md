@@ -649,8 +649,8 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `401` | `INVALID_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
 | `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
 | `400` | `MISSING_URL` | No URL was provided on the download request. The response also includes `"source_url_missing": true` so clients can distinguish this from `INVALID_URL` (a URL was given but malformed). |
-| `400` | `MISSING_FORMAT` | No format was selected on the download request. |
-| `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. |
+| `400` | `MISSING_FORMAT` | No format was selected on the download request. The response also includes `"format_id_missing": true` so clients can distinguish this from `INVALID_FORMAT_ID` (a format ID was given but malformed — `format_id_missing` is `false` in that case). |
+| `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. The response includes `"format_id_missing": false`. |
 | `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. The response body also includes `retry_after` (Unix timestamp), `quota_limit` (integer matching `quota_limit` on all other responses), and `upgrade_url` (AhoyVPN upsell link). |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
