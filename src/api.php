@@ -5353,7 +5353,11 @@ switch ($action) {
         // info/download/validation closures). Declare it locally here so the health
         // response uses the same configured limit as info/download responses, avoiding
         // the inconsistency of a separate getenv() call for the same value.
+        // Also compute quota_reset_ts locally so quota_reset/quota_reset_unix use the
+        // same tomorrow-midnight UTC timestamp as info/download responses — clients
+        // that rely on this field for reset timing will now get a correct value.
         $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+        $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
 
         $version = $GLOBALS['__ytdlp_version'] ?? 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?? 'not installed';
@@ -5465,13 +5469,14 @@ switch ($action) {
             'disk_free_gb' => $sys['disk_free_gb'],
             'disk_free_pct' => $sys['disk_free_pct'],
             // Daily quota fields — health is a read-only probe (does not consume quota)
-            // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
-            // configured daily limit for API surface consistency with info/download
-            // responses, allowing clients to always determine the limit from the body.
+            // so quota_remaining is -1 (unlimited signal). quota_limit and quota_reset
+            // mirror the configured daily limit and reset time for API surface
+            // consistency with info/download responses, allowing clients to always
+            // determine the limit and next reset from the response body.
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_reset' => $quota_reset_ts,
+            'quota_reset_unix' => $quota_reset_ts,
             // source_url: null for server-probe endpoints (no associated video URL).
             // Mirrors the source_url field in the /check response, giving API consumers
             // a consistent null reference for probe endpoints rather than a hardcoded URL.
