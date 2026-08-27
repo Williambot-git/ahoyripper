@@ -2334,6 +2334,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode([
         'error' => 'Method not allowed. Use GET.',
         'error_code' => 'METHOD_NOT_ALLOWED',
+        'action' => $action,
+        'retry_after' => 0,
         'request_id' => $request_id,
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -2395,6 +2397,8 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     echo json_encode([
         'error' => 'Not acceptable. API only returns application/json.',
         'error_code' => 'NOT_ACCEPTABLE',
+        'action' => $action,
+        'retry_after' => 0,
         'request_id' => $request_id,
         'received_accept' => $accept,
         'hint' => 'Send Accept: */* or Accept: application/json',
