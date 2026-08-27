@@ -21,8 +21,32 @@
      status bar, Android navigation bar) in dark mode when the PWA is active.
      Without this, iOS Safari uses a white status bar in standalone PWA windows,
      creating a visible white bar at the top that clashes with --color-bg (#0f0f0f).
-     Applied to :root so it cascades to the entire document including the OS chrome. */
+     Applied to :root so it cascades to the entire document including the OS chrome.
+     Light mode uses a media query below so users who prefer light themes in their
+     OS settings get a legible light interface. */
   color-scheme: dark;
+}
+
+/* Light mode: activate via OS-level "prefers-color-scheme: light" media query.
+   Users who prefer light themes in system settings now get a matching UI.
+   The media query is nested inside :root so the CSS variable overrides cascade
+   correctly without specificity conflicts. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #f8f9fa;
+    --color-surface: #ffffff;
+    --color-surface-el: #f1f3f5;
+    --color-border: #dee2e6;
+    --color-text: #212529;
+    --color-text-sec: #6c757d;
+    --color-text-ter: #adb5bd;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-accent-sub: rgba(37, 99, 235, 0.1);
+    --color-success: #16a34a;
+    --color-error: #dc2626;
+    color-scheme: light;
+  }
 }
 
 *, *:before, *:after { box-sizing: border-box; margin: 0; padding: 0; }
