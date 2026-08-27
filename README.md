@@ -833,6 +833,8 @@ Response headers on every API response:
 - `X-RateLimit-Remaining` — requests left in window
 - `X-RateLimit-Reset` — Unix timestamp when window resets
 - `X-RateLimit-Window` — window size in seconds
+- `X-Info-Timeout` — server-side info/action timeout in seconds (integer). Present on every API response (check, health, info, download, analytics, client-error). Clients should set their fetch timeout to at least this value when calling the `info` action to avoid premature client-side aborts. The value matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var).
+- `X-Download-Timeout` — server-side download timeout in seconds (integer). Present on every API response so clients always have the download timeout value available for retry logic without branching on the response type. The value matches `DOWNLOAD_TIMEOUT` (default: 300 seconds).
 
 Download endpoint rate-limit headers use the `X-DL-RateLimit-*` prefix (e.g., `X-DL-RateLimit-Limit: 10`). Both `info` and `download` endpoints return daily quota headers (`X-DailyLimit-*`) for non-unlimited users.
 
