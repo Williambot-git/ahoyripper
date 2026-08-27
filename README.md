@@ -870,9 +870,9 @@ When `action=download` succeeds (HTTP 200), the response includes binary file da
 | `X-DL-RateLimit-Limit` | Download-specific rate limit (10/min). |
 | `X-DL-RateLimit-Remaining` | Download requests remaining in the current window. |
 | `X-DL-RateLimit-Reset` | Unix timestamp when the download rate limit window resets. |
-| `X-RateLimit-Limit` | Shared rate-limit ceiling (10/min). Sent on download responses alongside the download-specific `X-DL-RateLimit-*` headers, giving generic API consumers the same rate-limit envelope as the info endpoint. |
-| `X-RateLimit-Remaining` | Shared rate-limit remaining (same value as `X-DL-RateLimit-Remaining`). |
-| `X-RateLimit-Reset` | Shared rate-limit reset timestamp (same value as `X-DL-RateLimit-Reset`). |
+| `X-RateLimit-Limit` | Shared rate-limit ceiling (30/min for info, 10/min for download — the info action's ceiling). Sent on all responses alongside the download-specific `X-DL-RateLimit-*` headers. Uses `$rate_limit` (the info action's per-minute limit) as the shared envelope so generic API consumers always see the info endpoint's rate-limit context. |
+| `X-RateLimit-Remaining` | Remaining requests in the shared per-minute window. |
+| `X-RateLimit-Reset` | Unix timestamp when the shared per-minute window resets. |
 | `X-DailyLimit-*` | Daily quota headers for non-unlimited users (same pattern as `info`). |
 
 On `action=download` failure (any non-200 status), the response is always JSON with the standard error shape. The binary download headers above (`Content-Type`, `Content-Length`, `Content-Disposition`, etc.) are never sent on error responses, but rate-limit headers, quota headers, `X-Info-Timeout`, and `X-Download-Timeout` are included so clients have full context for retry logic.
