@@ -4840,6 +4840,12 @@ switch ($action) {
                 header('X-DL-RateLimit-Reset: ' . $dl_reset);
                 header('X-DL-RateLimit-Window: ' . $dl_rate_window);
             }
+            // X-DailyLimit-*: daily quota was charged when yt-dlp wrote the file.
+            // Use post-refund values so the client sees current remaining quota.
+            header('X-DailyLimit-Limit: ' . (!$unlimited ? $daily_limit : -1));
+            header('X-DailyLimit-Remaining: ' . (!$unlimited ? $post_refund_count : -1));
+            header('X-DailyLimit-Reset: ' . (!$unlimited ? $quota_reset_ts : -1));
+            header('X-DailyLimit-Window: ' . (!$unlimited ? $quota_window : 'unlimited'));
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $retry_delta = DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
