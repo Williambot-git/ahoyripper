@@ -270,6 +270,11 @@ if ($blocked) {
             'retry_after' => 0,
             'request_id' => $request_id,
             'source_url' => null,
+            // source_url_missing and format_id_missing are both false — CORS validation
+            // fires before URL or format validation, so neither parameter has been checked.
+            // The false values signal "validation has not run" rather than "value is invalid".
+            'source_url_missing' => false,
+            'format_id_missing' => false,
             'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
@@ -440,6 +445,11 @@ if ($is_rate_limited) {
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
                 'source_url' => null,
+                // source_url_missing: false — rate-limit gate fires before URL validation,
+                // so the URL field being null here reflects that validation has not yet run,
+                // not that a URL was explicitly invalid. Same pattern for format_id_missing.
+                'source_url_missing' => false,
+                'format_id_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: included for consistency with all other error responses.
@@ -1941,6 +1951,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // API consumers can check this flag for precise error routing without
             // relying on string matching on the error message.
             'source_url_missing' => true,
+            // 'format_id_missing' is false — URL validation fires before format validation
+            // and the format parameter is not relevant for non-download actions (info, health, etc.).
+            // Including this field provides consistent structure across all validation-error responses.
+            'format_id_missing' => false,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'upgrade_url' => UPGRADE_URL,
@@ -1993,6 +2007,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'request_id' => $request_id,
             'source_url' => $url,
             'source_url_missing' => false,
+            // 'format_id_missing' is false — URL validation fires before format validation
+            // and the format parameter is not relevant for non-download actions.
+            'format_id_missing' => false,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'upgrade_url' => UPGRADE_URL,
@@ -2047,6 +2064,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'request_id' => $request_id,
             'source_url' => $url,
             'source_url_missing' => false,
+            // 'format_id_missing' is false — URL validation fires before format validation.
+            'format_id_missing' => false,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'upgrade_url' => UPGRADE_URL,
@@ -2658,6 +2677,7 @@ switch ($action) {
                     'action' => 'info',
                     'source_url' => $url,
                     'source_url_missing' => false,
+                    'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
@@ -3586,6 +3606,7 @@ switch ($action) {
                     'action' => 'download',
                     'source_url' => $url,
                     'source_url_missing' => false,
+                    'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'quota_remaining' => 0,
