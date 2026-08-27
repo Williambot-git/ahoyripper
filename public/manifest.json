@@ -1,7 +1,7 @@
 {
   "name": "AhoyRipper — Free Online Media Ripper",
   "short_name": "AhoyRipper",
-  "description": "Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free.",
+  "description": "Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1873+ platforms. Free.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -82,7 +82,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "AhoyRipper - supports YouTube, TikTok, X, SoundCloud and 1872+ platforms"
+      "label": "AhoyRipper - supports YouTube, TikTok, X, SoundCloud and 1873+ platforms"
     }
   ]
 }

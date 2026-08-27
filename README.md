@@ -1,6 +1,6 @@
 # AhoyRipper
 
-| **Rip any video, anywhere.** A free, no-signup media converter that pulls video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo, and 1872+ other platforms. |
+| **Rip any video, anywhere.** A free, no-signup media converter that pulls video and audio from YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo, and 1873+ other platforms. |
 
 Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN brand.
 
@@ -10,7 +10,7 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 - **No signup, no tracking, no ads in the rip flow**
 - MP4, WEBM, MP3, M4A, WAV, FLAC, OGG and more
-- YouTube, X (Twitter), SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1872+ platforms
+- YouTube, X (Twitter), SoundCloud, TikTok, Instagram, Facebook, Vimeo + 1873+ platforms
 - Dark theme matching ahoyvpn.com
 - Files streamed directly to your download - nothing stored on our servers
 - Built-in AhoyVPN upsell (supports the tool)
@@ -141,7 +141,7 @@ The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repea
 
 ## Supported Platforms
 
-AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1872+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms-reference). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
+AhoyRipper is powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and supports **1873+ platforms**. A comprehensive table of all major platforms with type labels and notes is in [the reference section below](#supported-platforms-reference). Platform-specific error codes (`AGE_RESTRICTED`, `GEOBLOCKED`, `PRIVATE_VIDEO`, `LOGIN_REQUIRED`, `UNSUPPORTED_SITE`, etc.) and per-platform troubleshooting tips are also documented there.
 
 For the full extractor list:
 
@@ -883,7 +883,7 @@ On `action=download` failure (any non-200 status), the response is always JSON w
 
 ## Supported Platforms Reference
 
-AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1872+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
+AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It supports **1873+ platforms** — every site that yt-dlp can extract from works with AhoyRipper.
 
 ### Quick-reference table
 
@@ -1108,7 +1108,7 @@ AhoyRipper is a free, browser-based tool for downloading video and audio from th
 AhoyRipper runs entirely in your browser. There's nothing to install — just open the page and paste a link. Your IP address is hidden behind our servers, which can help when a site blocks your connection.
 
 **Q: What platforms are supported?**
-Every platform that [yt-dlp supports](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — currently 1872+ sites. The supported platforms table above lists the most popular ones.
+Every platform that [yt-dlp supports](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) — currently 1873+ sites. The supported platforms table above lists the most popular ones.
 
 **Q: Is there a daily limit?**
 The free tier allows 5 rips per day (each `info` or `download` API call counts as one rip). The quota resets at midnight UTC. Get [AhoyVPN](https://ahoyvpn.com) for unlimited rips.

@@ -95,7 +95,7 @@ header_remove('X-Powered-By');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site</title>
-  <meta name="description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
+  <meta name="description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1873+ platforms. Free, no signup, no ads.">
   <meta name="robots" content="<?= $default_url ? 'noindex, follow' : 'index, follow' ?>">
   <meta name="author" content="AhoyVPN">
   <meta name="theme-color" content="#0f0f0f">
@@ -142,20 +142,20 @@ header_remove('X-Powered-By');
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
-  <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
+  <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1873+ platforms. Free, no signup, no ads.">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.webp">
   <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
+  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1873+ platforms">
   <!-- og:title:alt and og:description:alt provide text alternatives for the Open
        Graph title and description — used by screen readers, non-visual clients, and
        indexing bots. Must match twitter:title and twitter:description respectively.
        Keep all four in sync when updating share copy. -->
   <meta property="og:title:alt" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
-  <meta property="og:description:alt" content="Download video &amp; audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo &amp; 1872+ platforms. Free, no signup, no ads.">
+  <meta property="og:description:alt" content="Download video &amp; audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo &amp; 1873+ platforms. Free, no signup, no ads.">
   <!-- fetchpriority="high" signals the browser to prioritize loading the og:image early.
        This meaningfully improves LCP (Largest Contentful Paint) when the page is shared
        on social media or linked from external sites, since the og:image is the most
@@ -195,11 +195,11 @@ header_remove('X-Powered-By');
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
-  <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
+  <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1873+ platforms. Free, no signup, no ads.">
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
-  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1872+ platforms">
+  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1873+ platforms">
 
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
        production, but the meta tag ensures CSP is enforced even when the page is
@@ -242,7 +242,7 @@ header_remove('X-Powered-By');
         "@id": "<?= $BASE_URL ?>/#website",
         "name": "AhoyRipper",
         "url": "<?= $BASE_URL ?>",
-        "description": "Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms.",
+        "description": "Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1873+ platforms.",
         "publisher": {
           "@type": "Organization",
           "name": "AhoyVPN",
@@ -261,7 +261,7 @@ header_remove('X-Powered-By');
         "@type": "WebApplication",
         "@id": "<?= $BASE_URL ?>/#webapplication",
         "name": "AhoyRipper",
-        "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
+        "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1873+ other platforms. Free, no signup required.",
         "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
@@ -295,7 +295,7 @@ header_remove('X-Powered-By');
         "@type": "SoftwareApplication",
         "@id": "<?= $BASE_URL ?>/#softwareapplication",
         "name": "AhoyRipper",
-        "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
+        "description": "Free online media ripper supporting 1873+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
         "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
