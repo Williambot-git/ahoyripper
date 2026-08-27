@@ -2173,7 +2173,58 @@ test('ffprobe_verification_failed: ffprobe_exit is preserved',
 test('ffprobe_verification_failed: ffprobe_err is preserved',
     $logEntries[count($logEntries)-1]['extra']['ffprobe_err'] === 'Invalid data found when processing input');
 
-// 2. ffprobe stderr control-char stripper (verbatim from api.php)
+// 2. ffprobe verification timeout should be logged with status 504 (not 500)
+// The 504 status distinguishes VERIFICATION_TIMEOUT (ffprobe was killed before
+// completing — file may still be valid) from VERIFICATION_FAILED (corrupt file).
+logRequestTest('download', 504, [
+    'reason' => 'ffprobe_verification_timeout',
+    'format_id' => '18',
+    'ffprobe_exit' => -1,
+    'ffprobe_err' => 'Process timed out',
+]);
+test('ffprobe_verification_timeout: status code is 504 (not 500)',
+    $logEntries[count($logEntries)-1]['status'] === 504);
+test('ffprobe_verification_timeout: reason is preserved',
+    $logEntries[count($logEntries)-1]['extra']['reason'] === 'ffprobe_verification_timeout');
+test('ffprobe_verification_timeout: ffprobe_exit is -1 (SIGKILL sentinel)',
+    $logEntries[count($logEntries)-1]['extra']['ffprobe_exit'] === -1);
+test('ffprobe_verification_timeout: ffprobe_err indicates timeout',
+    $logEntries[count($logEntries)-1]['extra']['ffprobe_err'] === 'Process timed out');
+
+// ─── Test VERIFICATION_TIMEOUT vs VERIFICATION_FAILED distinction ────────────
+// Verifies the $is_verification_timeout flag correctly routes the error response.
+
+function buildVerificationErrorResponse($probe_exit, $probe_out, $probe_timed_out) {
+    // Mirrors the logic in api.php ffprobe verification failure block.
+    // Returns ['error_code' => string, 'error_msg' => string, 'http_code' => int].
+    if ($probe_timed_out) {
+        return [
+            'error_code' => 'VERIFICATION_TIMEOUT',
+            'error_msg' => 'The file may be valid but could not be confirmed within the server\'s verification time limit. Try a smaller format or try again.',
+            'http_code' => 504,
+        ];
+    }
+    return [
+        'error_code' => 'VERIFICATION_FAILED',
+        'error_msg' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
+        'http_code' => 500,
+    ];
+}
+
+test('VERIFICATION_TIMEOUT: probe_exit=-1, timed_out=true → 504',
+    buildVerificationErrorResponse(-1, '', true)['http_code'] === 504);
+test('VERIFICATION_TIMEOUT: error_code is VERIFICATION_TIMEOUT',
+    buildVerificationErrorResponse(-1, '', true)['error_code'] === 'VERIFICATION_TIMEOUT');
+test('VERIFICATION_FAILED: probe_exit=1, timed_out=false → 500',
+    buildVerificationErrorResponse(1, '', false)['http_code'] === 500);
+test('VERIFICATION_FAILED: error_code is VERIFICATION_FAILED',
+    buildVerificationErrorResponse(1, '', false)['error_code'] === 'VERIFICATION_FAILED');
+test('VERIFICATION_TIMEOUT: error_msg differs from VERIFICATION_FAILED',
+    buildVerificationErrorResponse(-1, '', true)['error_msg'] !== buildVerificationErrorResponse(1, '', false)['error_msg']);
+test('VERIFICATION_TIMEOUT: error_msg contains format hint',
+    str_contains(buildVerificationErrorResponse(-1, '', true)['error_msg'], 'smaller format'));
+
+// 3. ffprobe stderr control-char stripper (verbatim from api.php)
 $probe_err_raw = "Invalid data found\x00\x07\x1Fwhen processing input\n";
 $probe_err_clean = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $probe_err_raw));
 test('ffprobe stderr: control chars stripped (ASCII 0–31 and 127)',
@@ -2181,7 +2232,7 @@ test('ffprobe stderr: control chars stripped (ASCII 0–31 and 127)',
 test('ffprobe stderr: trailing newline removed by trim',
     strpos($probe_err_clean, "\n") === false);
 
-// 3. ffprobe stderr truncation ( >150 chars → ... suffix)
+// 4. ffprobe stderr truncation ( >150 chars → ... suffix)
 $probe_err_long = str_repeat('x', 200);
 $probe_err_truncated = mb_strlen($probe_err_long, 'UTF-8') > 150
     ? mb_substr($probe_err_long, 0, 150, 'UTF-8') . '...'
@@ -2193,7 +2244,7 @@ test('ffprobe stderr: truncation preserves prefix',
 
 // ─── Report ─────────────────────────────────────────────────────────────────
 
-// 4. ffprobe exit 0 with zero streams — malformed/empty container treated as failure.
+// 5. ffprobe exit 0 with zero streams — malformed/empty container treated as failure.
 // ffprobe -select_streams v:0 returns exit 0 even when no video stream exists;
 // the streams key is absent or []. This must be treated as a verification failure.
 // The code path: vstream null → probe_exit = -1 → falls into the else branch
@@ -2208,7 +2259,7 @@ test('ffprobe exit 0 with empty streams array: vstream is null (triggers verific
 test('null vstream is falsy: if ($vstream) branch skipped, else branch taken',
     ($vstream_zero ? true : false) === false);
 
-// 5. ffprobe exit 0 with valid JSON but missing streams key entirely — also fails verification.
+// 6. ffprobe exit 0 with valid JSON but missing streams key entirely — also fails verification.
 $probe_out_no_streams_key = json_encode([]);
 $probe_no_key = @json_decode($probe_out_no_streams_key, true);
 $vstream_no_key = $probe_no_key['streams'][0] ?? null;

@@ -575,6 +575,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. This is a rare server-side issue. Try again or pick a different format. |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
+| `VERIFICATION_TIMEOUT` | Verification timed out — the file may be valid but could not be confirmed within the server's time limit. Try a smaller format or try again. |
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
 | `CONFIG_ERROR` | Browser impersonation is not available on the server. The `curl_cffi` Python library may be missing. | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable impersonation, or contact the server operator. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |

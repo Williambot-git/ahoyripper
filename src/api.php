@@ -3086,6 +3086,7 @@ switch ($action) {
                 'UNSUPPORTED_SITE' => 404,
                 'PROBE_FAILED' => 503,
                 'VERIFICATION_FAILED' => 500,
+                'VERIFICATION_TIMEOUT' => 504,
                 'VIDEO_UNAVAILABLE' => 410,
                 'YTDLP_ERROR' => 422,
                 // UNKNOWN_ACTION uses 404 (set directly by http_response_code in the
@@ -4404,6 +4405,7 @@ switch ($action) {
             // missing/not executable at runtime) is correctly treated as a probe
             // failure rather than silently passing with exit=0.
             $probe_exit = -1;
+            $probe_timed_out = false; // tracks whether ffprobe was killed by the timeout
             $probe_start = hrtime(true);
             $probe_timeout = FFPROBE_TIMEOUT; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
@@ -4419,6 +4421,7 @@ switch ($action) {
                     if ((hrtime(true) - $probe_start) / 1e9 > $probe_timeout) {
                         proc_terminate($probe_proc, 9);
                         $probe_exit = -1;
+                        $probe_timed_out = true; // distinguish from corrupt-file ffprobe failure
                         foreach ($probe_pipes as $p) { if ($p) fclose($p); }
                         $probe_pipes = null;
                         $probe_proc = null;  // sentinel: prevents double proc_close() below
@@ -4480,6 +4483,19 @@ switch ($action) {
             } else {
                 // ffprobe failed (non-zero exit, timeout, or unreadable output).
                 // The file may be corrupt or the ffprobe binary may have failed.
+                // When $probe_timed_out is set, ffprobe was killed because it exceeded
+                // FFPROBE_TIMEOUT — this is a distinct failure mode from a corrupt file.
+                // The yt-dlp download itself may have succeeded; the file just could not
+                // be verified within the time limit. Return VERIFICATION_TIMEOUT so clients
+                // can distinguish this from VERIFICATION_FAILED (actual file corruption).
+                $is_verification_timeout = $probe_timed_out;
+                if ($is_verification_timeout) {
+                    $error_code = 'VERIFICATION_TIMEOUT';
+                    $error_msg = 'Download verification timed out. The file may be valid but could not be confirmed within the server\'s verification time limit. Try a smaller format or try again.';
+                } else {
+                    $error_code = 'VERIFICATION_FAILED';
+                    $error_msg = 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.';
+                }
                 // Surface a structured error so the client can distinguish this from
                 // a successful download, rather than silently sending an unverifiable file.
                 // Refund the quota since the file could not be verified.
@@ -4559,7 +4575,10 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-                http_response_code(500);
+                // VERIFICATION_TIMEOUT uses 504 to distinguish from VERIFICATION_FAILED (500).
+                // Both are retryable, but 504 signals the verification step timed out
+                // rather than finding a corrupt/unverifiable file.
+                http_response_code($is_verification_timeout ? 504 : 500);
                 // retry_after: delta-seconds until the download can be retried.
                 // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
                 // delta-seconds is simpler and consistent with all other Retry-After
@@ -4568,8 +4587,8 @@ switch ($action) {
                 $retry_delta = DOWNLOAD_TIMEOUT;
                 header('Retry-After: ' . max(0, $retry_delta));
                 echo json_encode([
-                    'error' => 'Download could not be verified. The file may be corrupt or the verification tool (ffprobe) encountered an error. Please try again or choose a different format.',
-                    'error_code' => 'VERIFICATION_FAILED',
+                    'error' => $error_msg,
+                    'error_code' => $error_code,
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, $retry_delta),
