@@ -2405,6 +2405,11 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // source_url_missing: false — NOT_ACCEPTABLE fires before URL processing
+        // (it is an Accept-header validation failure, not a URL validation failure).
+        'source_url_missing' => false,
+        // format_id_missing: false — format validation fires after Accept validation.
+        'format_id_missing' => false,
         // quota fields: -1 signals that quota tracking is not applicable at this
         // early pre-action validation stage (before any action is dispatched).
         'quota_remaining' => -1,
@@ -5144,6 +5149,14 @@ switch ($action) {
                 'request_id' => $request_id,
                 'api_version' => AHOYRIPPER_VERSION,
                 'retry_after' => 0,
+                // Internal fire-and-forget endpoint — no video URL or quota applies.
+                'source_url' => null,
+                'source_url_missing' => false,
+                'format_id_missing' => false,
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
@@ -5703,6 +5716,14 @@ switch ($action) {
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // Internal reporting endpoint — no video URL or quota applies.
+                'source_url' => null,
+                'source_url_missing' => false,
+                'format_id_missing' => false,
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
@@ -5771,6 +5792,17 @@ switch ($action) {
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'upgrade_url' => UPGRADE_URL,
+                // Consistent with all other API error responses:
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
+                'source_url' => null,
+                'source_url_missing' => false,
+                'format_id_missing' => false,
+                // Analytics is an internal action — quota does not apply.
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
@@ -5925,6 +5957,12 @@ switch ($action) {
             // This matches the pattern used by MISSING_URL (source_url: null) and ensures
             // all API error responses have a consistent top-level shape.
             'source_url' => null,
+            // source_url_missing: false — URL validation has not run for unknown actions.
+            // An unknown action rejects the request before URL processing, so the URL
+            // field (if any) is not validated. Matches MISSING_ACTION pattern.
+            'source_url_missing' => false,
+            // format_id_missing: false — format ID is not relevant to unknown actions.
+            'format_id_missing' => false,
             // quota_remaining: -1 signals that quota tracking is not available for unknown
             // actions. Matches MISSING_URL which also has quota_remaining: -1 for the same
             // reason. API consumers should treat -1 as "unknown remaining quota".
