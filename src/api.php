@@ -3924,6 +3924,17 @@ switch ($action) {
                 }
                 logRequest('download', 504, ['reason' => 'timeout', 'timeout_seconds' => $timeout]);
                 http_response_code(504);
+                // X-RateLimit-*: use $rate_window (60s) for the generic request rate limit
+                // so the generic header accurately reflects the per-minute request rate.
+                header('X-RateLimit-Limit: -1');
+                header('X-RateLimit-Remaining: -1');
+                header('X-RateLimit-Reset: -1');
+                header('X-RateLimit-Window: ' . $rate_window);
+                // X-DailyLimit-*: download timed out before starting — no quota consumed.
+                header('X-DailyLimit-Limit: -1');
+                header('X-DailyLimit-Remaining: -1');
+                header('X-DailyLimit-Reset: -1');
+                header('X-DailyLimit-Window: unavailable');
                 // retry_after: delta-seconds until the download can be retried.
                 // Use DOWNLOAD_TIMEOUT as a fixed window so the client has a consistent
                 // countdown value regardless of when the response is processed.
