@@ -3075,6 +3075,7 @@ switch ($action) {
                 'PLAYLIST_MISSING' => 404,
                 'PRIVATE_VIDEO' => 403,
                 'PROC_OPEN_FAILED' => 500,
+                'RATE_LIMIT_EXCEEDED' => 429,
                 'SOURCE_FORBIDDEN' => 403,
                 'SOURCE_HTTP_ERROR' => 502,
                 'SOURCE_NOT_FOUND' => 404,
