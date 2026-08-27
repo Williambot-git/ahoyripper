@@ -4390,6 +4390,10 @@ switch ($action) {
             || preg_match('/^(140|141|251|250|249|171|172|18|139)$/', $format_id);
         // audio-only if bare audio ID: no video stream to probe, skip ffprobe.
         $is_audio_only_format = $is_bare_audio_id;
+        // Set probe_exit=0 upfront for skipped (audio-only) case — needed so the
+        // refund condition (line ~4703) correctly treats "not run" as "success" (no refund).
+        // When ffprobe runs, probe_exit is set inside the block below.
+        $probe_exit = $is_audio_only_format ? 0 : -1;
         if (!$is_audio_only_format && !$is_bare_audio_id
             && is_file($actual_file) && is_executable($ffprobe_bin)) {
             // JSON probe — video stream only, no audio needed for substitution check.
