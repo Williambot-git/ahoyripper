@@ -5237,11 +5237,6 @@ switch ($action) {
         // are always fully hardened regardless of how the endpoint is served
         // (nginx, PHP built-in server, reverse proxy, etc.). This mirrors the
         // approach taken by the 'check' action at line ~4796.
-        //
-        // Cache-Control: no-store — health is a live system probe; responses must
-        // not be cached by intermediaries (CDNs, proxies) since system state
-        // changes on every call. Explicit here matches the check action pattern.
-        header('Cache-Control: no-store');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // CSP and Reporting headers — set here explicitly (not relying on the
@@ -5267,6 +5262,28 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
+
+        // Rate-limit sentinels for the health probe endpoint — mirrors the same
+        // header family set in the 'check' action block (lines 4959-4975).
+        // Health is a read-only probe: it does not consume the download rate limit
+        // or the daily quota. Use -1 (unlimited signal) for all counter values,
+        // consistent with the 'check' action pattern.
+        header('X-DL-RateLimit-Limit: -1');
+        header('X-DL-RateLimit-Remaining: -1');
+        header('X-DL-RateLimit-Reset: -1');
+        header('X-DL-RateLimit-Window: unlimited');
+        header('X-RateLimit-Limit: -1');
+        header('X-RateLimit-Remaining: -1');
+        header('X-RateLimit-Reset: -1');
+        header('X-RateLimit-Window: unlimited');
+        header('X-DailyLimit-Limit: -1');
+        header('X-DailyLimit-Remaining: -1');
+        header('X-DailyLimit-Reset: -1');
+        header('X-DailyLimit-Window: unlimited');
+        // Cache-Control: no-store — health is a live system probe; responses must
+        // not be cached by intermediaries (CDNs, proxies) since system state
+        // changes on every call.
+        header('Cache-Control: no-store');
 
         // $daily_limit is not defined in the health action scope (it lives inside the
         // info/download/validation closures). Declare it locally here so the health
