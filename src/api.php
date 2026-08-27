@@ -5248,11 +5248,6 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        // X-Info-Timeout and X-Download-Timeout: present on all other API responses
-        // so clients can always read the timeout values without branching on action type.
-        // Consistent with action=check (lines 4866-4867) and default: (lines 5767-5768).
-        header('X-Info-Timeout: ' . INFO_TIMEOUT);
-        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
 
         // $daily_limit is not defined in the health action scope (it lives inside the
         // info/download/validation closures). Declare it locally here so the health
