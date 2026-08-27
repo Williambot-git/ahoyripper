@@ -652,7 +652,7 @@ window.addEventListener('appinstalled', function() {
     'GEOBLOCKED': 'This video is geo-restricted in your region. Use AhoyVPN to route through an unblocked region: https://ahoyvpn.com',
     'DAILY_LIMIT': 'Daily free limit reached. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
     'INVALID_KEY': 'Invalid API key. Get AhoyVPN for unlimited rips: https://ahoyvpn.com',
-    'LOGIN_REQUIRED': 'This video requires login. Try downloading while signed in to the platform.',
+    'LOGIN_REQUIRED': 'This video requires login. Sign in to the platform in your browser, or pass cookies to yt-dlp for server-side auth (see README for setup).',
     'UNSUPPORTED_SITE': 'This site is not supported. Check the supported sites list at github.com/yt-dlp/yt-dlp.',
     'PLAYLIST_MISSING': 'The playlist was not found or is no longer available.',
     'COPYRIGHT_REMOVED': 'This content was removed due to a copyright claim.',

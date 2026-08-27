@@ -552,7 +552,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
-| `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Try downloading while signed in to the platform |
+| `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Sign in to the platform in your browser, or pass cookies to yt-dlp for server-side auth (see [cookies section](#passing-cookies-to-yt-dlp) for setup) |
 | `PARSE_ERROR` | The site returned a non-standard or unparseable response | The site may be temporarily unavailable or not supported |
 | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp | Check the supported sites list at github.com/yt-dlp/yt-dlp |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
