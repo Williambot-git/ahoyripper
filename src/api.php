@@ -1276,7 +1276,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
-        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
+        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
     // Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
@@ -1308,7 +1308,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // explicit and robust against future variations of the PHP timeout message.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP: https://ahoyvpn.com', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
