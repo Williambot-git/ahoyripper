@@ -22,7 +22,11 @@ services:
       - FFPROBE_TIMEOUT=${FFPROBE_TIMEOUT:-10}
       - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
       - RATE_LIMIT=${RATE_LIMIT:-30}
-      - PLAUSIBLE_HOST=${PLAUSIBLE_HOST:-plausible.io}
+      # PLAUSIBLE_HOST: empty (default) routes analytics through the self-hosted
+      # /src/api.php?action=analytics proxy — no third-party requests leave the
+      # browser. Set to 'plausible.io' (or your self-hosted domain) to forward
+      # events directly to Plausible. Set to empty string '' to disable entirely.
+      - PLAUSIBLE_HOST=${PLAUSIBLE_HOST:-}
       # YTDLP_VERSION: yt-dlp release version to install.
       # Use 'latest' (default) to always use the newest release for automatic updates.
       # Pin to a specific version (e.g. '2024.08.06') for reproducible builds and
