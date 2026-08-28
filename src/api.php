@@ -301,6 +301,63 @@ if ($blocked) {
     }
 }
 
+/**
+ * Sends a 503 SERVICE_UNAVAILABLE response for rate-limit subsystem failures.
+ * Used when the rate-limit file cannot be opened or locked — distinct from
+ * a client hitting a rate limit, so X-RateLimit-Remaining uses -1 (not 0).
+ * Uses the same full response shape as the action-level quota-file 503
+ * responses (lines 2565-2641) so all SERVICE_UNAVAILABLE errors have a
+ * consistent interface: Content-Type, X-Info-Timeout, X-Download-Timeout,
+ * and the complete JSON body with all standard error fields.
+ */
+function sendServiceUnavailable503(string $request_id, string $action): void
+{
+    http_response_code(503);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    header('X-Request-ID: ' . $request_id);
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Download-Options: noopen');
+    header('X-Robots-Tag: noindex, noai, noimage, noydir');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
+    header('Retry-After: 5');
+    header('X-Info-Timeout: ' . INFO_TIMEOUT);
+    header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    // Rate-limit subsystem failure: X-RateLimit-Remaining uses -1 (not 0) to
+    // signal that no rate-limit state is available — distinct from a client
+    // actually hitting the limit (where remaining=0 would be correct).
+    header('X-RateLimit-Limit: -1');
+    header('X-RateLimit-Remaining: -1');
+    header('X-RateLimit-Reset: -1');
+    header('X-RateLimit-Window: unavailable');
+    header('X-DailyLimit-Limit: -1');
+    header('X-DailyLimit-Remaining: -1');
+    header('X-DailyLimit-Reset: -1');
+    header('X-DailyLimit-Window: unavailable');
+    echo json_encode([
+        'error' => 'Service temporarily unavailable.',
+        'error_code' => 'SERVICE_UNAVAILABLE',
+        'action' => $action,
+        'upgrade_url' => UPGRADE_URL,
+        'retry_after' => 5,
+        'request_id' => $request_id,
+        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        'api_version' => AHOYRIPPER_VERSION,
+        // quota fields: unavailable — the rate-limit file could not be accessed.
+        // Use -1 sentinels so clients can distinguish this from a known limit.
+        'quota_remaining' => -1,
+        'quota_limit' => -1,
+        'quota_reset' => -1,
+        'quota_reset_unix' => -1,
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
+}
+
 // ─── Rate limiting gate ───────────────────────────────────────────────────
 // Rate limiting applies to expensive actions only (info, download).
 // Lightweight endpoints (health, progress, check) are exempt to allow frequent
@@ -332,64 +389,11 @@ $data = ['t' => time(), 'c' => 0];
 if ($is_rate_limited) {
     $fp = fopen($rate_file, 'c+');
     if (!$fp) {
-        http_response_code(503);
-        header('Retry-After: 5');
-        // Re-set all security headers that the top-of-script block already set —
-        // this block bypasses the normal switch/case flow and sends its own 503
-        // via exit, so the top-of-script headers may not have been applied when
-        // served through certain nginx/php-fpm configurations. This mirrors the same
-        // pattern used by NOT_ACCEPTABLE (406) and METHOD_NOT_ALLOWED (405).
-        header('X-Content-Type-Options: nosniff');
-        header('X-Frame-Options: SAMEORIGIN');
-        header('X-Download-Options: noopen');
-        header('X-Robots-Tag: noindex, noai, noimage, noydir');
-        header('X-Request-ID: ' . $request_id);
-        header('Referrer-Policy: strict-origin-when-cross-origin');
-        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
-        header('Cross-Origin-Opener-Policy: same-origin');
-        header('Cross-Origin-Resource-Policy: same-origin');
-        // Include rate-limit context so clients/monitoring can distinguish this
-        // from a generic 503 and know it is a rate-limit subsystem failure.
-        header('X-RateLimit-Limit: ' . $rate_limit);
-        header('X-RateLimit-Remaining: 0');
-        header('X-RateLimit-Reset: ' . (time() + 5));
-        header('X-RateLimit-Window: ' . $rate_window);
-        header('X-DailyLimit-Limit: -1');
-        header('X-DailyLimit-Remaining: -1');
-        header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unlimited');
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
-        exit;
+        sendServiceUnavailable503($request_id, $action ?? 'info');
     }
     if (!flock($fp, LOCK_EX)) {
         fclose($fp);
-        http_response_code(503);
-        header('Retry-After: 5');
-        // Re-set all security headers — same rationale as the fopen failure block above.
-        // Mirrors NOT_ACCEPTABLE (406) and METHOD_NOT_ALLOWED (405) patterns.
-        header('X-Content-Type-Options: nosniff');
-        header('X-Frame-Options: SAMEORIGIN');
-        header('X-Download-Options: noopen');
-        header('X-Robots-Tag: noindex, noai, noimage, noydir');
-        header('X-Request-ID: ' . $request_id);
-        header('Referrer-Policy: strict-origin-when-cross-origin');
-        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
-        header('Cross-Origin-Opener-Policy: same-origin');
-        header('Cross-Origin-Resource-Policy: same-origin');
-        // Include rate-limit context so clients/monitoring can distinguish this
-        // from a generic 503 and know it is a rate-limit subsystem failure.
-        header('X-RateLimit-Limit: ' . $rate_limit);
-        header('X-RateLimit-Remaining: 0');
-        header('X-RateLimit-Reset: ' . (time() + 5));
-        header('X-RateLimit-Window: ' . $rate_window);
-        header('X-DailyLimit-Limit: -1');
-        header('X-DailyLimit-Remaining: -1');
-        header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unlimited');
-        echo json_encode(['error' => 'Service temporarily unavailable.', 'request_id' => $request_id], JSON_INVALID_UTF8_SUBSTITUTE);
-        exit;
+        sendServiceUnavailable503($request_id, $action ?? 'info');
     }
 
     $raw = fread($fp, 4096);
