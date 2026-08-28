@@ -149,7 +149,7 @@ header_remove('X-Powered-By');
   <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1873+ platforms">
+  <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1873+ platforms">
   <!-- og:title:alt and og:description:alt provide text alternatives for the Open
        Graph title and description — used by screen readers, non-visual clients, and
        indexing bots. Must match twitter:title and twitter:description respectively.
@@ -199,7 +199,7 @@ header_remove('X-Powered-By');
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
-  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud and 1873+ platforms">
+  <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1873+ platforms">
 
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
        production, but the meta tag ensures CSP is enforced even when the page is
