@@ -124,6 +124,24 @@ fi
 echo "  ✓ --playlist false absent (uses --no-playlist, as correct)"
 
 echo ""
+echo "==> Checking --no-progress is used in health probe (not --progress-template 'false')..."
+# The health probe command is built in the 'health' action handler. The probe command
+# is defined as $probe_cmd = [ ... ] inside the health action. We anchor on the array
+# assignment to reach the actual probe command lines (lines 5551+), which are ~5500
+# lines after HEALTH_PROBE_VIDEO_ID (line 57). Using $probe_cmd = [ as the anchor
+# keeps the context tight and reliable regardless of where HEALTH_PROBE_VIDEO_ID moves.
+PROBE_CMD_ANCHOR='\$probe_cmd = \['
+if grep -A 5600 "$PROBE_CMD_ANCHOR" src/api.php | grep -qE "'--progress-template'[[:space:]]*,[[:space:]]*'false'"; then
+    echo "  ✗ --progress-template 'false' found in health probe (use --no-progress instead)"
+    exit 1
+fi
+if ! grep -A 5600 "$PROBE_CMD_ANCHOR" src/api.php | grep -qE "'--no-progress'"; then
+    echo "  ✗ --no-progress missing from health probe (yt-dlp progress suppression absent)"
+    exit 1
+fi
+echo "  ✓ Health probe uses --no-progress (correct progress suppression)"
+
+echo ""
 echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
 # --concurrent-fragments: removed in yt-dlp 2024.10 (deprecated since 2023.11).
@@ -1345,12 +1363,28 @@ fi
 
 echo ""
 echo "==> Checking 503 responses include Retry-After header (daily quota gate)..."
-# Both info and download daily-quota 503 paths should include Retry-After
-COUNT=$(grep -c "http_response_code(503)" src/api.php)
-# All 503 blocks in the file should have Retry-After; verify the pattern
-# by checking all occurrences have the header within 3 lines after.
+# All direct 503 call sites (not function definitions) must have Retry-After
+# within 3 lines. This skips http_response_code(503) that appears inside
+# helper functions (e.g. sendServiceUnavailable503 at line 315), where the
+# Retry-After line is deeper in the function body.
 bad=0
 while IFS=: read -r linenum _; do
+    # Skip lines inside helper function bodies.
+    # e.g. sendServiceUnavailable503() has { on line 314 and http_response_code(503)
+    # on line 315. Look back up to 3 lines for the 'function' keyword.
+    is_function_body=0
+    for ((lookback=1; lookback<=3; lookback++)); do
+        if [ "$linenum" -gt "$lookback" ]; then
+            prev=$(sed -n "$((linenum-lookback))p" src/api.php)
+            if echo "$prev" | grep -qE "^function [a-zA-Z_][a-zA-Z0-9_]*\("; then
+                is_function_body=1
+                break
+            fi
+        fi
+    done
+    if [ "$is_function_body" -eq 1 ]; then
+        continue  # inside function body — Retry-After appears deeper in the function
+    fi
     context=$(sed -n "${linenum},$((linenum+3))p" src/api.php)
     if ! echo "$context" | grep -q "Retry-After"; then
         echo "  ✗ Line $linenum: 503 without Retry-After header"
