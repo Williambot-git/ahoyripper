@@ -440,13 +440,14 @@ else
 fi
 
 echo ""
-echo "==> Checking og:image dimensions in index.php (Twitter Card / social preview)... "
-# Twitter Cards and most social crawlers require og:image:width and og:image:height
-# to be present for accurate rendering. These are part of the Open Graph spec.
-if grep -q 'og:image:width.*content=' public/index.php && grep -q 'og:image:height.*content=' public/index.php; then
-    echo "  ✓ og:image:width and og:image:height present"
+echo "==> Checking og:image:secure_url and og:url in public/index.php..."
+# og:image:secure_url provides the HTTPS URL for og:image (fallback for clients that
+# don't support webp). og:url sets the canonical URL for the page in Open Graph.
+if grep -q 'og:image:secure_url.*content=' public/index.php \
+    && grep -q 'og:url.*content=' public/index.php; then
+    echo "  ✓ og:image:secure_url and og:url present"
 else
-    echo "  ✗ og:image:width or og:image:height missing (social previews may be inaccurate)"
+    echo "  ✗ og:image:secure_url or og:url missing from index.php"
     exit 1
 fi
 
@@ -915,6 +916,22 @@ if grep -q 'meta property="og:image"' public/index.php; then
     echo "  ✓ og:image present in index.php"
 else
     echo "  ✗ og:image missing from index.php"
+    exit 1
+fi
+
+echo "==> Checking og:image sub-properties (dimensions, MIME type, fetchpriority) in public/index.php..."
+# og:image:width and og:image:height are required by Twitter Card validator and
+# Open Graph spec for accurate social previews. Guard against regression.
+# og:image:type validates the image MIME type for social crawler fetching.
+# og:image:fetchpriority signals the browser to prioritize og:image loading early,
+# reducing LCP (Largest Contentful Paint) on social media share pages.
+if grep -q 'og:image:width.*content=' public/index.php \
+    && grep -q 'og:image:height.*content=' public/index.php \
+    && grep -q 'og:image:type.*content=' public/index.php \
+    && grep -q 'og:image:fetchpriority.*content=' public/index.php; then
+    echo "  ✓ og:image:width, og:image:height, og:image:type, og:image:fetchpriority present"
+else
+    echo "  ✗ og:image sub-properties (width/height/type/fetchpriority) missing from index.php"
     exit 1
 fi
 
