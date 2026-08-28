@@ -1784,6 +1784,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? PHP_INT_MAX) <=> ($b['filesize_mb'] ?? PHP_INT_MAX);
+            // Put unknown-size formats at the bottom of an ascending (smallest-first) sort.
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {

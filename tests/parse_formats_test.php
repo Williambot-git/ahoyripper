@@ -382,7 +382,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         if ($sort === 'filesize') {
             $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
         } elseif ($sort === 'filesize_asc') {
-            $cmp = ($a['filesize_mb'] ?? 0) <=> ($b['filesize_mb'] ?? 0);
+            // Put unknown-size formats at the bottom of an ascending (smallest-first) sort.
+            // Using PHP_INT_MAX (not 0) ensures null values sort last, not first.
+            $cmp = ($a['filesize_mb'] ?? PHP_INT_MAX) <=> ($b['filesize_mb'] ?? PHP_INT_MAX);
         } elseif ($sort === 'tbr') {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         } elseif ($sort === 'quality') {
