@@ -2846,6 +2846,11 @@ switch ($action) {
         $pipes = null;
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
         if (!$proc) {
+            // pipes[0] (stdin) may be partially open — clean up all three pipes
+            if ($pipes !== null) {
+                foreach ($pipes as $p) { if ($p !== null && is_resource($p)) fclose($p); }
+                $pipes = null;
+            }
             // proc_open failed — the process could not be started at all.
             // This is a server-side error (binary missing, permissions, resource exhaustion),
             // distinct from yt-dlp running but failing — return 500, not 422.
