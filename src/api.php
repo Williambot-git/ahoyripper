@@ -4847,10 +4847,13 @@ switch ($action) {
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Cache-Control: no-store');
+            // X-RateLimit-*: download action consumed the per-minute request rate limit
+            // (info call was made). Use $rate_window (60s) — the request-level window,
+            // not $dl_rate_window (10s). Consistent with VERIFICATION_FAILED block.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit was consumed when the
             // file was successfully written by yt-dlp, even though it could not be
             // read back for streaming. Use the actual post-consumption values.
@@ -4870,7 +4873,8 @@ switch ($action) {
             header('X-DailyLimit-Limit: ' . (!$unlimited ? $daily_limit : -1));
             header('X-DailyLimit-Remaining: ' . (!$unlimited ? $post_refund_count : -1));
             header('X-DailyLimit-Reset: ' . (!$unlimited ? $quota_reset_ts : -1));
-            header('X-DailyLimit-Window: ' . (!$unlimited ? $quota_window : 'unlimited'));
+            header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $retry_delta = DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
