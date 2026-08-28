@@ -2901,11 +2901,13 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            // Info action: use INFO_TIMEOUT (not DOWNLOAD_TIMEOUT) and omit
-            // X-Download-Timeout header which belongs to the download action.
+            // Info action: include both timeout headers for consistency with
+            // the download action. Clients may use either timeout header to
+            // set their own local timer; having both available is harmless.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
