@@ -1704,6 +1704,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                 elseif ($br >= 96) $quality = 96;
                 elseif ($br >= 64) $quality = 64;
                 else $quality = 48;
+            } else {
+                // Audio-only format with no bitrate metadata at all (e.g. opus/ogg
+                // where yt-dlp doesn't report abr). Assign a low-tier fallback so it
+                // still participates in quality-based sorting rather than being null
+                // (which sorts last in descending sorts, obscuring real audio options).
+                $quality = 32;
             }
         }
 
