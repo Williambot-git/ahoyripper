@@ -5549,7 +5549,7 @@ switch ($action) {
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
-                    '--progress-template', "",
+                    '--progress-template', 'false',
                     '--retries', '3',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
