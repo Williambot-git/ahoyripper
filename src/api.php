@@ -72,6 +72,13 @@ define('QUOTA_DAILY_DEFAULT', 5);
 // Must be an absolute URL with scheme (https:// preferred).
 define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/'));
 
+// Plausible analytics host — '' (empty, default) routes events through the
+// /src/api.php?action=analytics proxy so no third-party requests leave the browser.
+// Set PLAUSIBLE_HOST to a hostname (e.g. 'plausible.io' or 'analytics.yourdomain.com')
+// to forward events directly to a self-hosted or hosted Plausible server.
+// Set to '' to disable analytics entirely (endpoint returns 204 silently).
+define('PLAUSIBLE_HOST', getenv('PLAUSIBLE_HOST') ?: '');
+
 // Rate limit: max info/download requests per IP per minute.
 // Defined early so the rate-limit gate (line ~199) can reference it before the
 // constants section at line ~1778. nginx's 30r/m shared gate is the first
@@ -5889,16 +5896,11 @@ switch ($action) {
             break;
         }
 
-        // Determine Plausible host — same default as the JS client (self-hosted proxy).
-        // Use ?: (empty-coalescing) instead of ?? (null-coalescing) because
-        // PHP's getenv() returns false (not null) for an unset var, and ??'s
-        // behavior with false is inconsistent across PHP versions.
-        // - Unset PLAUSIBLE_HOST: getenv()→false, false?:'' → '' (proxy, default)
-        // - Set PLAUSIBLE_HOST='': getenv()→'', ''?:'' → '' (disabled)
-        // - Set PLAUSIBLE_HOST='plausible.io': getenv()→'plausible.io', 'plausible.io':'' → 'plausible.io'
-        // This makes self-hosted deployments privacy-safe by default (no third-party
-        // Plausible calls without explicit PLAUSIBLE_HOST configuration).
-        $plausible_host = getenv('PLAUSIBLE_HOST') ?: '';
+        // Use PLAUSIBLE_HOST constant (defined at top of file).
+        // '' (default, from getenv): routes through /src/api.php?action=analytics proxy.
+        // 'plausible.io' or 'analytics.yourdomain.com': forward directly to Plausible.
+        // '' (explicitly set): disable analytics entirely (204 returned silently).
+        $plausible_host = PLAUSIBLE_HOST;
 
         // Strip PII from the payload before forwarding:
         //   - URL: remove any ?url= param (contains the video link prefill).
