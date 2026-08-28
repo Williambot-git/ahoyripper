@@ -5804,6 +5804,31 @@ switch ($action) {
             header('Referrer-Policy: strict-origin-when-cross-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            // X-Info-Timeout and X-Download-Timeout: present on all API responses.
+            // CSP-report 405 block was missing these — add for consistency with check/health.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unlimited');
+            // X-RateLimit-*: generic rate-limit header family for API consumers.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unlimited');
+            // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
+            // CSP and Reporting headers: csp-report 405 block bypasses the top-of-script
+            // block that sets these globally — repeat them here so the response is fully
+            // hardened regardless of how this action is served.
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report;');
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for CSP reports.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
