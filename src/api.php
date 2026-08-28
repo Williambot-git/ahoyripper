@@ -5862,6 +5862,26 @@ switch ($action) {
             header('Referrer-Policy: strict-origin-when-cross-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            // X-Info-Timeout and X-Download-Timeout: present on all API responses
+            // (check, health, client-error) for generic header-parsing consistency.
+            // Analytics 405 block was missing these — add them now.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-RateLimit-* sentinels: analytics is a read-only internal action
+            // that does not consume from the per-minute download or info rate budget.
+            // Mirrors the same -1 sentinel pattern used in check/health/client-error.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unlimited');
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unlimited');
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for analytics beacons.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
