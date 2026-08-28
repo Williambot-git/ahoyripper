@@ -37,6 +37,13 @@ define('MAX_FILENAME_LEN', 80);
 // Duplicated here for the X-Info-Timeout header constant-guard tests.
 define('INFO_TIMEOUT', 45);
 
+// UPGRADE_URL: URL for rate-limit and quota-exceeded upsell messaging.
+// Mirrors api.php UPGRADE_URL constant. Defined here so that inline
+// classifyYtdlpError() uses a real value (not undefined constant).
+if (!defined('UPGRADE_URL')) {
+    define('UPGRADE_URL', 'https://ahoyvpn.com');
+}
+
 function test($name, $condition) {
     global $failures, $tests_run, $tests_passed;
     $tests_run++;
@@ -293,7 +300,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'status' => 410];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
-        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
     }
     if (preg_match('/age.*restriction|under age|video is age.*restricted|age restricted/i', $err_lower)) {
         return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'status' => 403];
@@ -353,7 +360,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
         }
         if ($code === 429) {
-            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes.', 'status' => 429];
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
             return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
