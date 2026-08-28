@@ -333,19 +333,19 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     // actually hitting the limit (where remaining=0 would be correct).
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
-    header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: unavailable');
+    header('X-RateLimit-Reset: ' . (time() + 5));
+    header('X-RateLimit-Window: 5');
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
-    header('X-DailyLimit-Reset: -1');
-    header('X-DailyLimit-Window: unavailable');
+    header('X-DailyLimit-Reset: ' . (time() + 5));
+    header('X-DailyLimit-Window: 5');
     // X-DL-RateLimit-*: download-specific rate limit is unavailable (rate-limit
     // subsystem failure — not a per-IP download limit hit), so use -1 sentinels
     // to signal "unknown", matching the same pattern used by X-RateLimit-*.
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
-    header('X-DL-RateLimit-Reset: -1');
-    header('X-DL-RateLimit-Window: unavailable');
+    header('X-DL-RateLimit-Reset: ' . (time() + 5));
+    header('X-DL-RateLimit-Window: 5');
     echo json_encode([
         'error' => 'Service temporarily unavailable.',
         'error_code' => 'SERVICE_UNAVAILABLE',
