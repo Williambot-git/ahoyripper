@@ -142,6 +142,42 @@ fi
 echo "  ✓ Health probe uses --no-progress (correct progress suppression)"
 
 echo ""
+echo "==> Checking --no-progress is used in info action (not --progress-template 'false')..."
+# The info action's yt-dlp command is built starting at line 2816 with:
+#   $ytdlp_cmd = [
+#       YTDLP_PATH,
+#       '--dump-json',
+#       '--skip-download',
+# We anchor on the array assignment line to reach the command lines.
+# --no-progress should appear as a standalone string in the array, after the
+# playlist flags and before --socket-timeout.
+INFO_CMD_ANCHOR='ytdlp_cmd = \['
+if grep -A 50 "$INFO_CMD_ANCHOR" src/api.php | grep -qE "'--progress-template'[[:space:]]*,[[:space:]]*'false'"; then
+    echo "  ✗ --progress-template 'false' found in info action (use --no-progress instead)"
+    exit 1
+fi
+if ! grep -A 50 "$INFO_CMD_ANCHOR" src/api.php | grep -qE "'--no-progress'"; then
+    echo "  ✗ --no-progress missing from info action (yt-dlp progress suppression absent)"
+    exit 1
+fi
+echo "  ✓ Info action uses --no-progress (correct progress suppression)"
+
+echo ""
+echo "==> Checking --no-progress is used in download action (not --progress-template 'false')..."
+# The download action's $ytdlp_cmd = [ starts at line 3811 (vs info action at line 2816).
+# We target lines 3800-3870 to cover the download action's command array.
+# The info action is ~1000 lines earlier, so this range is unambiguous.
+if sed -n '3800,3870p' src/api.php | grep -qE "'--progress-template'[[:space:]]*,[[:space:]]*'false'"; then
+    echo "  ✗ --progress-template 'false' found in download action (use --no-progress instead)"
+    exit 1
+fi
+if ! sed -n '3800,3870p' src/api.php | grep -qE "'--no-progress'"; then
+    echo "  ✗ --no-progress missing from download action (yt-dlp progress suppression absent)"
+    exit 1
+fi
+echo "  ✓ Download action uses --no-progress (correct progress suppression)"
+
+echo ""
 echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
 # --concurrent-fragments: removed in yt-dlp 2024.10 (deprecated since 2023.11).

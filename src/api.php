@@ -2826,12 +2826,11 @@ switch ($action) {
             $ytdlp_cmd[] = $flag;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            // --progress-template false: suppress all progress output (replaces the
-            // deprecated --no-progress flag). yt-dlp emits progress template noise
-            // even during --skip-download which would prepend garbage to stderr
-            // and corrupt json_decode on stdout. 'false' is the canonical modern
-            // yt-dlp syntax for this (not the empty-string form).
-            '--progress-template', 'false',
+            // --no-progress: suppress all progress output. yt-dlp emits progress
+            // template noise even during --skip-download which would prepend garbage
+            // to stderr and corrupt json_decode on stdout. --no-progress is the
+            // correct modern flag (consistent with the health probe at line 5569).
+            '--no-progress',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
@@ -3830,7 +3829,11 @@ switch ($action) {
             $ytdlp_cmd[] = $flag;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--progress-template', 'false',
+            // --no-progress: suppress all progress output. yt-dlp emits progress
+            // template noise to stderr that can corrupt downstream parsing in PHP.
+            // --no-progress is the correct modern flag (consistent with info action
+            // at line 2833 and health probe at line 5568).
+            '--no-progress',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
