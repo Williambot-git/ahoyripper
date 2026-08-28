@@ -917,6 +917,9 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 | [Bandcamp](https://bandcamp.com) | Audio | |
 | [Mixcloud](https://mixcloud.com) | Audio | |
 | [Spotify](https://spotify.com) | Audio | Requires cookies for full access |
+| [Apple Music](https://music.apple.com) | Audio | |
+| [Deezer](https://deezer.com) | Audio | |
+| [Audiomack](https://audiomack.com) | Audio | |
 | [Netflix](https://netflix.com) | Video | Non-DRM only |
 | [Disney+](https://disneyplus.com) | Video | Non-DRM only |
 | [Amazon Prime Video](https://amazon.com/prime-video) | Video | Non-DRM only |
