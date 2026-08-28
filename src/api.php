@@ -246,6 +246,7 @@ if ($blocked) {
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unavailable');
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: ' . $quota_reset_ts);
@@ -286,7 +287,7 @@ if ($blocked) {
             // early pre-action validation stage (before any action is dispatched).
             'quota_remaining' => -1,
             'quota_limit' => -1,
-            'quota_reset' => $quota_reset_ts,
+            'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
@@ -1937,6 +1938,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-DL-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'missing_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
@@ -1968,7 +1970,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // same reason. API consumers should treat -1 as "unknown remaining quota".
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => $quota_reset_ts,
+            'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
@@ -1998,6 +2000,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-DL-RateLimit-Window: unavailable');
         logRequest($action, 400, ['reason' => 'invalid_url']);
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
@@ -2023,7 +2026,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // same reason. API consumers should treat -1 as "unknown remaining quota".
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => $quota_reset_ts,
+            'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
@@ -5374,6 +5377,7 @@ switch ($action) {
         // that rely on this field for reset timing will now get a correct value.
         $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
 
         $version = $GLOBALS['__ytdlp_version'] ?? 'not installed';
         $ffmpeg = $GLOBALS['__ffmpeg_version'] ?? 'not installed';
@@ -5491,7 +5495,7 @@ switch ($action) {
             // determine the limit and next reset from the response body.
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => $quota_reset_ts,
+            'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
             // source_url: null for server-probe endpoints (no associated video URL).
             // Mirrors the source_url field in the /check response, giving API consumers

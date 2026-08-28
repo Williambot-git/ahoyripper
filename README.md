@@ -471,8 +471,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "api_version": "1.0.0",
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": 1800000000,
-  "quota_reset_unix": 1800000000
+  "quota_reset": "2026-08-28T00:00:00+00:00",
+  "quota_reset_unix": 1756080000
 }
 ```
 
@@ -490,8 +490,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "retry_after": 300,
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": 1800000000,
-  "quota_reset_unix": 1800000000,
+  "quota_reset": "2026-08-28T00:00:00+00:00",
+  "quota_reset_unix": 1756080000,
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -751,7 +751,9 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1
+  "quota_reset": -1,
+  "quota_reset_unix": -1,
+  "source_url": null
 }
 ```
 
@@ -792,7 +794,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1
+  "quota_reset": -1,
+  "quota_reset_unix": -1
 }
 ```
 
@@ -805,6 +808,13 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 `yt_dlp_cache_expires_at` / `yt_dlp_cache_ttl_seconds` track the yt-dlp version cache (1-hour TTL). `ffmpeg_cache_expires_at` / `ffmpeg_cache_ttl_seconds` track the ffmpeg version cache (1-hour TTL). `yt_dlp_probe_cache_expires_at` / `yt_dlp_probe_cache_ttl_seconds` track the yt-dlp connectivity probe cache (5-minute TTL).
 
 `quota_remaining`, `quota_limit`, and `quota_reset` are included in `action=check` and `action=health` responses (as `-1`, the configured limit, and `-1` respectively) for API surface consistency with `action=info` and `action=download` responses. Since `check` and `health` are read-only probes that do not consume quota, `quota_remaining` is `-1` and `quota_reset` is `-1`. `quota_limit` always reflects the configured daily limit (default `5`).
+
+`quota_reset` and `quota_reset_unix` are a dual-field pair that represents the daily quota reset time:
+
+- `quota_reset` — ISO 8601 date string (e.g. `"2026-08-28T00:00:00+00:00"`) for HTTP-header parity and human-readable timestamps.
+- `quota_reset_unix` — Unix timestamp integer (e.g. `1756080000`) for clients that prefer integer comparison without date parsing.
+
+Both fields carry the same reset moment. The Unix variant exists because the `X-DailyLimit-Reset` HTTP header accepts only an integer, not an ISO string. For active quota both fields are set; for inactive/unlimited states both are `-1`. Clients should check `quota_remaining === -1` to detect unlimited status rather than comparing against the timestamp fields.
 
 `action=csp-report` receives [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) violation reports from browsers. Nginx is configured with a `report-uri /src/api.php?action=csp-report` directive in the CSP-Report-Only header, so violations (e.g., mixed content, inline script attempts) are logged to `error_log` rather than silently ignored. The report body is sanitized before logging — video URLs and referrers are omitted. This endpoint returns `200 OK` to all POST requests so browsers do not retry.
 

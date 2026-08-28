@@ -1875,13 +1875,16 @@ test('YTDLP_ERROR (info): error_code is YTDLP_ERROR',
     ($ytdlp_error_info_response['error_code'] ?? '') === 'YTDLP_ERROR');
 
 // health endpoint mock response — verify quota_reset_unix > 0 for free tier
+// quota_reset is an ISO 8601 date string; quota_reset_unix is the Unix timestamp.
 $health_response_with_reset = [
     'status' => 'ok',
     'quota_remaining' => 4,
     'quota_limit' => 5,
-    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
     'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
 ];
+test('health endpoint: quota_reset is ISO 8601 date string (not Unix timestamp)',
+    is_string($health_response_with_reset['quota_reset']));
 test('health endpoint: quota_reset_unix > 0 (free tier, quota active)',
     $health_response_with_reset['quota_reset_unix'] > time());
 
