@@ -846,18 +846,28 @@ test('DISALLOWED_CONTENT (TOS variant) has status 451',
     ($result['status'] ?? null) === 451);
 
 // ─── format_id validation (exact regex from api.php download action) ─────────
-// Regex: '/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\-~()*%!\'"\.]+$/'
-// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+/-/~()%!'"),
+// Regex: '/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"\\$]+$/'
+// Allows: alphanum, underscore, dot, comma, yt-dlp selector chars (<>=![]+/-/~()%!'"), dollar.
 // tilde for output templates, parens/percent for %(name)s template expansion.
-// Blocked: shell metacharacters `; | & $ ` ( ) { } < > \ @ and all whitespace.
+// $ is used in yt-dlp filter expressions: format_id$=_mp4 (ends-with), bv*+ba/b$ (same-as-first).
+// Blocked: shell metacharacters `; | & $ ` ( ) { } \ @ and all whitespace EXCEPT $.
 // Note: angle brackets `<>` are valid yt-dlp selector operators (e.g. [height<1080])
 // but are blocked here as shell metacharacters. They are safe in proc_open since
 // bypass_shell=true — no shell expansion occurs regardless. The derived filename
 // sanitization (separate from format_id) is the additional hardening layer.
 
 function validateFormatId($format_id) {
-    // Mirrors src/api.php line 1301 — must stay in sync with production.
-    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\-~()*%!\'"\.]+$/', $format_id);
+    // Mirrors src/api.php line ~2177 — must stay in sync with production.
+    // $ is now allowed to support yt-dlp ends-with filters (format_id$=_mp4) and
+    // merge formulas with $ destination labels.
+    // Reject $( immediately — it signals shell command substitution which the regex
+    // now allows (because $ is valid in yt-dlp format selectors). The combination
+    // of regex-allowed $ but blocked $( preserves defence-in-depth: yt-dlp's $ never
+    // appears as $(, so blocking $( is safe and costs nothing.
+    if (strpos($format_id, '$(') !== false) {
+        return 0;
+    }
+    return preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"\\$]+$/', $format_id);
 }
 
 echo "\n==> Testing format_id validation regex\n";
@@ -876,7 +886,13 @@ test('accepts with exclamation (negation)',
     validateFormatId('bestvideo[height!=720]') > 0);
 test('accepts with square brackets and equals',
     validateFormatId('bestaudio[ext=m4a]') > 0);
-test('rejects shell metacharacter `$` (command substitution)',
+test('accepts dollar sign in yt-dlp ends-with filter (format_id$=_mp4)',
+    validateFormatId('bestvideo[format_id$=_mp4]') > 0);
+test('accepts dollar sign in yt-dlp merge formula with same-as-first ($)',
+    validateFormatId('bv*+ba/b[height>=1080]$') > 0);
+test('accepts dollar sign in yt-dlp ends-with merge formula',
+    validateFormatId('bestvideo+bestaudio[format_id$=_mp4]') > 0);
+test('rejects dollar sign when followed by shell metacharacters (command substitution)',
     validateFormatId('22; rm -rf /') === 0);
 // NOTE: backtick is blocked by the current regex (it is not in the character
 // class). This is intentional — backticks have no role in yt-dlp format

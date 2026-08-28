@@ -2171,7 +2171,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         // NOTE: this block is inside the if ($action === 'download') guard because
         // format_id is null for info requests. Calling preg_match with a null subject
         // issues a PHP warning and returns false, incorrectly triggering INVALID_FORMAT_ID.
-        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"-]+$/', $format_id)) {
+        // NOTE: $ is used in yt-dlp filter expressions (format_id$=_mp4 = "ends with _mp4")
+        // and in merge formulas for per-output destination labels, and in some fallback
+        // syntax (bv*+ba/b$ where $ means "same format as the first alternative").
+        if (!preg_match('/^[a-zA-Z0-9_.,<>=!\\[\\]+\\/\\-~()*%!\'\"\\$]+$/', $format_id)) {
             http_response_code(400);
             logRequest($action, 400, ['reason' => 'invalid_format_id', 'format_id' => $format_id]);
             // Security headers — same set as MISSING_FORMAT / MISSING_URL.
