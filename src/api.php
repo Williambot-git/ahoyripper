@@ -5553,7 +5553,12 @@ switch ($action) {
                     '--dump-json',
                     '--no-playlist',
                     '--skip-download',
-                    '--no-progress',
+                    // --progress-template false: suppress all progress output (replaces the
+                    // deprecated --no-progress flag). yt-dlp emits progress template noise
+                    // even during --skip-download which would prepend garbage to stderr
+                    // and corrupt json_decode on stdout. 'false' is the canonical modern
+                    // yt-dlp syntax for this (not the empty-string form).
+                    '--progress-template', 'false',
                     '--retries', '3',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
