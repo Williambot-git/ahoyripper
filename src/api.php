@@ -5313,6 +5313,7 @@ switch ($action) {
         // are always fully hardened regardless of how the endpoint is served
         // (nginx, PHP built-in server, reverse proxy, etc.). This mirrors the
         // approach taken by the 'check' action at line ~4796.
+        header('Content-Type: application/json; charset=utf-8');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // CSP and Reporting headers — set here explicitly (not relying on the
