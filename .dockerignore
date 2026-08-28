@@ -25,5 +25,12 @@ Dockerfile
 *~
 .DS_Store
 
+# Exception: public/.well-known/ must be copied into the image — it serves
+# security.txt (RFC 9116) at /.well-known/security.txt. Security scanners
+# (GitHub, OpenBugBounty) and browsers expect to find it at the runtime path.
+# Add it before the catch-all so the specific path takes priority.
+!.well-known/
+!.well-known/security.txt
+
 # Hidden files (catch-all for any remaining dotdirs)
 .*/
