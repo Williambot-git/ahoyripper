@@ -865,16 +865,16 @@ else
 fi
 
 echo ""
-echo "==> Checking og-image.svg platform count consistency (1872, not 1800)... "
-# The og-image.svg <desc>, comment, and <text> element must all say "1872".
-# Inconsistency here (e.g. <desc> saying "1800+" while <text> says "+1872")
-# was found and fixed in the 2026-08 caretaker run.
-OG_DESC=$(grep 'id="og-desc"' public/og-image.svg | grep -o '1872\|1800' || true)
-OG_TEXT=$(grep 'text.*1872\|text.*1800' public/og-image.svg | grep -o '1872\|1800' || true)
-if [ "$OG_DESC" = "1872" ] && [ "$OG_TEXT" = "1872" ]; then
-    echo "  ✓ og-image.svg consistently says 1872+ (desc and text match)"
+echo "==> Checking og-image.svg platform count consistency (1873)... "
+# The og-image.svg <desc> and <text> element must both say "1873".
+# Inconsistency here (e.g. <desc> saying "1872" while <text> says "+1873")
+# was found and fixed in a previous caretaker run.
+OG_DESC=$(grep 'id="og-desc"' public/og-image.svg | grep -o '1873\|1872\|1800' || true)
+OG_TEXT=$(grep 'text.*1873\|text.*1872\|text.*1800' public/og-image.svg | grep -o '1873\|1872\|1800' || true)
+if [ "$OG_DESC" = "1873" ] && [ "$OG_TEXT" = "1873" ]; then
+    echo "  ✓ og-image.svg consistently says 1873+ (desc and text match)"
 else
-    echo "  ✗ og-image.svg platform count mismatch: desc='$OG_DESC', text='$OG_TEXT' (both must be 1872)"
+    echo "  ✗ og-image.svg platform count mismatch: desc='$OG_DESC', text='$OG_TEXT' (both must be 1873)"
     exit 1
 fi
 
