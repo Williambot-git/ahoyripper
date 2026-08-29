@@ -4016,6 +4016,7 @@ switch ($action) {
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
