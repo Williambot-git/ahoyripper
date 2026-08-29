@@ -1334,10 +1334,16 @@ window.addEventListener('appinstalled', function() {
     showProgress(true);
     setProgress(30, 'Fetching video info...');
 
-    // Read quota from last info response and update the display.
-    // Also hides the "free rips/day" label when X-DailyLimit-Remaining is -1
-    // (unlimited-key holder), since the quota concept does not apply.
-    function updateQuotaFromHeaders(resp) {
+    // Wrap the fetch in try/catch so network/timeout failures (which produce
+    // rejected promises, not HTTP error responses) also reset the loading
+    // state. Without this, a failed fetch leaves the UI stuck on "Fetching…"
+    // because async function rejections bypass the error-handling branches
+    // that call setLoading(false).
+    try {
+      // Read quota from last info response and update the display.
+      // Also hides the "free rips/day" label when X-DailyLimit-Remaining is -1
+      // (unlimited-key holder), since the quota concept does not apply.
+      function updateQuotaFromHeaders(resp) {
       var rem = resp.headers.get('X-DailyLimit-Remaining');
       var lim = resp.headers.get('X-DailyLimit-Limit');
       var el = document.getElementById('quotaDisplay');
