@@ -3819,14 +3819,6 @@ switch ($action) {
             ? $_GET['referer']
             : 'https://ahoyripper.com/';
 
-        // --progress-template false: yt-dlp accepts 'false' as the canonical modern
-        //   syntax to suppress all progress output to stderr. Without this, yt-dlp
-        //   emits progress bars to stderr even during file downloads, which pollutes
-        //   $proc_stderr and can prevent classifyYtdlpError() from matching actual
-        //   error messages correctly (progress bar text prepends the real error).
-        //   Note: '' (two single-quotes, the empty-string PHP literal form) is NOT
-        //   equivalent — yt-dlp interprets '' as a literal two-character template name,
-        //   not as empty. The 'false' string is the correct and unambiguous choice.
         // --socket-timeout: yt-dlp's per-connection timeout. Set to DOWNLOAD_TIMEOUT - 15s so
         // PHP's process-level timeout (DOWNLOAD_TIMEOUT) is always the outer limit and has time
         // to cleanly terminate the process and emit a classified DOWNLOAD_TIMEOUT error.
