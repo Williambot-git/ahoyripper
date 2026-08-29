@@ -791,7 +791,9 @@ if (in_array($action, $internal_actions, true)) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-            echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
+            // retry_after: 0 — client-error is a fire-and-forget endpoint with no
+            // server-side backoff; clients can immediately retry their original action.
+            echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
         }
@@ -830,7 +832,9 @@ if (in_array($action, $internal_actions, true)) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-        echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
+        // retry_after: 0 — client-error is a fire-and-forget endpoint with no
+        // server-side backoff; clients can immediately retry their original action.
+        echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
@@ -5209,6 +5213,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'retry_after' => 0,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
