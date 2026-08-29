@@ -164,14 +164,16 @@ echo "  ✓ Info action uses --no-progress (correct progress suppression)"
 
 echo ""
 echo "==> Checking --no-progress is used in download action (not --progress-template 'false')..."
-# The download action's $ytdlp_cmd = [ starts at line ~3848 (vs info action at line ~2833).
-# We target lines 3800-3880 to cover the download action's command array and its
-# --no-progress flag. The info action is ~1000 lines earlier, so this range is unambiguous.
-if sed -n '3800,3880p' src/api.php | grep -qE "'--progress-template'[[:space:]]*,[[:space:]]*'false'"; then
+# The download action's $ytdlp_cmd = [ starts at line 3883 (vs info action at line ~2876).
+# --no-progress is added via array_merge() at ~3909 (after the initial array construction).
+# Use a grep-based search within the download case block — more reliable than a fixed
+# line range since array_merge() can shift by several lines between versions.
+DOWNLOAD_YTDLP_BLOCK=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
+if echo "$DOWNLOAD_YTDLP_BLOCK" | grep -qE "'--progress-template'[[:space:]]*,[[:space:]]*'false'"; then
     echo "  ✗ --progress-template 'false' found in download action (use --no-progress instead)"
     exit 1
 fi
-if ! sed -n '3800,3880p' src/api.php | grep -qE "'--no-progress'"; then
+if ! echo "$DOWNLOAD_YTDLP_BLOCK" | grep -qE "'--no-progress'"; then
     echo "  ✗ --no-progress missing from download action (yt-dlp progress suppression absent)"
     exit 1
 fi
