@@ -351,10 +351,15 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     // X-DL-RateLimit-*: download-specific rate limit is unavailable (rate-limit
     // subsystem failure — not a per-IP download limit hit), so use -1 sentinels
     // to signal "unknown", matching the same pattern used by X-RateLimit-*.
+    // X-DL-RateLimit-Window uses "unavailable" (not 5) — there is no known
+    // time window for this error state since the rate-limit store itself is
+    // inaccessible. Using "5" would falsely imply a 5-second recovery window,
+    // which has no basis in the subsystem failure. Consistent with all other
+    // pre-gate and unavailable states that set X-*-Window: unavailable.
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
-    header('X-DL-RateLimit-Window: 5');
+    header('X-DL-RateLimit-Window: unavailable');
     echo json_encode([
         'error' => 'Service temporarily unavailable.',
         'error_code' => 'SERVICE_UNAVAILABLE',
