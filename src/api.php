@@ -5507,6 +5507,11 @@ switch ($action) {
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
+            // can always surface the upsell opportunity regardless of which endpoint
+            // was called. Health is a probe endpoint (no content rip), but the upsell
+            // is equally valid here — consistent with the check action pattern.
+            'upgrade_url' => UPGRADE_URL,
             // source_url: null for server-probe endpoints (no associated video URL).
             // Mirrors the source_url field in the /check response, giving API consumers
             // a consistent null reference for probe endpoints rather than a hardcoded URL.
@@ -5633,6 +5638,9 @@ switch ($action) {
                         // missing fields when inspecting probe results).
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        // upgrade_url: mirrors the health response body for consistency
+                        // when clients read the probe sub-field directly.
+                        'upgrade_url' => UPGRADE_URL,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
