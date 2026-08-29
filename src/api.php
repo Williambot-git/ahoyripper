@@ -2460,6 +2460,9 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'source_url_missing' => false,
         // format_id_missing: false — format validation fires after Accept validation.
         'format_id_missing' => false,
+        // source_url: null — NOT_ACCEPTABLE fires before URL processing
+        // (it is an Accept-header validation failure, not a URL validation failure).
+        'source_url' => null,
         // quota fields: -1 signals that quota tracking is not applicable at this
         // early pre-action validation stage (before any action is dispatched).
         'quota_remaining' => -1,
