@@ -3113,6 +3113,7 @@ switch ($action) {
                 'CONNECTION_FAILED' => 502,
                 'CONNECTION_TIMEOUT' => 504,
                 'COPYRIGHT_REMOVED' => 451,
+                'DAILY_LIMIT' => 429,
                 'DISALLOWED_CONTENT' => 451,
                 'DOWNLOAD_CANCELLED' => 499,
                 'DOWNLOAD_EMPTY' => 500,
