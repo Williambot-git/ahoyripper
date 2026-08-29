@@ -861,7 +861,11 @@ window.addEventListener('appinstalled', function() {
 
   function setLoading(on, label) {
     btn.disabled = on;
-    btn.textContent = on ? (label || 'Ripping...') : 'Rip It';
+    if (on) {
+      btn.innerHTML = '<span class="btn-spinner"></span>' + (label || 'Ripping...');
+    } else {
+      btn.textContent = 'Rip It';
+    }
   }
 
   function showProgress(on) {

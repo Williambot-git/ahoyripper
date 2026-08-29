@@ -191,6 +191,22 @@ body {
 .rip-btn:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
 .rip-btn:active { transform: translateY(0); }
 .rip-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+/* Spinner shown inside the submit button during loading states.
+   Uses the same 18px spin animation as the progress spinner so the visual
+   rhythm is consistent across the app. The spinner is inserted by JS
+   via setLoading() in index.php. */
+.rip-btn .btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+}
 
 .rip-noscript-msg {
   color: var(--color-error, #ef4444);
