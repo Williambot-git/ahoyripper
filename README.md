@@ -500,7 +500,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
 
 ### Info Response Headers
 
-Every `action=info` response — success and error — includes these HTTP headers:
+Every `action=info` response — success and error — includes these HTTP headers. Rate-limit headers (`X-RateLimit-*`) and download-rate-limit headers (`X-DL-RateLimit-*`) are always present; the download-specific headers are sent as `-1`/`unavailable` on info-action responses since the info action does not consume download rate slots.
 
 | Header | Description |
 |--------|-------------|
@@ -509,6 +509,10 @@ Every `action=info` response — success and error — includes these HTTP heade
 | `X-RateLimit-Remaining` | Requests left in the current window |
 | `X-RateLimit-Reset` | Unix timestamp when the rate limit window resets |
 | `X-RateLimit-Window` | Window size in seconds (`60`) |
+| `X-DL-RateLimit-Limit` | Max concurrent downloads allowed (default 10, configurable via `DL_RATE_LIMIT` env var). Sent as `-1` (unavailable) on info-action responses since the info action does not consume download rate slots. |
+| `X-DL-RateLimit-Remaining` | Download slots left in the current window. Sent as `-1` (unavailable) on info-action responses. |
+| `X-DL-RateLimit-Reset` | Unix timestamp when the download rate-limit window resets. Sent as `-1` on info-action responses. |
+| `X-DL-RateLimit-Window` | Window size in seconds for the download rate limit (`60`). Sent as `unavailable` on info-action responses. |
 | `X-Info-Timeout` | Server-side info timeout in seconds (integer). Clients should set their fetch timeout to at least this value so the client deadline never exceeds the server deadline. The value matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). Present on every `info` response — success and error — so clients can always read it for retry timeout guidance. |
 | `X-DailyLimit-Limit` | Daily rip limit (default 5, unlimited-key holders see `-1`) |
 | `X-DailyLimit-Remaining` | Rips left in the current day (`-1` for unlimited-key holders) |
