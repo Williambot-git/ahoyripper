@@ -106,6 +106,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (refund_quota_test.php) ───────────
+echo "==> Running refund_quota_test.php (download-quota refund logic)..."
+if php "$SCRIPT_DIR/refund_quota_test.php"; then
+    echo "✓ refund_quota_test.php: passed"
+else
+    echo "✗ refund_quota_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── Shell sanity checks ──────────────────────────────
 echo "==> Running sanity.sh (binary/syntax/deprecated-flag checks)..."
 if bash "$SCRIPT_DIR/sanity.sh"; then
