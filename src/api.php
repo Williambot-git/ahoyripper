@@ -5690,6 +5690,9 @@ switch ($action) {
                         // so clients always have version info regardless of probe outcome.
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        // upgrade_url: included on failed probe responses so clients can
+                        // always surface the AhoyVPN upsell regardless of probe outcome.
+                        'upgrade_url' => UPGRADE_URL,
                     ];
                 }
                 if ($probe_cache_file) {
