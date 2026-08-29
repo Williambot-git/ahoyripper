@@ -4299,76 +4299,18 @@ switch ($action) {
         $matched = glob($glob_pattern);
         $actual_file = $matched[0] ?? null;
 
-        if (!$actual_file || !is_file($actual_file)) {
-            foreach (glob($glob_pattern) as $f) { @unlink($f); }
-            logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
-            // Refund daily quota — yt-dlp exited 0 but produced no file, so the
-            // user got nothing and shouldn't be charged. Consistent with all other
-            // download failure paths which also refund on the free tier.
-            $post_refund_count = $daily_limit;
-            if (!$unlimited && isset($dl_quota_before_refund)) {
-                $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
-            }
-            http_response_code(500);
-            header('Cache-Control: no-store, must-revalidate');
-            header('X-Request-ID: ' . $request_id);
-            header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
-            header('Referrer-Policy: strict-origin-when-cross-origin');
-            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
-            header('Cross-Origin-Opener-Policy: same-origin');
-            header('Cross-Origin-Resource-Policy: same-origin');
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            // X-DL-RateLimit-*: download-specific rate limit.
-            // yt-dlp exited 0 but produced no/empty file — no download rate limit was
-            // consumed. Use -1 sentinel to signal "not applicable", consistent with
-            // other pre-limit-gate errors in the download action.
-            header('X-DL-RateLimit-Limit: -1');
-            header('X-DL-RateLimit-Remaining: -1');
-            header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unavailable');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            // retry_after: delta-seconds until the download can be retried.
-            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
-            // delta-seconds is simpler and consistent with all other Retry-After
-            // headers in this file. Using DOWNLOAD_TIMEOUT (not time() + DOWNLOAD_TIMEOUT)
-            // keeps this as a delta-seconds value.
-            $retry_delta = DOWNLOAD_TIMEOUT;
-            header('Retry-After: ' . max(0, $retry_delta));
-            echo json_encode([
-                'error' => 'Download failed: the source returned an empty file. This is a server-side issue, not a format problem. Please try again in a moment or choose a different format.',
-                'error_code' => 'DOWNLOAD_EMPTY',
-                'action' => 'download',
-                'upgrade_url' => UPGRADE_URL,
-                'retry_after' => max(0, $retry_delta),
-                'request_id' => $request_id,
-                'source_url' => $url,
-                'source_url_missing' => false,
-                'format_id_missing' => false,
-                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-                'api_version' => AHOYRIPPER_VERSION,
-                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
-                'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
-                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
-            ], JSON_INVALID_UTF8_SUBSTITUTE);
-            exit;
-        }
-
         // Clear stat cache before reading filesize — glob() uses cached directory
         // entries and PHP's filesize() also caches result metadata. Without clearing,
         // filesize() can return 0 or a stale size even for a freshly-downloaded file
         // on long-running PHP processes that have hit the same path before.
         clearstatcache(true, $actual_file);
         $filesize = @filesize($actual_file);
-        if ($filesize === false || $filesize === 0) {
+        if ($filesize === false || $filesize === 0 || !$actual_file || !is_file($actual_file)) {
             foreach (glob($glob_pattern) as $f) { @unlink($f); }
             logRequest('download', 500, ['reason' => 'empty_or_missing_file', 'format_id' => $format_id]);
-            // Refund daily quota — yt-dlp exited 0 but produced an empty/zero-byte file.
-            // The user received nothing usable and shouldn't be charged. Consistent with
-            // all other download failure paths which also refund on the free tier.
+            // Refund daily quota — yt-dlp exited 0 but produced no file or an
+            // empty/zero-byte file. The user received nothing usable and shouldn't
+            // be charged. Consistent with all other download failure paths.
             $post_refund_count = $daily_limit;
             if (!$unlimited && isset($dl_quota_before_refund)) {
                 $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
@@ -5244,20 +5186,23 @@ switch ($action) {
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unlimited');
+            header('X-DL-RateLimit-Window: unavailable');
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
+            // Timeout headers: client-error is a fire-and-forget endpoint (no yt-dlp
+            // involvement) but X-Info-Timeout/X-Download-Timeout are included for
+            // complete API surface parity — clients can always find these headers.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
-                'error' => 'Method Not Allowed. Use POST for client error reports.',
+                'error' => 'Method not allowed. Use POST for action=client-error.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
-                'action' => 'client-error',
+                'action' => $action,
                 'request_id' => $request_id,
                 'api_version' => AHOYRIPPER_VERSION,
-                'retry_after' => 0,
-                // Internal fire-and-forget endpoint — no video URL or quota applies.
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
@@ -5266,7 +5211,7 @@ switch ($action) {
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
-            break;
+            return;
         }
 
         // Always return 200 so the browser doesn't retry failed reports.
