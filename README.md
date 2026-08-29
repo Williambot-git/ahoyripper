@@ -77,7 +77,23 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https%3A%2F%2
 
 ```bash
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
-# {"status":"ok","server_time":"2026-08-17T00:00:00+00:00","server_time_unix":1752787200,"request_id":"...","app_version":"...","php_version":"8.2.0","api_version":"...","yt_dlp_version":"2026.06.02","quota_remaining":-1,"quota_limit":5,"quota_reset":-1,"quota_reset_unix":-1,"source_url":null}
+# {
+#   "status": "ok",
+#   "server_time": "2026-08-17T00:00:00+00:00",
+#   "server_time_unix": 1752787200,
+#   "request_id": "...",
+#   "app_version": "...",
+#   "php_version": "8.2.0",
+#   "api_version": "...",
+#   "os": "Linux",
+#   "yt_dlp_version": "2026.06.02",
+#   "upgrade_url": "https://ahoyvpn.com",
+#   "quota_remaining": -1,
+#   "quota_limit": 5,
+#   "quota_reset": -1,
+#   "quota_reset_unix": -1,
+#   "source_url": null
+# }
 ```
 
 ### Full health check
