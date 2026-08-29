@@ -680,7 +680,6 @@ window.addEventListener('appinstalled', function() {
     'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
     'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
     'PROBE_FAILED': 'Could not verify that yt-dlp is working. The server may be misconfigured or yt-dlp is not installed. Try again or contact support.',
-    'YTDLP_NOT_FOUND': 'yt-dlp could not be started. The server is misconfigured — yt-dlp may not be installed or the path is incorrect. Contact the server administrator.',
     'PARSE_ERROR': 'Could not parse the video info. The site may be temporarily unavailable or not supported.',
     'NOT_ACCEPTABLE': 'This client does not accept JSON. Use a standard API client.',
     'PRIVATE_VIDEO': 'This video is private and cannot be downloaded. Try a public video instead.',
