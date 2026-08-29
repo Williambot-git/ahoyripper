@@ -3309,7 +3309,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: 60');
+            header('X-RateLimit-Window: unavailable');
             // X-Info-Timeout: mirrors the header set on all other info-action responses.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: mirrors the header set on all other download-action responses.
