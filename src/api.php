@@ -4945,16 +4945,17 @@ switch ($action) {
                     header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                 }
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-                header('Retry-After: 0');
+                // Use DOWNLOAD_TIMEOUT (not 0) to prevent clients from rapid-retrying
+                // a cancelled download. FILE_READ_ERROR uses the same value for the same
+                // reason — the download was partially or fully consumed; retry immediately
+                // is not appropriate in either case. The Retry-After HTTP header and
+                // retry_after JSON field are intentionally kept in sync.
+                header('Retry-After: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => 'Download cancelled by client.',
                     'error_code' => 'DOWNLOAD_CANCELLED',
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
-                    // Use DOWNLOAD_TIMEOUT (not 0) to prevent clients from rapid-retrying
-                    // a cancelled download. FILE_READ_ERROR uses the same value for the same
-                    // reason — the download was partially or fully consumed; retry immediately
-                    // is not appropriate in either case.
                     'retry_after' => DOWNLOAD_TIMEOUT,
                     'request_id' => $request_id,
                     'source_url' => $url,
