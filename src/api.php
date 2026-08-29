@@ -3208,6 +3208,15 @@ switch ($action) {
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
         $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        // X-Info-Timeout: server-side info timeout in seconds. Clients should set their
+        // fetch timeout to at least this value so the client deadline never exceeds the
+        // server deadline. Present on every info response — success and error — so clients
+        // can always read it for retry timeout guidance.
+        // X-Download-Timeout: also present for consistency — the info response does not
+        // return a downloadable resource, but having both timeout headers available is
+        // harmless and helps clients that use a single header-parsing path for all responses.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('Cache-Control: no-store');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['platform' => $platform, 'url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
