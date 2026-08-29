@@ -5213,6 +5213,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'upgrade_url' => UPGRADE_URL,
                 'retry_after' => 0,
                 'source_url' => null,
                 'source_url_missing' => false,
