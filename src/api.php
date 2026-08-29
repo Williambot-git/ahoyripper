@@ -4543,7 +4543,7 @@ switch ($action) {
                     // ffprobe exited 0 but found no streams — ffprobe itself did not "fail"
                     // per se, but verification could not be completed. Use 'skipped' to
                     // distinguish from a genuine ffprobe execution error (which sets
-                    // 'failed' at line 4230).
+                    // 'failed' at line 4630).
                     header('X-FFProbe-Status: skipped');
                 }
             } else {
@@ -4769,7 +4769,7 @@ switch ($action) {
         // Matches the failure header set in the early-exit block at line 4335.
         // X-Request-ID is always set on every API response; add it here for consistency
         // with all other download response paths (empty-file, timeout, proc failure, etc.).
-        // NOTE: Connection: close was already sent before the streaming loop (line 3692).
+        // NOTE: Connection: close was already sent before the streaming loop (line 4864).
         header('X-FFProbe-Status: ' . ($ffprobe_ok ? 'success' : 'skipped'));
         header('X-Request-ID: ' . $request_id);
         header('Retry-After: 0');
@@ -5002,7 +5002,7 @@ switch ($action) {
         // Detect client abort AFTER the loop — feof() exits when the client disconnects,
         // so connection_aborted() here catches the abort cleanly. An aborted transfer
         // means the client gave up; no quota is burned since no usable file was received.
-        // NOTE: Connection: close was already sent before the streaming loop (line 3692).
+        // NOTE: Connection: close was already sent before the streaming loop (line 4864).
         // The server will close the connection immediately after the last chunk is sent.
         // Sending a JSON error body after binary data on a half-closed connection is
         // at best a protocol violation and at worst causes the JSON to be received as
