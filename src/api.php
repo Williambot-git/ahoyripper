@@ -2934,9 +2934,16 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            // Info action: include both timeout headers for consistency with
-            // the download action. Clients may use either timeout header to
-            // set their own local timer; having both available is harmless.
+            // Timeout headers: X-Info-Timeout and X-Download-Timeout are included on all
+            // info-action responses for API surface consistency — clients can always find
+            // both timeout values regardless of which error path was taken.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // retry_after: delta-seconds until the download can be retried.
+            // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
+            // delta-seconds is simpler and consistent with all other Retry-After
+            // headers in this file. Using INFO_TIMEOUT (not time() + INFO_TIMEOUT)
+            // ensures this stays consistent with the delta-seconds format.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
