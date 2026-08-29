@@ -1521,6 +1521,16 @@ else
 fi
 
 echo ""
+echo "==> Checking health action includes X-Info-Timeout header (consistent with check/info/download)..."
+HEALTH_CASE=$(sed -n "/case 'health':/,/case '/p" src/api.php | head -n -1)
+if echo "$HEALTH_CASE" | grep -q "X-Info-Timeout"; then
+    echo "  ✓ health action includes X-Info-Timeout header"
+else
+    echo "  ✗ health action missing X-Info-Timeout header (inconsistent with check/info/download)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID error codes exist..."
 # Both error codes are returned by the download action when format is absent or invalid.
 # Verify they exist and return HTTP 400 (not 200 or 500).
