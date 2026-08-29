@@ -2845,7 +2845,13 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
-            '--referer', 'https://ahoyripper.com/',
+            // yt-dlp sends the URL itself as referer by default. Allow per-request override
+            // via ?referer= URL param (same pattern used by the download action at line 3801).
+            // A platform-specific referer (e.g. youtube.com) can improve extraction success
+            // for platforms that validate the referer header.
+            '--referer', isset($_GET['referer']) && $_GET['referer'] !== ''
+                ? $_GET['referer']
+                : 'https://ahoyripper.com/',
             '--user-agent', AHOY_USER_AGENT,
         ]);
         // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
