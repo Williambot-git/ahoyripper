@@ -3443,6 +3443,7 @@ switch ($action) {
                 flock($dl_fp, LOCK_UN);
                 fclose($dl_fp);
                 http_response_code(429);
+                header('Content-Type: application/json; charset=utf-8');
                 header('Retry-After: ' . max(0, $dl_reset_ts - time()));
                 // Include download rate-limit headers so clients can distinguish this
                 // from the per-minute rate limit without parsing the error body.
@@ -3537,6 +3538,7 @@ switch ($action) {
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
+                header('Content-Type: application/json; charset=utf-8');
                 header('Retry-After: 5');
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
@@ -3586,6 +3588,7 @@ switch ($action) {
             if (!flock($daily_fp, LOCK_EX)) {
                 fclose($daily_fp);
                 http_response_code(503);
+                header('Content-Type: application/json; charset=utf-8');
                 header('Retry-After: 5');
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
