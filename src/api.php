@@ -330,23 +330,30 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('Retry-After: 5');
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-    // Rate-limit subsystem failure: X-RateLimit-Remaining uses -1 (not 0) to
+    // Rate-limit subsystem failure: all counter values use -1 (not 0) to
     // signal that no rate-limit state is available — distinct from a client
     // actually hitting the limit (where remaining=0 would be correct).
+    // X-*-Reset uses -1 (not time()+5) since Retry-After is already set to
+    // delta-seconds (5s) and using an absolute timestamp here was inconsistent —
+    // clients following Retry-After: 5 would retry, but the reset header said
+    // time()+5 which equals the same absolute moment but created ambiguity about
+    // whether the header was absolute or relative. Using -1 for reset timestamps
+    // is consistent with the "unknown/unavailable" sentinel used throughout the
+    // codebase for pre-gate errors where rate-limit state is not yet available.
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
-    header('X-RateLimit-Reset: ' . (time() + 5));
+    header('X-RateLimit-Reset: -1');
     header('X-RateLimit-Window: 5');
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
-    header('X-DailyLimit-Reset: ' . (time() + 5));
+    header('X-DailyLimit-Reset: -1');
     header('X-DailyLimit-Window: 5');
     // X-DL-RateLimit-*: download-specific rate limit is unavailable (rate-limit
     // subsystem failure — not a per-IP download limit hit), so use -1 sentinels
     // to signal "unknown", matching the same pattern used by X-RateLimit-*.
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
-    header('X-DL-RateLimit-Reset: ' . (time() + 5));
+    header('X-DL-RateLimit-Reset: -1');
     header('X-DL-RateLimit-Window: 5');
     echo json_encode([
         'error' => 'Service temporarily unavailable.',
