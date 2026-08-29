@@ -4951,7 +4951,11 @@ switch ($action) {
                     'error_code' => 'DOWNLOAD_CANCELLED',
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
-                    'retry_after' => 0,
+                    // Use DOWNLOAD_TIMEOUT (not 0) to prevent clients from rapid-retrying
+                    // a cancelled download. FILE_READ_ERROR uses the same value for the same
+                    // reason — the download was partially or fully consumed; retry immediately
+                    // is not appropriate in either case.
+                    'retry_after' => DOWNLOAD_TIMEOUT,
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
