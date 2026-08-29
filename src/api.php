@@ -5094,6 +5094,9 @@ switch ($action) {
             'quota_reset_unix' => -1,
             // source_url: null — check is a read-only server probe with no source video URL.
             'source_url' => null,
+            // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
+            // upsell opportunity. Mirrors the same field in the health response.
+            'upgrade_url' => UPGRADE_URL,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
