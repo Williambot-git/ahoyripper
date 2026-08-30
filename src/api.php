@@ -5062,6 +5062,10 @@ switch ($action) {
                 fclose($fp);
                 if ($actual_file && file_exists($actual_file)) { @unlink($actual_file); }
                 logRequest('download', 499, ['reason' => 'connection_aborted', 'filesize_bytes_partial' => $filesize]);
+                // HTTP 499 (Client Closed Request) — set explicitly since this is a
+                // distinct error code in err_status_map but was not being applied here.
+                // All other 4xx/5xx responses in this file call http_response_code() directly.
+                http_response_code(499);
                 // Content-Type was already set to binary MIME above; override
                 // back to JSON so the error response has the correct Content-Type.
                 header('Content-Type: application/json; charset=utf-8');
@@ -5095,6 +5099,15 @@ switch ($action) {
                     header('X-DL-RateLimit-Reset: ' . $dl_reset);
                     header('X-DL-RateLimit-Window: ' . $dl_rate_window);
                 }
+                // X-DailyLimit-*: daily quota was charged when yt-dlp completed the download.
+                // Include post-refund values for consistency with other download error responses.
+                header('X-DailyLimit-Limit: ' . (!$unlimited ? $daily_limit : -1));
+                header('X-DailyLimit-Remaining: ' . (!$unlimited ? $post_refund_count : -1));
+                header('X-DailyLimit-Reset: ' . (!$unlimited ? $quota_reset_ts : -1));
+                header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
+                // X-Info-Timeout and X-Download-Timeout: present on all API responses.
+                // Both are included for consistency with other download action responses.
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 // Use DOWNLOAD_TIMEOUT (not 0) to prevent clients from rapid-retrying
                 // a cancelled download. FILE_READ_ERROR uses the same value for the same
