@@ -3440,6 +3440,7 @@ switch ($action) {
                 'error_code' => 'SERVICE_UNAVAILABLE',
                 'action' => $action ?? 'download',
                 'upgrade_url' => UPGRADE_URL,
+                'platform' => null,
                 'retry_after' => 5,
                 'request_id' => $request_id,
                 'source_url' => $url ?? null,
