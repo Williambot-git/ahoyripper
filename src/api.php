@@ -2978,8 +2978,9 @@ switch ($action) {
             // ensures this stays consistent with the delta-seconds format.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
-            header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-Info-Timeout and X-Download-Timeout were already set above (lines ~2971-2972).
+            // Do not set them again here — duplicate headers are invalid in HTTP/2 and
+            // the second set creates ambiguity for clients reading the response.
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
