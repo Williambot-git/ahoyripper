@@ -363,9 +363,9 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => 502];
+            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
         }
-        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => 502];
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
     }
     // yt-dlp exit codes carry semantic meaning that supplements text classification.
     // Exit code 1 is the most common error code — it means "there was a problem" but often
@@ -628,16 +628,16 @@ test('detects SOURCE_RATE_LIMITED — HTTP 429',
     $result !== null && ($result['code'] ?? '') === 'SOURCE_RATE_LIMITED');
 
 $result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
-test('detects SOURCE_SERVER_ERROR — HTTP 500',
-    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+test('detects SOURCE_HTTP_ERROR — HTTP 500',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR' && $result['status'] === 500);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 502: Bad Gateway');
-test('detects SOURCE_SERVER_ERROR — HTTP 502',
-    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+test('detects SOURCE_HTTP_ERROR — HTTP 502',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR' && $result['status'] === 502);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
-test('detects SOURCE_SERVER_ERROR — HTTP 503',
-    $result !== null && ($result['code'] ?? '') === 'SOURCE_SERVER_ERROR');
+test('detects SOURCE_HTTP_ERROR — HTTP 503',
+    $result !== null && ($result['code'] ?? '') === 'SOURCE_HTTP_ERROR' && $result['status'] === 503);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
 test('maps non-standard HTTP 418 to generic SOURCE_HTTP_ERROR',
@@ -761,7 +761,7 @@ test('SSL_ERROR status is 502 (short form)',
 // All SOURCE_* codes from HTTP error classification include upgrade_url so
 // users hitting source-side errors always see the AhoyVPN upsell opportunity.
 // Previously only SOURCE_RATE_LIMITED had it; SOURCE_FORBIDDEN, SOURCE_NOT_FOUND,
-// SOURCE_SERVER_ERROR, and SOURCE_HTTP_ERROR now carry it too.
+// and SOURCE_HTTP_ERROR now carry it too.
 $result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
 test('SOURCE_FORBIDDEN (HTTP 403) includes upgrade_url',
     ($result['upgrade_url'] ?? '') === UPGRADE_URL);
@@ -771,11 +771,11 @@ test('SOURCE_NOT_FOUND (HTTP 404) includes upgrade_url',
     ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
-test('SOURCE_SERVER_ERROR (HTTP 500) includes upgrade_url',
+test('SOURCE_HTTP_ERROR (HTTP 500) includes upgrade_url',
     ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 502: Bad Gateway');
-test('SOURCE_SERVER_ERROR (HTTP 502) includes upgrade_url',
+test('SOURCE_HTTP_ERROR (HTTP 502) includes upgrade_url',
     ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
@@ -811,16 +811,16 @@ test('SOURCE_NOT_FOUND status is 404',
     ($result['status'] ?? null) === 404);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
-test('SOURCE_SERVER_ERROR status is 502 (HTTP 500 variant)',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 500',
+    ($result['status'] ?? null) === 500);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
-test('SOURCE_SERVER_ERROR status is 502 (HTTP 503 variant)',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 503',
+    ($result['status'] ?? null) === 503);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
-test('SOURCE_HTTP_ERROR (non-standard HTTP) status is 502',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 418',
+    ($result['status'] ?? null) === 418);
 
 $result = classifyYtdlpError('ERROR: This video has been removed');
 test('VIDEO_UNAVAILABLE status is 410',
@@ -831,16 +831,16 @@ test('SOURCE_NOT_FOUND status is 404',
     ($result['status'] ?? null) === 404);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
-test('SOURCE_SERVER_ERROR status is 502 (HTTP 500 variant)',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 500 (duplicate block)',
+    ($result['status'] ?? null) === 500);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 503: Service Unavailable');
-test('SOURCE_SERVER_ERROR status is 502 (HTTP 503 variant)',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 503 (duplicate block)',
+    ($result['status'] ?? null) === 503);
 
 $result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
-test('SOURCE_HTTP_ERROR (non-standard HTTP) status is 502',
-    ($result['status'] ?? null) === 502);
+test('SOURCE_HTTP_ERROR status matches actual HTTP 418 (duplicate block)',
+    ($result['status'] ?? null) === 418);
 
 $result = classifyYtdlpError('ERROR: [youtube] SSL Error');
 test('SSL_ERROR status is 502 (short form)',

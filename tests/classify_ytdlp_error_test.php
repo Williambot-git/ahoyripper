@@ -338,13 +338,13 @@ test('classifies HTTP 429',
     assert_classify('ERROR: [YouTube] abc: HTTP Error 429', 'SOURCE_RATE_LIMITED', 429));
 
 test('classifies HTTP 500',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 500', 'SOURCE_SERVER_ERROR', 500));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 500', 'SOURCE_HTTP_ERROR', 500));
 
 test('classifies HTTP 502',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 502', 'SOURCE_SERVER_ERROR', 502));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 502', 'SOURCE_HTTP_ERROR', 502));
 
 test('classifies HTTP 503',
-    assert_classify('ERROR: [YouTube] abc: HTTP Error 503', 'SOURCE_SERVER_ERROR', 503));
+    assert_classify('ERROR: [YouTube] abc: HTTP Error 503', 'SOURCE_HTTP_ERROR', 503));
 
 test('classifies other HTTP error',
     assert_classify('ERROR: [YouTube] abc: HTTP Error 418', 'SOURCE_HTTP_ERROR', 418));
@@ -409,7 +409,7 @@ test('CONFIG_ERROR text takes precedence over exit code 1',
 
 // CONFIG_ERROR text should win over generic HTTP error text
 // A platform that returns HTTP 503 alongside the impersonate error message
-// should still be classified as CONFIG_ERROR, not SOURCE_SERVER_ERROR.
+// should still be classified as CONFIG_ERROR, not SOURCE_HTTP_ERROR.
 test('CONFIG_ERROR text takes precedence over HTTP 503 text',
     classifyYtdlpError('ERROR: Impersonate target chrome is not available. HTTP Error 503', 1)['code'] === 'CONFIG_ERROR');
 

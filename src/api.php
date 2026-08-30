@@ -1382,7 +1382,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
+            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
         }
         // Other HTTP errors — surface the status but give a generic message.
         return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
@@ -3189,7 +3189,6 @@ switch ($action) {
                 'SOURCE_HTTP_ERROR' => 502,
                 'SOURCE_NOT_FOUND' => 404,
                 'SOURCE_RATE_LIMITED' => 429,
-                'SOURCE_SERVER_ERROR' => 502,
                 'SOURCE_TIMEOUT' => 504,
                 'SSL_ERROR' => 502,
                 'UNSUPPORTED_SITE' => 404,

@@ -631,8 +631,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes |
 | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
 | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source |
-| `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues | Try again shortly |
-| `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error | Try again shortly |
+| `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly |
 | `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
@@ -734,8 +733,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `429` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
 | `403` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) — try a different format or use AhoyVPN |
 | `404` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted |
-| `502` | `SOURCE_SERVER_ERROR` | The source site returned HTTP 5xx and is having issues |
-| `502` | `SOURCE_HTTP_ERROR` | The source site returned an unexpected HTTP error |
+| `502` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues (specific status propagated to response) |
 | `502` | `SSL_ERROR` | SSL/TLS error when connecting to the source — try again or use AhoyVPN |
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `502` | `CONNECTION_FAILED` | Could not connect to the source |
@@ -1112,8 +1110,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
 | `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
 | `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video |
-| `SOURCE_SERVER_ERROR` | Source site returned HTTP 5xx | Try again shortly |
-| `SOURCE_HTTP_ERROR` | Source site returned an unexpected HTTP error | Try again shortly |
+| `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
 | `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
