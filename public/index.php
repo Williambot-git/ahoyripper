@@ -265,7 +265,7 @@ header_remove('X-Powered-By');
         "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
-        "browserRequirements": "Requires JavaScript. WebAssembly support and media codecs (H.264, VP9, Opus) required for full functionality.",
+        "browserRequirements": "Any modern browser with JavaScript enabled.",
         "softwareVersion": "<?= $VERSION ?>",
         "author": {
           "@type": "Organization",
