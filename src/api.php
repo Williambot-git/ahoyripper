@@ -33,10 +33,10 @@ define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
 // in well under 10s for any real file; 10s is generous for large or slow files.
 // Override via FFPROBE_TIMEOUT env var (e.g. FFPROBE_TIMEOUT=20 in .env).
 // Note: parentheses around (getenv ... ?: ...) are required so int() applies to
-// the coalesced result — without them, ?: binds tighter than cast, producing 0
-// when the env var is unset (getenv returns false, false is falsy, so ?: returns
-// the default 10, but (int) only casts 'FFPROBE_TIMEOUT' name-string to 0, not 10).
-define('FFPROBE_TIMEOUT', max(1, (int)(getenv('FFPROBE_TIMEOUT') ?: 10)));
+// Use ?? (not ?:) so that "0" (a string, evaluated as non-empty in PHP) is not
+// mistaken for an unset variable — consistent with the pattern used by INFO_TIMEOUT,
+// DOWNLOAD_TIMEOUT, RATE_LIMIT, and other configurable constants in this file.
+define('FFPROBE_TIMEOUT', max(1, (int)(getenv('FFPROBE_TIMEOUT') ?? 10)));
 
 // TTL (seconds) for the yt-dlp connectivity probe cache in the health endpoint.
 // PROBE_CACHE_TTL (5 minutes) prevents hammering YouTube with repeated health checks while
