@@ -2359,11 +2359,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('X-Download-Options: noopen');
     header('X-Robots-Tag: noindex, noai, noimage, noydir');
     header('X-Request-ID: ' . $request_id);
+    // application/json Content-Type was missing — the body is JSON but this header
+    // was absent, causing generic API clients and browser DevTools to misrender
+    // the response body. Fixed alongside the other headers below.
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
+    // X-Info-Timeout and X-Download-Timeout: present on all API responses
+    // (check, health, client-error) for generic header-parsing consistency.
+    // GET-gate 405 was missing these — add them now to mirror POST-gate 405 blocks.
+    header('X-Info-Timeout: ' . INFO_TIMEOUT);
+    header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    // CSP and Reporting headers: GET-gate 405 was missing these.
+    // Mirrors the headers set in the POST-gate 405 blocks (analytics, client-error, csp-report).
+    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+    header('Reporting-Endpoints: csp-report="/csp-report"');
+    header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
     // Rate-limit headers on 405: check is not a download action (X-DL-RateLimit=-1)
     // and has no per-minute ceiling (X-RateLimit=-1, not 0). -1 is the sentinel for
     // "no rate limit applies" — 0 means "rate limit exhausted" which is wrong here.
