@@ -5639,14 +5639,15 @@ switch ($action) {
             'disk_free_gb' => $sys['disk_free_gb'],
             'disk_free_pct' => $sys['disk_free_pct'],
             // Daily quota fields — health is a read-only probe (does not consume quota)
-            // so quota_remaining is -1 (unlimited signal). quota_limit and quota_reset
-            // mirror the configured daily limit and reset time for API surface
-            // consistency with info/download responses, allowing clients to always
-            // determine the limit and next reset from the response body.
+            // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
+            // configured daily limit for API surface consistency. quota_reset and
+            // quota_reset_unix are -1 to signal "not applicable" for read-only probes,
+            // matching the action=check pattern. Clients can still determine the
+            // configured limit from quota_limit without needing to parse quota_reset.
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => $quota_reset_iso,
-            'quota_reset_unix' => $quota_reset_ts,
+            'quota_reset' => -1,
+            'quota_reset_unix' => -1,
             // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
             // can always surface the upsell opportunity regardless of which endpoint
             // was called. Health is a probe endpoint (no content rip), but the upsell
