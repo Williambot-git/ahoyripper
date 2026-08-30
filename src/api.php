@@ -4931,10 +4931,10 @@ switch ($action) {
                 // The file was downloaded by yt-dlp (quota was charged) but could not be
                 // read back for streaming — this is a server-side issue, not a quota problem.
                 // Quota was not refunded here since the download itself succeeded.
-                'quota_remaining' => $unlimited ? -1 : $post_refund_count,
-                'quota_limit' => $unlimited ? -1 : $daily_limit,
-                'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
-                'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                'quota_remaining' => !$unlimited ? $post_refund_count : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
