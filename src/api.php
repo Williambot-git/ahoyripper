@@ -5232,6 +5232,18 @@ switch ($action) {
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+            // Mirrors the field in action=health so monitoring scripts that hit
+            // action=check (the lightweight no-probe endpoint) can determine binary
+            // status without parsing the version string.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffprobe_version: version string for the ffprobe binary (part of ffmpeg suite).
+            // Mirrors the field in action=health for consistency across all endpoints.
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffmpeg_ok: true when ffprobe binary is installed and callable.
+            // Mirrors the field in action=health so monitoring can confirm ffprobe
+            // availability without parsing the version string.
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // Daily quota fields — check is a read-only probe (does not consume quota)
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency with info/download
