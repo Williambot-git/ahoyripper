@@ -441,13 +441,13 @@ header_remove('X-Powered-By');
         </div>
         <div class="results-sort">
           <label for="sortSelect" class="sort-label">Sort:</label>
-          <select id="sortSelect" class="sort-select" aria-label="Sort formats by resolution, size, bitrate, quality tier, or audio quality" disabled>
-            <option value="height">Resolution</option>
+          <select id="sortSelect" class="sort-select" aria-label="Sort formats by resolution, size, bitrate, quality tier, or audio quality (audio-first)" disabled>
+            <option value="height">Resolution (video first)</option>
             <option value="filesize">Size (largest)</option>
             <option value="filesize_asc">Size (smallest)</option>
             <option value="tbr">Bitrate</option>
             <option value="quality">Quality tier</option>
-            <option value="audio_quality">Audio quality</option>
+            <option value="audio_quality">Audio quality (audio first)</option>
           </select>
         </div>
       </div>
@@ -1095,7 +1095,8 @@ window.addEventListener('appinstalled', function() {
     // which caused a scroll-to-top on Enter press before the click handler ran.
 
     var size = f.filesize_mb > 0 ? formatBytes(f.filesize_mb) : '~size';
-    var tbrMeta = f.tbr ? f.tbr + 'kbps' : '';
+    var bitrate = f.tbr ? f.tbr + 'kbps' : (f.abr ? f.abr + 'kbps' : '');
+    var tbrMeta = bitrate;
     var extMeta = f.ext ? f.ext.toUpperCase() : '';
     var langMeta = f.language ? f.language.toUpperCase() : '';
     var metaParts = escapeHtml([extMeta, tbrMeta].filter(Boolean).join(' '));
