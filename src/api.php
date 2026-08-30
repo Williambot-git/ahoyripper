@@ -3527,7 +3527,7 @@ switch ($action) {
                 header('X-RateLimit-Limit: ' . $dl_rate_limit);
                 header('X-RateLimit-Remaining: ' . max(0, $dl_rate_limit - $dl_data['c']));
                 header('X-RateLimit-Reset: ' . $dl_reset_ts);
-                // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window (10s),
+                // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window (60s),
                 // so the generic header accurately reflects the per-minute request rate limit
                 // (not the download-specific rate limit). Consistent with the VERIFICATION_FAILED
                 // and successful download response blocks which also use $rate_window here.
@@ -4887,7 +4887,7 @@ switch ($action) {
             header('Cache-Control: no-store');
             // X-RateLimit-*: download action consumed the per-minute request rate limit
             // (info call was made). Use $rate_window (60s) — the request-level window,
-            // not $dl_rate_window (10s). Consistent with VERIFICATION_FAILED block.
+            // not $dl_rate_window (60s). Consistent with VERIFICATION_FAILED block.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
