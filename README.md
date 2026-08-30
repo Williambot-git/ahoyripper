@@ -58,6 +58,54 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=download&url=https://w
   -o video.m4a
 ```
 
+### Advanced format selectors
+
+yt-dlp's format selectors let you request specific quality, codec, and container combinations beyond the simple format IDs in the info response.
+
+```bash
+# Best audio only (e.g., best available m4a or opus)
+format=bestaudio
+
+# Specific height — best video up to 720p + best audio (merger format)
+format=bestvideo[height<=720]+bestaudio/best
+
+# High quality — 1080p+ video with best audio
+format=bestvideo[height>=1080]+bestaudio/bestvideo+bestaudio/best
+
+# Audio-only with specific extension
+format=bestaudio[ext=m4a]
+
+# Prefer framerate (highest fps available at or above target height)
+format=bestvideo[height>=720][fps>=30]+bestaudio/best
+
+# Exclude certain codecs (e.g., avoid VP9 to prefer H.264 on older devices)
+format=bestvideo[height>=720][vcodec!VP9]+bestaudio/bestvideo[height>=720]+bestaudio/best
+```
+
+**Selector operators:**
+
+| Operator | Meaning |
+|----------|---------|
+| `=` | Exact match (e.g., `[height=720]`) |
+| `>` `>=` | Greater than / greater than or equal |
+| `<` `<=` | Less than / less than or equal |
+| `!=` | Not equal (exclude matches) |
+| `/` | Fallback — try left side, fall back to right if unavailable |
+
+**Common fields:**
+
+| Field | Example | Notes |
+|-------|---------|-------|
+| `height` | `[height>=720]` | Video vertical resolution in px |
+| `fps` | `[fps>=30]` | Frames per second |
+| `ext` | `[ext=mp4]` | File extension / container |
+| `vcodec` | `[vcodec!=VP9]` | Video codec (`mp4a`, `opus`, `vorbis`, `h264`, `vp9`, `av1`) |
+| `acodec` | `[acodec=mp4a]` | Audio codec |
+| `filesize` | `[filesize>=10M]` | Approximate max file size |
+| `tbr` | `[tbr>=256]` | Total bitrate in kbps |
+
+For the full selector reference, see the [yt-dlp format selection docs](https://github.com/yt-dlp/yt-dlp#format-selection).
+
 ### With an API key (unlimited quota)
 
 ```bash
