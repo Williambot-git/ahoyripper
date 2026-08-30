@@ -991,7 +991,17 @@ function isValidUrl($url) {
         // Host is a bracketed IP like [::1] or [fe80::1] — extract the bare IP
         $host = substr($parsed, 1, -1);
     } else {
-        // Host is a domain name — resolve it and validate each resolved IP.
+        // Host is a domain name — validate its format before attempting DNS resolution.
+        // Reject hostnames that violate RFC 1123 / RFC 952 rules:
+        //   - Each label: 1–63 chars, alphanumeric/hyphen, must not start/end with hyphen
+        //   - No leading/trailing dots, no consecutive dots
+        //   - Total length ≤ 253 chars (already checked above)
+        // This prevents parse_url edge cases with crafted URLs and reduces
+        // unnecessary DNS lookups for obviously invalid hostnames.
+        if (!preg_match('/^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*$/', $parsed)) {
+            return false;
+        }
+        // Resolve and validate each resolved IP.
         // This prevents SSRF via DNS rebinding (e.g. localhost resolving to 127.0.0.1
         // or an attacker controlling DNS to point a domain at a private IP).
         // Domains that don't resolve are rejected.

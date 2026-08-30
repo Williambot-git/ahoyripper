@@ -88,6 +88,12 @@ function isValidUrl($url) {
     } elseif (filter_var(substr($parsed, 1, -1), FILTER_VALIDATE_IP) !== false) {
         $host = substr($parsed, 1, -1);
     } else {
+        // Validate hostname format before DNS resolution (RFC 1123 / RFC 952).
+        // Reject labels that start/end with hyphen, consecutive dots, or
+        // exceed 63 chars — all of which would fail DNS resolution anyway.
+        if (!preg_match('/^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*$/', $parsed)) {
+            return false;
+        }
         // Use dns_get_record (DNS_A | DNS_AAAA) instead of gethostbynamel() because
         // gethostbynamel() only returns IPv4 (A records) — IPv6-only domains return
         // false and are incorrectly rejected.
@@ -300,6 +306,37 @@ echo "\n==> Testing SSRF via DNS rebinding scenarios\n";
 // intentionally — that would indicate a DNS hijacking risk on the test network.
 test('cloudflare.com resolves to public IPs', isValidUrl('https://cloudflare.com/'));
 test('google.com resolves to public IPs',     isValidUrl('https://google.com/'));
+
+// ─── Hostname format validation (RFC 1123 / RFC 952) ──────────────────────────
+
+echo "\n==> Testing hostname format validation (RFC 1123 / RFC 952)\n";
+
+// Valid hostnames — should be resolved and accepted/rejected based on IP
+test('accepts single-label alphanumeric hostname (example.com)', isValidUrl('https://example.com/'));
+test('accepts multi-label hostname (www.example.com)',            isValidUrl('https://www.example.com/'));
+test('accepts hostname with hyphens in label (cnn.com)',         isValidUrl('https://cnn.com/'));
+test('accepts hostname starting with digit (3domain.com)',         isValidUrl('https://3domain.com/'));
+test('accepts hostname with numbers (google.com)',                  isValidUrl('https://google.com/'));
+
+// Invalid: consecutive dots — reject before DNS
+test('rejects consecutive dots (..)', !isValidUrl('https://example..com/'));
+test('rejects leading dot (.example.com)', !isValidUrl('https://.example.com/'));
+test('rejects trailing dot (example.com.)', !isValidUrl('https://example.com./'));
+
+// Invalid: label starting with hyphen — reject before DNS
+test('rejects label starting with hyphen (-example.com)', !isValidUrl('https://-example.com/'));
+test('rejects label ending with hyphen (example-.com)', !isValidUrl('https://example-.com/'));
+
+// Invalid: label exceeding 63 chars — reject before DNS
+$label_64 = str_repeat('a', 64);
+test('rejects label > 63 chars (64 a\'s)', !isValidUrl('https://' . $label_64 . '.com/'));
+
+// Invalid: total hostname > 253 chars — already handled by strlen check
+$hostname_254 = str_repeat('a', 250) . '.com';
+test('rejects hostname > 253 chars', !isValidUrl('https://' . $hostname_254 . '/'));
+
+// Mixed case — should be accepted (DNS is case-insensitive)
+test('accepts mixed-case hostname (EXAMPLE.COM)', isValidUrl('https://EXAMPLE.COM/'));
 
 // ─── Non-string input ────────────────────────────────────────────────────────
 
