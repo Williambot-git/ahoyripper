@@ -4396,6 +4396,14 @@ switch ($action) {
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            // X-RateLimit-*: generic request-rate limit sentinels (-1) since
+            // DOWNLOAD_EMPTY occurs before the download rate limit gate. yt-dlp exited 0
+            // but produced no/empty file — no download rate limit was consumed. Consistent
+            // with other pre-gate error responses in the download action.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
             // X-DL-RateLimit-*: download-specific rate limit.
             // yt-dlp exited 0 but produced no/empty file — no download rate limit was
             // consumed. Use -1 sentinel to signal "not applicable", consistent with
