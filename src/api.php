@@ -6195,6 +6195,8 @@ switch ($action) {
             'source_url_missing' => false,
             // format_id_missing: false — format ID is not relevant to unknown actions.
             'format_id_missing' => false,
+            // platform: null — unknown actions have no associated source platform.
+            'platform' => null,
             // quota_remaining: -1 signals that quota tracking is not available for unknown
             // actions. Matches MISSING_URL which also has quota_remaining: -1 for the same
             // reason. API consumers should treat -1 as "unknown remaining quota".
