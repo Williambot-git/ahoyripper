@@ -1824,9 +1824,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         } else {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
-        // Secondary: within same type group, sort by height descending for consistency.
-        // When height is also equal, prefer higher fps (60fps > 30fps > 24fps) so
-        // smoother formats appear first within the same resolution tier.
+        // Secondary: within same type group and quality tier, sort by the most
+        // meaningful quality metric for that format type. For video (height > 0)
+        // and combined formats, height and fps distinguish quality meaningfully.
+        // For audio-only (height = 0), height is always 0 — use tbr (bitrate)
+        // as the secondary sort so higher-bitrate audio appears first within
+        // the same quality tier. This makes the 'quality' sort useful for
+        // audio-heavy playlists where tier alone doesn't distinguish quality.
         if ($cmp === 0) {
             $cmp = ($b['height'] ?? 0) <=> ($a['height'] ?? 0);
         }
@@ -1834,6 +1838,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             $cmp = ($b['fps'] ?? 0) <=> ($a['fps'] ?? 0);
         }
         // Tertiary: within same type + height + fps, highest tbr wins.
+        // For audio-only formats where height=0 and fps=0, this resolves to
+        // sorting by bitrate as the primary differentiator within the quality tier.
         if ($cmp === 0) {
             $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
         }
