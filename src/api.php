@@ -879,6 +879,18 @@ if (in_array($action, $internal_actions, true)) {
         'api_version' => AHOYRIPPER_VERSION,
         'os' => PHP_OS,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+        // Mirrors the field in action=health so monitoring scripts that hit
+        // action=check (the lightweight no-probe endpoint) can determine binary
+        // status without parsing the version string.
+        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+        // ffprobe_version: version string for the ffprobe binary (part of ffmpeg suite).
+        // Mirrors the field in action=health for consistency across all endpoints.
+        'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+        // ffmpeg_ok: true when ffprobe binary is installed and callable.
+        // Mirrors the field in action=health so monitoring can confirm ffprobe
+        // availability without parsing the version string.
+        'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         'source_url' => null,
         'upgrade_url' => UPGRADE_URL,
         'quota_remaining' => -1,
