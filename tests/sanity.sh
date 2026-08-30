@@ -1383,12 +1383,12 @@ fi
 echo ""
 echo "==> Checking health action includes all required fields..."
 # The health action should return: status, server_time, request_id,
-# yt_dlp_version, ffmpeg_version, yt_dlp_cache_expires_at, yt_dlp_cache_ttl_seconds,
+# yt_dlp_version, ffmpeg_version, ffprobe_version, yt_dlp_cache_expires_at, yt_dlp_cache_ttl_seconds,
 # ffmpeg_cache_expires_at, ffmpeg_cache_ttl_seconds.
 # The root guard also has a 'status' => ... echo, so we must isolate the
 # case 'health': block specifically to get the real health response array.
 HEALTH_RESPONSE=$(awk "/case 'health':/,/\\];/" src/api.php | sed -n "/'status' =>/,/\\];/p")
-for field in "'status'" "'server_time'" "'request_id'" "'yt_dlp_version'" "'ffmpeg_version'" "'yt_dlp_cache_expires_at'" "'yt_dlp_cache_ttl_seconds'" "'ffmpeg_cache_expires_at'" "'ffmpeg_cache_ttl_seconds'" "'yt_dlp_probe_cache_expires_at'" "'yt_dlp_probe_cache_ttl_seconds'"; do
+for field in "'status'" "'server_time'" "'request_id'" "'yt_dlp_version'" "'ffmpeg_version'" "'ffprobe_version'" "'yt_dlp_cache_expires_at'" "'yt_dlp_cache_ttl_seconds'" "'ffmpeg_cache_expires_at'" "'ffmpeg_cache_ttl_seconds'" "'yt_dlp_probe_cache_expires_at'" "'yt_dlp_probe_cache_ttl_seconds'"; do
     if ! echo "$HEALTH_RESPONSE" | grep -q "$field"; then
         echo "  ✗ Health response missing field: $field"
         exit 1
