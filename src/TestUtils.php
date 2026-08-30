@@ -130,15 +130,18 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // rather than relying solely on the (?<!Process ) lookbehind, making the intent
     // explicit and robust against future variations of the PHP timeout message.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
-    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+    // NOTE: "connection timed out" is NOT included here — it routes to CONNECTION_TIMEOUT
+    // (504) below. Only broad connection failures (reset, broken pipe, DNS, etc.) belong
+    // in CONNECTION_FAILED (502).
+    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP: https://ahoyvpn.com', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
     // transferred but the source took too long). yt-dlp emits "connection timed out"
-    // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
-    // connection-failure patterns (connection reset, broken pipe, etc.) are caught
-    // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+    // for this case. The negative lookahead (?!\s)(?! after) rejects the compound
+    // form "connection timed out after Xs" which is a SOURCE_TIMEOUT (504).
+    // CONNECTION_FAILED catches everything else connection-related.
     if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
         return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }

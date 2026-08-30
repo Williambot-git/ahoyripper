@@ -174,16 +174,19 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookahead (?!)
             // at word boundary rejects "Process timed out" at the word level.
             // \\bi?/o timeout\\b — IO timeout as a standalone word (handles "i/o timeout").
-            if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+            // NOTE: "connection timed out" is NOT included here — it routes to CONNECTION_TIMEOUT
+            // (504) below. Only broad connection failures (reset, broken pipe, DNS, etc.) belong
+            // in CONNECTION_FAILED (502).
+            if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Could not connect to the source. Check your network and try again.', 'error_code' => 'CONNECTION_FAILED', 'formats' => []];
             }
             // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
             // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
             // transferred but the source took too long). yt-dlp emits "connection timed out"
-            // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
-            // connection-failure patterns (connection reset, broken pipe, etc.) are caught
-            // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+            // for this case. The negative lookahead (?!\s)(?! after) rejects the compound
+            // form "connection timed out after Xs" which is a SOURCE_TIMEOUT (504).
+            // CONNECTION_FAILED catches everything else connection-related.
             if (preg_match('#\bconnection timed out\b(?!\s)(?! after)#i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'Connection timed out before the source responded. Distinct from SOURCE_TIMEOUT — this is a network-level TCP stall. Try again or use AhoyVPN to change your exit IP.', 'error_code' => 'CONNECTION_TIMEOUT', 'formats' => []];

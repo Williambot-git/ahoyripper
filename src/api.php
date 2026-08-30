@@ -1320,22 +1320,24 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
 
+    // CONNECTION_FAILED: broad class of connection-level failures where data transfer
+    // started but was interrupted (reset, broken pipe, DNS failure, etc.).
+    // Does NOT include standalone "connection timed out" — that is classified as
+    // CONNECTION_TIMEOUT (504) by the dedicated check below.
     // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
-    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above) and NOT followed
-    // by " after" (PHP timeout format: "Process timed out after 45s"). The negative
-    // lookahead (?!) at word boundary rejects "Process timed out" at the word level
-    // rather than relying solely on the (?<!Process ) lookbehind, making the intent
-    // explicit and robust against future variations of the PHP timeout message.
+    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookahead (?!)
+    // at word boundary rejects "Process timed out" explicitly, making the intent
+    // robust against future variations of the PHP timeout message format.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
-    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|connection timed out|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
     // transferred but the source took too long). yt-dlp emits "connection timed out"
-    // for this case. The check runs AFTER CONNECTION_FAILED so that more-specific
-    // connection-failure patterns (connection reset, broken pipe, etc.) are caught
-    // first; "connection timed out" with no other qualifier routes to CONNECTION_TIMEOUT.
+    // for this case. Runs AFTER CONNECTION_FAILED so that generic connection failures
+    // (reset, broken pipe, etc.) are caught first; a bare "connection timed out"
+    // with no other qualifier routes here (504) instead of CONNECTION_FAILED (502).
     if (preg_match('#\\bconnection timed out\\b(?!\\s)(?!\\s+after)#i', $err_lower)) {
         return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
