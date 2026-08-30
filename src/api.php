@@ -4411,6 +4411,14 @@ switch ($action) {
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            // CSP headers: DOWNLOAD_EMPTY calls exit() from within a switch block that
+            // does not reach the normal global CSP headers set at the top of the script.
+            // Include them explicitly so this block is self-contained and consistent
+            // with other 500-class error responses in the download action
+            // (e.g. PROC_OPEN_FAILED at line ~3971).
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
             // X-RateLimit-*: generic request-rate limit sentinels (-1) since
             // DOWNLOAD_EMPTY occurs before the download rate limit gate. yt-dlp exited 0
             // but produced no/empty file — no download rate limit was consumed. Consistent
