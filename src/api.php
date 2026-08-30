@@ -3275,7 +3275,9 @@ switch ($action) {
         // Surface daily quota state in the JSON body for client UI — mirrors the
         // X-DailyLimit-* headers set above so clients can read quota from either.
         // -1 sentinel values signal "not applicable" (unlimited-key holder).
-        $parsed['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $daily_data['c'] + 1) : -1;
+        // $daily_data['c'] is the count AFTER incrementQuota was called. Since each
+        // successful request consumes one quota slot, remaining = limit - c.
+        $parsed['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1;
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
         $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
