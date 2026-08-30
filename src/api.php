@@ -4820,11 +4820,49 @@ switch ($action) {
         header('X-Request-ID: ' . $request_id);
         header('Retry-After: 0');
 
+        // Detect MIME type for Content-Type header.
+        // finfo is the authoritative source — it reads the file's actual magic bytes.
+        // Fall back to extension-based mapping when finfo is unavailable, returns a
+        // generic type (e.g. application/octet-stream for unknown binary files),
+        // or fails for any reason.
         $mime = 'application/octet-stream';
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $detected = $finfo->file($actual_file);
         if ($detected !== false && strpos($detected, '/') !== false) {
-            $mime = $detected;
+            // Only accept finfo's result if it returned a real MIME type
+            // (not the generic application/octet-stream fallback).
+            // Generic octet-stream means finfo couldn't determine a specific type —
+            // extension-based detection is more useful in that case.
+            if ($detected !== 'application/octet-stream') {
+                $mime = $detected;
+            }
+        }
+        // Extension-based fallback when finfo is unavailable, fails, or returns
+        // the generic fallback. This correctly identifies common media types that
+        // finfo sometimes fails on (e.g. partially-downloaded files, rare containers).
+        if ($mime === 'application/octet-stream' && $ext !== '') {
+            $ext_lower = strtolower($ext);
+            $ext_mimes = [
+                'mp4'  => 'video/mp4',
+                'm4a'  => 'audio/mp4',
+                'webm' => 'video/webm',
+                'mkv'  => 'video/x-matroska',
+                'mov'  => 'video/quicktime',
+                'avi'  => 'video/x-msvideo',
+                'flv'  => 'video/x-flv',
+                'wmv'  => 'video/x-ms-wmv',
+                'mp3'  => 'audio/mpeg',
+                'opus' => 'audio/opus',
+                'ogg'  => 'audio/ogg',
+                'flac' => 'audio/flac',
+                'wav'  => 'audio/wav',
+                'aac'  => 'audio/aac',
+                'm4b'  => 'audio/mp4',
+                'weba' => 'audio/webm',
+            ];
+            if (isset($ext_mimes[$ext_lower])) {
+                $mime = $ext_mimes[$ext_lower];
+            }
         }
 
         header('Content-Length: ' . $filesize);
