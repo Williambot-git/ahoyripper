@@ -3426,10 +3426,14 @@ switch ($action) {
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
             // Generic rate-limit context headers — use -1 sentinels (same rationale).
+            // X-RateLimit-Window: 5 (NOT unavailable) — Retry-After is 5 (delta-seconds),
+            // so the generic rate-limit window must also be 5s to stay consistent.
+            // X-DL-RateLimit-Window stays unavailable because the download-specific
+            // rate-limit store itself is inaccessible (file couldn't be opened).
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: 5');
             // Daily-limit sentinels — -1 signals "not applicable" at this early stage.
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
