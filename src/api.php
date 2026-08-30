@@ -2191,6 +2191,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // for precise error routing without relying on string matching.
                 'format_id_missing' => true,
                 'upgrade_url' => UPGRADE_URL,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining: -1 signals that quota tracking is not available at this
@@ -2268,6 +2269,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // relying on string matching on the error message.
                 'format_id_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota_remaining: -1 signals that quota tracking is not available at this
@@ -2993,6 +2995,7 @@ switch ($action) {
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: quota was refunded before this response.
@@ -4119,6 +4122,7 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => $format_id,
                     'format_id_missing' => false,
+                    'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
@@ -4426,6 +4430,7 @@ switch ($action) {
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
@@ -4686,6 +4691,7 @@ switch ($action) {
                     'source_url' => $url,
                     'source_url_missing' => false,
                     'format_id' => $format_id,
+                    'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
