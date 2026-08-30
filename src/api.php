@@ -1995,6 +1995,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // validation error has no server-side backoff; the client just needs to
             // provide valid input. Consistent with INVALID_URL and INVALID_FORMAT_ID.
             'retry_after' => 0,
+            'hint' => 'Pass a supported URL via the "url" query parameter. E.g. ?action=info&url=https://www.youtube.com/watch?v=...',
             'request_id' => $request_id,
             'source_url' => null,
             // 'source_url_missing' is true when the client provided no URL at all,
@@ -2056,6 +2057,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // validation error has no server-side backoff; the client just needs to
             // provide valid input. Consistent with MISSING_URL and INVALID_FORMAT_ID.
             'retry_after' => 0,
+            'hint' => 'URL must be a public HTTPS link to a supported platform. Use the info action to validate a URL before downloading.',
             'request_id' => $request_id,
             'source_url' => $url,
             'source_url_missing' => false,
@@ -2176,6 +2178,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // validation error has no server-side backoff; the client just needs to
                 // provide valid input. Consistent with MISSING_FORMAT and other validation errors.
                 'retry_after' => 0,
+                'hint' => 'Call the info action first to get available formats, then pass a format id (e.g. "18" or "bestaudio[ext=m4a]") as the "format" parameter to the download action.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
@@ -2252,6 +2255,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // validation error has no server-side backoff; the client just needs to
                 // provide a valid format_id. Consistent with MISSING_FORMAT and other validation errors.
                 'retry_after' => 0,
+                'hint' => 'Refresh the page to get a fresh format list, then pick a format id from the returned list. Format ids look like "18", "22", or "bestaudio[ext=m4a]".',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
@@ -2766,6 +2770,7 @@ switch ($action) {
                     'upgrade_url' => UPGRADE_URL,
                     'platform' => null,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
+                    'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('H:i:s') . ' UTC.',
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (int)$reset_timestamp,
@@ -2980,6 +2985,7 @@ switch ($action) {
                 'error_code' => 'PROC_OPEN_FAILED',
                 'action' => 'info',
                 'retry_after' => max(0, $retry_delta),
+                'hint' => 'The server is overloaded or the download tool is unavailable. Wait a moment and retry. If persistent, the server may need maintenance.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
@@ -3358,6 +3364,7 @@ switch ($action) {
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_KEY',
                 'retry_after' => 0,
+                'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter or the Authorization: Bearer header. Generate a key at https://ahoyvpn.com.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
@@ -3552,6 +3559,7 @@ switch ($action) {
                     'upgrade_url' => UPGRADE_URL,
                     'platform' => null,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
+                    'hint' => 'Wait ' . (int)(max(1, ($dl_reset_ts - time()))) . ' seconds before making another download request. Pass an AhoyVPN unlimited API key for unlimited downloads.',
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
@@ -3762,6 +3770,7 @@ switch ($action) {
                     'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
+                    'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('H:i:s') . ' UTC.',
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
                     'quota_reset' => (int)$reset_timestamp,
@@ -3991,6 +4000,7 @@ switch ($action) {
                 'error_code' => 'PROC_OPEN_FAILED',
                 'action' => 'download',
                 'retry_after' => max(0, $retry_delta),
+                'hint' => 'The server is overloaded or the download tool is unavailable. Wait a moment and retry. If persistent, the server may need maintenance.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
