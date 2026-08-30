@@ -351,21 +351,21 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
-            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'status' => 403];
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
         }
         if ($code === 401 || $code === 407) {
-            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'status' => 401];
+            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'upgrade_url' => UPGRADE_URL, 'status' => 401];
         }
         if ($code === 404) {
-            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'status' => 404];
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404];
         }
         if ($code === 429) {
             return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly.", 'status' => 502];
+            return ['code' => 'SOURCE_SERVER_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => 502];
         }
-        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly.", 'status' => 502];
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // yt-dlp exit codes carry semantic meaning that supplements text classification.
     // Exit code 1 is the most common error code — it means "there was a problem" but often
@@ -756,6 +756,31 @@ test('SSL_ERROR status is 502',
 $result = classifyYtdlpError('ERROR: SSL error');
 test('SSL_ERROR status is 502 (short form)',
     ($result['status'] ?? null) === 502);
+
+// ─── HTTP error upgrade_url coverage ─────────────────────────────────────────
+// All SOURCE_* codes from HTTP error classification include upgrade_url so
+// users hitting source-side errors always see the AhoyVPN upsell opportunity.
+// Previously only SOURCE_RATE_LIMITED had it; SOURCE_FORBIDDEN, SOURCE_NOT_FOUND,
+// SOURCE_SERVER_ERROR, and SOURCE_HTTP_ERROR now carry it too.
+$result = classifyYtdlpError('ERROR: HTTP Error 403: Forbidden');
+test('SOURCE_FORBIDDEN (HTTP 403) includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 404: Not Found');
+test('SOURCE_NOT_FOUND (HTTP 404) includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 500: Internal Server Error');
+test('SOURCE_SERVER_ERROR (HTTP 500) includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 502: Bad Gateway');
+test('SOURCE_SERVER_ERROR (HTTP 502) includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 418: I\'m a teapot');
+test('SOURCE_HTTP_ERROR (non-standard code) includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: Process timed out after 45s');
 test('SOURCE_TIMEOUT status is 504',
