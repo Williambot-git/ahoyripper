@@ -1200,7 +1200,15 @@ window.addEventListener('appinstalled', function() {
                 setLoading(false);
                 card.classList.remove('downloading');
               }).catch(function() {
-                showError('Download failed. Try another format.');
+                // resp.json() failed — response body was not valid JSON (e.g. a proxy
+                // error page). Fall back to the HTTP status code lookup so 502/504/503
+                // proxy errors still surface an actionable hint rather than a generic one.
+                var dlMsg = 'Download failed. Try another format.';
+                var dlStatusKey = String(resp.status);
+                if (ERROR_HINTS[dlStatusKey]) {
+                  dlMsg = ERROR_HINTS[dlStatusKey];
+                }
+                showError(dlMsg);
                 setLoading(false);
                 card.classList.remove('downloading');
               });
