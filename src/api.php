@@ -20,14 +20,14 @@ define('AHOYRIPPER_VERSION', require __DIR__ . '/version.php');
 // can override the default /usr/local/bin/yt-dlp without editing source.
 // Defined early because the version-probe proc_open (line ~533) runs before
 // the constants section and needs this value before any other constants exist.
-define('YTDLP_PATH', getenv('YTDLP_PATH') ?: '/usr/local/bin/yt-dlp');
+define('YTDLP_PATH', getenv('YTDLP_PATH') ?? '/usr/local/bin/yt-dlp');
 
 // Path to ffprobe binary — configurable via FFPROBE_PATH env var so deployments
 // can override the default /usr/bin/ffprobe (e.g. to /usr/local/bin/ffprobe).
 // Used for post-download codec/resolution verification in the download action.
 // The ffprobe binary path is also used as the cache-key filename for the ffprobe
 // version cache so that changing FFPROBE_PATH invalidates stale cache entries.
-define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe');
+define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?? '/usr/bin/ffprobe');
 
 // Timeout (seconds) for ffprobe post-download verification. ffprobe should finish
 // in well under 10s for any real file; 10s is generous for large or slow files.
