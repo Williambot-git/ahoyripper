@@ -495,6 +495,7 @@ if ($is_rate_limited) {
                 // not that a URL was explicitly invalid. Same pattern for format_id_missing.
                 'source_url_missing' => false,
                 'format_id_missing' => false,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: included for consistency with all other error responses.
