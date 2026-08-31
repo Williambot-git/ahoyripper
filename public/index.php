@@ -142,7 +142,9 @@ header_remove('X-Powered-By');
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
+  <meta property="og:title:alt" content="AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1873+ platforms">
   <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1873+ platforms. Free, no signup, no ads.">
+  <meta property="og:description:alt" content="Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1873+ platforms with no signup or ads">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta property="og:image:secure_url" content="<?= $BASE_URL ?>/og-image.webp">
