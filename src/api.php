@@ -2797,6 +2797,9 @@ switch ($action) {
                 $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
                 $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
+                // Cache-Control: no-store — daily-limit responses must not be cached by
+                // intermediaries. Mirrors the header set by all other API error responses.
+                header('Cache-Control: no-store');
                 // Security headers — mirrors the same set sent by the per-minute
                 // rate-limit 429 block so daily-quota 429 responses are equally
                 // hardened regardless of which limit was hit first.
@@ -3814,6 +3817,9 @@ switch ($action) {
                 $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
                 $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
+                // Cache-Control: no-store — daily-limit responses must not be cached by
+                // intermediaries. Mirrors the header set by all other API error responses.
+                header('Cache-Control: no-store');
                 // Security headers — mirrors the same set sent by the per-minute
                 // rate-limit 429 block (line ~344) so daily-quota 429 responses are
                 // equally hardened regardless of which limit was hit first.
