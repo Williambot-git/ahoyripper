@@ -5097,6 +5097,7 @@ switch ($action) {
                 'error_code' => 'FILE_READ_ERROR',
                 'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
+                'hint' => 'The server temporarily could not read the downloaded file. Try again — if it persists, the file may be too large for the server to handle.',
                 'retry_after' => max(0, DOWNLOAD_TIMEOUT),
                 'request_id' => $request_id,
                 'source_url' => $url,
