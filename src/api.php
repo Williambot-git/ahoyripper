@@ -6308,6 +6308,8 @@ switch ($action) {
             'error_code' => 'UNKNOWN_ACTION',
             'action' => $action,
             'request_id' => $request_id,
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'upgrade_url' => UPGRADE_URL,
