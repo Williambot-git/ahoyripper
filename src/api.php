@@ -3548,7 +3548,10 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            // X-RateLimit-Window: 5 (NOT unavailable) — Retry-After is 5 (delta-seconds),
+            // so the generic rate-limit window must also be 5s to stay consistent.
+            // Mirrors the fopen failure block at line ~3495.
+            header('X-RateLimit-Window: 5');
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
