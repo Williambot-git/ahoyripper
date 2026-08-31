@@ -369,6 +369,12 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'request_id' => $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+        // source_url_missing: false — no URL was found to be missing.
+        // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
+        'source_url' => null,
+        'source_url_missing' => false,
+        'format_id_missing' => false,
         // quota fields: unavailable — the rate-limit file could not be accessed.
         // Use -1 sentinels so clients can distinguish this from a known limit.
         'quota_remaining' => -1,

@@ -1770,4 +1770,21 @@ fi
 echo "  ✓ resolve_playlist_flag_test.php passed"
 
 echo ""
+echo "==> Checking SERVICE_UNAVAILABLE response includes all required fields..."
+# The sendServiceUnavailable503() helper is used when the rate-limit file cannot
+# be opened or locked. Its JSON response must include source_url (null),
+# source_url_missing (false), and format_id_missing (false) — same as every
+# other API error response. Missing these fields breaks client response parsers
+# that expect a consistent field shape across all error codes.
+SVC_UNAVAIL=$(sed -n '/function sendServiceUnavailable503/,/\},/p' src/api.php | sed -n "/echo json_encode/,/];/p")
+for field in "'source_url'" "'source_url_missing'" "'format_id_missing'"; do
+    if echo "$SVC_UNAVAIL" | grep -q "$field"; then
+        echo "  ✓ SERVICE_UNAVAILABLE includes $field"
+    else
+        echo "  ✗ SERVICE_UNAVAILABLE missing $field"
+        exit 1
+    fi
+done
+
+echo ""
 echo "All sanity checks passed."
