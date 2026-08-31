@@ -1787,4 +1787,16 @@ for field in "'source_url'" "'source_url_missing'" "'format_id_missing'"; do
 done
 
 echo ""
+echo "==> Checking ERROR_HINTS includes SERVICE_UNAVAILABLE (frontend UX)... "
+# SERVICE_UNAVAILABLE is returned by sendServiceUnavailable503() when the rate-limit
+# file cannot be opened. Users hitting this error should see a friendly hint, not the
+# raw error. Verify the entry is present in the ERROR_HINTS map in index.php.
+if grep -q "'SERVICE_UNAVAILABLE'.*Server-side lock or quota file" public/index.php; then
+    echo "  ✓ ERROR_HINTS includes SERVICE_UNAVAILABLE"
+else
+    echo "  ✗ ERROR_HINTS missing SERVICE_UNAVAILABLE hint"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."
