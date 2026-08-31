@@ -5904,6 +5904,7 @@ switch ($action) {
                         $probe_classified = [
                             'code' => 'PROC_OPEN_FAILED',
                             'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
+                            'upgrade_url' => UPGRADE_URL,
                         ];
                     // case 2: PHP-side timeout (proc_open succeeded, process was killed)
                     } elseif ($probe_exit === -1 && strpos($probe_raw_err, 'timed out') !== false) {
