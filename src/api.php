@@ -432,7 +432,11 @@ if ($is_rate_limited) {
     }
 
     if (time() - $data['t'] < $rate_window) {
-        if ($data['c'] >= $rate_limit) {
+        // $data['c'] is the count AFTER the previous request's increment.
+        // Block NOW if the NEXT request would push us over the limit.
+        // Using $data['c'] + 1 (not >=) enforces the exact limit without
+        // allowing one request to exceed it before blocking.
+        if ($data['c'] + 1 > $rate_limit) {
             $reset_timestamp = $data['t'] + $rate_window;
             flock($fp, LOCK_UN);
             fclose($fp);
