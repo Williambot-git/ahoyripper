@@ -478,7 +478,29 @@ The `quality` field in each format is a numeric tier that enables cross-format c
 
 The `sort_applied` field (e.g. `"height"`) confirms which sort was applied — useful because the sort is computed server-side and the client renders from the sorted list. The `type_group` field groups formats as the primary sort dimension: `0` = combined (video+audio), `1` = video-only, `2` = audio-only. Formats are always grouped by type first (combined → video-only → audio-only), then sorted within each group by the chosen sort key. For example, with `sort=height` (default): all combined formats appear first sorted by height descending, then all video-only formats sorted by height descending, then all audio-only formats sorted by bitrate descending. The `format_type` field distinguishes `"combined"`, `"video"`, and `"audio"` for display purposes. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
 
-The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1920x1080 1080p60 HDR 10bit"`) — use this for display when available.
+The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description` field provides richer human-readable context from yt-dlp (e.g. `"1920x1080 1080p60 HDR 10bit"`) — use this for display when available. The `format_description` field exposes yt-dlp's raw format notes (e.g. `"720p60 HDR 10bit"`) stripped of the resolution prefix that appears in `description`. The `format_note` field is yt-dlp's original format annotation (e.g. `"DASH audio"` or `"HDR"`).
+
+**Format fields reference:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Format selector ID for use with the `format` parameter on download (e.g. `"22"`, `"bestaudio[ext=m4a]"`). |
+| `label` | `string` | Compact human-readable label (e.g. `"720p60 HDR mp4"`). Suitable for primary format display. |
+| `description` | `string` | Full resolution prefix + format note from yt-dlp (e.g. `"1920x720 720p60 HDR 10bit"`). Use for detailed display. `null` when unavailable. |
+| `format_description` | `string\|null` | yt-dlp's raw format annotation without the resolution prefix (e.g. `"720p60 HDR 10bit"`). `null` when yt-dlp does not provide a note. |
+| `format_note` | `string\|null` | yt-dlp's original format annotation string (e.g. `"DASH audio"`, `"HDR"`, `"3D"`). `null` when yt-dlp does not annotate this format. |
+| `ext` | `string` | File extension / container (e.g. `"mp4"`, `"m4a"`, `"webm"`). |
+| `filesize_mb` | `float\|null` | Estimated file size in MB. `null` when yt-dlp does not provide filesize metadata. |
+| `height` | `int\|null` | Video vertical resolution in pixels (e.g. `1080`, `720`, `480`). `null` on audio-only formats. |
+| `fps` | `int\|null` | Frames per second (e.g. `30`, `60`). `null` on audio-only formats. |
+| `quality` | `int\|null` | Numeric quality tier for sorting. Equals `height` for video formats; for audio formats equals the bitrate tier (320 ≥ 320kbps, 256 ≥ 256kbps, etc.). `null` when quality cannot be determined. |
+| `tbr` | `float\|null` | Total bitrate in kbps (video + audio combined). Available on most formats; `null` when not reported by yt-dlp. |
+| `abr` | `float\|null` | Audio bitrate in kbps. Present on audio-only and combined formats; `null` on video-only formats. |
+| `vcodec` | `string` | Video codec (`"avc1.64001F"`, `"vp9"`, `"av1"`, `"none"`). `"none"` on audio-only formats. |
+| `acodec` | `string` | Audio codec (`"mp4a.40.2"`, `"opus"`, `"vorbis"`, `"none"`). `"none"` on video-only formats. |
+| `format_type` | `string` | `"combined"` (video+audio), `"video"` (video-only), or `"audio"` (audio-only). |
+| `type_group` | `int` | Sort grouping key: `0` = combined, `1` = video-only, `2` = audio-only. Used as the primary sort dimension so formats are grouped by media type first. |
+| `language` | `string\|null` | ISO 639-1 language code of the format's audio stream (e.g. `"en"`, `"ja"`). `null` when not available or not applicable. |
 
 The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `source_url_missing` boolean field distinguishes `MISSING_URL` (no URL provided at all) from other error cases where a URL was given but failed for other reasons — it is `true` only when the request included no URL whatsoever, and `false` for all other responses (including when a malformed URL was provided). The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. It is present on all responses including error responses, so clients can correlate errors with a specific yt-dlp build. `uploader_url` is the URL to the channel/uploader page as reported by yt-dlp (e.g. a YouTube channel URL), or `null` when not available from the source. The `url` field is the canonical video page URL (e.g. `https://www.youtube.com/watch?v=...`) as reported by yt-dlp — this is the URL yt-dlp resolved to after any redirects, which may differ from `source_url` for platforms that normalize URLs (e.g. `youtu.be` → `youtube.com/watch?v=...`). The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to — useful when a URL redirects to a different platform (e.g. `youtu.be` → YouTube, or a shortener that resolves to a video platform).
 
