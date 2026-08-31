@@ -151,6 +151,7 @@ body {
 .rip-input {
   flex: 1 1 200px;
   min-width: 0;
+  min-height: 48px;
   background: var(--color-surface-el);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
