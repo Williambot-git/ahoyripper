@@ -4056,6 +4056,7 @@ switch ($action) {
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
+                'format_id_missing' => false,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
