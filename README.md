@@ -134,7 +134,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 #   "php_version": "8.2.0",
 #   "api_version": "...",
 #   "os": "Linux",
-#   "yt_dlp_version": "2026.06.02",
+#   "yt_dlp_version": "2026.03.17",
 #   "yt_dlp_ok": true,
 #   "ffprobe_version": "6.1-1ubuntu3",
 #   "ffmpeg_ok": true,
@@ -167,7 +167,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "php_version": "8.2.0",
 #   "api_version": "...",
 #   "os": "Linux",
-#   "yt_dlp_version": "2026.06.02",
+#   "yt_dlp_version": "2026.03.17",
 #   "ffmpeg_version": "6.1...",
 #   "ffprobe_version": "6.1...",
 #   "yt_dlp_ok": true,
@@ -502,7 +502,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `type_group` | `int` | Sort grouping key: `0` = combined, `1` = video-only, `2` = audio-only. Used as the primary sort dimension so formats are grouped by media type first. |
 | `language` | `string\|null` | ISO 639-1 language code of the format's audio stream (e.g. `"en"`, `"ja"`). `null` when not available or not applicable. |
 
-The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `source_url_missing` boolean field distinguishes `MISSING_URL` (no URL provided at all) from other error cases where a URL was given but failed for other reasons — it is `true` only when the request included no URL whatsoever, and `false` for all other responses (including when a malformed URL was provided). The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.06.02"`), useful for debugging format availability on older extractors. It is present on all responses including error responses, so clients can correlate errors with a specific yt-dlp build. `uploader_url` is the URL to the channel/uploader page as reported by yt-dlp (e.g. a YouTube channel URL), or `null` when not available from the source. The `url` field is the canonical video page URL (e.g. `https://www.youtube.com/watch?v=...`) as reported by yt-dlp — this is the URL yt-dlp resolved to after any redirects, which may differ from `source_url` for platforms that normalize URLs (e.g. `youtu.be` → `youtube.com/watch?v=...`). The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to — useful when a URL redirects to a different platform (e.g. `youtu.be` → YouTube, or a shortener that resolves to a video platform).
+The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `source_url_missing` boolean field distinguishes `MISSING_URL` (no URL provided at all) from other error cases where a URL was given but failed for other reasons — it is `true` only when the request included no URL whatsoever, and `false` for all other responses (including when a malformed URL was provided). The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.03.17"`), useful for debugging format availability on older extractors. It is present on all responses including error responses, so clients can correlate errors with a specific yt-dlp build. `uploader_url` is the URL to the channel/uploader page as reported by yt-dlp (e.g. a YouTube channel URL), or `null` when not available from the source. The `url` field is the canonical video page URL (e.g. `https://www.youtube.com/watch?v=...`) as reported by yt-dlp — this is the URL yt-dlp resolved to after any redirects, which may differ from `source_url` for platforms that normalize URLs (e.g. `youtu.be` → `youtube.com/watch?v=...`). The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to — useful when a URL redirects to a different platform (e.g. `youtu.be` → YouTube, or a shortener that resolves to a video platform).
 
 **Success response:**
 ```json
@@ -802,7 +802,7 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "app_version": "1.0.0",
   "php_version": "8.2.0",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.06.02",
+  "yt_dlp_version": "2026.03.17",
   "quota_remaining": -1,
   "quota_limit": 5,
   "quota_reset": -1,
@@ -923,7 +923,7 @@ Both fields carry the same reset moment. The Unix variant exists because the `X-
   "ok": true,
   "request_id": "a3f1b2c9d4e5f678",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.06.02"
+  "yt_dlp_version": "2026.03.17"
 }
 ```
 
