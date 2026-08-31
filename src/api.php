@@ -347,11 +347,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
-    header('X-DailyLimit-Window: 5');
+    header('X-DailyLimit-Window: unavailable');
     // X-DL-RateLimit-*: download-specific rate limit is unavailable (rate-limit
     // subsystem failure — not a per-IP download limit hit), so use -1 sentinels
     // to signal "unknown", matching the same pattern used by X-RateLimit-*.
-    // X-DL-RateLimit-Window uses "unavailable" (not 5) — there is no known
+    // X-DL-RateLimit-Window uses "unavailable" — there is no known
     // time window for this error state since the rate-limit store itself is
     // inaccessible. Using "5" would falsely imply a 5-second recovery window,
     // which has no basis in the subsystem failure. Consistent with all other
