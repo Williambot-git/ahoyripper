@@ -2049,6 +2049,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // and the format parameter is not relevant for non-download actions (info, health, etc.).
             // Including this field provides consistent structure across all validation-error responses.
             'format_id_missing' => false,
+            'format_id' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => date('c'),
