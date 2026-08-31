@@ -1863,6 +1863,7 @@ $invalid_key_info_response = [
     'error_code' => 'INVALID_KEY',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'platform' => null,
 ];
 test('INVALID_KEY (info): source_url_missing key exists',
     array_key_exists('source_url_missing', $invalid_key_info_response));
@@ -1872,12 +1873,15 @@ test('INVALID_KEY (info): source_url is the provided URL string',
     ($invalid_key_info_response['source_url'] ?? null) === 'https://example.com/video');
 test('INVALID_KEY (info): error_code is INVALID_KEY',
     ($invalid_key_info_response['error_code'] ?? '') === 'INVALID_KEY');
+test('INVALID_KEY (info): platform is null (no URL was validated)',
+    ($invalid_key_info_response['platform'] ?? null) === null);
 
 $invalid_key_download_response = [
     'error' => 'Invalid API key.',
     'error_code' => 'INVALID_KEY',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'platform' => null,
 ];
 test('INVALID_KEY (download): source_url_missing key exists',
     array_key_exists('source_url_missing', $invalid_key_download_response));
@@ -1887,6 +1891,8 @@ test('INVALID_KEY (download): source_url is the provided URL string',
     ($invalid_key_download_response['source_url'] ?? null) === 'https://example.com/video');
 test('INVALID_KEY (download): error_code is INVALID_KEY',
     ($invalid_key_download_response['error_code'] ?? '') === 'INVALID_KEY');
+test('INVALID_KEY (download): platform is null (no URL was validated)',
+    ($invalid_key_download_response['platform'] ?? null) === null);
 
 // ─── YTDLP_ERROR (info action) source_url_missing / upgrade_url ────────────────
 // The YTDLP_ERROR info response (yt-dlp fetch failed: non-zero exit, non-empty

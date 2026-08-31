@@ -3412,6 +3412,7 @@ switch ($action) {
                 'source_url' => $url,
                 'source_url_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: invalid key means no quota tracking applies — consistent
