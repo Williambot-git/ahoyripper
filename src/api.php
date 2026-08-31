@@ -2795,6 +2795,7 @@ switch ($action) {
                 logRequest('info', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+                $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 // Security headers — mirrors the same set sent by the per-minute
                 // rate-limit 429 block so daily-quota 429 responses are equally
@@ -2842,7 +2843,7 @@ switch ($action) {
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('H:i:s') . ' UTC.',
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
-                    'quota_reset' => (int)$reset_timestamp,
+                    'quota_reset' => $quota_reset_iso,
                     'quota_reset_unix' => (int)$reset_timestamp,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -3811,6 +3812,7 @@ switch ($action) {
                 logRequest('download', 429, ['reason' => 'daily_limit_exceeded']);
                 http_response_code(429);
                 $reset_timestamp = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+                $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
                 header('Retry-After: ' . max(0, $reset_timestamp - time()));
                 // Security headers — mirrors the same set sent by the per-minute
                 // rate-limit 429 block (line ~344) so daily-quota 429 responses are
@@ -3856,7 +3858,7 @@ switch ($action) {
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('H:i:s') . ' UTC.',
                     'quota_remaining' => 0,
                     'quota_limit' => $daily_limit,
-                    'quota_reset' => (int)$reset_timestamp,
+                    'quota_reset' => $quota_reset_iso,
                     'quota_reset_unix' => (int)$reset_timestamp,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
