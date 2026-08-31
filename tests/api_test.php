@@ -1609,6 +1609,7 @@ $health_response = [
     'load_avg' => 0.15,
     'memory_available_pct' => 72.4,
     'disk_free_gb' => 48.2,
+    'platform' => null,
 ];
 test('health endpoint response includes api_version key',
     array_key_exists('api_version', $health_response));
@@ -1616,6 +1617,13 @@ test('health endpoint api_version matches AHOYRIPPER_VERSION',
     ($health_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
 test('health endpoint api_version is non-empty string',
     is_string($health_response['api_version']) && $health_response['api_version'] !== '');
+
+// platform is null for health (no associated video URL) — mirrors source_url
+// being null for this probe endpoint. Consistent field presence across all actions.
+test('health endpoint response includes platform key',
+    array_key_exists('platform', $health_response));
+test('health endpoint platform is null',
+    $health_response['platform'] === null);
 
 // The default: case in api.php also includes api_version (line 3373).
 // Verify the unknown-action error response includes api_version.

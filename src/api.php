@@ -5711,6 +5711,9 @@ switch ($action) {
             'disk_total_gb' => $sys['disk_total_gb'],
             'disk_free_gb' => $sys['disk_free_gb'],
             'disk_free_pct' => $sys['disk_free_pct'],
+            // platform: null for health (no associated video URL). Mirrors source_url
+            // being null for probe endpoints — consistent field presence across all actions.
+            'platform' => null,
             // Daily quota fields — health is a read-only probe (does not consume quota)
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency. quota_reset and
