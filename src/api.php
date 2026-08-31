@@ -619,6 +619,15 @@ $dl_window = 60;
 $dl_remaining = -1;
 $dl_reset = -1;
 $dl_window_label = 'unavailable';
+if (($action ?? '') !== 'download') {
+    // For non-download actions, $dl_remaining is set to -1 above (no download
+    // rate limit applies). Set $dl_limit to -1 as well for header consistency —
+    // the X-DL-RateLimit-Limit header should match the semantic of the other
+    // sentinels (-1 = not applicable to this action). Without this, the header
+    // would incorrectly report the configured DL_RATE_LIMIT value even though
+    // no download rate limit is in effect for info/health/check/client-error.
+    $dl_limit = -1;
+}
 if (($action ?? '') === 'download') {
     $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
     $dl_fp2 = @fopen($dl_rate_file, 'r');
