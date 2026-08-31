@@ -747,6 +747,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `400` | `MISSING_FORMAT` | No format was selected on the download request. The response also includes `"format_id_missing": true` so clients can distinguish this from `INVALID_FORMAT_ID` (a format ID was given but malformed — `format_id_missing` is `false` in that case). |
 | `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. The response includes `"format_id_missing": false`. |
 | `429` | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted. Quota resets at midnight UTC. The response body also includes `retry_after` (delta-seconds, integer — seconds until the daily quota resets), `quota_limit` (integer matching `quota_limit` on all other responses), and `upgrade_url` (AhoyVPN upsell link). |
+| `429` | `RATE_LIMIT_EXCEEDED` | Too many rapid requests — throttled by the server's per-IP rate limit. Wait ~60 seconds and retry, or use AhoyVPN for unlimited access. |
 | `422` | `GEOBLOCKED` | Video is geo-restricted in your region |
 | `403` | `AGE_RESTRICTED` | Video is age-restricted and requires verification on the source platform |
 | `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
@@ -768,11 +769,13 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
 | `500` | `PROC_OPEN_FAILED` | The download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing (contact the operator). |
+| `503` | `SERVICE_UNAVAILABLE` | The quota or rate-limit subsystem is temporarily unavailable — try again in a few seconds. If persistent, the server may be overloaded. |
 | `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
 | `500` | `FILE_READ_ERROR` | The downloaded file could not be read — rare server-side issue. Try again or pick a different format. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
 | `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
+| `504` | `VERIFICATION_TIMEOUT` | ffprobe verification timed out — the file may be valid but could not be confirmed within the server's time limit. Try a smaller format or try again. |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
 | `503` | `CONFIG_ERROR` | Browser impersonation is not available — the `curl_cffi` Python library may be missing. Set `AHOY_IMPERSONATE=` (empty) to disable impersonation, or update yt-dlp and install `pip install curl_cffi`. |
 
