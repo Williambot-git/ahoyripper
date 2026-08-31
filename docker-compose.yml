@@ -35,6 +35,7 @@ services:
       # See: https://github.com/yt-dlp/yt-dlp/releases
       - YTDLP_VERSION=${YTDLP_VERSION:-latest}
       - VERSION_CACHE_TTL=${VERSION_CACHE_TTL:-3600}
+      - PROBE_CACHE_TTL=${PROBE_CACHE_TTL:-300}
     restart: unless-stopped
     healthcheck:
       # Use / (root) instead of /src/api.php — the nginx Docker config serves the
