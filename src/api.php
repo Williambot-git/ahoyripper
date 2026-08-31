@@ -5236,6 +5236,11 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
+        // Cache-Control: no-store — check is a live system probe; responses must
+        // not be cached by intermediaries (CDNs, proxies) since system state is
+        // trivial and changes on every call. Mirrors the same header set in the
+        // 'health' action (line ~5625) and the top-of-script default (line ~178).
+        header('Cache-Control: no-store');
         // Connection: close is intentionally NOT set — the check endpoint is a
         // lightweight JSON ping meant for frequent calls (Docker healthchecks every
         // 10s, load-balancer probes). Closing the connection forces a new TCP
