@@ -1084,6 +1084,9 @@ if (!$GLOBALS['__ytdlp_version']) {
     $ytdlp_ver_cmd = [YTDLP_PATH, '--version'];
     $ytdlp_ver_proc = proc_open($ytdlp_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ytdlp_ver_pipes, null, [], ['bypass_shell' => true]);
     if ($ytdlp_ver_proc) {
+        // Close stdin immediately — we never write to it. Leaving it open causes
+        // the child to hold an unused pipe fd; proc_close waits for all pipe
+        // writers (stdin writer in the parent) to close before returning.
         fclose($ytdlp_ver_pipes[0]);
         unset($ytdlp_ver_pipes[0]);
         // Read only the first line (version string is always line 1).
@@ -1163,6 +1166,9 @@ if (!$GLOBALS['__ffmpeg_version']) {
     $ffprobe_ver_proc = proc_open($ffprobe_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ffprobe_ver_pipes, null, [], ['bypass_shell' => true]);
     $ffmpeg_ver = '';
     if ($ffprobe_ver_proc) {
+        // Close stdin immediately — we never write to it. Leaving it open causes
+        // the child to hold an unused pipe fd; proc_close waits for all pipe
+        // writers (stdin writer in the parent) to close before returning.
         fclose($ffprobe_ver_pipes[0]);
         unset($ffprobe_ver_pipes[0]);
         // Read only the first line (version string is always line 1).
