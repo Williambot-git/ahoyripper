@@ -5219,6 +5219,10 @@ switch ($action) {
         // bypasses that block by sending its own echo+break — so set them here
         // too so check responses are always fully hardened regardless of how
         // the endpoint is served (nginx, PHP built-in server, reverse proxy, etc.).
+        // Compute quota_reset locally — the health action's $quota_reset_ts/$quota_reset_iso
+        // are defined inside that case block and not in scope here.
+        $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         header('Content-Type: application/json; charset=utf-8');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
@@ -5313,10 +5317,12 @@ switch ($action) {
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency with info/download
             // responses, allowing clients to always determine the limit from the body.
+            // quota_reset and quota_reset_unix are always valid timestamps (never -1)
+            // per API contract — even read-only probes return the next reset time.
             'quota_remaining' => -1,
             'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_reset' => $quota_reset_iso,
+            'quota_reset_unix' => $quota_reset_ts,
             // source_url: null — check is a read-only server probe with no source video URL.
             'source_url' => null,
             // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
@@ -5744,13 +5750,11 @@ switch ($action) {
             // Daily quota fields — health is a read-only probe (does not consume quota)
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency. quota_reset and
-            // quota_reset_unix are -1 to signal "not applicable" for read-only probes,
-            // matching the action=check pattern. Clients can still determine the
-            // configured limit from quota_limit without needing to parse quota_reset.
+            // quota_reset_unix are always valid timestamps (never -1) per API contract.
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_reset' => $quota_reset_iso,
+            'quota_reset_unix' => $quota_reset_ts,
             // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
             // can always surface the upsell opportunity regardless of which endpoint
             // was called. Health is a probe endpoint (no content rip), but the upsell
