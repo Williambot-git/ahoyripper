@@ -4514,6 +4514,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                'format_id' => $format_id,
                 'format_id_missing' => false,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
