@@ -2246,8 +2246,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
-            'server_time_unix' => time(),
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
@@ -2326,8 +2326,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
-            'server_time_unix' => time(),
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
