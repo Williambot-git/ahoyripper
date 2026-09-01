@@ -440,7 +440,7 @@ header_remove('X-Powered-By');
           <p class="results-platform" id="resultsPlatform" hidden></p>
         </div>
         <div class="results-sort">
-          <label for="sortSelect" class="sort-label">Sort:</label>
+          <label for="sortSelect" id="sortLabel" class="sort-label">Sort:</label>
           <select id="sortSelect" class="sort-select" aria-label="Sort formats by resolution, size, bitrate, quality tier, or audio quality (audio-first)" disabled>
             <option value="height">Resolution (video first)</option>
             <option value="filesize">Size (largest)</option>
@@ -451,7 +451,7 @@ header_remove('X-Powered-By');
           </select>
         </div>
       </div>
-      <div class="format-grid" id="formatGrid" role="group" aria-label="Available formats"></div>
+      <div class="format-grid" id="formatGrid" role="group" aria-label="Available formats" aria-labelledby="sortLabel"></div>
       <div style="margin-top:1.5rem; text-align:center;">
         <button class="rip-again" id="ripAgain">Rip another</button>
       </div>

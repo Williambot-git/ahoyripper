@@ -430,6 +430,19 @@ else
 fi
 
 echo ""
+echo "==> Checking format grid has aria-labelledby linking it to the sort dropdown (accessibility)... "
+# The format grid (role=group) must have aria-labelledby="sortLabel" so screen readers
+# can announce which control governs the grid's sort order. Without this, the sort
+# dropdown and the format grid are two separate accessibility landmarks with no
+# relationship, making it unclear to screen reader users which dropdown affects the grid.
+if grep -q 'aria-labelledby="sortLabel"' public/index.php; then
+    echo "  ✓ aria-labelledby=\"sortLabel\" present on format grid (sort dropdown is accessible landmark)"
+else
+    echo "  ✗ aria-labelledby=\"sortLabel\" missing — sort dropdown not linked to format grid"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking og:alt (not og:image:alt) is NOT present in index.php (duplicate)... "
 # og:alt is NOT a valid Open Graph property — og:image:alt is the correct one.
 # A bare og:alt on the page (not scoped to og:image) is redundant and should be
