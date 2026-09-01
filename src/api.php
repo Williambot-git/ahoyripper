@@ -1556,10 +1556,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                 }
                 // Always include 'formats' => [] so API consumers can always
                 // access response.formats without checking if the key exists first.
+                // 'upgrade_url' is included so classified source errors (rate-limit, forbidden,
+                // timeout, etc.) surface the AhoyVPN upsell opportunity in info responses.
                 return [
                     'error' => $classified['msg'],
                     'error_code' => $classified['code'],
                     'formats' => [],
+                    'upgrade_url' => $classified['upgrade_url'] ?? UPGRADE_URL,
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
