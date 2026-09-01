@@ -932,7 +932,9 @@ Both fields carry the same reset moment. The Unix variant exists because the `X-
 | Endpoint | Limit | Window |
 |----------|-------|--------|
 | `/src/api.php?action=info` | 30 requests | 60 seconds |
-| `/src/api.php?action=download` | 10 requests | 60 seconds |
+| `/src/api.php?action=download` | 10 requests (download-specific) + 30 requests (shared info+download gate) | 60 seconds |
+
+> The download endpoint is gated by **two** independent rate limits simultaneously: the download-specific `$dl_rate_limit` (10 req/min via `X-DL-RateLimit-*` headers) and the shared `$rate_limit` that covers both `info` and `download` together (30 req/min via `X-RateLimit-*` headers). Both must pass for a download request to proceed.
 
 Response headers on every API response:
 - `X-Request-ID` — unique per-request correlation ID (16 hex chars); use this when reporting issues to correlate browser, API, and server-side logs
