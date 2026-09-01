@@ -323,7 +323,7 @@ header_remove('X-Powered-By');
      No PII leaves the browser. Video URLs in the query string are stripped
      before sending so the analytics only sees page paths, not video links.
      To disable, comment out the script below. -->
-<script defer src="/js/analytics.js"></script>
+<script defer src="/js/analytics.js" integrity="sha384-QB8QC/cxkfyyqsCZABT3Jyo4ipuuTudhvn9Lm7/eWAzdmjLRNN7M480Bz2bY2csU" crossorigin="anonymous"></script>
 </head>
 <body>
 
