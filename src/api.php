@@ -5664,10 +5664,6 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
-        // Cache-Control: no-store — health is a live system probe; responses must
-        // not be cached by intermediaries (CDNs, proxies) since system state
-        // changes on every call.
-        header('Cache-Control: no-store');
 
         // $daily_limit is not defined in the health action scope (it lives inside the
         // info/download/validation closures). Declare it locally here so the health
