@@ -5533,6 +5533,10 @@ switch ($action) {
         // consistency with the rest of the API surface. API consumers inspecting headers
         // will always find this field present, simplifying generic response parsers.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // X-Download-Timeout: also present for consistency — client-error does not
+        // involve yt-dlp, but X-Download-Timeout is included on all API responses
+        // so generic response parsers can always find this field without special-casing.
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // Set the same CSP and Reporting-Endpoints headers that the top-of-script
         // block applies to all other responses. The client-error endpoint bypasses
         // the global header block by sending its own response — repeat them here so
@@ -6269,9 +6273,41 @@ switch ($action) {
         if (function_exists('fastcgi_finish_request')) {
             // Re-set standard headers explicitly since the top-of-script header
             // buffer may not be flushed before fastcgi_finish_request().
+            // These headers are normally set by the top-of-script block but this
+            // fastcgi_finish_request() path bypasses that block, so they must be
+            // set explicitly here to prevent header-less responses in PHP-FPM mode.
             header('Content-Type: text/plain; charset=utf-8');
-            header('Cache-Control: no-store');
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Request-ID: ' . $request_id);
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('Cache-Control: no-store');
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // Rate-limit sentinels (-1): analytics is a read-only internal action
+            // that does not consume from the per-minute download or info rate budget.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unlimited');
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unlimited');
+            header('X-DailyLimit-Limit: -1');
+            header('X-DailyLimit-Remaining: -1');
+            header('X-DailyLimit-Reset: -1');
+            header('X-DailyLimit-Window: unlimited');
+            // CSP and Reporting headers: complete the security header family.
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report;');
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo '';
             fastcgi_finish_request();
         }
