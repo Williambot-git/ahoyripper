@@ -1197,6 +1197,14 @@ window.addEventListener('appinstalled', function() {
                     dlMsg += ' ' + err.upgrade_url;
                   }
                 }
+                // Surface the server-supplied hint (actionable next step) from the API
+                // response. The hint supplements ERROR_HINTS with per-error-context
+                // guidance (e.g. "Select a format from the list above first" for
+                // MISSING_FORMAT). Only append when hint is different from dlMsg to
+                // avoid duplicating content when hint mirrors ERROR_HINTS verbatim.
+                if (typeof err.hint === 'string' && err.hint.length > 0 && err.hint !== dlMsg) {
+                  dlMsg += ' ' + err.hint;
+                }
                 showError(dlMsg);
                 setLoading(false);
                 card.classList.remove('downloading');
@@ -1528,6 +1536,11 @@ window.addEventListener('appinstalled', function() {
               } else if (secs > 0) {
                 msg += ' Try again in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '.';
               }
+            }
+            // Surface the server-supplied hint (actionable next step). Only append when
+            // hint differs from msg to avoid duplicating content already in ERROR_HINTS.
+            if (typeof err.hint === 'string' && err.hint.length > 0 && err.hint !== msg) {
+              msg += ' ' + err.hint;
             }
           } else {
             // No error_code — fall back to HTTP status lookup and surface upgrade_url
