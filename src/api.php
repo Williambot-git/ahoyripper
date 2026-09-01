@@ -3155,6 +3155,7 @@ switch ($action) {
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $resp = [
                 'error' => "Could not fetch that URL. $err_msg$version_info",
                 'error_code' => 'YTDLP_ERROR',
@@ -3197,6 +3198,7 @@ switch ($action) {
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $resp = [
                 'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
                 'error_code' => 'PARSE_ERROR',
@@ -3299,6 +3301,7 @@ switch ($action) {
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $resp = [
                 'error' => $parsed['error'],
                 'error_code' => $parsed['error_code'] ?? 'YTDLP_ERROR',
