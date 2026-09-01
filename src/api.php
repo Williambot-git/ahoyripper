@@ -6389,6 +6389,11 @@ switch ($action) {
         // are included for consistency with the rest of the API surface.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // Retry-After: 0 — unknown-action is a validation error (the action name is
+        // not recognized), not a server-side backoff situation. The client should
+        // retry immediately with a corrected action name. Consistent with MISSING_URL,
+        // INVALID_URL, and other validation errors which also use retry_after: 0.
+        header('Retry-After: 0');
         // Prevent caching of the unknown-action JSON response.
         // All other API responses (success and error) set Cache-Control: no-store
         // globally or in their respective case blocks. This case was missing it,
@@ -6398,6 +6403,7 @@ switch ($action) {
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
             'error_code' => 'UNKNOWN_ACTION',
             'action' => $action,
+            'retry_after' => 0,
             'request_id' => $request_id,
             'server_time' => date('c'),
             'server_time_unix' => time(),
