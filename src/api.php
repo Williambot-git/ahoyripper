@@ -2254,7 +2254,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // for precise error routing without relying on string matching.
                 'format_id_missing' => true,
                 'upgrade_url' => UPGRADE_URL,
-                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
@@ -2334,7 +2333,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // relying on string matching on the error message.
                 'format_id_missing' => false,
                 'upgrade_url' => UPGRADE_URL,
-                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
