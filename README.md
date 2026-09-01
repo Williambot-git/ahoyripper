@@ -45,7 +45,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
   -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
 ```
 
-Response includes `title`, `thumbnail`, `duration`, `uploader`, `platform`, `derived_filename`, and `formats[]` with `id`, `label`, `description`, `format_note`, `filesize_mb`, `height`, `fps`, `quality`, `ext`, `vcodec`, `acodec`, `abr`, `format_type`, `type_group`, and `language` for each available format. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
+Response includes `title`, `thumbnail`, `duration`, `uploader`, `uploader_url`, `url`, `platform`, `derived_filename`, and `formats[]` with `id`, `label`, `description`, `format_note`, `filesize_mb`, `height`, `fps`, `quality`, `ext`, `vcodec`, `acodec`, `abr`, `format_type`, `type_group`, and `language` for each available format. `uploader_url` is the channel/uploader page URL (or `null`). `url` is the canonical video page URL after any redirect. Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
 
 ### Download a specific format
 
