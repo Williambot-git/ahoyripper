@@ -1815,4 +1815,18 @@ else
 fi
 
 echo ""
+echo "==> Checking client-error success response includes upgrade_url (API surface consistency)..."
+# The client-error action (POST fire-and-forget) returns a 200 JSON response.
+# upgrade_url must be present on ALL API responses for consistent upsell opportunity.
+# The 405 response path already had it; the 200 success path was missing it.
+# Extract the 200-OK success block: from http_response_code(200) to the closing );
+CE_SUCCESS=$(sed -n '/http_response_code(200);/,/^[[:space:]]*return;$/p' src/api.php | sed -n '/echo json_encode/,/]);/p')
+if echo "$CE_SUCCESS" | grep -q "'upgrade_url'"; then
+    echo "  ✓ client-error success response includes upgrade_url"
+else
+    echo "  ✗ client-error success response missing upgrade_url"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."

@@ -5588,11 +5588,13 @@ switch ($action) {
         // Consistent JSON response with api_version and request_id for API surface parity.
         // retry_after: 0 — client-error is a fire-and-forget endpoint that does not
         // consume rate limit or quota budget, so no backoff is needed on the client.
+        // upgrade_url: included on all API responses for consistent upsell opportunity.
         echo json_encode([
             'ok' => true,
             'request_id' => $request_id,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'upgrade_url' => UPGRADE_URL,
             'retry_after' => 0,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
