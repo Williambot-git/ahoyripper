@@ -5188,7 +5188,7 @@ switch ($action) {
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'hint' => 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged. Try again when ready.',
-                    'retry_after' => DOWNLOAD_TIMEOUT,
+                    'retry_after' => max(0, DOWNLOAD_TIMEOUT),
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'source_url_missing' => false,
