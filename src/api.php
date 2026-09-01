@@ -2126,6 +2126,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // 'format_id_missing' is false — URL validation fires before format validation
             // and the format parameter is not relevant for non-download actions.
             'format_id_missing' => false,
+            'format_id' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => date('c'),
@@ -2175,10 +2176,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'INVALID_URL',
+            'action' => $action,
             // retry_after: 0 signals "retry immediately once input is corrected" — a
             // validation error has no server-side backoff; the client just needs to
             // provide a shorter URL. Consistent with MISSING_URL and INVALID_URL.
             'retry_after' => 0,
+            'hint' => 'URL exceeds the maximum allowed length (' . MAX_URL_LEN . ' chars). Try shortening the URL or removing unnecessary query parameters.',
             'request_id' => $request_id,
             'source_url' => $url,
             'source_url_missing' => false,
