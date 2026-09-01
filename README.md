@@ -99,7 +99,7 @@ format=bestvideo[height>=720][vcodec!VP9]+bestaudio/bestvideo[height>=720]+besta
 | `height` | `[height>=720]` | Video vertical resolution in px |
 | `fps` | `[fps>=30]` | Frames per second |
 | `ext` | `[ext=mp4]` | File extension / container |
-| `vcodec` | `[vcodec!=VP9]` | Video codec (`mp4a`, `opus`, `vorbis`, `h264`, `vp9`, `av1`) |
+| `vcodec` | `[vcodec!=VP9]` | Video codec (`h264`, `vp9`, `av1`, `hevc/h265`) |
 | `acodec` | `[acodec=mp4a]` | Audio codec |
 | `filesize` | `[filesize>=10M]` | Approximate max file size |
 | `tbr` | `[tbr>=256]` | Total bitrate in kbps |
