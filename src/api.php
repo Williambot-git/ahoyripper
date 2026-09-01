@@ -5635,6 +5635,11 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
+        // Cache-Control: no-store — health is a live system probe; responses must
+        // not be cached by intermediaries (CDNs, proxies) since system state is
+        // trivial and changes on every call. Mirrors the same header set in the
+        // 'check' action (line ~5266) and the top-of-script default (line ~178).
+        header('Cache-Control: no-store');
 
         // Rate-limit sentinels for the health probe endpoint — mirrors the same
         // header family set in the 'check' action block (lines 4959-4975).
