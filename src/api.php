@@ -5190,6 +5190,8 @@ switch ($action) {
                     'source_url' => $url,
                     'source_url_missing' => false,
                     'format_id' => $format_id,
+                    'format_id_missing' => false,
+                    'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     // quota fields: included for consistency with all other download error responses.
