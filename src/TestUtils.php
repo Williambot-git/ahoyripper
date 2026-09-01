@@ -221,6 +221,50 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
+/**
+ * Reverse a daily quota increment when a download request fails before
+ * any file is served. Prevents users from losing quota on failed downloads.
+ * Mirrors the canonical implementation in src/api.php.
+ *
+ * @param string $ip  Client IP address (used as quota file key)
+ * @param bool $unlimited  Whether the client holds an unlimited API key
+ * @param int $daily_limit  Configured daily limit
+ * @param int $pre_increment_count  Count of quota BEFORE this request's increment
+ * @param string $tmp_dir  Temp directory for quota files (default /tmp in production)
+ * @return int  Remaining quota count after refund
+ */
+function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count, string $tmp_dir = '/tmp'): int {
+    if ($unlimited) return $daily_limit;
+    $undo_fp = fopen($tmp_dir . '/ahoyrip_daily_' . md5($ip), 'c+');
+    if (!$undo_fp) return $daily_limit;
+    if (!flock($undo_fp, LOCK_EX)) {
+        fclose($undo_fp);
+        return $daily_limit;
+    }
+    $undo_raw = fread($undo_fp, 4096);
+    $undo_data = ['t' => gmdate('Y-m-d'), 'c' => 0];
+    if ($undo_raw) {
+        $decoded = json_decode($undo_raw, true);
+        if ($decoded && is_array($decoded)) $undo_data = $decoded;
+    }
+    // Only decrement if: same day AND this request's increment is still present.
+    // c > $pre_increment_count means the increment from this request is reflected
+    // in the stored count (another concurrent request hasn't refunded it yet).
+    // This prevents the race where Request B reads c=6 (both requests incremented
+    // from 5), Request A's refund decrements to 5, then Request B's refund ALSO
+    // decrements to 4 (should be 5 — Request B's increment was undone by Request A).
+    if ($undo_data['t'] === gmdate('Y-m-d') && $undo_data['c'] > $pre_increment_count) {
+        $undo_data['c']--;
+        ftruncate($undo_fp, 0);
+        rewind($undo_fp);
+        fwrite($undo_fp, json_encode($undo_data));
+        fflush($undo_fp);
+    }
+    flock($undo_fp, LOCK_UN);
+    fclose($undo_fp);
+    return $undo_data['c'];
+}
+
 function resolvePlaylistFlag($playlist_get) {
     // Reject booleans explicitly — isset(true) is true and 1&&!is_string(true)
     // is true, causing boolean true to incorrectly return --yes-playlist via

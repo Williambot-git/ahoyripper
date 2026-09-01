@@ -36,37 +36,6 @@ function test($name, $condition, $debug = '') {
 // ─── Import canonical implementation from TestUtils ───────────────────────────
 require_once __DIR__ . '/../src/TestUtils.php';
 
-/**
- * Override refundQuota() to use a test-specific temp directory instead of /tmp.
- * This allows tests to run in parallel without interfering with each other.
- * The real api.php uses /tmp/ahoyrip_daily_<md5(ip>) which works the same way.
- */
-function refundQuotaOverride(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count, string $tmp_dir): int {
-    if ($unlimited) return $daily_limit;
-    $fp = fopen($tmp_dir . '/ahoyrip_daily_' . md5($ip), 'c+');
-    if (!$fp) return $daily_limit;
-    if (!flock($fp, LOCK_EX)) {
-        fclose($fp);
-        return $daily_limit;
-    }
-    $raw = fread($fp, 4096);
-    $data = ['t' => gmdate('Y-m-d'), 'c' => 0];
-    if ($raw) {
-        $decoded = json_decode($raw, true);
-        if ($decoded && is_array($decoded)) $data = $decoded;
-    }
-    if ($data['t'] === gmdate('Y-m-d') && $data['c'] > $pre_increment_count) {
-        $data['c']--;
-        ftruncate($fp, 0);
-        rewind($fp);
-        fwrite($fp, json_encode($data));
-        fflush($fp);
-    }
-    flock($fp, LOCK_UN);
-    fclose($fp);
-    return $data['c'];
-}
-
 // Create a private temp directory for this test run so parallel test execution
 // (or a concurrent sanity.sh run) doesn't interfere with these tests.
 $TEST_TMP = sys_get_temp_dir() . '/ahoyripper_refund_test_' . getmypid();
@@ -104,22 +73,22 @@ function clearQuota(string $tmp_dir, string $ip): void {
 echo "\n==> Testing unlimited-key holder (no refund needed)\n";
 
 test('unlimited=true returns daily_limit unchanged (5)',
-    refundQuotaOverride('1.2.3.4', true, 5, 0, $TEST_TMP) === 5,
-    'Got: ' . refundQuotaOverride('1.2.3.4', true, 5, 0, $TEST_TMP));
+    refundQuota('1.2.3.4', true, 5, 0, $TEST_TMP) === 5,
+    'Got: ' . refundQuota('1.2.3.4', true, 5, 0, $TEST_TMP));
 
 test('unlimited=true returns daily_limit unchanged (100)',
-    refundQuotaOverride('1.2.3.4', true, 100, 99, $TEST_TMP) === 100,
-    'Got: ' . refundQuotaOverride('1.2.3.4', true, 100, 99, $TEST_TMP));
+    refundQuota('1.2.3.4', true, 100, 99, $TEST_TMP) === 100,
+    'Got: ' . refundQuota('1.2.3.4', true, 100, 99, $TEST_TMP));
 
 // ─── Test: no quota file (first request) — refund is no-op ─────────────────
 echo "\n==> Testing no existing quota file (fresh user)\n";
 
 $ip = '5.6.7.8';
 clearQuota($TEST_TMP, $ip);
-$result = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 0, $TEST_TMP);
 test('no quota file: refund returns 0 (new file initialized to c=0)',
-    refundQuotaOverride($ip, false, 5, 0, $TEST_TMP) === 0,
-    "Expected 0, got: " . refundQuotaOverride($ip, false, 5, 0, $TEST_TMP));
+    refundQuota($ip, false, 5, 0, $TEST_TMP) === 0,
+    "Expected 0, got: " . refundQuota($ip, false, 5, 0, $TEST_TMP));
 
 // ─── Test: same-day refund decrements count ─────────────────────────────────
 echo "\n==> Testing same-day quota refund\n";
@@ -129,7 +98,7 @@ $today = gmdate('Y-m-d');
 setQuota($TEST_TMP, $ip, $today, 3);
 $pre_result = readQuota($TEST_TMP, $ip);
 $pre_count = $pre_result !== null ? $pre_result['c'] : '?';
-$result = refundQuotaOverride($ip, false, 5, 2, $TEST_TMP); // pre_inc=2, stored=3
+$result = refundQuota($ip, false, 5, 2, $TEST_TMP); // pre_inc=2, stored=3
 test('same-day: refunds and decrements count from 3 to 2',
     $result === 2,
     "Expected 2, got: $result (pre-call count was $pre_count)");
@@ -144,7 +113,7 @@ echo "\n==> Testing stale quota file (previous UTC day — no decrement)\n";
 
 $yesterday = gmdate('Y-m-d', strtotime('yesterday'));
 setQuota($TEST_TMP, $ip, $yesterday, 3);
-$result = refundQuotaOverride($ip, false, 5, 2, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 2, $TEST_TMP);
 test('stale date: does NOT decrement (returns stored count unchanged)',
     $result === 3,
     "Expected 3 (stale count preserved), got: $result");
@@ -161,21 +130,21 @@ $today = gmdate('Y-m-d');
 
 // Scenario A: c=5 > pre_inc=3 → safe to decrement
 setQuota($TEST_TMP, $ip, $today, 5);
-$result = refundQuotaOverride($ip, false, 5, 3, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 3, $TEST_TMP);
 test('race guard: c=5 > pre_inc=3 → decrements to 4',
     $result === 4,
     "Expected 4, got: $result");
 
 // Scenario B: c=5 == pre_inc=5 → another refund already happened; no-op
 setQuota($TEST_TMP, $ip, $today, 5);
-$result = refundQuotaOverride($ip, false, 5, 5, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 5, $TEST_TMP);
 test('race guard: c=5 == pre_inc=5 → no decrement (already refunded), returns 5',
     $result === 5,
     "Expected 5 (no change), got: $result");
 
 // Scenario C: c=4 < pre_inc=5 → should not decrement
 setQuota($TEST_TMP, $ip, $today, 4);
-$result = refundQuotaOverride($ip, false, 5, 5, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 5, $TEST_TMP);
 test('race guard: c=4 < pre_inc=5 → no decrement, returns 4',
     $result === 4,
     "Expected 4 (no change), got: $result");
@@ -185,7 +154,7 @@ echo "\n==> Testing boundary: quota already at zero\n";
 
 $ip = '3.3.3.3';
 setQuota($TEST_TMP, $ip, $today, 0);
-$result = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 0, $TEST_TMP);
 test('quota at 0: no underflow, returns 0',
     $result === 0,
     "Expected 0, got: $result");
@@ -201,7 +170,7 @@ fflush($fp);
 flock($fp, LOCK_UN);
 fclose($fp);
 
-$result = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 0, $TEST_TMP);
 test('corrupted JSON: falls back to default [t=today, c=0], refund returns 0',
     $result === 0,
     "Expected 0 (default fallback), got: $result");
@@ -226,7 +195,7 @@ fflush($fp);
 flock($fp, LOCK_UN);
 fclose($fp);
 
-$result = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP);
+$result = refundQuota($ip, false, 5, 0, $TEST_TMP);
 test('empty file: falls back to default, refund returns 0',
     $result === 0,
     "Expected 0, got: $result");
@@ -237,13 +206,13 @@ echo "\n==> Testing multiple sequential refunds (exhausted user gets 3 failures)
 $ip = '8.8.8.8';
 setQuota($TEST_TMP, $ip, $today, 2); // user has 2 left
 
-$result1 = refundQuotaOverride($ip, false, 5, 1, $TEST_TMP); // pre_inc=1, c=2
+$result1 = refundQuota($ip, false, 5, 1, $TEST_TMP); // pre_inc=1, c=2
 test('first refund: c=2, pre_inc=1 → decrements to 1', $result1 === 1);
 
-$result2 = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP); // pre_inc=0, c=1
+$result2 = refundQuota($ip, false, 5, 0, $TEST_TMP); // pre_inc=0, c=1
 test('second refund: c=1, pre_inc=0 → decrements to 0', $result2 === 0);
 
-$result3 = refundQuotaOverride($ip, false, 5, 0, $TEST_TMP); // c=0, no pre_inc needed
+$result3 = refundQuota($ip, false, 5, 0, $TEST_TMP); // c=0, no pre_inc needed
 test('third refund: c=0, pre_inc=0 → no change, stays 0', $result3 === 0);
 
 // ─── Test: different IPs get different files ────────────────────────────────
@@ -254,8 +223,8 @@ $ip_b = '10.0.0.2';
 setQuota($TEST_TMP, $ip_a, $today, 5);
 setQuota($TEST_TMP, $ip_b, $today, 3);
 
-$result_a = refundQuotaOverride($ip_a, false, 5, 4, $TEST_TMP); // decrements A from 5→4
-$result_b = refundQuotaOverride($ip_b, false, 5, 2, $TEST_TMP); // decrements B from 3→2
+$result_a = refundQuota($ip_a, false, 5, 4, $TEST_TMP); // decrements A from 5→4
+$result_b = refundQuota($ip_b, false, 5, 2, $TEST_TMP); // decrements B from 3→2
 
 test('IP A: independent quota, decremented from 5 to 4', $result_a === 4);
 test('IP B: independent quota, decremented from 3 to 2', $result_b === 2);
