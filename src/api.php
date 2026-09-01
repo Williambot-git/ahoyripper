@@ -3350,6 +3350,11 @@ switch ($action) {
         // api_version was previously missing from the info response but present on
         // check and health endpoints — add it for consistent API surface metadata.
         $parsed['api_version'] = AHOYRIPPER_VERSION;
+        // upgrade_url: AhoyVPN upsell URL included on all API responses (success and error).
+        // Error responses already include it via individual error blocks. Add it here for
+        // the info success path so the upsell opportunity is always surfaced regardless
+        // of response type — consistent with the check and health action patterns.
+        $parsed['upgrade_url'] = UPGRADE_URL;
         // Surface daily quota state in the JSON body for client UI — mirrors the
         // X-DailyLimit-* headers set above so clients can read quota from either.
         // -1 sentinel values signal "not applicable" (unlimited-key holder).
