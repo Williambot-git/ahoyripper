@@ -602,7 +602,7 @@ Every `action=info` response — success and error — includes these HTTP heade
 | `X-DL-RateLimit-Limit` | Max concurrent downloads allowed (default 10, configurable via `DL_RATE_LIMIT` env var). Sent as `-1` (unavailable) on info-action responses since the info action does not consume download rate slots. |
 | `X-DL-RateLimit-Remaining` | Download slots left in the current window. Sent as `-1` (unavailable) on info-action responses. |
 | `X-DL-RateLimit-Reset` | Unix timestamp when the download rate-limit window resets. Sent as `-1` on info-action responses. |
-| `X-DL-RateLimit-Window` | Window size in seconds for the download rate limit (`60`). Sent as `unavailable` on info-action responses. |
+| `X-DL-RateLimit-Window` | Window size in seconds for the download rate limit (`60`). Set to `60` when the download rate limit is active or has been consumed. Sent as `unavailable` on info-action responses (the download rate limit does not apply to the info action) and on download action responses that exit before the rate limit is computed (e.g. invalid API key, daily quota exceeded). Sent as `unlimited` for unlimited-key holders. |
 | `X-Info-Timeout` | Server-side info timeout in seconds (integer). Clients should set their fetch timeout to at least this value so the client deadline never exceeds the server deadline. The value matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). Present on every `info` response — success and error — so clients can always read it for retry timeout guidance. |
 | `X-DailyLimit-Limit` | Daily rip limit (default 5, unlimited-key holders see `-1`) |
 | `X-DailyLimit-Remaining` | Rips left in the current day (`-1` for unlimited-key holders) |
