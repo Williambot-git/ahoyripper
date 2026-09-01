@@ -2397,6 +2397,15 @@ define('MAX_URL_LEN', max(1, (int)(getenv('MAX_URL_LEN') ?: 2048)));
 // Override via MAX_FILENAME_LEN env var in .env or Docker environment.
 define('MAX_FILENAME_LEN', max(1, (int)(getenv('MAX_FILENAME_LEN') ?: 80)));
 
+// Maximum download filesize in bytes. yt-dlp's --max-filesize flag aborts the download
+// if the estimated or discovered filesize exceeds this limit, preventing wasted CPU,
+// bandwidth, and disk I/O on files too large for the server to handle gracefully.
+// The error is classified as FILE_TOO_LARGE by the existing /file.*larger/ regex.
+// Default 50 GB (53687091200 bytes). Override via MAX_DOWNLOAD_FILESIZE env var
+// (e.g. MAX_DOWNLOAD_FILESIZE=10737418240 for 10 GB). Set to 0 to disable (yt-dlp
+// uses its own internal limits in that case, which may be platform-dependent).
+define('MAX_DOWNLOAD_FILESIZE', max(0, (int)(getenv('MAX_DOWNLOAD_FILESIZE') ?: 53687091200)));
+
 // Configurable timeout for the health probe (lightweight yt-dlp metadata fetch).
 // Override via HEALTH_PROBE_TIMEOUT env var (e.g. HEALTH_PROBE_TIMEOUT=20 in .env).
 // Defaults to 15 seconds. The probe is a simple --dump-json --skip-download call
@@ -4012,6 +4021,15 @@ switch ($action) {
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
         ]);
+        // Enforce a server-side filesize cap to prevent resource exhaustion from
+        // attempting to download excessively large files (e.g. multi-hour 4K streams).
+        // yt-dlp exits with an error when the file exceeds --max-filesize; the existing
+        // /file.*larger/ error classifier catches this and returns FILE_TOO_LARGE (413).
+        // MAX_DOWNLOAD_FILESIZE=0 disables the cap (yt-dlp uses its own limits in that case).
+        if (MAX_DOWNLOAD_FILESIZE > 0) {
+            $ytdlp_cmd[] = '--max-filesize';
+            $ytdlp_cmd[] = (string)MAX_DOWNLOAD_FILESIZE;
+        }
         // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
         // Dramatically reduces 403/422 bot-detection errors on protected sites.
         if (AHOY_IMPERSONATE !== '') {
