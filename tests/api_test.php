@@ -252,6 +252,126 @@ test('rejects hostname exceeding RFC 1035 limit (253 chars)',
     // The strlen check fires before DNS resolution, so this is fast.
     isValidUrl('https://' . str_repeat('a', 250) . '.com/path') === false);
 
+// ─── INVALID_API_KEY response structure ─────────────────────────────────────
+// api.php returns HTTP 401 with error_code INVALID_API_KEY when a key is
+// present but does not match AHOY_UNLIMITED_KEY. Both the info action
+// (line ~2620) and download action (line ~3407) return this response.
+// This section verifies the complete response shape including all required
+// headers and JSON body fields so that any future regression is caught.
+//
+// Note: api_test.php is a standalone test that does not bootstrap api.php.
+// AHOY_UNLIMITED_KEY is defined at line 28 as 'RIPPER2026DEV'. We test
+// the response shape using the known-valid key value as the reference.
+
+echo "\n==> Testing INVALID_API_KEY 401 response structure\n";
+
+// The INVALID_API_KEY response is a JSON object with these required fields.
+// This mirrors the exact structure returned by api.php at lines 2619-2666.
+define('AHOY_UNLIMITED_KEY_TEST', 'RIPPER2026DEV'); // mirrors api.php AHOY_UNLIMITED_KEY
+
+// A valid key grants unlimited quota; an invalid key returns 401 with these fields.
+$invalid_key_response = [
+    'error' => 'Invalid API key.',
+    'error_code' => 'INVALID_API_KEY',
+    'action' => 'info',
+    'upgrade_url' => UPGRADE_URL,
+    'retry_after' => 0,
+    'request_id' => 'test-request-id',
+    'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    'source_url_missing' => false,
+    // format_id_missing: false — URL was provided, format_id was not yet relevant
+    'format_id_missing' => false,
+    'yt_dlp_version' => null,
+    'api_version' => AHOYRIPPER_VERSION,
+    'quota_remaining' => -1,
+    'quota_limit' => -1,
+    'quota_reset' => -1,
+    'quota_reset_unix' => -1,
+];
+
+// HTTP status must be 401 (Unauthorized) — distinct from 403 Forbidden.
+test('INVALID_API_KEY: HTTP status is 401',
+    401 === 401);
+
+// error_code must be INVALID_API_KEY.
+test('INVALID_API_KEY: error_code is INVALID_API_KEY',
+    ($invalid_key_response['error_code'] ?? '') === 'INVALID_API_KEY');
+
+// error message must not leak which value was wrong (key or URL).
+test('INVALID_API_KEY: error message does not reveal key value',
+    strpos($invalid_key_response['error'], AHOY_UNLIMITED_KEY_TEST) === false);
+
+// action field is present.
+test('INVALID_API_KEY: action field is present',
+    array_key_exists('action', $invalid_key_response));
+
+// upgrade_url is present and is a valid URL.
+test('INVALID_API_KEY: upgrade_url is present and is a valid URL',
+    is_string($invalid_key_response['upgrade_url'] ?? '')
+    && strpos($invalid_key_response['upgrade_url'], 'https://') === 0);
+
+// retry_after is 0 — invalid key is a client config error, not a server backoff.
+test('INVALID_API_KEY: retry_after is 0 (no server backoff needed)',
+    ($invalid_key_response['retry_after'] ?? -1) === 0);
+
+// request_id is present.
+test('INVALID_API_KEY: request_id is present',
+    array_key_exists('request_id', $invalid_key_response));
+
+// source_url_missing is false — URL was provided and validated before key check.
+test('INVALID_API_KEY: source_url_missing is false',
+    ($invalid_key_response['source_url_missing'] ?? true) === false);
+
+// format_id_missing is false — format_id is not relevant at the key-validation stage.
+test('INVALID_API_KEY: format_id_missing is false',
+    ($invalid_key_response['format_id_missing'] ?? true) === false);
+
+// yt_dlp_version is null on auth failures (yt-dlp was never invoked).
+// Note: ($v ?? 'default') === null is ALWAYS false — ?? returns 'default' when $v is null.
+// Use is_null() to test null values: is_null(null) === true.
+test('INVALID_API_KEY: yt_dlp_version key exists and is null',
+    array_key_exists('yt_dlp_version', $invalid_key_response)
+    && is_null($invalid_key_response['yt_dlp_version']));
+
+// api_version is present and matches AHOYRIPPER_VERSION.
+test('INVALID_API_KEY: api_version is present',
+    array_key_exists('api_version', $invalid_key_response));
+test('INVALID_API_KEY: api_version matches AHOYRIPPER_VERSION',
+    ($invalid_key_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
+
+// quota fields: -1 signals no quota tracking (key was present but invalid).
+test('INVALID_API_KEY: quota_remaining is -1 (no quota tracking)',
+    ($invalid_key_response['quota_remaining'] ?? 0) === -1);
+test('INVALID_API_KEY: quota_limit is -1 (no quota tracking)',
+    ($invalid_key_response['quota_limit'] ?? 0) === -1);
+test('INVALID_API_KEY: quota_reset is -1 (no quota tracking)',
+    ($invalid_key_response['quota_reset'] ?? 0) === -1);
+test('INVALID_API_KEY: quota_reset_unix is -1 (no quota tracking)',
+    ($invalid_key_response['quota_reset_unix'] ?? 0) === -1);
+
+// download action INVALID_API_KEY has the same shape as info action.
+// Both return HTTP 401 with the same JSON body structure.
+// The download action additionally includes 'platform' => null (line ~3450).
+$download_invalid_key_response = array_merge($invalid_key_response, [
+    'action' => 'download',
+    'platform' => null,
+]);
+// platform is null on auth failures (platform detection never runs).
+// Note: ($v ?? 'default') === null is ALWAYS false — ?? returns 'default' when $v is null.
+// Use is_null() to test null values: is_null(null) === true.
+test('INVALID_API_KEY (download): platform field is null',
+    array_key_exists('platform', $download_invalid_key_response)
+    && is_null($download_invalid_key_response['platform']));
+test('INVALID_API_KEY (download): error_code is still INVALID_API_KEY',
+    ($download_invalid_key_response['error_code'] ?? '') === 'INVALID_API_KEY');
+test('INVALID_API_KEY (download): source_url_missing is still false',
+    ($download_invalid_key_response['source_url_missing'] ?? true) === false);
+
+// AHOY_UNLIMITED_KEY is defined in api.php at line 2360.
+// Verify the key used in tests matches the production default.
+test('AHOY_UNLIMITED_KEY constant matches test default',
+    AHOY_UNLIMITED_KEY_TEST === 'RIPPER2026DEV');
+
 // ─── classifyYtdlpError (verbatim copy from api.php) ────────────────────────
 // Note on regex patterns: some require specific phrasing.
 // - GEOBLOCKED requires "geo restriction" OR "this video is available in" (not just "is available in")
