@@ -2233,6 +2233,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // Cache-Control: no-store — prevents all API responses from being cached.
+            header('Cache-Control: no-store');
             echo json_encode([
                 'error' => 'Select a format from the list above first, then click it to download. For unlimited downloads, visit ' . UPGRADE_URL,
                 'error_code' => 'MISSING_FORMAT',
