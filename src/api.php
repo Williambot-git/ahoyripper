@@ -5841,6 +5841,12 @@ switch ($action) {
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
+                    // --target-formats video: skip fetching audio-only and muxed stream
+                    // metadata during the metadata-only probe. yt-dlp would otherwise
+                    // probe ALL formats (video + audio + muxed combinations), which
+                    // is slower and wastes CPU/bandwidth when only metadata is needed.
+                    // Mirrors the --target-formats optimization in the info action.
+                    '--target-formats', 'video',
                 ];
                 if (AHOY_IMPERSONATE !== '') {
                     $probe_cmd[] = '--impersonate';
