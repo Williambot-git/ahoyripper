@@ -3020,6 +3020,11 @@ switch ($action) {
             }
             logRequest('info', 500, ['reason' => 'proc_open_failed']);
             http_response_code(500);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
@@ -3031,9 +3036,6 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            header('Reporting-Endpoints: csp-report="/csp-report"');
-            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
             // Rate-limit sentinels (-1): no rate limit was consumed because proc_open
             // itself failed before yt-dlp could run. Consistent with other pre-gate errors.
             header('X-RateLimit-Limit: -1');
@@ -3048,10 +3050,6 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            // Timeout headers: X-Info-Timeout and X-Download-Timeout are included on all
-            // info-action responses for API surface consistency — clients can always find
-            // both timeout values regardless of which error path was taken.
-            // They were already set above (lines ~2971-2972) — do not duplicate here.
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
@@ -5075,6 +5073,9 @@ switch ($action) {
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Cache-Control: no-store');
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
             // X-RateLimit-*: download action consumed the per-minute request rate limit
             // (info call was made). Use $rate_window (60s) — the request-level window,
             // not $dl_rate_window (60s). Consistent with VERIFICATION_FAILED block.
