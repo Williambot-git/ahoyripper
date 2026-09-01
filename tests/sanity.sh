@@ -1657,6 +1657,21 @@ else
 fi
 
 echo ""
+echo "==> Checking UNKNOWN_ACTION (default: case) response includes retry_after field..."
+# UNKNOWN_ACTION is a client-input validation error (the action name is not recognized).
+# Adding retry_after: 0 gives API clients a consistent field to read for backoff
+# timing — matching the contract of all other validation errors (MISSING_URL,
+# INVALID_URL, URL_TOO_LONG) which all include retry_after: 0.
+# Anchor on the unique error message so we get the actual JSON response block.
+UNKNOWN_ACTION_CHECK=$(sed -n "/Unknown action. Use/,/echo json_encode/p" src/api.php | head -n 30)
+if echo "$UNKNOWN_ACTION_CHECK" | grep -q "'retry_after'"; then
+    echo "  ✓ UNKNOWN_ACTION includes retry_after field"
+else
+    echo "  ✗ UNKNOWN_ACTION is missing retry_after field (inconsistent with other validation errors)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking RATE_LIMIT_EXCEEDED and DAILY_LIMIT responses include retry_after field..."
 # Users hitting rate/daily limits need to know when they can retry. Both error codes
 # should include a 'retry_after' field in the JSON response.
