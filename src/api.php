@@ -32,27 +32,34 @@ define('FFPROBE_PATH', getenv('FFPROBE_PATH') ?? '/usr/bin/ffprobe');
 // Timeout (seconds) for ffprobe post-download verification. ffprobe should finish
 // in well under 10s for any real file; 10s is generous for large or slow files.
 // Override via FFPROBE_TIMEOUT env var (e.g. FFPROBE_TIMEOUT=20 in .env).
-// Note: parentheses around (getenv ... ?: ...) are required so int() applies to
-// Use ?? (not ?:) so that "0" (a string, evaluated as non-empty in PHP) is not
-// mistaken for an unset variable — consistent with the pattern used by INFO_TIMEOUT,
-// DOWNLOAD_TIMEOUT, RATE_LIMIT, and other configurable constants in this file.
-define('FFPROBE_TIMEOUT', max(1, (int)(getenv('FFPROBE_TIMEOUT') ?? 10)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string (a valid Docker env:) is treated the same as unset,
+// falling through to the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('FFPROBE_TIMEOUT');
+define('FFPROBE_TIMEOUT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 10));
+unset($_raw);
 
 // TTL (seconds) for the yt-dlp connectivity probe cache in the health endpoint.
 // PROBE_CACHE_TTL (5 minutes) prevents hammering YouTube with repeated health checks while
 // keeping the probe result fresh enough to detect real outages. Override via
 // PROBE_CACHE_TTL env var in .env or docker-compose (e.g. PROBE_CACHE_TTL=600 for 10 minutes).
-// Use ?? (not ?:) so that "0" (a string, evaluated as non-empty in PHP) is not mistaken
-// for an unset variable — consistent with the pattern used by INFO_TIMEOUT and DOWNLOAD_TIMEOUT.
-define('PROBE_CACHE_TTL', max(1, (int)(getenv('PROBE_CACHE_TTL') ?? 300)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('PROBE_CACHE_TTL');
+define('PROBE_CACHE_TTL', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 300));
+unset($_raw);
 
 // TTL (seconds) for yt-dlp and ffprobe binary version caches.
 // Cached for 1 hour by default — version rarely changes and probing on every health check
 // is unnecessary overhead. Override via VERSION_CACHE_TTL env var in .env or docker-compose
 // (e.g. VERSION_CACHE_TTL=7200 for 2-hour cache, VERSION_CACHE_TTL=300 for 5-minute cache).
-// Use ?? (not ?:) so that "0" (a string, evaluated as non-empty in PHP) is not mistaken
-// for an unset variable — consistent with the pattern used by INFO_TIMEOUT and DOWNLOAD_TIMEOUT.
-define('VERSION_CACHE_TTL', max(1, (int)(getenv('VERSION_CACHE_TTL') ?? 3600)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('VERSION_CACHE_TTL');
+define('VERSION_CACHE_TTL', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 3600));
+unset($_raw);
 
 // YouTube video ID used for the /health endpoint connectivity probe. Rick Astley's
 // "Never Gonna Give You Up" is reliably available, long enough to detect stream stalls,
@@ -85,20 +92,33 @@ define('PLAUSIBLE_HOST', getenv('PLAUSIBLE_HOST') ?: '');
 // Defined early so the rate-limit gate (line ~199) can reference it before the
 // constants section at line ~1778. nginx's 30r/m shared gate is the first
 // threshold; this PHP-layer limit is the per-action ceiling.
-// Use ?? (not ?:) so that "0" (a string, which PHP evaluates as non-empty)
-// is not treated as falsy and mistaken for an unset variable.
-define('RATE_LIMIT', max(1, (int)(getenv('RATE_LIMIT') ?? 30)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('RATE_LIMIT');
+define('RATE_LIMIT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 30));
+unset($_raw);
 
 // Download rate limit: max download requests per IP per minute.
 // Defined early for the same reason as RATE_LIMIT above. Named in all-caps
 // to match the env-var convention used throughout this file.
-define('DL_RATE_LIMIT', max(1, (int)(getenv('DL_RATE_LIMIT') ?? 10)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('DL_RATE_LIMIT');
+define('DL_RATE_LIMIT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 10));
+unset($_raw);
 
 // Timeout (seconds) for the info action (metadata fetch). yt-dlp should finish
 // in under 30s for most videos; 45s is generous for slow/unstable sources.
 // An explicit 0 (or any non-positive integer) is passed through as-is;
 // max(1, ...) then clamps it to a minimum of 1 second.
-define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default.
+$_raw = getenv('YTDLP_TIMEOUT');
+define('INFO_TIMEOUT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 45));
+unset($_raw);
 
 // Configurable timeout for the download action (file download).
 // Override via YTDLP_DOWNLOAD_TIMEOUT env var (e.g. YTDLP_DOWNLOAD_TIMEOUT=120 in .env).
@@ -106,8 +126,12 @@ define('INFO_TIMEOUT', max(1, (int)(getenv('YTDLP_TIMEOUT') ?? 45)));
 // The download action is I/O-bound (large media files) and needs a longer timeout
 // than the info action (metadata fetch). INFO_TIMEOUT controls info; this constant
 // controls download so the two can be tuned independently without compromise.
-// Use ?? (not ?:) to match the intent of INFO_TIMEOUT above.
-define('DOWNLOAD_TIMEOUT', max(1, (int)(getenv('YTDLP_DOWNLOAD_TIMEOUT') ?? 300)));
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default.
+$_raw = getenv('YTDLP_DOWNLOAD_TIMEOUT');
+define('DOWNLOAD_TIMEOUT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 300));
+unset($_raw);
 
 // ─── ORIGIN / REFERER VALIDATION ────────────────────────────────────────────
 // throughout this script without an explicit timezone argument. PHP issues
