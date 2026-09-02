@@ -2692,8 +2692,9 @@ switch ($action) {
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
                 'error' => 'Invalid API key.',
-                'error_code' => 'INVALID_KEY',
+                'error_code' => 'INVALID_API_KEY',
                 'action' => $action,
+                'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter or the Authorization: Bearer *** header. Generate a key at https://ahoyvpn.com.',
                 'retry_after' => 0,
                 'request_id' => $request_id,
                 'source_url' => $url,
@@ -3493,9 +3494,10 @@ switch ($action) {
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             echo json_encode([
                 'error' => 'Invalid API key.',
-                'error_code' => 'INVALID_KEY',
+                'error_code' => 'INVALID_API_KEY',
+                'action' => 'download',
+                'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter or the Authorization: Bearer *** header. Generate a key at https://ahoyvpn.com.',
                 'retry_after' => 0,
-                'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter or the Authorization: Bearer header. Generate a key at https://ahoyvpn.com.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
