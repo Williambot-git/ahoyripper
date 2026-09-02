@@ -181,7 +181,7 @@ header_remove('X-Powered-By');
        same CORS rules apply to both the preload and the meta tag reference. -->
   <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.webp" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="<?= $BASE_URL ?>">
+  <meta property="og:url" content="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
   <!-- Canonical URL: tells search engines the definitive URL for this page,
        preventing duplicate content issues when the same page is accessible via
        multiple URLs (e.g. with/without www, with/without trailing slash,
@@ -190,7 +190,7 @@ header_remove('X-Powered-By');
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="<?= $BASE_URL ?>">
+  <meta name="twitter:url" content="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
   <meta name="twitter:domain" content="ahoyripper.com">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">

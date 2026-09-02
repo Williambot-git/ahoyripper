@@ -2099,6 +2099,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'hint' => 'Pass a supported URL via the "url" query parameter. E.g. ?action=info&url=https://www.youtube.com/watch?v=...',
             'request_id' => $request_id,
             'source_url' => null,
+            // 'video_url' mirrors source_url in error responses for consistency with
+            // the info response (where video_url holds the resolved page URL).
+            // Null here because no URL was provided at all.
+            'video_url' => null,
             // 'source_url_missing' is true when the client provided no URL at all,
             // distinguishing MISSING_URL from other null-source_url error cases.
             // API consumers can check this flag for precise error routing without
