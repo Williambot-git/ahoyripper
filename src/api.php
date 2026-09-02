@@ -73,6 +73,18 @@ define('HEALTH_PROBE_URL', 'https://www.youtube.com/watch?v=' . HEALTH_PROBE_VID
 // Named with _DEFAULT suffix to distinguish from the runtime $daily_limit variable
 // and to signal that this is a compile-time fallback, not the runtime value.
 define('QUOTA_DAILY_DEFAULT', 5);
+/**
+ * Get the configured daily quota limit from the QUOTA_DAILY env var.
+ * Uses an explicit guard so both unset (false) and empty-string ('') fall through
+ * to QUOTA_DAILY_DEFAULT — consistent with the pattern used for timeout and
+ * rate-limit constants throughout this file. A Docker env: QUOTA_DAILY: (empty)
+ * is thus treated the same as an absent variable, returning the default.
+ */
+function getDailyQuotaLimit(): int {
+    $_raw = getenv('QUOTA_DAILY');
+    return max(0, ($_raw !== false && $_raw !== '') ? (int)$_raw : QUOTA_DAILY_DEFAULT);
+}
+
 
 // URL shown to users when they hit quota/rate-limit barriers — directs users to
 // the upsell destination (e.g. AhoyVPN landing page for the public deploy).
@@ -509,7 +521,7 @@ if ($is_rate_limited) {
             // X-Info-Timeout: consistent with all other info-action error responses.
             // Clients can use this to set appropriate fetch timeouts on retry.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            $rate_quota_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+            $rate_quota_limit = getDailyQuotaLimit();
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
@@ -938,7 +950,7 @@ if (in_array($action, $internal_actions, true)) {
         'source_url' => null,
         'upgrade_url' => UPGRADE_URL,
         'quota_remaining' => -1,
-        'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
+        'quota_limit' => getDailyQuotaLimit(),
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -2038,7 +2050,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     // Determine the daily limit from the environment to include in error
     // responses. This is the configured limit, not the user's remaining quota
     // (quota tracking is not available at this early validation stage).
-    $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+    $daily_limit = getDailyQuotaLimit();
 
     $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
     if (!$url) {
@@ -2559,7 +2571,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     header('X-RateLimit-Window: unlimited');
     // info action is subject to daily quota; others (check, health, progress) are not.
     if ($action === 'info') {
-        $dl = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+        $dl = getDailyQuotaLimit();
         header('X-DailyLimit-Limit: ' . $dl);
         header('X-DailyLimit-Remaining: ' . $dl);
         header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
@@ -2725,7 +2737,7 @@ switch ($action) {
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
             // Defaults to QUOTA_DAILY_DEFAULT (5) when the env var is absent. Set to 0
             // or -1 to disable the free tier entirely (unlimited-key required).
-            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+            $daily_limit = getDailyQuotaLimit();
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 // All security headers — consistent with every other API error response.
@@ -3733,7 +3745,7 @@ switch ($action) {
             // or -1 to disable the free tier entirely (unlimited-key required).
             // Mirrors the same constant used in the info action so both actions
             // enforce the same daily limit regardless of which endpoint is called.
-            $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+            $daily_limit = getDailyQuotaLimit();
             $daily_fp = fopen($daily_file, 'c+');
             if (!$daily_fp) {
                 http_response_code(503);
@@ -5405,7 +5417,7 @@ switch ($action) {
             // quota_reset and quota_reset_unix are always valid timestamps (never -1)
             // per API contract — even read-only probes return the next reset time.
             'quota_remaining' => -1,
-            'quota_limit' => max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT)),
+            'quota_limit' => getDailyQuotaLimit(),
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
             // source_url: null — check is a read-only server probe with no source video URL.
@@ -5723,7 +5735,7 @@ switch ($action) {
         // Also compute quota_reset_ts locally so quota_reset/quota_reset_unix use the
         // same tomorrow-midnight UTC timestamp as info/download responses — clients
         // that rely on this field for reset timing will now get a correct value.
-        $daily_limit = max(0, (int)(getenv('QUOTA_DAILY') ?? QUOTA_DAILY_DEFAULT));
+        $daily_limit = getDailyQuotaLimit();
         $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
 
