@@ -812,7 +812,13 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
 }
 ```
 
-`yt_dlp_version` is present on all endpoints (`check`, `health`, `info`, `download`) for consistent API surface metadata. On `check` it is the cached version string (no additional subprocess call); on `health`/`info`/`download` it confirms the binary was exercised.
+`action=health&probe=1` runs a live yt-dlp connectivity probe — it calls yt-dlp with `--dump-json` on `{HEALTH_PROBE_VIDEO_ID}` (default: `dQw4w9WgXcQ`) and returns the result, confirming end-to-end reachability to upstream platforms. Probe results are cached for `PROBE_CACHE_TTL` seconds (default 300s) to avoid hammering YouTube on every health check. See the [Analytics](#analytics) section for full details on the privacy-preserving event proxy.
+
+`action=csp-report` receives browser CSP violation reports forwarded by nginx's `report-uri` directive. No authentication is required — nginx rate-limits these at the network layer. Useful for monitoring CSP policy effectiveness in production deployments.
+
+`action=client-error` accepts client-side JavaScript error reports from the frontend. No authentication required. Used internally to track unexpected JS errors and debug user-reported issues — events are stored server-side without forwarding to any external service.
+
+`action=analytics` is AhoyRipper's privacy-preserving analytics proxy — see the [Analytics](#analytics) section for the full design, including how it strips PII (video URLs, full referrer URLs, IP addresses) before forwarding to the configured Plausible server.
 
 `action=health` returns full system status:
 ```
