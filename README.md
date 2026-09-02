@@ -190,8 +190,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "disk_free_gb": 48.2,
 #   "quota_remaining": -1,
 #   "quota_limit": 5,
-#   "quota_reset": -1,
-#   "quota_reset_unix": -1,
+#   "quota_reset": "2026-08-28T00:00:00+00:00",
+#   "quota_reset_unix": 1756080000,
 #   "source_url": null
 # }
 ```
@@ -849,8 +849,8 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1,
-  "quota_reset_unix": -1,
+  "quota_reset": "2026-08-28T00:00:00+00:00",
+  "quota_reset_unix": 1756080000,
   "source_url": null
 }
 ```
@@ -892,8 +892,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1,
-  "quota_reset_unix": -1
+  "quota_reset": "2026-08-28T00:00:00+00:00",
+  "quota_reset_unix": 1756080000
 }
 ```
 
@@ -905,7 +905,7 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 
 `yt_dlp_cache_expires_at` / `yt_dlp_cache_ttl_seconds` track the yt-dlp version cache (1-hour TTL). `ffmpeg_cache_expires_at` / `ffmpeg_cache_ttl_seconds` track the ffmpeg version cache (1-hour TTL). `yt_dlp_probe_cache_expires_at` / `yt_dlp_probe_cache_ttl_seconds` track the yt-dlp connectivity probe cache (5-minute TTL).
 
-`quota_remaining`, `quota_limit`, and `quota_reset` are included in `action=check` and `action=health` responses (as `-1`, the configured limit, and `-1` respectively) for API surface consistency with `action=info` and `action=download` responses. Since `check` and `health` are read-only probes that do not consume quota, `quota_remaining` is `-1` and `quota_reset` is `-1`. `quota_limit` always reflects the configured daily limit (default `5`).
+|`quota_remaining`, `quota_limit`, and `quota_reset` are included in `action=check` and `action=health` responses for API surface consistency with `action=info` and `action=download` responses. `action=check` is a read-only probe — it does not consume quota and returns `quota_remaining: -1` and `quota_reset: -1`. `action=health` is also a read-only probe, but it returns the configured daily limit in `quota_limit` and the next reset timestamp in both `quota_reset` and `quota_reset_unix`, giving API consumers a concrete reset time even when quota is not consumed. `quota_limit` always reflects the configured daily limit (default `5`).
 
 `quota_reset` and `quota_reset_unix` are a dual-field pair that represents the daily quota reset time:
 
