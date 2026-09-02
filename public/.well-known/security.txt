@@ -1,5 +1,23 @@
-# https://ahoyripper.com/.well-known/security.txt
-# RFC 9116 — Contact + Canonical URL only (minimal, privacy-preserving)
+# Canonical security contact for AhoyRipper
+# See RFC 9116 for the security.txt standard: https://datatracker.ietf.org/doc/html/rfc9116
 
-Contact: https://ahoyripper.com/contact
+# Contact method
+Contact: https://ahoyvpn.com/contact
+
+# Preferred languages
+Preferred-Languages: en
+
+# Encryption
+# PGP key available at https://ahoyvpn.com/.well-known/ahoyripper-security.asc
+
+# Policy
+Policy: https://ahoyripper.com/terms
+
+# Homepage (more context about the project)
+Homepage: https://ahoyripper.com
+
+# Canonical URL for this file (required by RFC 9116 §2.5.3)
 Canonical: https://ahoyripper.com/.well-known/security.txt
+
+# Acknowledgments (optional — link to a public hall of fame if you have one)
+# Acknowledgments: https://ahoyripper.com/security/acknowledgments

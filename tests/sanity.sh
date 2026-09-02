@@ -272,13 +272,42 @@ fi
 
 echo ""
 echo "==> Verifying required files exist..."
-for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh; do
+for f in src/api.php src/style.css public/index.php README.md Dockerfile docker-compose.yml deploy/nginx.conf scripts/install-deps.sh public/.well-known/security.txt; do
     if [ ! -f "$f" ]; then
         echo "  ✗ Missing: $f"
         exit 1
     fi
 done
 echo "  ✓ All required files present"
+
+echo ""
+echo "==> Checking security.txt is valid RFC 9116 format..."
+SECURITY_TXT="public/.well-known/security.txt"
+# Must have a Contact: field (required by RFC 9116 §2.5.2)
+if grep -q "^Contact:" "$SECURITY_TXT"; then
+    echo "  ✓ security.txt has Contact: field (RFC 9116 §2.5.2)"
+else
+    echo "  ✗ security.txt missing Contact: field (required by RFC 9116)"
+    exit 1
+fi
+# Must have a Canonical: field (RFC 9116 §2.5.3)
+if grep -q "^Canonical:" "$SECURITY_TXT"; then
+    echo "  ✓ security.txt has Canonical: field (RFC 9116 §2.5.3)"
+else
+    echo "  ✗ security.txt missing Canonical: field (required by RFC 9116)"
+    exit 1
+fi
+# Canonical URL must point to this exact file
+CANONICAL_URL=$(grep "^Canonical:" "$SECURITY_TXT" | cut -d: -f2- | tr -d ' ')
+EXPECTED_URL="https://ahoyripper.com/.well-known/security.txt"
+if [ "$CANONICAL_URL" = "$EXPECTED_URL" ]; then
+    echo "  ✓ security.txt Canonical URL is correct"
+else
+    echo "  ✗ security.txt Canonical URL is wrong"
+    echo "    Expected: $EXPECTED_URL"
+    echo "    Got:      $CANONICAL_URL"
+    exit 1
+fi
 
 echo ""
 echo "==> Checking manifest.json is valid JSON... "
