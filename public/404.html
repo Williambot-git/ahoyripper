@@ -13,6 +13,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f0f">
+  <!-- PWA manifest — enables install-to-homescreen on supported browsers.
+       Matches the manifest referenced by index.php for a consistent PWA experience
+       when error pages are served or shared before the app is installed. -->
+  <link rel="manifest" href="/manifest.json">
   <!-- application-name: used by Windows 7+ taskbar jump list and Start menu tile
        when a user pins the site. Identifies the app independently of the page title.
        Mirrors the app name from manifest.json. -->
@@ -58,7 +62,9 @@
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - 404 Page Not Found">
+  <meta property="og:title:alt" content="AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms">
   <meta property="og:description" content="Page not found. Download video and audio from YouTube, TikTok, X, SoundCloud & 1850+ sites. Free, no signup, no ads.">
+  <meta property="og:description:alt" content="Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms with no signup or ads">
   <meta property="og:site_name" content="AhoyRipper">
   <meta property="og:url" content="https://ahoyripper.com">
   <meta property="og:image" content="https://ahoyripper.com/og-image.webp">
@@ -79,11 +85,14 @@
   <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.webp">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://ahoyripper.com">
   <meta name="twitter:domain" content="ahoyripper.com">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - 404 Page Not Found">
+  <meta name="twitter:title:alt" content="AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms">
   <meta name="twitter:description" content="Page not found. Download video and audio from 1850+ platforms. Free, no signup needed.">
+  <meta name="twitter:description:alt" content="Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms with no signup or ads">
   <meta name="twitter:image" content="https://ahoyripper.com/og-image.webp">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
