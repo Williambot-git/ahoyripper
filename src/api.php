@@ -5606,6 +5606,11 @@ switch ($action) {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
         header('Cache-Control: no-store');
+        // Reporting-Endpoints + Report-To: enables the browser's Reporting API for CSP
+        // violation reports from this endpoint. Matches the headers set by every other API
+        // response path (top-of-script, client-error 405 block, csp-report, analytics).
+        header('Reporting-Endpoints: csp-report="/csp-report"');
+        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
         // fire-and-forget endpoint that does not consume from the per-minute rate budget.
         // Mirrors the pattern used by action=check and action=health for consistency.
@@ -5633,14 +5638,11 @@ switch ($action) {
         // involve yt-dlp, but X-Download-Timeout is included on all API responses
         // so generic response parsers can always find this field without special-casing.
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-        // Set the same CSP and Reporting-Endpoints headers that the top-of-script
-        // block applies to all other responses. The client-error endpoint bypasses
-        // the global header block by sending its own response — repeat them here so
-        // client-error responses are always fully hardened regardless of how this
-        // action is served (nginx, PHP built-in server, reverse proxy, etc.).
+        // CSP: same policy as every other API response. The client-error endpoint
+        // bypasses the top-of-script header block by sending its own — repeat them here
+        // so client-error POST responses are fully hardened regardless of how this action
+        // is served (nginx, PHP built-in server, reverse proxy, etc.).
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-        header('Reporting-Endpoints: csp-report="/csp-report"');
-        header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
 
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
