@@ -1408,12 +1408,14 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // started but was interrupted (reset, broken pipe, DNS failure, etc.).
     // Does NOT include standalone "connection timed out" — that is classified as
     // CONNECTION_TIMEOUT (504) by the dedicated check below.
-    // \b(?!process )timed out\b — "timed out" as a standalone word, NOT preceded
-    // by "Process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookahead (?!)
-    // at word boundary rejects "Process timed out" explicitly, making the intent
-    // robust against future variations of the PHP timeout message format.
+    // (?<!process )timed out\b — "timed out" as a standalone word, NOT preceded
+    // by "process " (PHP-side timeout → SOURCE_TIMEOUT above). Negative lookbehind
+    // (?<!) checks the character positions immediately before "timed" and correctly
+    // rejects "Process timed out". A negative lookahead (?!...) at the word boundary
+    // would check what FOLLOWS "timed out", not what precedes it — it cannot
+    // exclude "Process timed out" based on the prefix. The lookbehind is correct.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
-    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|\b(?!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
+    if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|(?<!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
         return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
