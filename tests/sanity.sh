@@ -1003,6 +1003,29 @@ else
     exit 1
 fi
 
+echo "==> Checking twitter:title:alt text alternative in public/index.php..."
+# twitter:title:alt (RFC 6947 §4.1) provides a text alternative for the
+# twitter:title when the page is rendered in a non-visual context (screen readers,
+# search indexers, Twitter Card clients without rendering). Matches the og:title:alt
+# pattern — both og: and twitter: cards should have alt text for accessibility.
+if grep -q 'meta name="twitter:title:alt"' public/index.php; then
+    echo "  ✓ twitter:title:alt present in index.php"
+else
+    echo "  ✗ twitter:title:alt missing from index.php (RFC 6947 §4.1 text alternative)"
+    exit 1
+fi
+
+echo "==> Checking twitter:description:alt text alternative in public/index.php..."
+# twitter:description:alt (RFC 6947 §4.1) provides a text alternative for the
+# twitter:description in non-visual contexts, matching the og:description:alt
+# pattern above.
+if grep -q 'meta name="twitter:description:alt"' public/index.php; then
+    echo "  ✓ twitter:description:alt present in index.php"
+else
+    echo "  ✗ twitter:description:alt missing from index.php (RFC 6947 §4.1 text alternative)"
+    exit 1
+fi
+
 echo "==> Checking og:url meta tag in public/index.php..."
 if grep -q 'meta property="og:url"' public/index.php; then
     echo "  ✓ og:url present in index.php"

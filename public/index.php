@@ -195,7 +195,9 @@ header_remove('X-Powered-By');
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
+  <meta name="twitter:title:alt" content="AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms">
   <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1850+ platforms. Free, no signup, no ads.">
+  <meta name="twitter:description:alt" content="Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1850+ platforms with no signup or ads">
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta name="twitter:image:width" content="1200">
   <meta name="twitter:image:height" content="630">
