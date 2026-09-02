@@ -2,7 +2,7 @@
   "name": "AhoyRipper — Free Online Media Ripper",
   "short_name": "AhoyRipper",
   "description": "Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1850+ platforms. Free.",
-  "id": "/",
+  "id": "/manifest.json",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
