@@ -3013,8 +3013,14 @@ switch ($action) {
             // --no-progress: suppress all progress output. yt-dlp emits progress
             // template noise even during --skip-download which would prepend garbage
             // to stderr and corrupt json_decode on stdout. --no-progress is the
-            // correct modern flag (consistent with the health probe at line 5569).
+            // correct modern flag (consistent with the health probe at line 5942).
             '--no-progress',
+            // --no-warnings: suppress all warning messages. yt-dlp can emit warnings
+            // even during --skip-download (e.g. deprecation notices, extractor warnings)
+            // that prepend to stderr and corrupt json_decode on stdout. The info action
+            // only needs the JSON output; warnings add no value and are structurally
+            // identical to progress noise. Mirrors --no-warnings in the health probe.
+            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
@@ -3023,6 +3029,12 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
+            // --target-formats video: skip fetching audio-only and muxed stream
+            // metadata during the metadata-only probe. yt-dlp would otherwise
+            // probe ALL formats (video + audio + muxed combinations), which
+            // is slower and wastes CPU/bandwidth when only video metadata is needed.
+            // This speeds up the info response and reduces memory usage on the server.
+            '--target-formats', 'video',
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
             // via ?referer= URL param (same pattern used by the download action at line 3801).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
