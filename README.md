@@ -500,9 +500,10 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `acodec` | `string` | Audio codec (`"mp4a.40.2"`, `"opus"`, `"vorbis"`, `"none"`). `"none"` on video-only formats. |
 | `format_type` | `string` | `"combined"` (video+audio), `"video"` (video-only), or `"audio"` (audio-only). |
 | `type_group` | `int` | Sort grouping key: `0` = combined, `1` = video-only, `2` = audio-only. Used as the primary sort dimension so formats are grouped by media type first. |
-| `language` | `string\|null` | ISO 639-1 language code of the format's audio stream (e.g. `"en"`, `"ja"`). `null` when not available or not applicable. |
+| `language` | `string|null` | ISO 639-1 language code of the format's audio stream (e.g. `"en"`, `"ja"`). `null` when not available or not applicable. |
+| `platform` | `string|null` | yt-dlp extractor name for the source platform (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`). `null` on error responses when the platform could not be identified. Useful for confirming which platform a URL resolved to — especially for shorteners or URL normalizers (e.g. `youtu.be` → `"YouTube"`). |
 
-The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link. `source_url` is also included in error responses so clients can correlate failures with the original request. The `source_url_missing` boolean field distinguishes `MISSING_URL` (no URL provided at all) from other error cases where a URL was given but failed for other reasons — it is `true` only when the request included no URL whatsoever, and `false` for all other responses (including when a malformed URL was provided). The `yt_dlp_version` field reports the version of yt-dlp installed on the server (e.g. `"2026.03.17"`), useful for debugging format availability on older extractors. It is present on all responses including error responses, so clients can correlate errors with a specific yt-dlp build. `uploader_url` is the URL to the channel/uploader page as reported by yt-dlp (e.g. a YouTube channel URL), or `null` when not available from the source. The `url` field is the canonical video page URL (e.g. `https://www.youtube.com/watch?v=...`) as reported by yt-dlp — this is the URL yt-dlp resolved to after any redirects, which may differ from `source_url` for platforms that normalize URLs (e.g. `youtu.be` → `youtube.com/watch?v=...`). The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to — useful when a URL redirects to a different platform (e.g. `youtu.be` → YouTube, or a shortener that resolves to a video platform).
+The `source_url` field in the info response is the exact URL that was ripped — it is always the URL you passed, included so API consumers can match a response back to the source link.
 
 **Success response:**
 ```json
@@ -655,7 +656,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
 | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes, or use AhoyVPN for a different exit IP |
 | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
-| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source. If the issue persists, use AhoyVPN to change your exit IP. |
+| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or check the URL |
 | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly. If it persists, use AhoyVPN to change your exit IP. |
 | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded |
 | `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
