@@ -3714,36 +3714,43 @@ switch ($action) {
             if (!$daily_fp) {
                 http_response_code(503);
                 header('Content-Type: application/json; charset=utf-8');
-                header('Retry-After: 5');
+                header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
-                header('X-Request-ID: ' . $request_id);
                 header('Referrer-Policy: strict-origin-when-cross-origin');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('Cache-Control: no-store');
+                header('Reporting-Endpoints: csp-report="/csp-report"');
+                header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+                header('Retry-After: 5');
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (daily quota file open failed, no download is possible). Use -1 sentinel.
                 header('X-DL-RateLimit-Limit: -1');
                 header('X-DL-RateLimit-Remaining: -1');
                 header('X-DL-RateLimit-Reset: -1');
                 header('X-DL-RateLimit-Window: unavailable');
-                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-                header('X-Info-Timeout: ' . INFO_TIMEOUT);
-                // Daily-limit state is unavailable (file couldn't be opened).
-                // Send -1 sentinels so clients can distinguish this from a known limit.
+                // X-RateLimit-*: the per-minute request rate limit was consumed by the
+                // info call that preceded this block. Preserve those values and add the
+                // window header which was not set in the download action's pre-quota section.
+                header('X-RateLimit-Window: ' . $rate_window);
+                // X-DailyLimit-*: daily quota — the quota file couldn't be opened, so
+                // the daily limit state is unavailable. Use -1 sentinels.
                 header('X-DailyLimit-Limit: -1');
                 header('X-DailyLimit-Remaining: -1');
                 header('X-DailyLimit-Reset: -1');
                 header('X-DailyLimit-Window: unavailable');
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
-                    'error' => 'Service temporarily unavailable.',
+                    'error' => 'Service unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
-                    'action' => $action ?? 'download',
+                    'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
@@ -3764,29 +3771,43 @@ switch ($action) {
                 fclose($daily_fp);
                 http_response_code(503);
                 header('Content-Type: application/json; charset=utf-8');
-                header('Retry-After: 5');
+                header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
-                header('X-Request-ID: ' . $request_id);
                 header('Referrer-Policy: strict-origin-when-cross-origin');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('Cache-Control: no-store');
-                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-                header('X-Info-Timeout: ' . INFO_TIMEOUT);
-                // Daily-limit state unavailable (could not acquire lock).
+                header('Reporting-Endpoints: csp-report="/csp-report"');
+                header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+                header('Retry-After: 5');
+                // X-DL-RateLimit-*: download-specific rate limit — not applicable here
+                // (could not acquire daily quota lock, no download is possible). Use -1 sentinel.
+                header('X-DL-RateLimit-Limit: -1');
+                header('X-DL-RateLimit-Remaining: -1');
+                header('X-DL-RateLimit-Reset: -1');
+                header('X-DL-RateLimit-Window: unavailable');
+                // X-RateLimit-*: the per-minute request rate limit was consumed by the
+                // info call that preceded this block. Preserve those values and add the
+                // window header which was not set in the download action's pre-quota section.
+                header('X-RateLimit-Window: ' . $rate_window);
+                // X-DailyLimit-*: daily quota — could not acquire lock, state unavailable.
+                // Use -1 sentinels consistent with other pre-quota-gate errors.
                 header('X-DailyLimit-Limit: -1');
                 header('X-DailyLimit-Remaining: -1');
                 header('X-DailyLimit-Reset: -1');
                 header('X-DailyLimit-Window: unavailable');
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
-                    'error' => 'Service temporarily unavailable.',
+                    'error' => 'Service unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
-                    'action' => $action ?? 'download',
+                    'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
