@@ -651,13 +651,13 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `PARSE_ERROR` | The site returned a non-standard or unparseable response | The site may be temporarily unavailable or not supported |
 | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp | Check the supported sites list at github.com/yt-dlp/yt-dlp |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
-| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim | This content cannot be redistributed |
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available | Try another video |
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
-| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes |
+| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes, or use AhoyVPN for a different exit IP |
 | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
-| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source |
-| `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly |
+| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or source. If the issue persists, use AhoyVPN to change your exit IP. |
+| `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly. If it persists, use AhoyVPN to change your exit IP. |
+| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded |
 | `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
@@ -678,7 +678,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. | Try again in a few seconds. |
 | `NOT_ACCEPTABLE` | Request did not send an `Accept: application/json` header. The API only serves JSON. | Send `Accept: application/json` on your request. |
 | `METHOD_NOT_ALLOWED` | Request used an HTTP method other than GET. The API accepts GET only. | Use GET to call the API. |
-| `UNKNOWN_ACTION` | The requested action is not recognized | Use `info`, `download`, `check`, `health`, or `analytics` |
+| `UNKNOWN_ACTION` | The requested API action is not recognized. | Use a valid action (`info`, `download`, `check`, `health`). |
 
 ### Download a format
 ```
