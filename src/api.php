@@ -4067,6 +4067,13 @@ switch ($action) {
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
             '--restrict-filenames',
+            // --no-mtime: do not set the downloaded file's modification time to the
+            // source video's upload date. AhoyRipper streams files to the client rather
+            // than storing them on disk long-term, so the source mtime is meaningless
+            // and could cause cache confusion or unexpected file-identity behavior when
+            // the same file is re-downloaded. The file's actual mtime (download moment)
+            // is the meaningful timestamp for a streaming service.
+            '--no-mtime',
         ];
         // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
         // --no-playlist is the safe default (single video); --yes-playlist is
