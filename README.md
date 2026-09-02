@@ -516,6 +516,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "uploader_url": "https://www.youtube.com/channel/...",
   "platform": "YouTube",
   "derived_filename": "Video_Title",
+  "api_version": "1.0.0",
   "formats": [
     {
       "id": "22",
