@@ -2242,7 +2242,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Cache-Control: no-store — prevents all API responses from being cached.
             header('Cache-Control: no-store');
             echo json_encode([
-                'error' => 'Select a format from the list above first, then click it to download. For unlimited downloads, visit ' . UPGRADE_URL,
+                'error' => 'No format was selected. Call the info action first to see available formats, then pass a format id to the download action.',
                 'error_code' => 'MISSING_FORMAT',
                 'action' => 'download',
                 // retry_after: 0 signals "retry immediately once input is corrected" —
