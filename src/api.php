@@ -2950,6 +2950,15 @@ switch ($action) {
             YTDLP_PATH,
             '--dump-json',
             '--skip-download',
+            // --no-warnings: suppress all yt-dlp stderr warnings. Warnings like
+            // "Failed to parse JSON" or "Missing attribute X in description" are
+            // emitted to stderr alongside errors, polluting the error-classification
+            // regex that checks for ERROR/WARNING prefixes (line ~1537). Without this,
+            // a warning on stderr can prevent the ERROR line from being the first
+            // match, causing real errors to fall through to unclassified. --no-warnings
+            // also keeps stderr clean for the health probe (php:line 5569) where any
+            // unexpected output would corrupt the JSON probe result.
+            '--no-warnings',
             // --no-playlist / --yes-playlist: prevent accidental playlist fetching when
             // the user pastes a playlist URL intending only the single video. resolvePlaylistFlag()
             // returns exactly one flag: --yes-playlist (when playlist=1) or --no-playlist
@@ -4015,6 +4024,13 @@ switch ($action) {
             '-f', $format_id,
             '-o', $out_template,
             '--force-overwrite',
+            '--no-warnings',
+            // --no-warnings: suppress all yt-dlp stderr warnings. Warnings during
+            // download (e.g. "Failed to parse JSON" in description, extractor issues)
+            // can appear alongside real errors on stderr, polluting the
+            // error-classification regex. Suppressing them keeps stderr clean and
+            // ensures the ERROR/WARNING prefix check (line ~1537) only matches actual
+            // errors. Consistent with the info action (line 2954).
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
             // temporary 5xx, etc.) separately from generic --retries. Useful for
