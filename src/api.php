@@ -4461,6 +4461,7 @@ switch ($action) {
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                 header('X-Download-Options: noopen');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
                 // have rate-limit metadata regardless of how the download ends (classified or not).
