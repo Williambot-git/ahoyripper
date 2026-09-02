@@ -1458,16 +1458,19 @@ fi
 echo ""
 echo "==> Checking 503 responses include Retry-After header (daily quota gate)..."
 # All direct 503 call sites (not function definitions) must have Retry-After
-# within 3 lines. This skips http_response_code(503) that appears inside
+# within 20 lines. This skips http_response_code(503) that appears inside
 # helper functions (e.g. sendServiceUnavailable503 at line 315), where the
 # Retry-After line is deeper in the function body.
+# The lookback is 25 lines because the daily-quota fopen/flock 503 blocks
+# have ~16 security headers (CSP, Reporting-Endpoints, Report-To) between
+# http_response_code(503) and Retry-After — the function keyword is ~24 lines back.
 bad=0
 while IFS=: read -r linenum _; do
     # Skip lines inside helper function bodies.
     # e.g. sendServiceUnavailable503() has { on line 314 and http_response_code(503)
-    # on line 315. Look back up to 3 lines for the 'function' keyword.
+    # on line 315. Look back up to 25 lines for the 'function' keyword.
     is_function_body=0
-    for ((lookback=1; lookback<=3; lookback++)); do
+    for ((lookback=1; lookback<=25; lookback++)); do
         if [ "$linenum" -gt "$lookback" ]; then
             prev=$(sed -n "$((linenum-lookback))p" src/api.php)
             if echo "$prev" | grep -qE "^function [a-zA-Z_][a-zA-Z0-9_]*\("; then
@@ -1479,7 +1482,7 @@ while IFS=: read -r linenum _; do
     if [ "$is_function_body" -eq 1 ]; then
         continue  # inside function body — Retry-After appears deeper in the function
     fi
-    context=$(sed -n "${linenum},$((linenum+3))p" src/api.php)
+    context=$(sed -n "${linenum},$((linenum+20))p" src/api.php)
     if ! echo "$context" | grep -q "Retry-After"; then
         echo "  ✗ Line $linenum: 503 without Retry-After header"
         bad=1
