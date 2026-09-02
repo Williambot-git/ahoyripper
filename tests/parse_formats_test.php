@@ -290,6 +290,12 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
                 elseif ($br >= 96) $quality = 96;
                 elseif ($br >= 64) $quality = 64;
                 else $quality = 48;
+            } else {
+                // Audio-only format with no bitrate metadata at all (e.g. opus/ogg
+                // where yt-dlp doesn't report abr). Assign a low-tier fallback so it
+                // still participates in quality-based sorting rather than being null
+                // (which sorts last in descending sorts, obscuring real audio options).
+                $quality = 32;
             }
         }
 
@@ -720,7 +726,7 @@ $json_audio_no_br = makeJson('Test', [makeFormat([
     'vcodec' => 'none', 'acodec' => 'mp4a', 'ext' => 'm4a', 'tbr' => null, 'abr' => null
 ])]);
 $result_no_br = parseFormats($json_audio_no_br);
-test('audio with no tbr or abr has null quality', $result_no_br && ($result_no_br['formats'][0]['quality'] ?? null) === null);
+test('audio with no tbr or abr falls back to low-tier quality (32)', $result_no_br && ($result_no_br['formats'][0]['quality'] ?? null) === 32);
 
 // ─── parseFormats: label construction ─────────────────────────────────────────
 
