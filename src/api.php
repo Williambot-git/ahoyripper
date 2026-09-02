@@ -2763,10 +2763,14 @@ switch ($action) {
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
-                    'source_url' => $url ?? null,
-                    'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+                    // source_url_missing: false — no URL was found to be missing.
+                    // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
+                    'source_url' => null,
+                    'source_url_missing' => false,
+                    'format_id_missing' => false,
                     // quota fields: unavailable — the quota file could not be opened.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
@@ -3847,10 +3851,14 @@ switch ($action) {
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => 5,
                     'request_id' => $request_id,
-                    'source_url' => $url ?? null,
-                    'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+                    // source_url_missing: false — no URL was found to be missing.
+                    // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
+                    'source_url' => null,
+                    'source_url_missing' => false,
+                    'format_id_missing' => false,
                     // quota fields: unavailable — the quota file could not be locked.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
