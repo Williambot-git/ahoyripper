@@ -5936,6 +5936,12 @@ switch ($action) {
                     // template noise even during --skip-download which would prepend garbage
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
+                    // --no-warnings: suppress all warning messages. yt-dlp can emit warnings
+                    // even during --skip-download (e.g. deprecation notices, extractor warnings)
+                    // that prepend to stderr and corrupt json_decode on stdout. The health probe
+                    // only needs the JSON output; warnings add no value and are structurally
+                    // identical to progress noise (lines prepended to stderr before JSON).
+                    '--no-warnings',
                     '--retries', '3',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
