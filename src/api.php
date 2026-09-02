@@ -294,7 +294,7 @@ if ($blocked) {
         $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
-        header('X-DailyLimit-Reset: ' . $quota_reset_ts);
+        header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unavailable');
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
