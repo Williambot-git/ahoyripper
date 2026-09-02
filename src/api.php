@@ -835,6 +835,10 @@ if (in_array($action, $internal_actions, true)) {
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
             // Cache-Control: no-store — prevents all API responses from being cached.
+            // Set explicitly here (not relying on the global header at line 214) because
+            // fastcgi_finish_request() flushes the output buffer before line 214 is reached
+            // in the FPM fast-path, so the global Cache-Control would not be included.
+            // The non-FPM fallback block also sets this explicitly (line 881) for consistency.
             header('Cache-Control: no-store');
             // X-Info-Timeout: mirrors the header set in the non-FPM fallback block.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
