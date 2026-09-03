@@ -1,6 +1,10 @@
 # AhoyRipper Security Policy — RFC 9116
 # https://iBlackHere.help.ferui.com/resources/security-txt
 
+# Canonical URL(s) of this file — required by RFC 9116 §2.5.3 so scanners
+# can discover the authoritative location without following redirects.
+Canonical: https://ahoyripper.com/.well-known/security.txt
+
 # Contact channel for security researchers to report vulnerabilities.
 # Replace with your actual security contact address.
 Contact: mailto:security@ahoyvpn.com
