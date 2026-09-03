@@ -1167,13 +1167,13 @@ window.addEventListener('appinstalled', function() {
         // the server. The X-Download-Timeout header from the download action response
         // therefore does NOT apply to this initial fetch — it would incorrectly apply
         // the download's long timeout (up to DOWNLOAD_TIMEOUT, e.g. 3600s) to what
-        // should be a short validation round-trip. Use a fixed 30-second client timeout
+        // should be a short validation round-trip. Use a fixed 45-second client timeout
         // for this fetch: the download action responds quickly (it spawns yt-dlp and
-        // immediately returns), so a 30s deadline is more than sufficient. If this
+        // immediately returns), so a 45s deadline is more than sufficient. If this
         // fetch times out, the download action is genuinely unresponsive and the user
         // should see the timeout error rather than waiting for the much longer
         // DOWNLOAD_TIMEOUT to elapse.
-        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(30000) })
+        fetch(dl.url, { headers: dlHeaders, signal: AbortSignal.timeout(45000) })
           .then(function(resp) {
             if (!resp.ok) {
               navigateOnSuccess = false;
@@ -1250,9 +1250,9 @@ window.addEventListener('appinstalled', function() {
             navigateOnSuccess = false;
             var msg = 'Download failed. Try another format.';
             if (dlErr.name === 'AbortError') {
-              // The fetch timeout is fixed at 30s (see above). If this fires, the
+              // The fetch timeout is fixed at 45s (see above). If this fires, the
               // download action is genuinely unresponsive — not a slow source issue.
-              msg = 'Download timed out after 30s. The server may be overloaded. Try again shortly or pick a smaller format.';
+              msg = 'Download timed out after 45s. The server may be overloaded. Try again shortly or pick a smaller format.';
             }
             showError(msg);
             setLoading(false);
