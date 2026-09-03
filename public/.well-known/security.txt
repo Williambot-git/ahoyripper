@@ -1,23 +1,31 @@
-# Canonical security contact for AhoyRipper
-# See RFC 9116 for the security.txt standard: https://datatracker.ietf.org/doc/html/rfc9116
+# AhoyRipper Security Policy — RFC 9116
+# https://iBlackHere.help.ferui.com/resources/security-txt
 
-# Contact method
-Contact: https://ahoyvpn.com/contact
+# Contact channel for security researchers to report vulnerabilities.
+# Replace with your actual security contact address.
+Contact: mailto:security@ahoyvpn.com
 
-# Preferred languages
+# Encryption key for sensitive communications (optional, recommended).
+# Provide your PGP public key or a link to your keybase.io profile.
+Encryption: https://ahoyvpn.com/.well-known/security.asc
+
+# URL to your security acknowledgment page (optional).
+# Thanks security researchers who report issues.
+Acknowledgments: https://ahoyvpn.com/security/thanks
+
+# Path to your security policy or responsible disclosure page (optional).
+Policy: https://ahoyvpn.com/security-policy
+
+# Language preference for this file (RFC 9116 §2.4.5).
+# en = English — update if your policy is available in multiple languages.
 Preferred-Languages: en
 
-# Encryption
-# PGP key available at https://ahoyvpn.com/.well-known/ahoyripper-security.asc
+# ISO 8601 date when this security.txt will stop being valid.
+# Update this date annually. After expiration, scanners should treat
+# this file as expired and may fall back to outdated contact methods.
+# Format: YYYY-MM-DDTHH:MM:SS.000Z (always UTC/Zulu)
+Expires: 2027-09-03T00:00:00.000Z
 
-# Policy
-Policy: https://ahoyripper.com/terms
-
-# Homepage (more context about the project)
-Homepage: https://ahoyripper.com
-
-# Canonical URL for this file (required by RFC 9116 §2.5.3)
-Canonical: https://ahoyripper.com/.well-known/security.txt
-
-# Acknowledgments (optional — link to a public hall of fame if you have one)
-# Acknowledgments: https://ahoyripper.com/security/acknowledgments
+# Hiring: if you have a security research bounty or disclosure program,
+# link to it here (optional).
+# Hiring: https://ahoyvpn.com/security-bug-bounty
