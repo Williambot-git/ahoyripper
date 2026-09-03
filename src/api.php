@@ -1428,7 +1428,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // for this case. Runs AFTER CONNECTION_FAILED so that generic connection failures
     // (reset, broken pipe, etc.) are caught first; a bare "connection timed out"
     // with no other qualifier routes here (504) instead of CONNECTION_FAILED (502).
-    if (preg_match('#\\bconnection timed out\\b(?!\\s)(?!\\s+after)#i', $err_lower)) {
+    if (preg_match('#\bconnection timed out\b(?!\s)(?!\s+after)#i', $err_lower)) {
         return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
