@@ -1564,6 +1564,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'error_code' => 'PARSE_ERROR',
             'raw_error' => $parse_fail_msg,
             'formats' => [],
+            // platform: available from $first_valid when playlist JSON was partially parsed;
+            // null when the failure occurred before any valid JSON was collected.
+            'platform' => $first_valid['extractor_key'] ?? null,
         ];
     }
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
@@ -1635,11 +1638,14 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                 // access response.formats without checking if the key exists first.
                 // 'upgrade_url' is included so classified source errors (rate-limit, forbidden,
                 // timeout, etc.) surface the AhoyVPN upsell opportunity in info responses.
+                // 'platform': available from $first_valid when playlist JSON was parsed;
+                // null when the failure occurred before any valid JSON was collected.
                 return [
                     'error' => $classified['msg'],
                     'error_code' => $classified['code'],
                     'formats' => [],
                     'upgrade_url' => $classified['upgrade_url'] ?? UPGRADE_URL,
+                    'platform' => $first_valid['extractor_key'] ?? null,
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
@@ -1652,7 +1658,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             }
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg, 'formats' => []];
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg, 'formats' => [], 'platform' => $first_valid['extractor_key'] ?? null];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
@@ -1668,7 +1674,13 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         }
         // Always include 'formats' => [] so API consumers can always
         // access response.formats without checking if the key exists first.
-        return ['error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.', 'error_code' => 'PARSE_ERROR', 'raw_error' => $parse_fail_msg, 'formats' => []];
+        return [
+            'error' => 'Could not parse video info. The site may not be supported or returned a non-standard response.',
+            'error_code' => 'PARSE_ERROR',
+            'raw_error' => $parse_fail_msg,
+            'formats' => [],
+            'platform' => $first_valid['extractor_key'] ?? null,
+        ];
     }
 
     // JSON parsed successfully but has no formats key — this is a distinct
@@ -1691,6 +1703,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.
             'formats' => [],
+            'platform' => $first_valid['extractor_key'] ?? null,
         ];
     }
 
