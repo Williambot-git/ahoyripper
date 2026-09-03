@@ -3015,12 +3015,6 @@ switch ($action) {
             // to stderr and corrupt json_decode on stdout. --no-progress is the
             // correct modern flag (consistent with the health probe at line 5942).
             '--no-progress',
-            // --no-warnings: suppress all warning messages. yt-dlp can emit warnings
-            // even during --skip-download (e.g. deprecation notices, extractor warnings)
-            // that prepend to stderr and corrupt json_decode on stdout. The info action
-            // only needs the JSON output; warnings add no value and are structurally
-            // identical to progress noise. Mirrors --no-warnings in the health probe.
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
@@ -3029,12 +3023,6 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
-            // --target-formats video: skip fetching audio-only and muxed stream
-            // metadata during the metadata-only probe. yt-dlp would otherwise
-            // probe ALL formats (video + audio + muxed combinations), which
-            // is slower and wastes CPU/bandwidth when only video metadata is needed.
-            // This speeds up the info response and reduces memory usage on the server.
-            '--target-formats', 'video',
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
             // via ?referer= URL param (same pattern used by the download action at line 3801).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
@@ -5952,23 +5940,11 @@ switch ($action) {
                     // template noise even during --skip-download which would prepend garbage
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
-                    // --no-warnings: suppress all warning messages. yt-dlp can emit warnings
-                    // even during --skip-download (e.g. deprecation notices, extractor warnings)
-                    // that prepend to stderr and corrupt json_decode on stdout. The health probe
-                    // only needs the JSON output; warnings add no value and are structurally
-                    // identical to progress noise (lines prepended to stderr before JSON).
-                    '--no-warnings',
                     '--retries', '3',
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
-                    // --target-formats video: skip fetching audio-only and muxed stream
-                    // metadata during the metadata-only probe. yt-dlp would otherwise
-                    // probe ALL formats (video + audio + muxed combinations), which
-                    // is slower and wastes CPU/bandwidth when only metadata is needed.
-                    // Mirrors the --target-formats optimization in the info action.
-                    '--target-formats', 'video',
                 ];
                 if (AHOY_IMPERSONATE !== '') {
                     $probe_cmd[] = '--impersonate';
