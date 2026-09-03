@@ -5209,6 +5209,11 @@ switch ($action) {
         header('Content-Type: ' . $mime);
         header('X-Content-Type-Options: nosniff');
         header('X-Download-Options: noopen');
+        // X-Info-Timeout: present on every download-action response (success and error).
+        // Consistent with all other download paths which include this header so clients
+        // can always determine the info timeout from response headers without parsing
+        // the JSON body or checking a separate /info endpoint.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
         // Suppress PHP's automatic chunked transfer encoding for binary streams.
         // PHP adds Transfer-Encoding: chunked for large responses; identity
         // forces raw bytes so the Content-Length header is respected.
