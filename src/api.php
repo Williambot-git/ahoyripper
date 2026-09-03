@@ -907,9 +907,44 @@ if (in_array($action, $internal_actions, true)) {
         // retry_after: 0 — client-error is a fire-and-forget endpoint with no
         // server-side backoff; clients can immediately retry their original action.
         echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
+        fastcgi_finish_request();
         exit;
     }
-
+    // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers.
+    // NOTE: exit is REQUIRED here — without it, the script falls through to the
+    // check/health handler below (line 913) and returns a spurious status:ok from
+    // the wrong handler, confusing API clients that expect no body from client-error.
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Download-Options: noopen');
+    header('X-Robots-Tag: noindex, noai, noimage, noydir');
+    header('X-Request-ID: ' . $request_id);
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
+    header('Cache-Control: no-store');
+    header('X-Info-Timeout: ' . INFO_TIMEOUT);
+    header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    header('X-DL-RateLimit-Limit: -1');
+    header('X-DL-RateLimit-Remaining: -1');
+    header('X-DL-RateLimit-Reset: -1');
+    header('X-DL-RateLimit-Window: unlimited');
+    header('X-RateLimit-Limit: -1');
+    header('X-RateLimit-Remaining: -1');
+    header('X-RateLimit-Reset: -1');
+    header('X-RateLimit-Window: unlimited');
+    header('X-DailyLimit-Limit: -1');
+    header('X-DailyLimit-Remaining: -1');
+    header('X-DailyLimit-Reset: -1');
+    header('X-DailyLimit-Window: unlimited');
+    header('Reporting-Endpoints: csp-report="/csp-report"');
+    header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+    echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
     // All other internal_actions (check, health, progress)
     // receive X-Robots-Tag via the nginx add_header in deploy/nginx.conf
     // when served through the = /src/api.php location block (line ~98).
