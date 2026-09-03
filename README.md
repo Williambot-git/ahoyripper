@@ -580,6 +580,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "source_url_missing": false,
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "upgrade_url": "https://ahoyvpn.com",
   "retry_after": 300,
   "quota_remaining": 4,
   "quota_limit": 5,
@@ -723,6 +724,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "source_url": "https://www.youtube.com/watch?v=...",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "upgrade_url": "https://ahoyvpn.com",
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -736,6 +738,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "source_url": "https://www.youtube.com/watch?v=...",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "upgrade_url": "https://ahoyvpn.com",
   "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
@@ -839,6 +842,7 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "ffprobe_version": "ffmpeg version 6.x",
   "yt_dlp_ok": true,
   "ffmpeg_ok": true,
+  "upgrade_url": "https://ahoyvpn.com",
   "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
