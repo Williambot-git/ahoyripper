@@ -854,4 +854,11 @@ footer a:hover { color: var(--color-accent); }
   .format-card:active {
     transform: none;
   }
+  /* Disable quota warning/exhausted animations for users who prefer reduced motion.
+     The color changes (low/exhausted states) still apply — only the distracting
+     pulsing animation is suppressed. */
+  .quota-count.low,
+  .quota-count.exhausted {
+    animation: none;
+  }
 }
