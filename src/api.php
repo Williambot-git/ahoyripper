@@ -2746,6 +2746,16 @@ switch ($action) {
             // X-Info-Timeout: mirrors the header set on all other info-action responses.
             // Clients can use this to set appropriate fetch timeouts on retry.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-Download-Timeout: present on all API responses for consistent header coverage.
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // Content-Type: required for correct JSON rendering in browsers and API clients.
+            // Missing from the original block — added for consistency with all other API responses.
+            header('Content-Type: application/json; charset=utf-8');
+            // retry_after: 0 — invalid key is a validation error with no server-side
+            // backoff; the client just needs to correct the key. Same as MISSING_FORMAT.
+            header('Retry-After: 0');
+            // Cache-Control: no-store — prevents all API responses from being cached.
+            header('Cache-Control: no-store');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_API_KEY',
@@ -3350,6 +3360,7 @@ switch ($action) {
                 'FORMAT_UNAVAILABLE' => 422,
                 'GEOBLOCKED' => 451,
                 'INVALID_FORMAT_ID' => 400,
+                'INVALID_API_KEY' => 401,
                 'INVALID_KEY' => 401,
                 'INVALID_URL' => 400,
                 'LOGIN_REQUIRED' => 401,
