@@ -6228,6 +6228,10 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // Retry-After: 0 — health is a read-only probe with no server-side backoff;
+        // the client should retry immediately. Mirrors the same pattern in the 'check'
+        // action (which also uses Retry-After: 0 alongside X-*-Limit: -1 sentinels).
+        header('Retry-After: 0');
 
         header('Cache-Control: no-store');
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
