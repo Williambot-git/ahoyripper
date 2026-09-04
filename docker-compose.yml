@@ -36,6 +36,14 @@ services:
       - YTDLP_VERSION=${YTDLP_VERSION:-latest}
       - VERSION_CACHE_TTL=${VERSION_CACHE_TTL:-3600}
       - PROBE_CACHE_TTL=${PROBE_CACHE_TTL:-300}
+      # QUOTA_DIR: directory for daily-quota and rate-limit state files.
+      # Defaults to /tmp so Docker container restarts wipe quota state, preventing
+      # quota bypass via container restart. Mount a persistent volume for quota to
+      # survive restarts (e.g. QUOTA_DIR=/var/run/ahoyripper/quota with a
+      # corresponding Docker volume mount). Requires the directory to exist and
+      # be writable by the PHP process.
+      # Docker: QUOTA_DIR=/var/run/ahoyripper/quota
+      - QUOTA_DIR=${QUOTA_DIR:-/tmp}
     restart: unless-stopped
     healthcheck:
       # Use / (root) instead of /src/api.php — the nginx Docker config serves the
