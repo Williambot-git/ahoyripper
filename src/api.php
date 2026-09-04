@@ -4183,6 +4183,13 @@ switch ($action) {
             // the same file is re-downloaded. The file's actual mtime (download moment)
             // is the meaningful timestamp for a streaming service.
             '--no-mtime',
+            // --write-thumbnail --embed-thumbnail: download the video thumbnail and embed
+            // it as metadata (album art for audio, file thumbnail for video). This improves
+            // the downloaded file's discoverability and visual presentation without any
+            // meaningful downside — thumbnail files are tiny (~5–50 KB) and embedding is
+            // a standard metadata operation for both audio and video files.
+            '--write-thumbnail',
+            '--embed-thumbnail',
         ];
         // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
         // --no-playlist is the safe default (single video); --yes-playlist is
