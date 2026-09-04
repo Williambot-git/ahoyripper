@@ -1376,18 +1376,24 @@ fi
 
 echo ""
 echo "==> Checking X-FFProbe-Status header in download responses..."
-# X-FFProbe-Status should be set on both success and failure paths so the
-# client can always diagnose ffprobe verification outcomes. The success case
-# (header 'X-FFProbe-Status: success') is set after ffprobe confirms a video
-# stream; the failure case (header 'X-FFProbe-Status: failed') is set in the
-# early-exit block when ffprobe fails, times out, or finds no video stream.
-# Both occurrences must be present to ensure the header is never absent.
+# X-FFProbe-Status should be set on all three outcome paths so the client can
+# always diagnose ffprobe verification outcomes:
+#   success  — ffprobe confirmed a video stream in the downloaded file
+#   skipped  — ffprobe exited successfully but found no video stream
+#              (audio-only format, empty file, or yt-dlp failed before ffprobe ran)
+#   failed   — ffprobe could not verify the file (corrupt, unreadable, or error)
+# All three must be present to prevent silent regression.
 FFPROBE_SUCCESS=$(grep -c "X-FFProbe-Status: success" src/api.php || true)
+FFPROBE_SKIPPED=$(grep -c "X-FFProbe-Status: skipped" src/api.php || true)
 FFPROBE_FAILED=$(grep -c "X-FFProbe-Status: failed" src/api.php || true)
-if [ "$FFPROBE_SUCCESS" -ge 1 ] && [ "$FFPROBE_FAILED" -ge 1 ]; then
-    echo "  ✓ X-FFProbe-Status header present on both success and failure paths"
+if [ "$FFPROBE_SUCCESS" -ge 1 ] && [ "$FFPROBE_SKIPPED" -ge 1 ] && [ "$FFPROBE_FAILED" -ge 1 ]; then
+    echo "  ✓ X-FFProbe-Status header present on all three outcome paths (success, skipped, failed)"
 elif [ "$FFPROBE_SUCCESS" -ge 1 ]; then
-    echo "  ✗ X-FFProbe-Status: success present but X-FFProbe-Status: failed missing"
+    if [ "$FFPROBE_SKIPPED" -lt 1 ]; then
+        echo "  ✗ X-FFProbe-Status: success present but skipped missing — add X-FFProbe-Status: skipped to error paths where ffprobe was not reached"
+    else
+        echo "  ✗ X-FFProbe-Status: success present but failed missing"
+    fi
     exit 1
 else
     echo "  ✗ X-FFProbe-Status header not found in download response paths"
