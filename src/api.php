@@ -4613,6 +4613,10 @@ switch ($action) {
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                // X-FFProbe-Status: ffprobe was never reached in the unclassified-error path
+                // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
+                // clients can distinguish this from a ffprobe-verification failure.
+                header('X-FFProbe-Status: skipped');
                 // CSP headers: unclassified errors exit() from within a switch block that
                 // bypasses the global headers set at the top of the script. These three
                 // headers are needed to maintain consistent CSP reporting and browser
