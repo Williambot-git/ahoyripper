@@ -6072,6 +6072,9 @@ switch ($action) {
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
                     '--retries', '3',
+                    // --extractor-retries: retry known extractor errors (rate limits, temporary
+                    // 5xx) separately from generic --retries. Mirrors the info and download
+                    // action pattern so the health probe accurately reflects real ripping behavior.
                     '--extractor-retries', '3',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
