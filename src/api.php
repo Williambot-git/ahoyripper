@@ -4272,6 +4272,11 @@ switch ($action) {
             header('X-DailyLimit-Window: unavailable');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-FFProbe-Status: ffprobe was never reached — proc_open itself failed
+            // before yt-dlp could run, so no file was ever produced for ffprobe to verify.
+            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
+            // (where ffprobe ran but found the file corrupt/unreadable).
+            header('X-FFProbe-Status: skipped');
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
