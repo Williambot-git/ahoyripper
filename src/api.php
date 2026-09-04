@@ -4383,6 +4383,17 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                // X-FFProbe-Status: ffprobe was never reached — yt-dlp timed out before
+                // producing any output file, so no file was produced for ffprobe to verify.
+                // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
+                header('X-FFProbe-Status: skipped');
+                // CSP headers: the DOWNLOAD_TIMEOUT block exit()s from within the download
+                // loop before reaching the classified/unclassified yt-dlp error blocks that
+                // also add CSP headers. Add the three headers here to maintain consistent
+                // CSP reporting and browser security policy enforcement for timeouts.
+                header('Reporting-Endpoints: csp-report="/csp-report"');
+                header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
                 // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
                 // have rate-limit metadata regardless of how the download ends (classified or not).
                 // Mirrors the headers set at line ~3822 for classified YTDLP_ERROR downloads.
