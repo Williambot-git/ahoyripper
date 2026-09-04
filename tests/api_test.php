@@ -372,6 +372,18 @@ test('INVALID_API_KEY (download): source_url_missing is still false',
 test('AHOY_UNLIMITED_KEY constant matches test default',
     AHOY_UNLIMITED_KEY_TEST === 'RIPPER2026DEV');
 
+// AHOY_IMPERSONATE: yt-dlp 2024.09+ browser TLS fingerprint impersonation target.
+// Mirrors api.php AHOY_IMPERSONATE constant (default 'chrome', controlled by
+// AHOY_IMPERSONATE env var). Defined here so classifyYtdlpError uses a real value
+// when classifying --impersonate failures (CONFIG_ERROR).
+if (!defined('AHOY_IMPERSONATE')) {
+    define('AHOY_IMPERSONATE', getenv('AHOY_IMPERSONATE') ?: 'chrome');
+}
+
+// Verify AHOY_IMPERSONATE defaults to 'chrome' (matches api.php production default).
+test('AHOY_IMPERSONATE constant defaults to chrome',
+    AHOY_IMPERSONATE === 'chrome');
+
 // ─── classifyYtdlpError (verbatim copy from api.php) ────────────────────────
 // Note on regex patterns: some require specific phrasing.
 // - GEOBLOCKED requires "geo restriction" OR "this video is available in" (not just "is available in")
