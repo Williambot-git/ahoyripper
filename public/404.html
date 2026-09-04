@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -81,8 +81,14 @@
   <!-- Preload the og:image so social share previews load instantly.
        fetchpriority="high" on the preload signals the browser to prioritize
        this resource early in the page load. Supported in Chromium 86+ and Firefox 121+;
-       Safari ignores it (no harm, no regression). Matches index.php preload. -->
-  <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.webp">
+       Safari ignores it (no harm, no regression). Matches index.php preload.
+       crossorigin="anonymous" is required: the og:image URL uses https://ahoyripper.com
+       which the browser treats as cross-origin by default. Without crossorigin,
+       the browser issues an anonymous fetch for the preload that does not share
+       credentials or cookies with the og:image meta tag's fetch. Adding
+       crossorigin="anonymous" ensures both fetches use the same CORS context,
+       avoiding a double-fetch that wastes bandwidth and can delay LCP. -->
+  <link rel="preload" as="image" fetchpriority="high" href="https://ahoyripper.com/og-image.webp" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://ahoyripper.com">
