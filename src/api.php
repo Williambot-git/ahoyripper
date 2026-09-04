@@ -3460,6 +3460,17 @@ switch ($action) {
             // countdown value regardless of when the response is processed.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
+            header('Cache-Control: no-store');
+            header('X-Request-ID: ' . $request_id);
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             $resp = [
