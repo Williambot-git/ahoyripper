@@ -1,5 +1,4 @@
 # AhoyRipper Security Policy — RFC 9116
-# https://iBlackHere.help.ferui.com/resources/security-txt
 
 # Canonical URL(s) of this file — required by RFC 9116 §2.5.3 so scanners
 # can discover the authoritative location without following redirects.
