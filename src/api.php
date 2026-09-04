@@ -3208,6 +3208,11 @@ switch ($action) {
             // ensures this stays consistent with the delta-seconds format.
             $retry_delta = INFO_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
+            // X-FFProbe-Status: ffprobe was never reached — proc_open itself failed
+            // before yt-dlp could run, so no file was ever produced for ffprobe to verify.
+            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
+            // (where ffprobe ran but found the file corrupt/unreadable).
+            header('X-FFProbe-Status: skipped');
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
