@@ -185,8 +185,11 @@ header_remove('X-Powered-By');
   <!-- Canonical URL: tells search engines the definitive URL for this page,
        preventing duplicate content issues when the same page is accessible via
        multiple URLs (e.g. with/without www, with/without trailing slash,
-       with UTM parameters). Must match og:url for consistency. -->
-  <link rel="canonical" href="<?= $BASE_URL ?>">
+       with ?url=... pre-fill params). Must match og:url for consistency —
+       including ?url=... so pre-filled share links (?url=...) are treated as
+       the same page as the bare root, preventing SEO dilution across duplicate
+       URLs. -->
+  <link rel="canonical" href="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
