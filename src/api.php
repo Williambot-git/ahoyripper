@@ -4559,6 +4559,11 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => $format_id,
                     'format_id_missing' => false,
+                    // platform: the download action runs after the info action in normal usage
+                    // (the UI always fetches info first), so the platform is known from the
+                    // info response in the client state. This endpoint has no access to that
+                    // phase's $first_valid['extractor_key']. Set to null to match all other
+                    // download error paths and avoid fabricating platform data here.
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
