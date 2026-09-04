@@ -693,7 +693,9 @@ header('X-DL-RateLimit-Window: ' . $dl_window_label);
 // 'progress' case falls through to 'health' in the switch below). Exposing
 // both names maintains backwards compatibility with any clients that use the
 // older 'progress' action name while guiding new integrations toward 'health'.
-$internal_actions = ['check', 'health', 'progress', 'csp-report', 'client-error'];
+// 'analytics' is listed here so the default: block doesn't route it to
+// UNKNOWN_ACTION. It is handled by its own case at line 6403.
+$internal_actions = ['analytics', 'check', 'health', 'progress', 'csp-report', 'client-error'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
     // csp-report: receive and log browser CSP violation reports (nginx POSTs
