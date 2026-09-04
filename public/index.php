@@ -1330,10 +1330,22 @@ window.addEventListener('appinstalled', function() {
 
   var isFetching = false; // guard against duplicate concurrent fetches (e.g. paste + Enter/Go)
   var _lastAnnouncedQuota = null; // sentinel: last quota value that triggered a screen-reader announcement
+  var _fetchController = null; // AbortController for cancelling in-flight info fetches
+  var _fetchId = 0; // monotonic counter; each fetch gets a unique ID to detect stale responses
 
   async function fetchInfo() {
     const url = input.value.trim();
     if (!url) return;
+
+    // Cancel any in-flight fetch from a previous submit before starting a new one.
+    // Without this, rapid paste+submit sequences leave the old request running in
+    // the background — its response can race with the new one and overwrite the
+    // results with stale data after the UI has already rendered fresh results.
+    if (_fetchController) {
+      _fetchController.abort();
+    }
+    _fetchController = new AbortController();
+    var _myFetchId = ++_fetchId; // capture this fetch's ID; compare at response time
 
     if (isFetching) return;
     isFetching = true;
@@ -1345,6 +1357,7 @@ window.addEventListener('appinstalled', function() {
       const parsed = new URL(url);
       if (!['http:', 'https:'].includes(parsed.protocol)) {
         showError('Only http:// and https:// URLs are supported. Please paste a valid web link.');
+        _fetchController.abort();
         isFetching = false;
         setLoading(false);
         showProgress(false);
@@ -1508,7 +1521,7 @@ window.addEventListener('appinstalled', function() {
       const playlistParam = (playlistToggle && playlistToggle.checked) ? '&playlist=1' : '';
       const resp = await fetch(API + '?action=info&url=' + encodeURIComponent(url) + '&sort=' + encodeURIComponent(sort) + playlistParam, {
         headers,
-        signal: AbortSignal.timeout(60000)
+        signal: _fetchController.signal,
       });
 
       updateQuotaFromHeaders(resp);
@@ -1668,15 +1681,25 @@ window.addEventListener('appinstalled', function() {
           }
         }
       }
+      // If a newer fetch started while this one was in flight, discard its result
+      // to prevent a stale response from overwriting fresher data already rendered.
+      if (_myFetchId !== _fetchId) { return; }
       renderFormats(url, data);
 
     } catch (e) {
+      // If a newer fetch has already replaced this one (e.g. rapid paste+submit),
+      // silently ignore this response to prevent a stale result from overwriting
+      // fresh data that is already being processed or has been rendered.
+      if (_myFetchId !== _fetchId) { return; }
       var msg = 'Could not connect to the ripper. Please try again in a moment.';
       if (e.name === 'AbortError') {
         msg = 'Request timed out. The video might be too large or unavailable. Try again.';
       }
       showError(msg);
     } finally {
+      // Only reset isFetching here on the fresh/error path. On the stale success
+      // path (return early above), the finally still runs but the fresh fetch's
+      // own finally will run after it and reset to the correct value anyway.
       isFetching = false;
       setLoading(false);
       showProgress(false);
