@@ -3939,6 +3939,8 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url ?? null,
                     'source_url_missing' => ($url ?? '') === '',
+                    // format_id_missing: false — fopen fails before format validation runs.
+                    'format_id_missing' => false,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     // quota fields: unavailable — the quota file could not be opened.
