@@ -19,4 +19,4 @@
 
 # Binary files — preserve exactly as-is
 *.ico            binary
-*.svg            binary
+*.svg            text eol=lf
