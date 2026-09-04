@@ -4370,7 +4370,7 @@ switch ($action) {
                 // countdown value regardless of when the response is processed.
                 $retry_delta = DOWNLOAD_TIMEOUT;
                 header('Retry-After: ' . max(0, $retry_delta));
-                header('Cache-Control: no-store, must-revalidate');
+                header('Cache-Control: no-store');
                 header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
@@ -4508,7 +4508,7 @@ switch ($action) {
                 logRequest('download', $status, ['reason' => 'ytdlp_error_classified', 'err_code' => $err_classified['code']]);
                 http_response_code($status);
                 header('Retry-After: ' . max(0, $retry_delta));
-                header('Cache-Control: no-store, must-revalidate');
+                header('Cache-Control: no-store');
                 header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
@@ -4600,7 +4600,7 @@ switch ($action) {
                 logRequest('download', 422, ['reason' => 'ytdlp_error', 'exit' => $actual_exit, 'err_preview' => substr($proc_err, 0, 100)]);
                 http_response_code(422);
                 header('Retry-After: ' . max(0, $retry_delta));
-                header('Cache-Control: no-store, must-revalidate');
+                header('Cache-Control: no-store');
                 header('X-Request-ID: ' . $request_id);
                 header('X-Content-Type-Options: nosniff');
                 header('X-Frame-Options: SAMEORIGIN');
@@ -4992,7 +4992,7 @@ switch ($action) {
                     header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
                     header('X-DailyLimit-Window: 86400');
                 }
-                header('Cache-Control: no-store, must-revalidate');
+                header('Cache-Control: no-store');
                 header('X-Request-ID: ' . $request_id);
                 header('X-FFProbe-Status: failed');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
