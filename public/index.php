@@ -269,6 +269,7 @@ header_remove('X-Powered-By');
         "operatingSystem": "Any",
         "browserRequirements": "Any modern browser with JavaScript enabled.",
         "softwareVersion": "<?= $VERSION ?>",
+        "image": "<?= $BASE_URL ?>/og-image.webp",
         "author": {
           "@type": "Organization",
           "name": "AhoyVPN",
