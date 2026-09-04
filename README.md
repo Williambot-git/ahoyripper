@@ -549,7 +549,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
       "height": null,
       "quality": 128,
       "fps": null,
-      "tbr": 128,
+      "tbr": null,
       "abr": 128,
       "vcodec": "none",
       "acodec": "mp4a.40.2",
