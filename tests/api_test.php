@@ -1748,7 +1748,7 @@ test('health endpoint platform is null',
 // The default: case in api.php also includes api_version (line 3373).
 // Verify the unknown-action error response includes api_version.
 $default_response = [
-    'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, or ?action=analytics.',
+    'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
     'error_code' => 'UNKNOWN_ACTION',
     'request_id' => 'test-request-id',
     'yt_dlp_version' => null,
