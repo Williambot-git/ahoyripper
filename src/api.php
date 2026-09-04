@@ -5549,6 +5549,10 @@ switch ($action) {
         // unnecessary for a stateless JSON ping and inconsistent with the rest of
         // the API surface (all other responses use no-store).
         header('Cache-Control: no-store');
+        // Retry-After: 0 — check is a read-only probe with no server-side backoff;
+        // the client should retry immediately. Mirrors the same pattern in action=health
+        // (which also uses Retry-After: 0 alongside X-*-Limit: -1 sentinels).
+        header('Retry-After: 0');
         // yt_dlp_version is included in the check response for consistency with
         // health/info/download responses. The version string is pre-cached before
         // the routing switch (lines 535-583) so no additional subprocess call is
