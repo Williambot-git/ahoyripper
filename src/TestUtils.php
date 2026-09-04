@@ -221,6 +221,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
+
 /**
  * Reverse a daily quota increment when a download request fails before
  * any file is served. Prevents users from losing quota on failed downloads.
