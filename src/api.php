@@ -366,6 +366,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('Retry-After: 5');
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    // CSP violation reporting — mirrors the headers set in all other API response paths.
+    // Without these, 'report-to csp-report' in the nginx-layer CSP has no defined endpoint
+    // group and browser CSP violation reports are silently dropped.
+    header('Reporting-Endpoints: csp-report="/csp-report"');
+    header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
     // Rate-limit subsystem failure: all counter values use -1 (not 0) to
     // signal that no rate-limit state is available — distinct from a client
     // actually hitting the limit (where remaining=0 would be correct).
@@ -396,6 +401,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
     header('X-DL-RateLimit-Window: unavailable');
+    // Content-Security-Policy for the SERVICE_UNAVAILABLE response — mirrors the
+    // enforcement CSP set in all other API response paths. Without this, browsers
+    // apply a default restrictive CSP and ServiceWorker registrations at this origin
+    // would be blocked (worker-src 'self' requires explicit 'self' to allow workers).
+    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
     echo json_encode([
         'error' => 'Service temporarily unavailable.',
         'error_code' => 'SERVICE_UNAVAILABLE',
