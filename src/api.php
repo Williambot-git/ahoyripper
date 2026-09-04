@@ -5590,7 +5590,9 @@ switch ($action) {
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
             // source_url: null — check is a read-only server probe with no source video URL.
+            // source_url_missing: true — no video URL was provided (probe endpoint).
             'source_url' => null,
+            'source_url_missing' => true,
             // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
             // upsell opportunity. Mirrors the same field in the health response.
             'upgrade_url' => UPGRADE_URL,
@@ -6036,9 +6038,11 @@ switch ($action) {
             // is equally valid here — consistent with the check action pattern.
             'upgrade_url' => UPGRADE_URL,
             // source_url: null for server-probe endpoints (no associated video URL).
+            // source_url_missing: true — no video URL was provided (probe endpoint).
             // Mirrors the source_url field in the /check response, giving API consumers
             // a consistent null reference for probe endpoints rather than a hardcoded URL.
             'source_url' => null,
+            'source_url_missing' => true,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).

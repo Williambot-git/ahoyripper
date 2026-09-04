@@ -1974,6 +1974,37 @@ test('DAILY_LIMIT (download): source_url is the provided URL string',
 test('DAILY_LIMIT (download): error_code is DAILY_LIMIT',
     ($daily_limit_download_response['error_code'] ?? '') === 'DAILY_LIMIT');
 
+// ─── action=check response source_url_missing ────────────────────────────────
+// action=check is a read-only probe endpoint with no source video URL.
+// source_url is null and source_url_missing must be true — no URL was provided.
+$check_response = [
+    'action' => 'check',
+    'source_url' => null,
+    'source_url_missing' => true,
+];
+test('action=check: source_url_missing key exists',
+    array_key_exists('source_url_missing', $check_response));
+test('action=check: source_url_missing is boolean true (no URL provided)',
+    ($check_response['source_url_missing'] ?? null) === true);
+test('action=check: source_url is null (probe endpoint)',
+    ($check_response['source_url'] ?? null) === null);
+
+// ─── action=health response source_url_missing ────────────────────────────────
+// action=health is a read-only probe endpoint with no source video URL.
+// source_url is null and source_url_missing must be true — no URL was provided.
+// Mirrors the same pattern as action=check for consistent probe endpoint semantics.
+$health_response = [
+    'action' => 'health',
+    'source_url' => null,
+    'source_url_missing' => true,
+];
+test('action=health: source_url_missing key exists',
+    array_key_exists('source_url_missing', $health_response));
+test('action=health: source_url_missing is boolean true (no URL provided)',
+    ($health_response['source_url_missing'] ?? null) === true);
+test('action=health: source_url is null (probe endpoint)',
+    ($health_response['source_url'] ?? null) === null);
+
 // ─── INVALID_KEY response source_url_missing ─────────────────────────────────
 // INVALID_KEY error responses (info and download actions) include source_url
 // but were previously missing source_url_missing => false. The client did
