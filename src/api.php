@@ -85,6 +85,14 @@ function getDailyQuotaLimit(): int {
     return max(0, ($_raw !== false && $_raw !== '') ? (int)$_raw : QUOTA_DAILY_DEFAULT);
 }
 
+// Directory for daily-quota and rate-limit state files (ip-md5 hashed).
+// Stored in /tmp by default so Docker container restarts clear quota state,
+// preventing quota bypass via container restart. Mount a persistent volume
+// (e.g. /var/run/ahoyripper/quota) for quota to survive restarts.
+// All state files (ahoyrip_daily_*, ahoyrip_rate_*, ahoyrip_dl_rate_*) live here.
+define('QUOTA_DIR', getenv('QUOTA_DIR') !== false && getenv('QUOTA_DIR') !== ''
+    ? rtrim(getenv('QUOTA_DIR'), '/')
+    : '/tmp');
 
 // URL shown to users when they hit quota/rate-limit barriers — directs users to
 // the upsell destination (e.g. AhoyVPN landing page for the public deploy).
@@ -446,7 +454,7 @@ $is_rate_limited = in_array($action, $rate_limited_actions, true);
 // available for both the rate-limit block and the daily-quota block (info action
 // reads it at line 2365, download action at line 3115).
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$rate_file = '/tmp/ahoyrip_rate_' . md5($ip);
+$rate_file = QUOTA_DIR . '/ahoyrip_rate_' . md5($ip);
 $rate_limit = RATE_LIMIT; // requests per minute (configurable via RATE_LIMIT env var)
 $rate_window = 60;
 // $cleanup_cutoff: stale rate files older than $rate_window seconds are removed.
@@ -591,13 +599,13 @@ if ($is_rate_limited) {
 // (meaning the window has fully expired and no new requests arrived to refresh it).
 // Note: abs() is intentionally omitted — time() - $d['t'] is always >= 0 for valid
 // timestamps, and omitting abs() makes the condition self-documenting.
-foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
+foreach (glob(QUOTA_DIR . '/ahoyrip_rate_*') as $f) {
     $d = @json_decode(@file_get_contents($f), true);
     if (!$d || !is_array($d) || (time() - ($d['t'] ?? 0)) > $cleanup_cutoff) {
         @unlink($f);
     }
 }
-// Clean up stale daily-quota files. These are stored as /tmp/ahoyrip_daily_<ip_hash>
+// Clean up stale daily-quota files. These are stored in QUOTA_DIR as ahoyrip_daily_<ip_hash>
 // and reset at midnight UTC. A quota file is stale when its stored date does not
 // match today (UTC), meaning midnight has passed and a fresh window has started.
 // Unlike rate files which expire after $rate_window seconds, quota files must wait
@@ -605,7 +613,7 @@ foreach (glob('/tmp/ahoyrip_rate_*') as $f) {
 // Stale quota files are safe to remove: the user starts a fresh window on the next
 // request, and keeping old files serves no purpose.
 $today_utc = gmdate('Y-m-d');
-foreach (glob('/tmp/ahoyrip_daily_*') as $f) {
+foreach (glob(QUOTA_DIR . '/ahoyrip_daily_*') as $f) {
     $d = @json_decode(@file_get_contents($f), true);
     $file_date = $d['t'] ?? null;
     if (!$d || !is_array($d) || $file_date !== $today_utc) {
@@ -675,7 +683,7 @@ if (($action ?? '') !== 'download') {
     $dl_limit = -1;
 }
 if (($action ?? '') === 'download') {
-    $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
+    $dl_rate_file = QUOTA_DIR . '/ahoyrip_dl_rate_' . md5($ip);
     $dl_fp2 = @fopen($dl_rate_file, 'r');
     if ($dl_fp2) {
         $dl_raw = @fread($dl_fp2, 4096);
@@ -2062,7 +2070,7 @@ function logRequest($action, $status, $extra = []) {
 // Returns the post-refund daily count; callers use this to compute quota_remaining.
 function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count): int {
     if ($unlimited) return $daily_limit;
-    $undo_fp = fopen('/tmp/ahoyrip_daily_' . md5($ip), 'c+');
+    $undo_fp = fopen(QUOTA_DIR . '/ahoyrip_daily_' . md5($ip), 'c+');
     if (!$undo_fp) return $daily_limit;
     if (!flock($undo_fp, LOCK_EX)) {
         fclose($undo_fp);
@@ -2814,7 +2822,7 @@ switch ($action) {
             // Use the same $ip variable declared above for the rate-limit gate.
             // Both info and download actions share the same daily-quota file so
             // that a user hitting 5 info calls has no download quota left.
-            $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
+            $daily_file = QUOTA_DIR . '/ahoyrip_daily_' . md5($ip);
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
             // Defaults to QUOTA_DAILY_DEFAULT (5) when the env var is absent. Set to 0
             // or -1 to disable the free tier entirely (unlimited-key required).
@@ -3653,7 +3661,7 @@ switch ($action) {
         // Separate file from the request rate limiter to prevent the download
         // action's write (which runs after the request gate check) from wiping
         // the request gate's counter and causing spurious rate-limit hits.
-        $dl_rate_file = '/tmp/ahoyrip_dl_rate_' . md5($ip);
+        $dl_rate_file = QUOTA_DIR . '/ahoyrip_dl_rate_' . md5($ip);
 
         $dl_fp = fopen($dl_rate_file, 'c+');
         if (!$dl_fp) {
@@ -3878,7 +3886,7 @@ switch ($action) {
         if (!$unlimited) {
             // Use the same $ip variable declared at the top of the script for the
             // rate-limit gate. Both info and download share the daily-quota file.
-            $daily_file = '/tmp/ahoyrip_daily_' . md5($ip);
+            $daily_file = QUOTA_DIR . '/ahoyrip_daily_' . md5($ip);
             // Override via QUOTA_DAILY env var (e.g. QUOTA_DAILY=100 in .env).
             // Defaults to QUOTA_DAILY_DEFAULT (5) when the env var is absent. Set to 0
             // or -1 to disable the free tier entirely (unlimited-key required).
