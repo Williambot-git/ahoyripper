@@ -5887,6 +5887,13 @@ switch ($action) {
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
             'retry_after' => 0,
+            // quota fields: -1 sentinel = not applicable (client-error is a fire-and-forget
+            // endpoint that does not consume quota). Matches the pattern used by the
+            // check, health, and analytics actions for consistent API surface coverage.
+            'quota_remaining' => -1,
+            'quota_limit' => -1,
+            'quota_reset' => -1,
+            'quota_reset_unix' => -1,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
