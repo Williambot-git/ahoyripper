@@ -2821,6 +2821,8 @@ switch ($action) {
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota fields: invalid key means no quota tracking applies — consistent
                 // with the -1 sent for unlimited-key responses.
                 'quota_remaining' => -1,
@@ -3676,6 +3678,8 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota fields: invalid key means no quota tracking applies — consistent
                 // with the -1 sent for unlimited-key responses.
                 'quota_remaining' => -1,
