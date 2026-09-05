@@ -2406,6 +2406,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // provided but failed validation). API consumers can check this flag
                 // for precise error routing without relying on string matching.
                 'format_id_missing' => true,
+                'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
@@ -2485,6 +2486,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // API consumers can check this flag for precise error routing without
                 // relying on string matching on the error message.
                 'format_id_missing' => false,
+                'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
