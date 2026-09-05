@@ -13,6 +13,9 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 
 ## [Unreleased]
 
+### Added
+- **`PROBE_FAILED` to Troubleshooting** — Added `PROBE_FAILED` to the common error codes table in the Troubleshooting section. This error code is returned by `action=health&probe=1` when yt-dlp fails to fetch the test video, but was previously undocumented in the troubleshooting guide, leaving users with no guidance when they encountered it.
+
 ### Fixed
 - **`.dockerignore` missing `public/.well-known/`** — `public/.well-known/security.txt`
   (RFC 9116 security contact policy) was excluded from the Docker image by the
