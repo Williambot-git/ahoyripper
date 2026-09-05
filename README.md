@@ -434,7 +434,7 @@ ahoyripper/
 
 ### Get video info + formats
 ```
-GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|quality>&playlist=<0|1>&referer=<url>&key=<api_key>
+GET /src/api.php?action=info&url=<url>&sort=<height|filesize|filesize_asc|tbr|quality|audio_quality>&playlist=<0|1>&referer=<url>&key=<api_key>
 ```
 
 **Parameters:**
