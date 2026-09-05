@@ -4691,6 +4691,12 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // X-RateLimit-*: use $rate_window (60s) for the generic request rate limit
+                // so the generic header accurately reflects the per-minute request rate.
+                header('X-RateLimit-Limit: -1');
+                header('X-RateLimit-Remaining: -1');
+                header('X-RateLimit-Reset: -1');
+                header('X-RateLimit-Window: ' . $rate_window);
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 // X-FFProbe-Status: ffprobe was never reached in the unclassified-error path
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
