@@ -72,6 +72,23 @@ if [ "$FAILED_PHP" -eq 1 ]; then
 fi
 echo "  ✓ All PHP syntax OK"
 
+echo ""
+echo "==> Checking error suppression in public entry points..."
+# api.php and public/index.php must call error_reporting(0) and ini_set('display_errors','0')
+# at runtime to prevent PHP warnings/notices from leaking into JSON/HTML responses
+# even when php.ini has display_errors=On (a misconfigured production setup).
+for f in src/api.php public/index.php; do
+    if ! grep -q "error_reporting(0)" "$PROJECT_ROOT/$f"; then
+        echo "  ✗ $f missing error_reporting(0)"
+        exit 1
+    fi
+    if ! grep -q "ini_set.*display_errors.*0" "$PROJECT_ROOT/$f"; then
+        echo "  ✗ $f missing ini_set('display_errors', '0')"
+        exit 1
+    fi
+done
+echo "  ✓ Error suppression present in api.php and public/index.php"
+
 # --no-warnings in the info action breaks error classification: yt-dlp emits
 # error messages (GEOBLOCKED, AGE_RESTRICTED, etc.) to stderr, and
 # classifyYtdlpError() reads $proc_stderr to classify failures. Suppressing

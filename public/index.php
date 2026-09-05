@@ -4,6 +4,13 @@
  * Single-page app for ripping media from supported platforms
  */
 
+// Production hardening — explicitly disable error display at runtime so that
+// even if php.ini has display_errors=On (a misconfigured production setup),
+// no PHP warnings/notices can leak into the HTML response.
+// log_errors=On is preserved so errors are still written to error_log.
+error_reporting(0);
+ini_set('display_errors', '0');
+
 // Detect if JS is available (passed via cookie or param)
 $jsEnabled = isset($_COOKIE['js']) || isset($_GET['js']);
 $default_url = $_GET['url'] ?? '';
