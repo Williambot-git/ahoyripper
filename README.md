@@ -36,7 +36,7 @@ The file streams directly to your browser — nothing is stored on the server. E
 
 ## Quick Examples
 
-All API calls require a `Referer: https://ahoyripper.com` header (browser requests already include this; add it explicitly when using `curl`).
+All API calls require either a `Referer: https://ahoyripper.com` header (browser AJAX requests from the web UI already include this) or the `&referer=https://ahoyripper.com/` query parameter (needed for browser direct navigation — e.g. `?url=...&referer=https://ahoyripper.com/` — where `fetch()` does not send custom headers). When using `curl`, add the header explicitly as shown below. The `&referer=` query parameter works for both browser and CLI use and is documented in the API parameter tables.
 
 ### Get video info and format list
 
