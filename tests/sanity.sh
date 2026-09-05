@@ -476,6 +476,30 @@ else
 fi
 
 echo ""
+echo "==> Checking platform count consistency across og-image.svg, index.php, and manifest.json... "
+# The platform count (e.g. 1872+) appears in og-image.svg (as +1872 in the badge),
+# in index.php meta tags (og:description, twitter:description, meta description), and in
+# manifest.json description. All must agree on the same number to avoid SEO inconsistency
+# where social media scrapers see a different platform count than the page meta tags.
+MANIFEST_COUNT=$(php -r 'echo (int)preg_replace("/[^0-9]/", "", json_decode(file_get_contents($argv[1]))->description ?? "0");' public/manifest.json)
+INDEX_COUNT=$(php -r '
+    $content = file_get_contents($argv[1]);
+    preg_match("/\b(\d{4})\+\s*platform/i", $content, $m);
+    echo $m[1] ?? "0";
+' public/index.php)
+SVG_COUNT=$(php -r '
+    $content = file_get_contents($argv[1]);
+    preg_match("/\+(\d{4})<\/text>/", $content, $m);
+    echo $m[1] ?? "0";
+' public/og-image.svg)
+if [ "$MANIFEST_COUNT" = "$INDEX_COUNT" ] && [ "$INDEX_COUNT" = "$SVG_COUNT" ]; then
+    echo "  ✓ Platform count consistent: $SVG_COUNT+ platforms across all files"
+else
+    echo "  ✗ Platform count mismatch: manifest.json=$MANIFEST_COUNT index.php=$INDEX_COUNT og-image.svg=$SVG_COUNT"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking format grid has aria-labelledby linking it to the sort dropdown (accessibility)... "
 # The format grid (role=group) must have aria-labelledby="sortLabel" so screen readers
 # can announce which control governs the grid's sort order. Without this, the sort
@@ -999,16 +1023,15 @@ else
 fi
 
 echo ""
-echo "==> Checking og-image.svg platform count consistency (1873)... "
-# The og-image.svg <desc> and <text> element must both say "1873".
-# Inconsistency here (e.g. <desc> saying "1872" while <text> says "+1873")
-# was found and fixed in a previous caretaker run.
+echo "==> Checking og-image.svg platform count consistency (1872+)... "
+# The og-image.svg <desc> and <text> element must both say "1872".
+# This was previously 1873 but was corrected when platform count was standardized to 1872+.
 OG_DESC=$(grep 'id="og-desc"' public/og-image.svg | grep -o '1873\|1872\|1800' || true)
 OG_TEXT=$(grep 'text.*1873\|text.*1872\|text.*1800' public/og-image.svg | grep -o '1873\|1872\|1800' || true)
-if [ "$OG_DESC" = "1873" ] && [ "$OG_TEXT" = "1873" ]; then
-    echo "  ✓ og-image.svg consistently says 1873+ (desc and text match)"
+if [ "$OG_DESC" = "1872" ] && [ "$OG_TEXT" = "1872" ]; then
+    echo "  ✓ og-image.svg consistently says 1872+ (desc and text match)"
 else
-    echo "  ✗ og-image.svg platform count mismatch: desc='$OG_DESC', text='$OG_TEXT' (both must be 1873)"
+    echo "  ✗ og-image.svg platform count mismatch: desc='$OG_DESC', text='$OG_TEXT' (both must be 1872)"
     exit 1
 fi
 
