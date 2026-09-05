@@ -5932,6 +5932,8 @@ switch ($action) {
         // retry_after: 0 — client-error is a fire-and-forget endpoint that does not
         // consume rate limit or quota budget, so no backoff is needed on the client.
         // upgrade_url: included on all API responses for consistent upsell opportunity.
+        // platform: null — client-error is a fire-and-forget endpoint with no associated
+        // video URL. Consistent with the same null value in action=check and action=health.
         echo json_encode([
             'ok' => true,
             'request_id' => $request_id,
@@ -5939,6 +5941,7 @@ switch ($action) {
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
             'retry_after' => 0,
+            'platform' => null,
             // quota fields: -1 sentinel = not applicable (client-error is a fire-and-forget
             // endpoint that does not consume quota). Matches the pattern used by the
             // check, health, and analytics actions for consistent API surface coverage.
