@@ -6629,13 +6629,23 @@ switch ($action) {
 
         $raw_body = @file_get_contents('php://input');
         if ($raw_body === false || $raw_body === '') {
+            // 204 with no body — analytics is fire-and-forget so silent 204 is
+            // acceptable. Still set X-Info-Timeout/X-Download-Timeout for
+            // consistent header coverage across all API response types.
             http_response_code(204);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             break;
         }
 
         $payload = @json_decode($raw_body, true);
         if (!is_array($payload)) {
+            // 204 with no body — invalid/non-JSON payload silently discarded so
+            // analytics failures never affect page load. Still set timeout headers
+            // for consistent header coverage across all API response types.
             http_response_code(204);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             break;
         }
 
