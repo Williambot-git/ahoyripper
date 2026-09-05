@@ -2416,9 +2416,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
                 // same reason. API consumers should treat -1 as "unknown remaining quota".
                 'quota_remaining' => -1,
-                'quota_limit' => $daily_limit,
-                'quota_reset' => $quota_reset_iso,
-                'quota_reset_unix' => $quota_reset_ts,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
