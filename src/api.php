@@ -5386,6 +5386,14 @@ switch ($action) {
         // deadline), causing premature client-side aborts that waste server resources.
         // The value is in seconds (integer).
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-Requested-Format: echo back the format ID the client originally requested
+        // (from X-Requested-Format header). yt-dlp may substitute with a nearby format
+        // when the requested one is unavailable. Clients can compare this to the format
+        // actually delivered to determine whether substitution occurred.
+        $req_fmt = $_SERVER['HTTP_X_REQUESTED_FORMAT'] ?? '';
+        if ($req_fmt !== '') {
+            header('X-Requested-Format: ' . $req_fmt);
+        }
 
         // Suppress SIGPIPE so that a client abort during the streaming loop does
         // not kill the PHP process. Without this, writing to a closed connection

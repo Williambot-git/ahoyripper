@@ -1163,6 +1163,12 @@ window.addEventListener('appinstalled', function() {
         // Pass the browser's language preference so yt-dlp can request localized
         // metadata (titles, descriptions) from the source platform.
         dlHeaders['Accept-Language'] = navigator.language || 'en-US';
+        // Forward the originally-selected format ID so the server can compare it
+        // against the actual delivered format (yt-dlp may substitute when the
+        // requested format is unavailable). The server surfaces this via the
+        // X-Format-Substituted header so the frontend can show "Downloaded 720p
+        // (requested 1080p)" instead of silently delivering a lower quality.
+        dlHeaders['X-Requested-Format'] = f.id;
         // Forward page_request_id so the API and server logs can correlate
         // the download request with the browser's page view.
         dlHeaders['X-Request-ID'] = PAGE_REQUEST_ID;
