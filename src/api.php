@@ -5024,6 +5024,10 @@ switch ($action) {
                     // per se, but verification could not be completed. Use 'skipped' to
                     // distinguish from a genuine ffprobe execution error (which sets
                     // 'failed' at line 4630).
+                    // Initialize $probe_err_truncated so the ?? cascade in the JSON response
+                    // (line ~5162) always has a defined fallback, regardless of which
+                    // verification failure path was taken.
+                    $probe_err_truncated = $probe_err;
                     header('X-FFProbe-Status: skipped');
                 }
             } else {
