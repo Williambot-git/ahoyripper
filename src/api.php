@@ -3039,6 +3039,7 @@ switch ($action) {
                     'action' => 'info',
                     'source_url' => $url,
                     'source_url_missing' => false,
+                    'format_id' => null,
                     'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'platform' => null,
