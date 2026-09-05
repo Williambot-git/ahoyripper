@@ -657,15 +657,15 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available | Try another video |
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
-| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes, or use AhoyVPN for a different exit IP |
-| `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
-| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or check the URL |
-| `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly. If it persists, use AhoyVPN to change your exit IP. |
+| `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests | Try again in a few minutes, or use AhoyVPN for a different exit IP. `upgrade_url` included in response. |
+| `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
+| `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or check the URL. `upgrade_url` included in response. |
+| `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly. If it persists, use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
 | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded |
-| `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy |
-| `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
-| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
-| `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If the issue persists, the server's network route to the source may be degraded. |
+| `SOURCE_TIMEOUT` | The source site took too long to respond | Try a smaller format (audio-only is fastest) or try again when the site is less busy. `upgrade_url` included in response. |
+| `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
+| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
+| `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If the issue persists, the server's network route to the source may be degraded. `upgrade_url` included in response. |
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
@@ -1134,9 +1134,9 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `AGE_RESTRICTED` | Video requires age verification | Sign in to the platform in your browser first, then try |
 | `COPYRIGHT_REMOVED` | Content was removed due to a copyright claim | This content cannot be redistributed |
 | `UNSUPPORTED_SITE` | Site is not in yt-dlp's extractor list | Check [yt-dlp's supported sites](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#supported-sites) |
-| `SOURCE_FORBIDDEN` | Source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP |
-| `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again |
-| `SOURCE_TIMEOUT` | Source site took too long to respond | Try audio-only (fastest) or a lower resolution |
+| `SOURCE_FORBIDDEN` | Source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
+| `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again. `upgrade_url` included in response. |
+| `SOURCE_TIMEOUT` | Source site took too long to respond | Try audio-only (fastest) or a lower resolution. `upgrade_url` included in response. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable). Try a smaller format or audio-only. |
 | `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Pick a different format from the list |
@@ -1156,10 +1156,10 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
 | `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
-| `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video |
-| `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly |
-| `SSL_ERROR` | Secure connection to the source failed | Try again shortly |
-| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again |
+| `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video. `upgrade_url` included in response. |
+| `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly. `upgrade_url` included in response. |
+| `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
+| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
 | `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
