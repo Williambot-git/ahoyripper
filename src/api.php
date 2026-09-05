@@ -2714,6 +2714,10 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // source_url: null — NOT_ACCEPTABLE fires before URL processing
         // (it is an Accept-header validation failure, not a URL validation failure).
         'source_url' => null,
+        // platform: null — NOT_ACCEPTABLE fires before platform detection.
+        // Consistent with the same null value in MISSING_URL, INVALID_URL,
+        // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
+        'platform' => null,
         // quota fields: -1 signals that quota tracking is not applicable at this
         // early pre-action validation stage (before any action is dispatched).
         'quota_remaining' => -1,
