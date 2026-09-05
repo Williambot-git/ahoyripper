@@ -6819,6 +6819,12 @@ switch ($action) {
             'quota_limit' => $daily_limit,
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            // upgrade_url: included on all API responses for consistent AhoyVPN upsell
+            // opportunity. The UNKNOWN_ACTION response is the last-resort fallback for
+            // unrecognized action names — even an invalid action is a valid conversion
+            // opportunity. Consistent with the same field in MISSING_URL and other
+            // validation errors that bypass normal action processing.
+            'upgrade_url' => UPGRADE_URL,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
