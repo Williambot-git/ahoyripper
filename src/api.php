@@ -5136,6 +5136,14 @@ switch ($action) {
                 // keeps this as a delta-seconds value.
                 $retry_delta = DOWNLOAD_TIMEOUT;
                 header('Retry-After: ' . max(0, $retry_delta));
+                // CSP headers: the ffprobe verification failure block exit()s from within
+                // the verification loop before reaching the classified/unclassified yt-dlp
+                // error blocks or the global headers. Add the three CSP headers here to
+                // maintain consistent CSP reporting and browser security policy enforcement
+                // for verification failures (both VERIFICATION_FAILED and VERIFICATION_TIMEOUT).
+                header('Reporting-Endpoints: csp-report="/csp-report"');
+                header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
                 echo json_encode([
                     'error' => $error_msg,
                     'error_code' => $error_code,
