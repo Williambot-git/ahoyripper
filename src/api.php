@@ -5685,6 +5685,11 @@ switch ($action) {
             'quota_limit' => getDailyQuotaLimit(),
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // platform: null for probe endpoints (no associated video URL).
+            // Mirrors the 'platform' field in action=health — both probe endpoints
+            // return null since neither processes a video URL. Consistent field presence
+            // across all actions allows API consumers to always expect this field.
+            'platform' => null,
             // source_url: null — check is a read-only server probe with no source video URL.
             // source_url_missing: true — no video URL was provided (probe endpoint).
             'source_url' => null,
