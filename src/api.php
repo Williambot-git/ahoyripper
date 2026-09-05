@@ -3598,6 +3598,10 @@ switch ($action) {
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
         $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        // server_time: ISO 8601 timestamp for client clock synchronization.
+        // Consistent with check, health, and download success responses.
+        $parsed['server_time'] = date('c');
+        $parsed['server_time_unix'] = time();
         // X-Info-Timeout: server-side info timeout in seconds. Clients should set their
         // fetch timeout to at least this value so the client deadline never exceeds the
         // server deadline. Present on every info response — success and error — so clients
