@@ -4691,12 +4691,17 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
-                // X-RateLimit-*: use $rate_window (60s) for the generic request rate limit
-                // so the generic header accurately reflects the per-minute request rate.
+                // X-RateLimit-*: no active per-minute rate limit to report here — yt-dlp
+                // ran (consuming the request slot) and exited with an unclassified error.
+                // Send -1 (unlimited) for all four fields so clients know no rate limit
+                // is currently active, consistent with how the 'check' action handles this.
+                // X-RateLimit-Window is set to 'unlimited' rather than $rate_window (60s)
+                // because the per-minute rate limit has already been consumed and no new
+                // window is active — reporting a stale window value would be misleading.
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: ' . $rate_window);
+                header('X-RateLimit-Window: unlimited');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 // X-FFProbe-Status: ffprobe was never reached in the unclassified-error path
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
