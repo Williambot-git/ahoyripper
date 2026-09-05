@@ -429,6 +429,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'source_url' => null,
         'source_url_missing' => false,
         'format_id_missing' => false,
+        'format_id' => null,
+        // platform: null — SERVICE_UNAVAILABLE fires before platform detection.
+        // Consistent with the same null value in MISSING_URL, INVALID_URL,
+        // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
+        'platform' => null,
         // quota fields: unavailable — the rate-limit file could not be accessed.
         // Use -1 sentinels so clients can distinguish this from a known limit.
         'quota_remaining' => -1,
@@ -2334,6 +2339,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'source_url_missing' => false,
             // 'format_id_missing' is false — URL validation fires before format validation.
             'format_id_missing' => false,
+            'format_id' => null,
+            // platform: null — URL too-long validation fires before platform detection.
+            // Consistent with the same null value in MISSING_URL, INVALID_URL,
+            // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
+            'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => date('c'),
@@ -2638,9 +2648,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'source_url_missing' => false,
         // format_id_missing: false — format validation fires after method validation.
         'format_id_missing' => false,
-        // source_url: null — METHOD_NOT_ALLOWED fires before URL processing
-        // (it is a HTTP-method validation failure, not a URL validation failure).
-        'source_url' => null,
+        'format_id' => null,
+        // platform: null — METHOD_NOT_ALLOWED fires before platform detection.
+        // Consistent with the same null value in MISSING_URL, INVALID_URL,
+        // NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
+        'platform' => null,
         // quota fields: -1 signals that quota tracking is not applicable at this
         // early pre-action validation stage (before any action is dispatched).
         'quota_remaining' => -1,
