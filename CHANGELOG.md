@@ -15,16 +15,6 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 
 ### Added
 - **`PROBE_FAILED` to Troubleshooting** — Added `PROBE_FAILED` to the common error codes table in the Troubleshooting section. This error code is returned by `action=health&probe=1` when yt-dlp fails to fetch the test video, but was previously undocumented in the troubleshooting guide, leaving users with no guidance when they encountered it.
-
-### Fixed
-- **`.dockerignore` missing `public/.well-known/`** — `public/.well-known/security.txt`
-  (RFC 9116 security contact policy) was excluded from the Docker image by the
-  catch-all `.*/` rule. Security scanners (GitHub, OpenBugBounty) and browsers
-  expect to find it at `/.well-known/security.txt` at runtime. Added negated
-  exceptions `!.well-known/` and `!.well-known/security.txt` before the catch-all
-  so the specific paths take priority.
-
-### Added
 - **`CONFIG_ERROR` documentation** — Added `CONFIG_ERROR` (503) to the error codes table, HTTP status mapping table, and Troubleshooting section. This error is classified by `classifyYtdlpError()` when the `--impersonate` feature fails due to a missing `curl_cffi` library, but was previously undocumented in the README.
 - **Twitter Card meta tags** — Added `twitter:card`, `twitter:title`,
   `twitter:description`, and `twitter:image` to `public/index.php`. Cards now
@@ -34,6 +24,12 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   of just "quality or file size".
 
 ### Fixed
+- **`.dockerignore` missing `public/.well-known/`** — `public/.well-known/security.txt`
+  (RFC 9116 security contact policy) was excluded from the Docker image by the
+  catch-all `.*/` rule. Security scanners (GitHub, OpenBugBounty) and browsers
+  expect to find it at `/.well-known/security.txt` at runtime. Added negated
+  exceptions `!.well-known/` and `!.well-known/security.txt` before the catch-all
+  so the specific paths take priority.
 - **`deploy/nginx-docker.conf` Google Fonts CSP gaps** — `font-src` was missing `https://fonts.googleapis.com https://fonts.gstatic.com` in 4 CSP headers (`location = /csp-report`, `location = /src/api.php` enforcement, and their Report-Only counterparts). Docker deployments would block Google Fonts requests (the Inter font would fail to load). Also added those hosts to `connect-src`, `style-src 'self' https://fonts.googleapis.com` in the same locations, and `upgrade-insecure-requests` to the Report-Only header at `location = /csp-report` for parity with the production `nginx.conf`.
 - **`location = /src/api.php` missing CSP Reporting-Endpoints and Report-To headers** — nginx `add_header` does not inherit from the server block into a `location` when the location also defines `add_header`. The API location's CSP included `report-to csp-report` but had no matching `Reporting-Endpoints` (modern Reporting API, Chromium 94+/Firefox 79+) or `Report-To` (legacy fallback, Chromium 84-93) header, causing browsers to silently drop CSP violation reports for API responses. Added both headers to the API location block. All other locations (`location /`, `location = /csp-report`, `location ~ \.php$`) already had them defined.
 - **`PROC_OPEN_FAILED` duplication in error codes table** — The classified error codes table had `PROC_OPEN_FAILED` listed twice (lines 557 and 559) with different explanations (server overload vs. misconfiguration). Merged into a single entry with a clear explanation distinguishing it from `YTDLP_ERROR`. `DOWNLOAD_TIMEOUT` (which had a missing third column in the original) is already correct.
