@@ -1546,8 +1546,41 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         if ($exit_code >= 2) {
             return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
         }
+        // Unrecognised error with no specific classification — return null so callers
+        // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
+        return null;
     }
-    return null;
+    // Unclassified/unrecognised yt-dlp error — surface a generic error so the client
+    // knows something went wrong without being able to infer the specific cause.
+    // This is the fallback for classifyYtdlpError() returning null above.
+    return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
+}
+
+/**
+ * Validate that a client-supplied ?referer= parameter is a URL whose origin
+ * belongs to the set of allowed AhoyRipper origins. Rejects any origin not in
+ * $allowed_origins, preventing callers from making this server send arbitrary
+ * Referer headers via yt-dlp's --referer flag.
+ *
+ * @param string $referer  The raw referer value from $_GET['referer'].
+ * @return string          A safe origin to pass as --referer to yt-dlp.
+ *                         Returns 'https://ahoyripper.com/' when the input is
+ *                         invalid, empty, or not an allowed origin.
+ */
+function validateRefererParam(string $referer): string {
+    global $allowed_origins;
+    if ($referer === '') {
+        return 'https://ahoyripper.com/';
+    }
+    $parts = @parse_url($referer);
+    if (!is_array($parts)) {
+        return 'https://ahoyripper.com/';
+    }
+    $origin = ($parts['scheme'] ?? '') . '://' . ($parts['host'] ?? '');
+    if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
+        return 'https://ahoyripper.com/';
+    }
+    return $referer;
 }
 
 // Parse yt-dlp output to extract formats
@@ -3132,12 +3165,11 @@ switch ($action) {
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
-            // via ?referer= URL param (same pattern used by the download action at line 3801).
+            // via ?referer= URL param (same pattern used by the download action at line 4213).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
-            // for platforms that validate the referer header.
-            '--referer', isset($_GET['referer']) && $_GET['referer'] !== ''
-                ? $_GET['referer']
-                : 'https://ahoyripper.com/',
+            // for platforms that validate the referer header. validateRefererParam() returns
+            // a safe fallback when the provided origin is not in $allowed_origins.
+            '--referer', validateRefererParam($_GET['referer'] ?? ''),
             '--user-agent', AHOY_USER_AGENT,
         ]);
         // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
@@ -4173,13 +4205,11 @@ switch ($action) {
         });
 
         // yt-dlp sends the URL itself as referer by default. Allow per-request override
-        // via ?referer= URL param (same pattern used by the info action at line 184).
+        // via ?referer= URL param (same pattern used by the info action at line 3168).
         // A platform-specific referer (e.g. youtube.com) can improve extraction success
-        // on sites that validate the referer header. Falls back to ahoyripper.com if
-        // no override is provided, preventing the user's video URL from leaking.
-        $referer = isset($_GET['referer']) && $_GET['referer'] !== ''
-            ? $_GET['referer']
-            : 'https://ahoyripper.com/';
+        // on sites that validate the referer header. validateRefererParam() returns a safe
+        // fallback when the provided origin is not in $allowed_origins.
+        $referer = validateRefererParam($_GET['referer'] ?? '');
 
         // --socket-timeout: yt-dlp's per-connection timeout. Set to DOWNLOAD_TIMEOUT - 15s so
         // PHP's process-level timeout (DOWNLOAD_TIMEOUT) is always the outer limit and has time
