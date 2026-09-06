@@ -6040,6 +6040,9 @@ switch ($action) {
         // video URL. Consistent with the same null value in action=check and action=health.
         echo json_encode([
             'ok' => true,
+            'action' => $action,
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
             'request_id' => $request_id,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
