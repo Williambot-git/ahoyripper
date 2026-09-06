@@ -2913,6 +2913,7 @@ switch ($action) {
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report;');
                 header('Retry-After: 5');
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
                     'error' => 'Service temporarily unavailable.',
                     'error_code' => 'SERVICE_UNAVAILABLE',
