@@ -6313,6 +6313,13 @@ switch ($action) {
                     while (!feof($probe_pipes[1]) || !feof($probe_pipes[2])) {
                         if ((hrtime(true) - $probe_start) / 1e9 > HEALTH_PROBE_TIMEOUT) {
                             proc_terminate($probe_proc, 9);
+                            // Close pipes explicitly before nulling — unlike the normal exit path
+                            // (where proc_close closes pipes implicitly), proc_terminate() leaves
+                            // pipes open. Without explicit fclose() here, file descriptors leak
+                            // on every timed-out health probe. This mirrors the ffprobe download
+                            // timeout handler pattern (lines 5001-5004).
+                            foreach ($probe_pipes as $p) { if ($p) fclose($p); }
+                            $probe_pipes = null;
                             $probe_proc = null;  // sentinel: prevents double proc_close() below
                             $probe_err = "Process timed out after " . HEALTH_PROBE_TIMEOUT . "s";
                             break;
