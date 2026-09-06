@@ -3098,6 +3098,10 @@ switch ($action) {
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
+            // Capture baseline BEFORE incrementing so refundQuota() can detect
+            // whether the count has been modified by another request since then
+            // (c > baseline guard prevents double-refund on concurrent errors).
+            $info_quota_before_refund = $daily_data['c'];
             $daily_data['c']++;
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
@@ -3106,14 +3110,6 @@ switch ($action) {
             flock($daily_fp, LOCK_UN);
             fclose($daily_fp);  // explicitly close to release lock without waiting for GC
             $daily_fp = null;
-            // Refund guard baseline: captured AFTER the increment is persisted so
-            // the classified-error refund block can detect whether the quota file
-            // was modified by another request since this increment (prevents
-            // double-refund when concurrent requests hit different error paths).
-            // This is the count AFTER increment — refundQuota's c > baseline guard
-            // will only decrement if the stored count is still above this value,
-            // meaning this request's increment hasn't been refunded by a concurrent req.
-            $info_quota_before_refund = $daily_data['c'];
 
             // Surface daily quota state so the client can display remaining rips.
             // Show how many rips remain AFTER this request: limit minus the new count.
@@ -3579,9 +3575,10 @@ switch ($action) {
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and other error responses.
-                // Quota was incremented before this error path; the refund above reversed it.
-                // post-refund count is the pre-increment baseline since the increment was undone.
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $info_quota_before_refund) : -1,
+                // Quota was incremented then refunded (refundQuota reverts it on error).
+                // post-refund count = pre-increment baseline (refund decremented the file),
+                // so quota_remaining = limit - baseline.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $info_quota_before_refund - 1) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
@@ -4179,11 +4176,14 @@ switch ($action) {
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
+            // Capture baseline BEFORE incrementing so refundQuota() can detect
+            // whether the count has been modified by another request since then
+            // (c > baseline guard prevents double-refund on concurrent errors).
+            $dl_quota_before_refund = $daily_data['c'];
             $daily_data['c']++;
             // Refund guard: if proc_open fails below, we decrement here to reverse
             // the increment. This is the pre-refund baseline — must stay in sync
             // with the refund block that runs on download failure.
-            $dl_quota_before_refund = $daily_data['c'];
             ftruncate($daily_fp, 0);
             rewind($daily_fp);
             fwrite($daily_fp, json_encode($daily_data));
