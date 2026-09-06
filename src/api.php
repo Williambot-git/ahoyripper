@@ -4444,6 +4444,13 @@ switch ($action) {
                 // that prevents the post-loop proc_close() from running on an
                 // already-closed handle (avoids double-close).
                 proc_terminate($proc, 9);
+                // Unlike the normal exit path (where proc_close closes pipes implicitly),
+                // proc_terminate() leaves pipes open. Without explicit fclose() here,
+                // file descriptors leak on every timed-out download. This mirrors the
+                // info action timeout handler (line ~3323) and the ffprobe download
+                // timeout handler (line ~5001). Setting $proc = null also serves as a
+                // sentinel that prevents the post-loop proc_close() from running.
+                foreach ($pipes as $i => $p) { if ($p !== null && is_resource($p)) { fclose($p); $pipes[$i] = null; } }
                 $proc = null;  // sentinel: post-loop proc_close() skips this
                 $proc_killed = true;
                 // Use glob pattern — $out_file was never set in this scope.
