@@ -20,6 +20,9 @@ User-agent: Google-Extended
 User-agent: GPTBot
 User-agent: GoogleOther
 User-agent: GrokBot
+User-agent: DeepSeekBot
+User-agent: SentiBot
+User-agent: AnthropicBot
 User-agent: ImagesiftBot
 User-agent: KenjinBot
 User-agent: Meta-ExternalAgent
