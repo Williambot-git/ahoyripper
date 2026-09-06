@@ -1954,12 +1954,22 @@ test('INVALID_FORMAT_ID: INFO_TIMEOUT constant is defined (prerequisite for X-In
 // source_url and source_url_missing fields for consistency with all other
 // error responses. source_url_missing is false (not absent) because the client
 // did provide a URL — it simply hit the daily quota before yt-dlp was invoked.
+// DAILY_LIMIT also includes retry_after (delta-seconds to midnight UTC reset),
+// quota_remaining (0 — limit exhausted), quota_limit, quota_reset (ISO string),
+// and quota_reset_unix (Unix timestamp) so clients can display a reset timer.
+$tomorrow_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+$tomorrow_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
 $daily_limit_info_response = [
     'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
     'error_code' => 'DAILY_LIMIT',
     'action' => 'info',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'retry_after' => max(0, (int)($tomorrow_ts - time())),
+    'quota_remaining' => 0,
+    'quota_limit' => 5,
+    'quota_reset' => $tomorrow_iso,
+    'quota_reset_unix' => (int)$tomorrow_ts,
 ];
 test('DAILY_LIMIT (info): source_url_missing key exists',
     array_key_exists('source_url_missing', $daily_limit_info_response));
@@ -1969,6 +1979,20 @@ test('DAILY_LIMIT (info): source_url is the provided URL string',
     ($daily_limit_info_response['source_url'] ?? null) === 'https://example.com/video');
 test('DAILY_LIMIT (info): error_code is DAILY_LIMIT',
     ($daily_limit_info_response['error_code'] ?? '') === 'DAILY_LIMIT');
+test('DAILY_LIMIT (info): retry_after is a non-negative integer (seconds to reset)',
+    is_int($daily_limit_info_response['retry_after'] ?? null) && $daily_limit_info_response['retry_after'] >= 0);
+test('DAILY_LIMIT (info): retry_after is positive when well before midnight UTC',
+    ($daily_limit_info_response['retry_after'] ?? -1) > 0);
+test('DAILY_LIMIT (info): quota_remaining is 0 (limit exhausted)',
+    ($daily_limit_info_response['quota_remaining'] ?? 999) === 0);
+test('DAILY_LIMIT (info): quota_limit is a positive integer',
+    is_int($daily_limit_info_response['quota_limit'] ?? null) && $daily_limit_info_response['quota_limit'] > 0);
+test('DAILY_LIMIT (info): quota_reset is ISO 8601 string',
+    is_string($daily_limit_info_response['quota_reset'] ?? null));
+test('DAILY_LIMIT (info): quota_reset_unix is a future Unix timestamp',
+    is_int($daily_limit_info_response['quota_reset_unix'] ?? null) && $daily_limit_info_response['quota_reset_unix'] > time());
+test('DAILY_LIMIT (info): quota_reset_unix matches quota_reset timestamp',
+    $daily_limit_info_response['quota_reset_unix'] === (new DateTime($daily_limit_info_response['quota_reset']))->getTimestamp());
 
 $daily_limit_download_response = [
     'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
@@ -1976,6 +2000,11 @@ $daily_limit_download_response = [
     'action' => 'download',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'retry_after' => max(0, (int)($tomorrow_ts - time())),
+    'quota_remaining' => 0,
+    'quota_limit' => 5,
+    'quota_reset' => $tomorrow_iso,
+    'quota_reset_unix' => (int)$tomorrow_ts,
 ];
 test('DAILY_LIMIT (download): source_url_missing key exists',
     array_key_exists('source_url_missing', $daily_limit_download_response));
@@ -1985,6 +2014,18 @@ test('DAILY_LIMIT (download): source_url is the provided URL string',
     ($daily_limit_download_response['source_url'] ?? null) === 'https://example.com/video');
 test('DAILY_LIMIT (download): error_code is DAILY_LIMIT',
     ($daily_limit_download_response['error_code'] ?? '') === 'DAILY_LIMIT');
+test('DAILY_LIMIT (download): retry_after is a non-negative integer (seconds to reset)',
+    is_int($daily_limit_download_response['retry_after'] ?? null) && $daily_limit_download_response['retry_after'] >= 0);
+test('DAILY_LIMIT (download): retry_after is positive when well before midnight UTC',
+    ($daily_limit_download_response['retry_after'] ?? -1) > 0);
+test('DAILY_LIMIT (download): quota_remaining is 0 (limit exhausted)',
+    ($daily_limit_download_response['quota_remaining'] ?? 999) === 0);
+test('DAILY_LIMIT (download): quota_limit is a positive integer',
+    is_int($daily_limit_download_response['quota_limit'] ?? null) && $daily_limit_download_response['quota_limit'] > 0);
+test('DAILY_LIMIT (download): quota_reset is ISO 8601 string',
+    is_string($daily_limit_download_response['quota_reset'] ?? null));
+test('DAILY_LIMIT (download): quota_reset_unix is a future Unix timestamp',
+    is_int($daily_limit_download_response['quota_reset_unix'] ?? null) && $daily_limit_download_response['quota_reset_unix'] > time());
 
 // ─── action=check response source_url_missing ────────────────────────────────
 // action=check is a read-only probe endpoint with no source video URL.
