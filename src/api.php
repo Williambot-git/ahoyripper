@@ -6436,7 +6436,11 @@ switch ($action) {
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
                         'action' => 'health',
-                        'source_url_missing' => false,
+                        // Omit source_url_missing: the probe URL (HEALTH_PROBE_URL) is set
+                        // below so the URL is not missing — only the fetch failed. The field
+                        // would misleadingly suggest "URL was provided but not found" when
+                        // the real meaning is "yt-dlp could not retrieve the probe URL".
+                        // This mirrors the successful probe result which also omits the field.
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
                         'source_url' => HEALTH_PROBE_URL,
