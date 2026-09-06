@@ -4700,7 +4700,7 @@ switch ($action) {
                     'error' => $err_classified['msg'],
                     'error_code' => $err_classified['code'],
                     'action' => 'download',
-                    'upgrade_url' => UPGRADE_URL,
+                    'upgrade_url' => $err_classified['upgrade_url'] ?? UPGRADE_URL,
                     'hint' => 'The download failed with a source error. Check the error message for details, try another format, or try again shortly.',
                     'request_id' => $request_id,
                     'source_url' => $url,
