@@ -116,6 +116,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (validate_referer_param_test.php) ──────
+echo "==> Running validate_referer_param_test.php (Referer validation tests)..."
+if php "$SCRIPT_DIR/validate_referer_param_test.php"; then
+    echo "✓ validate_referer_param_test.php: passed"
+else
+    echo "✗ validate_referer_param_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── Shell sanity checks ──────────────────────────────
 echo "==> Running sanity.sh (binary/syntax/deprecated-flag checks)..."
 if bash "$SCRIPT_DIR/sanity.sh"; then
