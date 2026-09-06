@@ -1878,6 +1878,7 @@ $missing_url_response = [
     'error' => 'No URL was provided.',
     'error_code' => 'MISSING_URL',
     'source_url' => null,
+    'video_url' => null,
     'source_url_missing' => true,
 ];
 test('MISSING_URL: source_url_missing key exists',
@@ -1886,6 +1887,8 @@ test('MISSING_URL: source_url_missing is boolean true',
     $missing_url_response['source_url_missing'] === true);
 test('MISSING_URL: source_url is null',
     $missing_url_response['source_url'] === null);
+test('MISSING_URL: video_url is null',
+    ($missing_url_response['video_url'] ?? null) === null);
 test('MISSING_URL: error_code is MISSING_URL',
     ($missing_url_response['error_code'] ?? '') === 'MISSING_URL');
 
@@ -1960,11 +1963,12 @@ test('INVALID_FORMAT_ID: INFO_TIMEOUT constant is defined (prerequisite for X-In
 $tomorrow_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
 $tomorrow_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
 $daily_limit_info_response = [
-    'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
+    'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, visit ' . UPGRADE_URL,
     'error_code' => 'DAILY_LIMIT',
     'action' => 'info',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'video_url' => null,
     'retry_after' => max(0, (int)($tomorrow_ts - time())),
     'quota_remaining' => 0,
     'quota_limit' => 5,
@@ -1977,6 +1981,8 @@ test('DAILY_LIMIT (info): source_url_missing is boolean false',
     $daily_limit_info_response['source_url_missing'] === false);
 test('DAILY_LIMIT (info): source_url is the provided URL string',
     ($daily_limit_info_response['source_url'] ?? null) === 'https://example.com/video');
+test('DAILY_LIMIT (info): video_url is null (daily quota hit before video resolution)',
+    ($daily_limit_info_response['video_url'] ?? null) === null);
 test('DAILY_LIMIT (info): error_code is DAILY_LIMIT',
     ($daily_limit_info_response['error_code'] ?? '') === 'DAILY_LIMIT');
 test('DAILY_LIMIT (info): retry_after is a non-negative integer (seconds to reset)',
@@ -1995,11 +2001,12 @@ test('DAILY_LIMIT (info): quota_reset_unix matches quota_reset timestamp',
     $daily_limit_info_response['quota_reset_unix'] === (new DateTime($daily_limit_info_response['quota_reset']))->getTimestamp());
 
 $daily_limit_download_response = [
-    'error' => 'Daily limit reached. You get 5 free lookups per day. For unlimited access, get AhoyVPN.',
+    'error' => 'Daily limit reached. You get 5 free rips per day. For unlimited access, visit ' . UPGRADE_URL,
     'error_code' => 'DAILY_LIMIT',
     'action' => 'download',
     'source_url' => 'https://example.com/video',
     'source_url_missing' => false,
+    'video_url' => null,
     'retry_after' => max(0, (int)($tomorrow_ts - time())),
     'quota_remaining' => 0,
     'quota_limit' => 5,
@@ -2012,6 +2019,8 @@ test('DAILY_LIMIT (download): source_url_missing is boolean false',
     $daily_limit_download_response['source_url_missing'] === false);
 test('DAILY_LIMIT (download): source_url is the provided URL string',
     ($daily_limit_download_response['source_url'] ?? null) === 'https://example.com/video');
+test('DAILY_LIMIT (download): video_url is null (daily quota hit before video resolution)',
+    ($daily_limit_download_response['video_url'] ?? null) === null);
 test('DAILY_LIMIT (download): error_code is DAILY_LIMIT',
     ($daily_limit_download_response['error_code'] ?? '') === 'DAILY_LIMIT');
 test('DAILY_LIMIT (download): retry_after is a non-negative integer (seconds to reset)',
@@ -2026,6 +2035,65 @@ test('DAILY_LIMIT (download): quota_reset is ISO 8601 string',
     is_string($daily_limit_download_response['quota_reset'] ?? null));
 test('DAILY_LIMIT (download): quota_reset_unix is a future Unix timestamp',
     is_int($daily_limit_download_response['quota_reset_unix'] ?? null) && $daily_limit_download_response['quota_reset_unix'] > time());
+
+// ─── RATE_LIMIT_EXCEEDED response fields ───────────────────────────────────────
+// RATE_LIMIT_EXCEEDED is the per-minute rate-limit response (429). It fires before
+// URL validation, so source_url is null. The full response structure mirrors
+// MISSING_URL for consistency — action, video_url, format_id, platform, and
+// all standard quota/header fields are included so API clients have a complete
+// error response regardless of which gate rejected the request.
+$rate_limit_exceeded_response = [
+    'error' => 'Too many requests. Slow down.',
+    'error_code' => 'RATE_LIMIT_EXCEEDED',
+    'action' => 'info',
+    'upgrade_url' => UPGRADE_URL,
+    'retry_after' => 60,
+    'request_id' => 'abc123',
+    'source_url' => null,
+    'video_url' => null,
+    'source_url_missing' => false,
+    'format_id_missing' => false,
+    'format_id' => null,
+    'platform' => null,
+    'yt_dlp_version' => null,
+    'api_version' => AHOYRIPPER_VERSION,
+    'quota_remaining' => -1,
+    'quota_limit' => 5,
+    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+];
+test('RATE_LIMIT_EXCEEDED: error_code is RATE_LIMIT_EXCEEDED',
+    ($rate_limit_exceeded_response['error_code'] ?? '') === 'RATE_LIMIT_EXCEEDED');
+test('RATE_LIMIT_EXCEEDED: action is present',
+    array_key_exists('action', $rate_limit_exceeded_response));
+test('RATE_LIMIT_EXCEEDED: action is info',
+    ($rate_limit_exceeded_response['action'] ?? '') === 'info');
+test('RATE_LIMIT_EXCEEDED: source_url is null (rate-limit fires before URL validation)',
+    ($rate_limit_exceeded_response['source_url'] ?? null) === null);
+test('RATE_LIMIT_EXCEEDED: video_url is null',
+    ($rate_limit_exceeded_response['video_url'] ?? null) === null);
+test('RATE_LIMIT_EXCEEDED: source_url_missing is false (URL was provided, not missing)',
+    ($rate_limit_exceeded_response['source_url_missing'] ?? null) === false);
+test('RATE_LIMIT_EXCEEDED: format_id_missing is false',
+    ($rate_limit_exceeded_response['format_id_missing'] ?? null) === false);
+test('RATE_LIMIT_EXCEEDED: format_id is null',
+    ($rate_limit_exceeded_response['format_id'] ?? null) === null);
+test('RATE_LIMIT_EXCEEDED: platform is null',
+    ($rate_limit_exceeded_response['platform'] ?? null) === null);
+test('RATE_LIMIT_EXCEEDED: retry_after is non-negative integer',
+    is_int($rate_limit_exceeded_response['retry_after'] ?? null) && $rate_limit_exceeded_response['retry_after'] >= 0);
+test('RATE_LIMIT_EXCEEDED: upgrade_url is present',
+    array_key_exists('upgrade_url', $rate_limit_exceeded_response));
+test('RATE_LIMIT_EXCEEDED: quota_remaining is -1 (unknown at rate-limit gate)',
+    ($rate_limit_exceeded_response['quota_remaining'] ?? null) === -1);
+test('RATE_LIMIT_EXCEEDED: quota_limit is positive integer',
+    is_int($rate_limit_exceeded_response['quota_limit'] ?? null) && $rate_limit_exceeded_response['quota_limit'] > 0);
+test('RATE_LIMIT_EXCEEDED: quota_reset is ISO 8601 string',
+    is_string($rate_limit_exceeded_response['quota_reset'] ?? null));
+test('RATE_LIMIT_EXCEEDED: quota_reset_unix is future Unix timestamp',
+    is_int($rate_limit_exceeded_response['quota_reset_unix'] ?? null) && $rate_limit_exceeded_response['quota_reset_unix'] > time());
+test('RATE_LIMIT_EXCEEDED: quota_reset_unix matches quota_reset timestamp',
+    $rate_limit_exceeded_response['quota_reset_unix'] === (new DateTime($rate_limit_exceeded_response['quota_reset']))->getTimestamp());
 
 // ─── action=check response source_url_missing ────────────────────────────────
 // action=check is a read-only probe endpoint with no source video URL.

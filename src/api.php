@@ -549,15 +549,20 @@ if ($is_rate_limited) {
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
+                'action' => $action,
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
                 'request_id' => $request_id,
                 'source_url' => null,
+                // video_url: null — rate-limit gate fires before URL validation,
+                // so no video URL has been resolved at this point.
+                'video_url' => null,
                 // source_url_missing: false — rate-limit gate fires before URL validation,
                 // so the URL field being null here reflects that validation has not yet run,
                 // not that a URL was explicitly invalid. Same pattern for format_id_missing.
                 'source_url_missing' => false,
                 'format_id_missing' => false,
+                'format_id' => null,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
