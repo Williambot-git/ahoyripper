@@ -1376,7 +1376,7 @@ fi
 
 echo ""
 echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
-# COOP and CORP each appear 14 times legitimately:
+# COOP and CORP each appear 15 times legitimately:
 #   - 1 at server level (base hardening for all responses)
 #   - 1 in /csp-report location block — /csp-report is a PHP endpoint and needs its
 #     own headers because server-level add_header directives are NOT inherited by
@@ -1394,14 +1394,16 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #     limit_req burst rejections (503) — bypasses PHP so headers must be at nginx level.
 #   - 1 in /src/api.php location block for the API endpoint
 #   - 1 in the catch-all `location /` block (try_files fallback)
+#   - 1 in the `location ~ \.php$` block (PHP fallback — all security headers
+#     needed here because this regex location overrides server-level add_header)
 # PHP's api.php sets COOP/CORP itself, but the /csp-report handler (PHP) does not
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 14 ] && [ "$CORP_COUNT" -eq 14 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /og-image.webp + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location /)"
+if [ "$COOP_COUNT" -eq 15 ] && [ "$CORP_COUNT" -eq 15 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /og-image.webp + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location / + location ~ \.php$)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 14), CORP appears $CORP_COUNT times (expected 14)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 15), CORP appears $CORP_COUNT times (expected 15)"
     exit 1
 fi
 
