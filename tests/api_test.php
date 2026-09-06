@@ -2148,57 +2148,70 @@ test("unlimited key holder: quota_remaining = -1",
 
 echo "\n==> Testing ffprobe failure quota refund condition\n";
 
-// $ffprobe_ok: probe_exit === 0 AND probe_out is non-empty
+// $probe_attempted && $probe_exit !== 0 → refund
+// $probe_attempted && $probe_exit === 0 → no refund (success)
+// !$probe_attempted → no refund (skipped; user got a file)
 // $unlimited: true = skip refund (never had quota incremented)
 // $dl_quota_before_refund: isset = quota was incremented (baseline set)
-// refund when: !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)
 
 $unlimited = false;
 $dl_quota_before_refund = 3;
 
 // ffprobe succeeded → no refund
+$probe_attempted = true;
 $probe_exit = 0;
 $probe_out = '{"streams":[{"codec_name":"h264","width":1920,"height":1080}]}';
-$ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-$should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
 test('ffprobe succeeded → no quota refund',
     $should_refund === false);
 
 // ffprobe timed out (probe_exit = -1, unset probe_out) → refund
+$probe_attempted = true;
 $probe_exit = -1;
 $probe_out = '';
-$ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-$should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
 test('ffprobe timed out → quota refund',
     $should_refund === true);
 
 // ffprobe non-zero exit (e.g. corrupt file) → refund
+$probe_attempted = true;
 $probe_exit = 1;
 $probe_out = '';
-$ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-$should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
 test('ffprobe non-zero exit → quota refund',
     $should_refund === true);
 
 // ffprobe succeeded (exit=0) but output is empty (no video stream detected).
-// The refund condition in api.php models ffprobe_ok as: isset($probe_exit) && $probe_exit === 0
-// (probe_out is checked separately in the actual ffprobe probe block, not in ffprobe_ok itself).
-// Since ffprobe_exit===0, ffprobe_ok=true → no refund.
+// Since ffprobe_exit===0, probe_attempted=true → no refund.
 // Rationale: ffprobe succeeded as a binary; the empty output is a data-level issue
 // (no video stream in the file), not an infrastructure failure.
+$probe_attempted = true;
 $probe_exit = 0;
 $probe_out = '';
-$ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-$should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
 test('ffprobe exit=0 but empty output → no refund (binary succeeded, data issue)',
     $should_refund === false);
 
+// ffprobe was skipped because the format is audio-only.
+// $probe_exit is pre-initialized to 0 (audio-only sentinel, means "success/no refund").
+// $probe_attempted===false means ffprobe block was never entered.
+// With probe_exit=0, the old buggy condition would be:
+//   isset(0) && 0===0 = true  → wrongly refunds audio-only rips!
+// The new condition: probe_attempted && probe_exit !== 0 = false  → no refund (correct).
+$probe_attempted = false;
+$probe_exit = 0;  // audio-only sentinel value (not -1)
+$probe_out = '';
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
+test('ffprobe skipped (audio-only format, probe_exit=0 sentinel) → no quota refund',
+    $should_refund === false,
+    "old bug: isset(0)&&0===0=TRUE would wrongly refund audio-only; fix: !probe_attempted short-circuits");
+
 // unlimited-key holder → no refund regardless of ffprobe result
 $unlimited = true;
+$probe_attempted = true;
 $probe_exit = -1;
 $probe_out = '';
-$ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-$should_refund = !$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund);
+$should_refund = $probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund);
 test('unlimited-key holder → no quota refund (even when ffprobe fails)',
     $should_refund === false);
 

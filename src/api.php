@@ -4953,7 +4953,13 @@ switch ($action) {
         // Set probe_exit=0 upfront for skipped (audio-only) case — needed so the
         // refund condition (line ~4703) correctly treats "not run" as "success" (no refund).
         // When ffprobe runs, probe_exit is set inside the block below.
+        // Track whether ffprobe was actually attempted: $probe_exit is set to 0 or -1
+        // depending on audio detection, but $probe_attempted is only set to true when
+        // the ffprobe proc_open block is entered (covers all skip reasons: missing file,
+        // non-executable binary, audio-only format). The refund condition uses
+        // $probe_attempted to distinguish "ffprobe skipped" from "ffprobe failed".
         $probe_exit = $is_audio_only_format ? 0 : -1;
+        $probe_attempted = false;
         if (!$is_audio_only_format && !$is_bare_audio_id
             && is_file($actual_file) && is_executable($ffprobe_bin)) {
             // JSON probe — video stream only, no audio needed for substitution check.
@@ -4977,6 +4983,7 @@ switch ($action) {
             $probe_start = hrtime(true);
             $probe_timeout = FFPROBE_TIMEOUT; // outer kill timeout — ffprobe should finish in under 10s for any real file
             $probe_proc = proc_open($probe_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $probe_pipes, null, [], ['bypass_shell' => true]);
+            $probe_attempted = true;
             if ($probe_proc) {
                 $probe_exit = 0; // proc_open succeeded — will be overwritten by proc_close
                 fclose($probe_pipes[0]);
@@ -5269,19 +5276,17 @@ switch ($action) {
         // Since the substitution-detection info is unreliable in these cases, the user
         // effectively received the same outcome as if no ffprobe had run.
         // Refunding is the consistent choice: we refund on all yt-dlp failures regardless of
-        // classified/unclassified status, so ffprobe failures (which are outside the user's
-        // control) deserve the same treatment.
-        // Skip when: ffprobe succeeded ($probe_exit === 0), audio-only (no probe ran),
-        // or user is unlimited-key holder ($unlimited=true — never had quota incremented).
-        // $probe_exit is only set inside the ffprobe block (line 4245), so isset() distinguishes
-        // "ffprobe ran and exited 0" (no refund) from "ffprobe ran and failed" or "ffprobe
-        // was skipped" (both get a refund). The distinction between failure and skip is
-        // made by the probe_exit value: 0 = success (no refund), -1 or non-zero = fail/refund.
-        // A non-existent FFPROBE_PATH causes is_executable() to return false, the if block
-        // is never entered, $probe_exit is never set, and this refund fires — correct
-        // behavior since the user shouldn't be charged when ffprobe couldn't even be attempted.
-        $ffprobe_ok = isset($probe_exit) && $probe_exit === 0;
-        if (!$ffprobe_ok && !$unlimited && isset($dl_quota_before_refund)) {
+        // Refund quota when ffprobe was actually attempted AND failed (exit !== 0).
+        // Do NOT refund when:
+        //   - ffprobe succeeded ($probe_attempted && $probe_exit === 0): file verified, keep quota
+        //   - ffprobe was never attempted ($probe_attempted === false): skip (audio-only, missing
+        //     file, non-executable binary) — user got a file, no refund needed; the probe_exit
+        //     sentinel distinguishes audio-only ($probe_exit=0) from non-audio skip ($probe_exit=-1)
+        //   - user is an unlimited-key holder ($unlimited=true): never had quota incremented
+        // $probe_attempted is set to true only when the ffprobe proc_open block is entered.
+        // The X-FFProbe-Status header (set below) uses probe_exit to distinguish:
+        //   'success' (probe_exit === 0), 'failed' (probe_exit !== 0), 'skipped' (never attempted).
+        if ($probe_attempted && $probe_exit !== 0 && !$unlimited && isset($dl_quota_before_refund)) {
             $post_refund_count = refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
         }
         // Surface ffprobe verification outcome in response headers for client diagnostics.
@@ -5289,7 +5294,7 @@ switch ($action) {
         // X-Request-ID is always set on every API response; add it here for consistency
         // with all other download response paths (empty-file, timeout, proc failure, etc.).
         // NOTE: Connection: close was already sent before the streaming loop (line 4864).
-        header('X-FFProbe-Status: ' . ($ffprobe_ok ? 'success' : 'skipped'));
+        header('X-FFProbe-Status: ' . (!$probe_attempted ? 'skipped' : ($probe_exit === 0 ? 'success' : 'failed')));
         header('X-Request-ID: ' . $request_id);
         header('Retry-After: 0');
 
