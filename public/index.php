@@ -691,7 +691,7 @@ window.addEventListener('appinstalled', function() {
     'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
     'SOURCE_HTTP_ERROR': 'The source site returned HTTP 4xx/5xx and is having issues. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'FORMAT_UNAVAILABLE': 'That format is not available for this video. Select another from the list above.',
-    'ANALYTICS_ACTION': 'Internal analytics action — not usable directly. Use a supported action: info, download, check, health, progress, client-error, or csp-report.',
+    'ANALYTICS_ACTION': 'Internal analytics action — not usable directly. Use a supported action: info, download, check, health, progress, analytics, client-error, or csp-report.',
     'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
     'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
     'PROBE_FAILED': 'Could not verify that yt-dlp is working. The server may be misconfigured or yt-dlp is not installed. Try again or contact support.',

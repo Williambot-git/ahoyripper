@@ -5615,6 +5615,8 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                     // quota fields: included for consistency with all other download error responses.
                     // Quota was not charged since no usable file was received.
                     'quota_remaining' => $unlimited ? -1 : $post_refund_count,
