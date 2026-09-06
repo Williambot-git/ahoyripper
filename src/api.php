@@ -2175,6 +2175,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
     if (!$url) {
         http_response_code(400);
+        // Cache-Control: no-store — prevents all API responses from being cached.
+        // Validation errors must never be cached or reused by shared caches/CDNs.
+        header('Cache-Control: no-store');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('X-Download-Options: noopen');
@@ -2249,6 +2252,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     }
     if (!isValidUrl($url)) {
         http_response_code(400);
+        // Cache-Control: no-store — prevents all API responses from being cached.
+        // Validation errors must never be cached or reused by shared caches/CDNs.
+        header('Cache-Control: no-store');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('X-Download-Options: noopen');
