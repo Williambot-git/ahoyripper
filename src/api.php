@@ -6532,6 +6532,8 @@ switch ($action) {
             header('Referrer-Policy: strict-origin-when-cross-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
             // X-Info-Timeout and X-Download-Timeout: present on all API responses.
             // CSP-report 405 block was missing these — add for consistency with check/health.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
