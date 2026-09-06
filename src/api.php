@@ -5489,6 +5489,8 @@ switch ($action) {
             header('X-DailyLimit-Remaining: ' . (!$unlimited ? $post_refund_count : -1));
             header('X-DailyLimit-Reset: ' . (!$unlimited ? $quota_reset_ts : -1));
             header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-FFProbe-Status: ffprobe was never reached — the file could not be opened
             // for reading, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
