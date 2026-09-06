@@ -2222,6 +2222,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Including this field provides consistent structure across all validation-error responses.
             'format_id_missing' => false,
             'format_id' => null,
+            // platform: null — MISSING_URL fires before platform detection.
+            // Consistent with the same null value in INVALID_URL (URL too long),
+            // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
+            'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => date('c'),
