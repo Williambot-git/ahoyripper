@@ -1521,6 +1521,65 @@ window.addEventListener('appinstalled', function() {
       }
     }
 
+    // Updates the quota UI from a JSON response body (success or error).
+    // Reads quota_remaining / quota_limit from the body rather than headers,
+    // then persists to localStorage so the correct value is shown on reload.
+    function updateQuotaFromBody(data) {
+      if (!data || typeof data.quota_remaining !== 'number') { return; }
+      var qel = document.getElementById('quotaDisplay');
+      var qlimEl = document.getElementById('quotaLimit');
+      var qlabelEl = document.getElementById('quotaLabel');
+      var qupgradeEl = document.getElementById('quotaUpgrade');
+      if (qel) {
+        qel.textContent = data.quota_remaining >= 0 ? data.quota_remaining : '';
+        if (data.quota_remaining <= 2 && data.quota_remaining >= 0) {
+          qel.classList.add('low');
+        } else {
+          qel.classList.remove('low');
+        }
+        if (data.quota_remaining === 0) {
+          qel.classList.add('exhausted');
+        } else {
+          qel.classList.remove('exhausted');
+        }
+      }
+      if (qlimEl) {
+        qlimEl.textContent = (data.quota_limit > 0) ? '/' + data.quota_limit : '';
+      }
+      if (data.quota_remaining === -1 && qlabelEl) {
+        qlabelEl.style.display = 'none';
+        if (qel) qel.style.display = 'none';
+        if (qlimEl) qlimEl.style.display = 'none';
+      }
+      if (qupgradeEl) {
+        if (data.quota_remaining <= 0 && data.quota_remaining !== -1) {
+          qupgradeEl.textContent = 'upgrade now';
+          qupgradeEl.style.fontWeight = '700';
+          qupgradeEl.style.color = 'var(--color-error)';
+        } else {
+          qupgradeEl.textContent = 'get unlimited';
+          qupgradeEl.style.fontWeight = '500';
+          qupgradeEl.style.color = '';
+        }
+      }
+      // Persist to localStorage for reload correctness.
+      if (data.quota_remaining === -1) {
+        localStorage.setItem('ahoyrip_quota_unlimited', '1');
+        localStorage.removeItem('ahoyrip_quota_remaining');
+        localStorage.removeItem('ahoyrip_quota_limit');
+        localStorage.removeItem('ahoyrip_quota_reset');
+      } else if (data.quota_remaining >= 0) {
+        localStorage.setItem('ahoyrip_quota_remaining', data.quota_remaining);
+        localStorage.removeItem('ahoyrip_quota_unlimited');
+        if (data.quota_limit > 0) {
+          localStorage.setItem('ahoyrip_quota_limit', data.quota_limit);
+        }
+        if (data.quota_reset) {
+          localStorage.setItem('ahoyrip_quota_reset', data.quota_reset);
+        }
+      }
+    }
+
     try {
       const keyInput = document.getElementById('apiKey');
       const key = keyInput ? keyInput.value : '';
@@ -1629,6 +1688,12 @@ window.addEventListener('appinstalled', function() {
         if (raw) {
           msg += ': ' + raw;
         }
+        // Update the quota UI from the error response body so the user sees
+        // the correct remaining count (e.g. 0 after a DAILY_LIMIT error) even
+        // though the request failed. Also persists to localStorage for reload.
+        if (typeof err === 'object' && err !== null) {
+          updateQuotaFromBody(err);
+        }
         showError(msg);
         return;
       }
@@ -1660,46 +1725,7 @@ window.addEventListener('appinstalled', function() {
       // headers. This ensures the quota display is updated on the SUCCESS path
       // even when headers are unavailable or cross-origin restrictions apply.
       // The unlimited-key sentinel is -1 for all three fields.
-      if (data && typeof data.quota_remaining === 'number') {
-        var qel = document.getElementById('quotaDisplay');
-        var qlimEl = document.getElementById('quotaLimit');
-        var qlabelEl = document.getElementById('quotaLabel');
-        var qupgradeEl = document.getElementById('quotaUpgrade');
-        if (qel) {
-          // Only show non-negative values; -1 means "not applicable" (unlimited).
-          qel.textContent = data.quota_remaining >= 0 ? data.quota_remaining : '';
-          if (data.quota_remaining <= 2 && data.quota_remaining >= 0) {
-            qel.classList.add('low');
-          } else {
-            qel.classList.remove('low');
-          }
-          if (data.quota_remaining === 0) {
-            qel.classList.add('exhausted');
-          } else {
-            qel.classList.remove('exhausted');
-          }
-        }
-        if (qlimEl) {
-          qlimEl.textContent = (data.quota_limit > 0) ? '/' + data.quota_limit : '';
-        }
-        // Unlimited-key holders get -1: hide the entire quota UI row.
-        if (data.quota_remaining === -1 && qlabelEl) {
-          qlabelEl.style.display = 'none';
-          if (qel) qel.style.display = 'none';
-          if (qlimEl) qlimEl.style.display = 'none';
-        }
-        if (qupgradeEl) {
-          if (data.quota_remaining <= 0 && data.quota_remaining !== -1) {
-            qupgradeEl.textContent = 'upgrade now';
-            qupgradeEl.style.fontWeight = '700';
-            qupgradeEl.style.color = 'var(--color-error)';
-          } else {
-            qupgradeEl.textContent = 'get unlimited';
-            qupgradeEl.style.fontWeight = '500';
-            qupgradeEl.style.color = '';
-          }
-        }
-      }
+      updateQuotaFromBody(data);
       // If a newer fetch started while this one was in flight, discard its result
       // to prevent a stale response from overwriting fresher data already rendered.
       if (_myFetchId !== _fetchId) { return; }
