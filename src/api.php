@@ -2535,11 +2535,13 @@ define('AHOY_USER_AGENT', getenv('AHOY_USER_AGENT') ?: 'Mozilla/5.0 (Windows NT 
 // Set to '' (empty string) to disable impersonation entirely. The --user-agent
 // flag is still passed alongside --impersonate so both the TLS fingerprint and
 // the HTTP User-Agent header match when impersonation is enabled.
-// Use ?? (null coalescing) instead of ?: (ternary) so that an explicitly set
-// empty-string AHOY_IMPERSONATE disables impersonation and returns 204.
-// PHP's getenv() returns false (not '') for an unset var, and ?: treats both
-// false and '' as falsy — ?? distinguishes them by only falling back on null (unset).
-define('AHOY_IMPERSONATE', getenv('AHOY_IMPERSONATE') ?? 'chrome');
+// Uses an explicit guard so both unset (false) and empty-string ('') fall through
+// to the default 'chrome', while any non-empty value (including 'chrome', 'firefox')
+// is used as-is. This matches the pattern used for all other configurable constants
+// in this file. Use the same guard pattern as INFO_TIMEOUT, RATE_LIMIT, etc.
+$_raw_impersonate = getenv('AHOY_IMPERSONATE');
+define('AHOY_IMPERSONATE', ($_raw_impersonate !== false && $_raw_impersonate !== '') ? $_raw_impersonate : 'chrome');
+unset($_raw_impersonate);
 
 // Path to a Netscape-format cookies.txt file for authenticated requests
 // (age-restricted YouTube, Spotify, etc.). Set via COOKIES_PATH env var or
