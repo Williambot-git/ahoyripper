@@ -725,11 +725,24 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 {
   "error": "This video is geo-restricted in your region.",
   "error_code": "GEOBLOCKED",
+  "action": "download",
+  "hint": "This video is not available in your region. Use AhoyVPN to connect from a different country.",
   "request_id": "a3f1b2c9d4e5f678",
   "source_url": "https://www.youtube.com/watch?v=...",
+  "source_url_missing": false,
+  "format_id_missing": false,
+  "format_id": "bestaudio[ext=m4a]",
+  "platform": "YouTube",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "server_time": "2026-09-06T22:30:00+00:00",
+  "server_time_unix": 1725658200,
   "upgrade_url": "https://ahoyvpn.com",
+  "retry_after": 300,
+  "quota_remaining": 4,
+  "quota_limit": 5,
+  "quota_reset": "2026-09-07T00:00:00+00:00",
+  "quota_reset_unix": 1725686400,
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -739,11 +752,24 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 {
   "error": "Download failed: requested format not available.",
   "error_code": "YTDLP_ERROR",
+  "action": "download",
+  "hint": "Refresh the format list and select a valid format ID from the info response.",
   "request_id": "a3f1b2c9d4e5f678",
   "source_url": "https://www.youtube.com/watch?v=...",
+  "source_url_missing": false,
+  "format_id_missing": false,
+  "format_id": "invalid-format",
+  "platform": "YouTube",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "server_time": "2026-09-06T22:30:00+00:00",
+  "server_time_unix": 1725658200,
   "upgrade_url": "https://ahoyvpn.com",
+  "retry_after": 0,
+  "quota_remaining": 4,
+  "quota_limit": 5,
+  "quota_reset": "2026-09-07T00:00:00+00:00",
+  "quota_reset_unix": 1725686400,
   "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
