@@ -717,7 +717,7 @@ header('X-DL-RateLimit-Window: ' . $dl_window_label);
 // both names maintains backwards compatibility with any clients that use the
 // older 'progress' action name while guiding new integrations toward 'health'.
 // 'analytics' is listed here so the default: block doesn't route it to
-// UNKNOWN_ACTION. It is handled by its own case at line 6403.
+// UNKNOWN_ACTION. It is handled by its own case at line 6612.
 $internal_actions = ['analytics', 'check', 'health', 'progress', 'csp-report', 'client-error'];
 // NOTE: $action is already declared at line 75 before the rate-limit gate.
 if (in_array($action, $internal_actions, true)) {
@@ -1218,7 +1218,7 @@ if (!$GLOBALS['__ytdlp_version']) {
     // ("sh: 1: /usr/local/bin/yt-dlp: not found"), proc_open with bypass_shell
     // does not generate a shell error message — the absence is indicated by
     // $ver === '' alone. The strpos($ver, 'not installed') check handles the
-    // sentinel string (used by the ffmpeg probe). The health check (line 5116)
+    // sentinel string (used by the ffmpeg probe). The health probe (line 6187)
     // uses strpos($version, 'not installed') === false to detect "not installed",
     // so this sentinel must be consistent.
     if ($ver === '' || strpos($ver, 'not installed') !== false) {
@@ -6885,7 +6885,6 @@ switch ($action) {
             'server_time_unix' => time(),
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'upgrade_url' => UPGRADE_URL,
             // source_url is null here because an unknown action has no associated video URL.
             // This matches the pattern used by MISSING_URL (source_url: null) and ensures
             // all API error responses have a consistent top-level shape.
