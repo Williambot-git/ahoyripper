@@ -2334,7 +2334,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
-            'error_code' => 'INVALID_URL',
+            'error_code' => 'URL_TOO_LONG',
             'action' => $action,
             // retry_after: 0 signals "retry immediately once input is corrected" — a
             // validation error has no server-side backoff; the client just needs to
@@ -3508,6 +3508,7 @@ switch ($action) {
                 // than "Bad Request" (malformed syntax). Kept here so the map fully
                 // documents all error codes, even if this entry is reached only
                 // if a future refactor routes unknown actions through the info path.
+                'URL_TOO_LONG' => 400,
                 'UNKNOWN_ACTION' => 404,
                 // HTTP 451: Unavailable For Legal Reasons — specifically for content
                 // blocked by legal demand (TOS violations, court orders, etc.).

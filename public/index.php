@@ -702,6 +702,7 @@ window.addEventListener('appinstalled', function() {
     'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
     'MISSING_URL': 'No URL was provided. Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit.',
+    'URL_TOO_LONG': 'That URL is too long. Try shortening it — remove unnecessary query parameters or use a direct video link.',
     'SERVICE_UNAVAILABLE': 'Server-side lock or quota file could not be opened. Please try again in a few seconds.',
     'CONFIG_ERROR': 'The server is misconfigured — browser impersonation is not available. Contact the server operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.',
     'UNKNOWN_ACTION': 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
