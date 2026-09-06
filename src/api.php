@@ -1613,6 +1613,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     // Without this guard, e.g. trim(null) produces a PHP warning that leaks into
     // error_log and could expose implementation details. Return a clean PARSE_ERROR.
     if (!is_string($json_str)) {
+        // $first_valid is initialised to null here so that the platform field in the
+        // return array resolves to null cleanly (no undefined-variable warning in PHP 8+).
+        // The variable is also declared at line 1637 for the normal parsing path.
+        $first_valid = null;
         $parse_fail_msg = 'Internal parse error — invalid input type.';
         if ($raw_error_out !== null) {
             $raw_error_out = $parse_fail_msg;
@@ -1622,8 +1626,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'error_code' => 'PARSE_ERROR',
             'raw_error' => $parse_fail_msg,
             'formats' => [],
-            // platform: available from $first_valid when playlist JSON was partially parsed;
-            // null when the failure occurred before any valid JSON was collected.
+            // platform: null — $first_valid is null in this path since no JSON was parsed.
             'platform' => $first_valid['extractor_key'] ?? null,
         ];
     }
