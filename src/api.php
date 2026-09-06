@@ -2299,6 +2299,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_limit' => -1,
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
+            // 'video_url' mirrors source_url in error responses for consistency with
+            // the info response (where video_url holds the resolved page URL).
+            // Null here because the URL was invalid and no video was resolved.
+            'video_url' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
