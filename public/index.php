@@ -687,6 +687,7 @@ window.addEventListener('appinstalled', function() {
     'VERIFICATION_TIMEOUT': 'Verification timed out — the file may be valid but could not be confirmed within the server time limit. Try a smaller format (audio-only is fastest) or try again.',
     'FILE_READ_ERROR': 'The server could not read the downloaded file back for streaming. This is a temporary server issue — try again or pick a different format.',
     'PROC_OPEN_FAILED': 'The download could not be started. The server may be restarting or overloaded. Try again in a moment.',
+    'SERVICE_UNAVAILABLE': 'Server temporarily unavailable. The rate-limit system could not be accessed — this is a server-side issue. Try again in a moment.',
     'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
     'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
     'SOURCE_HTTP_ERROR': 'The source site returned HTTP 4xx/5xx and is having issues. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
