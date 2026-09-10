@@ -231,7 +231,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  * @param bool $unlimited  Whether the client holds an unlimited API key
  * @param int $daily_limit  Configured daily limit
  * @param int $pre_increment_count  Count of quota BEFORE this request's increment
- * @param string $tmp_dir  Temp directory for quota files (default /tmp in production)
+ * @param string $tmp_dir  Quota file directory. Tests pass a custom temp dir;
+ *                          production always uses QUOTA_DIR (defaults to /tmp).
  * @return int  Remaining quota count after refund
  */
 function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count, string $tmp_dir = '/tmp'): int {

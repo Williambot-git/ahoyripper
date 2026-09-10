@@ -2122,10 +2122,12 @@ function logRequest($action, $status, $extra = []) {
 //                        Used to detect whether this request's increment is still
 //                        present in the quota file (not yet refunded by a concurrent
 //                        request that failed at the same time).
+// $tmp_dir:              directory for quota files. Defaults to QUOTA_DIR.
+//                        Exists for test isolation — production always uses QUOTA_DIR.
 // Returns the post-refund daily count; callers use this to compute quota_remaining.
-function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count): int {
+function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_increment_count, string $tmp_dir = QUOTA_DIR): int {
     if ($unlimited) return $daily_limit;
-    $undo_fp = fopen(QUOTA_DIR . '/ahoyrip_daily_' . md5($ip), 'c+');
+    $undo_fp = fopen($tmp_dir . '/ahoyrip_daily_' . md5($ip), 'c+');
     if (!$undo_fp) return $daily_limit;
     if (!flock($undo_fp, LOCK_EX)) {
         fclose($undo_fp);
