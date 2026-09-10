@@ -840,11 +840,15 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "php_version": "8.2.0",
   "api_version": "1.0.0",
   "yt_dlp_version": "2026.03.17",
+  "yt_dlp_ok": true,
+  "ffprobe_version": "ffmpeg version 6.x",
+  "ffmpeg_ok": true,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": -1,
-  "quota_reset_unix": -1,
-  "source_url": null
+  "quota_reset": "2026-08-18T00:00:00+00:00",
+  "quota_reset_unix": 1753056000,
+  "source_url": null,
+  "platform": null
 }
 ```
 
