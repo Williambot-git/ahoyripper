@@ -2875,6 +2875,9 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                // error was raised, but the input URL was valid and accepted.
+                'video_url' => $url,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
@@ -3099,6 +3102,9 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => null,
                     'format_id_missing' => false,
+                    // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                    // error was raised (daily-quota gate fires before the yt-dlp probe).
+                    'video_url' => $url,
                     'upgrade_url' => UPGRADE_URL,
                     'platform' => null,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
@@ -3319,6 +3325,9 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                // error was raised (proc_open itself failed before yt-dlp could start).
+                'video_url' => $url,
                 'upgrade_url' => UPGRADE_URL,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -3736,6 +3745,9 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                // error was raised, but the input URL was valid and accepted.
+                'video_url' => $url,
                 'upgrade_url' => UPGRADE_URL,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -4178,6 +4190,9 @@ switch ($action) {
                     'source_url' => $url,
                     'source_url_missing' => false,
                     'format_id_missing' => false,
+                    // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                    // error was raised (daily-quota gate fires before the yt-dlp probe).
+                    'video_url' => $url,
                     'upgrade_url' => UPGRADE_URL,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . $quota_reset_iso . ' UTC.',
@@ -4440,6 +4455,9 @@ switch ($action) {
                 'source_url_missing' => false,
                 'format_id' => $format_id,
                 'format_id_missing' => ($format_id === '' || $format_id === null),
+                // 'video_url' mirrors source_url: yt-dlp had not yet run when this
+                // error was raised (proc_open itself failed before yt-dlp could start).
+                'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
