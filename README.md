@@ -1094,6 +1094,7 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 | [Pornhub](https://pornhub.com) | Video + Audio | |
 | [XVideos](https://xvideos.com) | Video + Audio | |
 | [xHamster](https://xhamster.com) | Video + Audio | |
+| [XNXX](https://xnxx.com) | Video + Audio | |
 
 > **DRM note:** Netflix, Disney+, Amazon Prime Video, Hulu, Paramount+, Peacock, and Max content with digital rights management (DRM) cannot be ripped. Only non-DRM content from these platforms will work.
 
