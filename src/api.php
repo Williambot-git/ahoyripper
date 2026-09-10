@@ -2050,6 +2050,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         'title' => $title,
         'thumbnail' => $thumbnail,
         'url' => $video_url,
+        // 'video_url' mirrors 'url' — the canonical video page URL after any redirect.
+        // Included for consistency with error responses (which always include 'video_url'),
+        // making 'video_url' a reliable field for API consumers regardless of response type.
+        'video_url' => $video_url,
         'duration' => $duration,
         'uploader' => $uploader,
         'uploader_url' => $uploader_url,
