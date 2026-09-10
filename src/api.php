@@ -392,7 +392,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: 5');
+    header('X-RateLimit-Window: unavailable');
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
@@ -442,7 +442,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // quota fields: unavailable — the rate-limit file could not be accessed.
         // Use -1 sentinels so clients can distinguish this from a known limit.
         'quota_remaining' => -1,
-        'quota_limit' => -1,
+        'quota_limit' => getDailyQuotaLimit(),
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
