@@ -5994,6 +5994,16 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
+        // X-Info-Timeout and X-Download-Timeout: informational headers present on all
+        // other API responses. Included here so generic API consumers can always find
+        // these fields without special-casing the client-error action.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // CSP: client-error 200 OK bypasses the top-of-script header block by sending
+        // its own response — repeat CSP here so the action is always fully hardened.
+        // Note: upgrade-insecure-requests is intentionally ABSENT — this is a JSON API
+        // endpoint, not an HTML document, so the directive has no effect here.
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
         header('Cache-Control: no-store');
         // Reporting-Endpoints + Report-To: enables the browser's Reporting API for CSP
         // violation reports from this endpoint. Matches the headers set by every other API
