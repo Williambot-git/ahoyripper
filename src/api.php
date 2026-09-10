@@ -2447,7 +2447,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
-                'format_id' => null,
+                'format_id' => '',
                 // 'format_id_missing' is true when no format was selected at all —
                 // distinguishing MISSING_FORMAT from INVALID_FORMAT_ID (format was
                 // provided but failed validation). API consumers can check this flag
