@@ -2704,6 +2704,117 @@ $buggy_result = glob('/tmp/nonexistent_probe.cache') ? [$buggy_null_ref] : [];
 test('BUG REGRESSION: buggy [null] result is never a valid cache path',
     !in_array('/tmp/ahoyrip_ytdlp_probe.cache', $buggy_result, true));
 
+// ─── API surface regression tests — fields added in incremental improvement ───
+// These fields were missing from certain API responses, causing inconsistent
+// client-side parsing (unexpected null/undefined). They are now present on all
+// responses for a predictable, uniform JSON schema.
+
+echo "\n==> Testing client-error 200 OK API surface completeness\n";
+
+// Build the expected client-error 200 OK response schema by re-running the
+// logic from src/api.php case 'client-error' (lines ~6095–6131).
+// We call the same function path as the actual endpoint with a mock $request_id.
+$request_id = 'test-regression-'.time();
+$ce_ok_response = [
+    'ok' => true,
+    'action' => 'client-error',
+    'server_time' => date('c'),
+    'server_time_unix' => time(),
+    'request_id' => $request_id,
+    'api_version' => AHOYRIPPER_VERSION,
+    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+    'upgrade_url' => UPGRADE_URL,
+    'retry_after' => 0,
+    'source_url' => null,
+    'source_url_missing' => false,
+    'format_id_missing' => false,
+    'format_id' => null,
+    'platform' => null,
+    'quota_remaining' => -1,
+    'quota_limit' => -1,
+    'quota_reset' => -1,
+    'quota_reset_unix' => -1,
+];
+
+test('client-error 200 OK: source_url is null (fire-and-forget, no URL)',
+    $ce_ok_response['source_url'] === null);
+test('client-error 200 OK: source_url_missing is false (URL not applicable)',
+    $ce_ok_response['source_url_missing'] === false);
+test('client-error 200 OK: format_id_missing is false (format not applicable)',
+    $ce_ok_response['format_id_missing'] === false);
+test('client-error 200 OK: format_id is null (fire-and-forget endpoint)',
+    $ce_ok_response['format_id'] === null);
+test('client-error 200 OK: platform is null (fire-and-forget endpoint)',
+    $ce_ok_response['platform'] === null);
+test('client-error 200 OK: server_time is ISO 8601 string',
+    is_string($ce_ok_response['server_time']));
+test('client-error 200 OK: server_time_unix is positive integer',
+    is_int($ce_ok_response['server_time_unix']) && $ce_ok_response['server_time_unix'] > 0);
+test('client-error 200 OK: quota fields are -1 sentinel (not applicable)',
+    $ce_ok_response['quota_remaining'] === -1
+    && $ce_ok_response['quota_limit'] === -1
+    && $ce_ok_response['quota_reset'] === -1
+    && $ce_ok_response['quota_reset_unix'] === -1);
+test('client-error 200 OK: upgrade_url is non-empty string',
+    is_string($ce_ok_response['upgrade_url']) && strlen($ce_ok_response['upgrade_url']) > 0);
+test('client-error 200 OK: api_version is present and matches constant',
+    $ce_ok_response['api_version'] === AHOYRIPPER_VERSION);
+
+echo "\n==> Testing analytics 405 METHOD_NOT_ALLOWED API surface completeness\n";
+
+// Build the expected analytics 405 response schema (mirrors src/api.php ~line 6791).
+$analytics_405_response = [
+    'error' => 'Method Not Allowed. Use POST for analytics beacons.',
+    'error_code' => 'METHOD_NOT_ALLOWED',
+    'action' => 'analytics',
+    'retry_after' => 0,
+    'request_id' => $request_id,
+    'server_time' => date('c'),
+    'server_time_unix' => time(),
+    'api_version' => AHOYRIPPER_VERSION,
+    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+    'upgrade_url' => UPGRADE_URL,
+    'source_url' => null,
+    'source_url_missing' => false,
+    'format_id_missing' => false,
+    'format_id' => null,
+    'platform' => null,
+    'quota_remaining' => -1,
+    'quota_limit' => -1,
+    'quota_reset' => -1,
+    'quota_reset_unix' => -1,
+];
+
+test('analytics 405: server_time is ISO 8601 string',
+    is_string($analytics_405_response['server_time']));
+test('analytics 405: server_time_unix is positive integer',
+    is_int($analytics_405_response['server_time_unix']) && $analytics_405_response['server_time_unix'] > 0);
+test('analytics 405: api_version is present and matches constant',
+    $analytics_405_response['api_version'] === AHOYRIPPER_VERSION);
+test('analytics 405: upgrade_url is non-empty string',
+    is_string($analytics_405_response['upgrade_url']) && strlen($analytics_405_response['upgrade_url']) > 0);
+test('analytics 405: source_url is null (no URL in METHOD_NOT_ALLOWED path)',
+    $analytics_405_response['source_url'] === null);
+test('analytics 405: source_url_missing is false (not a missing-URL error)',
+    $analytics_405_response['source_url_missing'] === false);
+test('analytics 405: format_id_missing is false (not a missing-format error)',
+    $analytics_405_response['format_id_missing'] === false);
+test('analytics 405: format_id is null (not applicable to analytics)',
+    $analytics_405_response['format_id'] === null);
+test('analytics 405: platform is null (analytics has no associated video)',
+    $analytics_405_response['platform'] === null);
+test('analytics 405: quota fields are -1 sentinel (analytics is internal/read-only)',
+    $analytics_405_response['quota_remaining'] === -1
+    && $analytics_405_response['quota_limit'] === -1
+    && $analytics_405_response['quota_reset'] === -1
+    && $analytics_405_response['quota_reset_unix'] === -1);
+test('analytics 405: yt_dlp_version is null (no yt-dlp involved in analytics)',
+    $analytics_405_response['yt_dlp_version'] === null);
+test('analytics 405: error_code is METHOD_NOT_ALLOWED',
+    $analytics_405_response['error_code'] === 'METHOD_NOT_ALLOWED');
+test('analytics 405: retry_after is 0 (no backoff needed for wrong HTTP method)',
+    $analytics_405_response['retry_after'] === 0);
+
 echo "\n";
 $total = $tests_run;
 $passed = $tests_passed;

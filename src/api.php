@@ -6124,6 +6124,10 @@ switch ($action) {
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
             'retry_after' => 0,
+            'source_url' => null,
+            'source_url_missing' => false,
+            'format_id_missing' => false,
+            'format_id' => null,
             'platform' => null,
             // quota fields: -1 sentinel = not applicable (client-error is a fire-and-forget
             // endpoint that does not consume quota). Matches the pattern used by the
@@ -6794,13 +6798,16 @@ switch ($action) {
                 'action' => 'analytics',
                 'retry_after' => 0,
                 'request_id' => $request_id,
-                'upgrade_url' => UPGRADE_URL,
-                // Consistent with all other API error responses:
-                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 'api_version' => AHOYRIPPER_VERSION,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'upgrade_url' => UPGRADE_URL,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
+                'format_id' => null,
+                'platform' => null,
                 // Analytics is an internal action — quota does not apply.
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
