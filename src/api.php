@@ -409,6 +409,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
     header('X-DL-RateLimit-Window: unavailable');
+    // Cross-Origin-Opener-Policy: same-origin — completes the security header
+    // ensemble for the SERVICE_UNAVAILABLE response. Required for consistency with
+    // all other API response paths (info, download, health, check, etc.) which
+    // set COOP. Without it, the 503 response lacks this security hardening.
+    header('Cross-Origin-Opener-Policy: same-origin');
     // Content-Security-Policy for the SERVICE_UNAVAILABLE response — mirrors the
     // enforcement CSP set in all other API response paths. Without this, browsers
     // apply a default restrictive CSP and ServiceWorker registrations at this origin
