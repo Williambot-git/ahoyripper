@@ -180,8 +180,12 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "ffmpeg_cache_ttl_seconds": 3600,
 #   "yt_dlp_probe": {
 #     "ok": true,
+#     "action": "health",
 #     "title": "Rick Astley - Never Gonna Give You Up (Official) (Music...",
 #     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+#     "yt_dlp_version": "2026.03.17",
+#     "api_version": "...",
+#     "upgrade_url": "https://ahoyvpn.com",
 #     "probe_age_seconds": 0
 #   },
 #   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
@@ -198,9 +202,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 # }
 ```
 
-The probe result:
-- `yt_dlp_probe.ok: true` — yt-dlp successfully fetched metadata from YouTube; the server has working outbound connectivity.
-- `yt_dlp_probe.ok: false` with an `error_code` — yt-dlp itself is failing. Check `yt_dlp_version` and `ffmpeg_version` to confirm both are installed.
+The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, and `upgrade_url` on all probe results (not just failures), plus `ok`, `title`, `source_url`, and `probe_age_seconds`. `yt_dlp_version` and `api_version` are included even when the probe fails, so clients always have version information regardless of probe outcome.
 
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
