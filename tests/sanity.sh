@@ -1986,27 +1986,19 @@ if [ -z "$SRI_VALUE" ]; then
     echo "  ✗ integrity attribute not found on analytics.js script tag"
     exit 1
 fi
-# Verify base64 padding: sha384 SRI hashes are base64-encoded and must end with '=' or '=='
 # Extract just the hash value (after sha384- prefix)
 HASH_B64=$(echo "$SRI_VALUE" | sed 's/sha384-//')
-# Check it ends with = (valid base64 padding for sha384)
-if echo "$HASH_B64" | grep -q '[^=]$'; then
-    echo "  ✗ analytics.js SRI hash lacks proper base64 padding (sha384 hashes must end with '='): got '$SRI_VALUE'"
-    exit 1
-fi
 # Compute the actual hash of the file and compare.
-# Both must be normalized to include base64 padding since sha384 produces 48 raw bytes
-# which encodes to 64 base64 chars (no padding needed) but browsers/some tools add padding.
+# sha384 produces 48 raw bytes = 64 base64 chars — NO padding is needed or correct.
+# Compare unpadded hashes directly.
 ACTUAL_HASH=$(openssl dgst -sha384 -binary "$ANALYTICS_SCRIPT" | openssl base64 -A)
-# Normalize both to padded form for comparison
-ACTUAL_NORMALIZED=$(echo "$ACTUAL_HASH" | sed 's/$/=/' | sed 's/==$/=/')
-if [ "$HASH_B64" != "$ACTUAL_NORMALIZED" ]; then
+if [ "$HASH_B64" != "$ACTUAL_HASH" ]; then
     echo "  ✗ analytics.js SRI hash mismatch in index.php"
     echo "    Expected (from file): sha384-$ACTUAL_HASH"
     echo "    Found in tag:         sha384-$HASH_B64"
     exit 1
 fi
-echo "  ✓ analytics.js SRI hash is correct and properly padded (sha384-$ACTUAL_HASH)"
+echo "  ✓ analytics.js SRI hash is correct (sha384-$ACTUAL_HASH)"
 
 echo ""
 echo "All sanity checks passed."
