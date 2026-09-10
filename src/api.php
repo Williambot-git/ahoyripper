@@ -3322,7 +3322,7 @@ switch ($action) {
                 // refundQuota() — it IS the remaining quota, not an offset from the limit.
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
@@ -3418,7 +3418,7 @@ switch ($action) {
                 // above reversed it, so show the pre-increment count.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
             if ($raw_err) {
@@ -3462,7 +3462,7 @@ switch ($action) {
                 // Quota was incremented before this error path; the refund above reversed it.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
@@ -3585,7 +3585,7 @@ switch ($action) {
                 // so quota_remaining = limit - baseline.
                 'quota_remaining' => !$unlimited ? max(0, $daily_limit - $info_quota_before_refund - 1) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ];
             // Surface the raw yt-dlp output so the client can show diagnostic info
@@ -3624,7 +3624,7 @@ switch ($action) {
         // successful request consumes one quota slot, remaining = limit - c.
         $parsed['quota_remaining'] = !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1;
         $parsed['quota_limit'] = $unlimited ? -1 : $daily_limit;
-        $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+        $parsed['quota_reset'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         // server_time: ISO 8601 timestamp for client clock synchronization.
         // Consistent with check, health, and download success responses.
@@ -4441,7 +4441,7 @@ switch ($action) {
                 // download-action error response.
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
@@ -4581,7 +4581,7 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
-                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -4754,7 +4754,7 @@ switch ($action) {
                     'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : $post_refund_count,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
-                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
@@ -4857,7 +4857,7 @@ switch ($action) {
                     'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : $uncl_post_refund_count,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
-                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 ];
                 if ($proc_err) {
@@ -4964,7 +4964,7 @@ switch ($action) {
                 'server_time_unix' => time(),
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
@@ -5247,7 +5247,7 @@ switch ($action) {
                     // incremented, so quota fields use -1 sentinel values.
                     'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
-                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                     // Surface ffprobe failure details for client diagnostics — the early-exit path
                     // (ffprobe exit !== 0) uses $probe_err_truncated (truncated to 150 bytes).
@@ -5570,7 +5570,7 @@ switch ($action) {
                 // Quota was not refunded here since the download itself succeeded.
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
-                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
@@ -5657,7 +5657,7 @@ switch ($action) {
                     // Quota was not charged since no usable file was received.
                     'quota_remaining' => $unlimited ? -1 : $post_refund_count,
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
-                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -6968,7 +6968,7 @@ switch ($action) {
             // reason. API consumers should treat -1 as "unknown remaining quota".
             'quota_remaining' => -1,
             'quota_limit' => $daily_limit,
-            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             // upgrade_url: included on all API responses for consistent AhoyVPN upsell
             // opportunity. The UNKNOWN_ACTION response is the last-resort fallback for
