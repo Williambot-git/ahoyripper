@@ -3667,9 +3667,14 @@ switch ($action) {
         // X-Download-Timeout: also present for consistency — the info response does not
         // return a downloadable resource, but having both timeout headers available is
         // harmless and helps clients that use a single header-parsing path for all responses.
+        // X-FFProbe-Status: always 'skipped' on info responses since ffprobe only runs
+        // after a download. Present on all info responses for consistent header coverage —
+        // clients parsing a unified response path see this header on every action type.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        header('X-FFProbe-Status: skipped');
         header('Cache-Control: no-store');
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
         logRequest('info', 200, ['platform' => $platform, 'url_type' => 'single', 'format_count' => count($parsed['formats'] ?? [])]);
         break;
