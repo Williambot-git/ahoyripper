@@ -66,6 +66,10 @@ function isValidUrl($url) {
     if (!is_string($url)) {
         return false;
     }
+    // Trim whitespace — callers are responsible for trimming too, but this
+    // guards against any caller that passes untrimmed input and makes
+    // isValidUrl() self-contained and safe for reuse as a standalone validator.
+    $url = trim($url);
     if (!preg_match('/^https:\/\//', $url)) {
         return false; // Only HTTPS — reject http:// and other schemes
     }
@@ -233,6 +237,10 @@ test('rejects path-only (no scheme)',
     isValidUrl('/watch?v=abc') === false);
 test('rejects empty string',
     isValidUrl('') === false);
+test('accepts URL with leading whitespace (trim before validation — prevents leading-space bypass of HTTPS check)',
+    isValidUrl('  https://www.youtube.com/watch?v=dQw4w9WgXcQ') !== false);
+test('accepts URL with trailing whitespace (trim before validation — trailing space would fail FILTER_VALIDATE_URL)',
+    isValidUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ  ') !== false);
 test('rejects space in URL (invalid URL)',
     isValidUrl('https://example.com/watch v=abc') === false);
 test('rejects unresolvable domain (no DNS A record)',
