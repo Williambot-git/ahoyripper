@@ -148,6 +148,7 @@ header_remove('X-Powered-By');
 
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
+  <meta property="og:type:alt" content="AhoyRipper is a web application for ripping media from supported platforms.">
   <meta property="og:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
   <meta property="og:title:alt" content="AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms">
   <meta property="og:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
@@ -202,6 +203,7 @@ header_remove('X-Powered-By');
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
   <meta name="twitter:domain" content="ahoyripper.com">
+  <meta name="twitter:domain:alt" content="AhoyRipper — ahoyripper.com">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">

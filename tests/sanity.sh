@@ -1062,6 +1062,19 @@ else
     exit 1
 fi
 
+echo "==> Checking og:type:alt text alternative in public/index.php..."
+# og:type:alt (RFC 6947 §4.1) provides a text alternative for og:type in
+# non-visual contexts. All other og: tags have :alt variants (og:title:alt,
+# og:description:alt); og:type was the last remaining tag without a text
+# alternative, creating an accessibility gap for screen readers and indexing
+# bots that rely on RFC 6947 §4.1 text alternatives.
+if grep -q 'meta property="og:type:alt"' public/index.php; then
+    echo "  ✓ og:type:alt present in index.php"
+else
+    echo "  ✗ og:type:alt missing from index.php (RFC 6947 §4.1 text alternative)"
+    exit 1
+fi
+
 echo "==> Checking og:description:alt text alternative in public/index.php..."
 # og:description:alt (RFC 6947 §4.1) provides a text alternative for the
 # og:description in non-visual contexts, matching the og:title:alt pattern above.
@@ -1116,6 +1129,17 @@ if grep -q 'meta name="twitter:card"' public/index.php \
     echo "  ✓ Twitter Card meta tags (card, title, description, site, creator, domain) present in index.php"
 else
     echo "  ✗ Twitter Card meta tags missing from index.php"
+    exit 1
+fi
+
+echo "==> Checking twitter:domain:alt text alternative in public/index.php..."
+# twitter:domain:alt (RFC 6947 §4.1) provides a text alternative for
+# twitter:domain in non-visual contexts. Consistent with the og:*:alt and
+# twitter:title:alt / twitter:description:alt pattern already in place.
+if grep -q 'meta name="twitter:domain:alt"' public/index.php; then
+    echo "  ✓ twitter:domain:alt present in index.php"
+else
+    echo "  ✗ twitter:domain:alt missing from index.php (RFC 6947 §4.1 text alternative)"
     exit 1
 fi
 
