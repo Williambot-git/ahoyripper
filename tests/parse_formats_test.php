@@ -100,10 +100,18 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
 
             // classifyYtdlpError — inline copy for test isolation
             $err_lower = strtolower($err_msg);
-            if (preg_match('/geo.*restriction|this video is available in|geo.?restricted/i', $err_lower)) {
+            if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
                 if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 // Always include 'formats' => [] so API consumers can always
                 // access response.formats without checking if the key exists first.
+                return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED', 'formats' => []];
+            }
+            // Standalone "geo restricted" (no characters after "geo") — the single-word
+            // form yt-dlp sometimes emits. Separate from the geo.?restricted pattern above
+            // (which requires characters after "restricted" and uses (?!.) to prevent
+            // "geo restriction" from matching here, since that pattern fires first).
+            if (preg_match('/\bgeo restricted\b/i', $err_lower)) {
+                if ($raw_error_out !== null) $raw_error_out = $err_msg;
                 return ['error' => 'This video is geo-restricted and not available in your region.', 'error_code' => 'GEOBLOCKED', 'formats' => []];
             }
             if (preg_match('/video is private|this video is private/i', $err_lower)) {
