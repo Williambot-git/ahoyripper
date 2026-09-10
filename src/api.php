@@ -2443,6 +2443,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // provided but failed validation). API consumers can check this flag
                 // for precise error routing without relying on string matching.
                 'format_id_missing' => true,
+                // 'video_url' mirrors source_url in error responses for consistency
+                // with the info response (where video_url holds the resolved page URL).
+                // $url is set at this point — MISSING_FORMAT fires after URL validation.
+                'video_url' => $url,
                 'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
