@@ -3519,7 +3519,6 @@ switch ($action) {
                 'GEOBLOCKED' => 451,
                 'INVALID_FORMAT_ID' => 400,
                 'INVALID_API_KEY' => 401,
-                'INVALID_KEY' => 401,
                 'INVALID_URL' => 400,
                 'LOGIN_REQUIRED' => 401,
                 'MISSING_FORMAT' => 400,
