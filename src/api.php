@@ -4506,6 +4506,22 @@ switch ($action) {
                 header('X-DailyLimit-Remaining: -1');
                 header('X-DailyLimit-Reset: -1');
                 header('X-DailyLimit-Window: unavailable');
+                // X-DL-RateLimit-*: download-specific rate limit. DOWNLOAD_TIMEOUT
+                // means the process timed out before consuming a download slot — use -1
+                // sentinel to signal no slot was consumed, consistent with the proc_open_failed
+                // handler (lines 4397-4400) which uses the same sentinel for the same reason.
+                // Mirrors the X-DL-RateLimit-* set at lines 4541-4550 for classified errors.
+                if ($unlimited) {
+                    header('X-DL-RateLimit-Limit: -1');
+                    header('X-DL-RateLimit-Remaining: -1');
+                    header('X-DL-RateLimit-Reset: -1');
+                    header('X-DL-RateLimit-Window: unlimited');
+                } else {
+                    header('X-DL-RateLimit-Limit: ' . $dl_rate_limit);
+                    header('X-DL-RateLimit-Remaining: ' . max(0, $dl_remaining));
+                    header('X-DL-RateLimit-Reset: ' . $dl_reset);
+                    header('X-DL-RateLimit-Window: ' . $dl_rate_window);
+                }
                 // retry_after: delta-seconds until the download can be retried.
                 // Use DOWNLOAD_TIMEOUT as a fixed window so the client has a consistent
                 // countdown value regardless of when the response is processed.
