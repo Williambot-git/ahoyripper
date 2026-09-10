@@ -632,7 +632,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | Code | Meaning |
 |------|---------|
 | `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`), missing format on download (`MISSING_FORMAT`), or invalid format ID (`INVALID_FORMAT_ID`) |
-| `401` | Invalid API key (`INVALID_KEY`) |
+| `401` | Invalid API key (`INVALID_API_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
@@ -651,7 +651,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `INVALID_URL` | URL is malformed, uses an unsupported scheme, or exceeds the 2048-character limit | Paste a valid public video URL (YouTube, TikTok, X, SoundCloud, Instagram, etc.) |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded. The response includes `retry_after` (delta-seconds, integer — seconds to wait before retrying) and `upgrade_url` (AhoyVPN upsell link). | Wait a minute and try again, or upgrade to an unlimited API key |
-| `INVALID_KEY` | The API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
+| `INVALID_API_KEY` | The API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
@@ -779,7 +779,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 
 | Code | `error_code` | Meaning |
 |------|--------------|---------|
-| `401` | `INVALID_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
+| `401` | `INVALID_API_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
 | `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
 | `400` | `MISSING_URL` | No URL was provided on the download request. The response also includes `"source_url_missing": true` so clients can distinguish this from `INVALID_URL` (a URL was given but malformed). |
 | `400` | `MISSING_FORMAT` | No format was selected on the download request. The response also includes `"format_id_missing": true` so clients can distinguish this from `INVALID_FORMAT_ID` (a format ID was given but malformed — `format_id_missing` is `false` in that case). |
@@ -1198,7 +1198,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
-| `INVALID_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
+| `INVALID_API_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is unavailable | Try another video |
 

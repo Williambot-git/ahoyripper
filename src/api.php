@@ -513,7 +513,7 @@ if ($is_rate_limited) {
             // at this gate (dl_rate_file is opened later in the download action), so send -1
             // to signal "unavailable" rather than misleadingly echoing the request-rate limit.
             // Uses "unavailable" to match the semantic used consistently in the download action's
-            // other early-exit blocks (INVALID_KEY, etc.) — both mean "not applicable here".
+            // other early-exit blocks (INVALID_API_KEY, etc.) — both mean "not applicable here".
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');

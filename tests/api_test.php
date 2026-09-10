@@ -2134,8 +2134,8 @@ test('action=health: source_url_missing is boolean true (no URL provided)',
 test('action=health: source_url is null (probe endpoint)',
     ($health_response['source_url'] ?? null) === null);
 
-// ─── INVALID_KEY response source_url_missing ─────────────────────────────────
-// INVALID_KEY error responses (info and download actions) include source_url
+// ─── INVALID_API_KEY response source_url_missing ─────────────────────────────────
+// INVALID_API_KEY error responses (info and download actions) include source_url
 // but were previously missing source_url_missing => false. The client did
 // provide a URL — it was simply rejected as invalid, so source_url_missing is false.
 $invalid_key_info_response = [
