@@ -675,7 +675,7 @@ window.addEventListener('appinstalled', function() {
     'VIDEO_UNAVAILABLE': 'This video is no longer available or has been removed.',
     'AGE_RESTRICTED': 'This video is age-restricted and cannot be downloaded without age verification on the source platform.',
     'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
-    'SOURCE_TIMEOUT': 'The source site took too long to respond. Try audio-only (fastest), a lower resolution, or try again when the site is less busy.',
+    'SOURCE_TIMEOUT': 'The source site took too long to respond. Try audio-only (fastest), a lower resolution, or try again when the site is less busy. Use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP: https://ahoyvpn.com',
     'SSL_ERROR': 'Secure connection to the source failed. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'CONNECTION_TIMEOUT': 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again: https://ahoyvpn.com',
