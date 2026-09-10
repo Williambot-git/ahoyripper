@@ -6445,24 +6445,47 @@ switch ($action) {
                     // in the info and download action paths, so operators get a consistent
                     // HTTP 500 / PROC_OPEN_FAILED signal regardless of which action triggered
                     // the startup failure.
+                    // HTTP status code: map error codes to semantically appropriate HTTP responses
+                    // so health-check monitors using HTTP-level alerting (PagerDuty, etc.) fire
+                    // correctly on probe failures (not just 2xx body-level ok:false signals).
+                    $probe_http_status = 502; // default: upstream/yt-dlp error
                     if ($probe_exit === -1 && $probe_err === '' && $probe_raw_err === '') {
+                        // case 1: proc_open failed — binary missing or system-level error → 500
                         $probe_classified = [
                             'code' => 'PROC_OPEN_FAILED',
                             'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
                         ];
-                    // case 2: PHP-side timeout (proc_open succeeded, process was killed)
-                    } elseif ($probe_exit === -1 && strpos($probe_raw_err, 'timed out') !== false) {
+                        $probe_http_status = 500;
+                    } elseif ($probe_exit === -1 && strpos($probe_err, 'timed out') !== false) {
+                        // case 2: PHP-side timeout (proc_open succeeded, process was killed by PHP)
+                        // Guard uses $probe_err (not $probe_raw_err) to avoid false match when
+                        // proc_open fails and $probe_raw_err is "proc_open failed" — strpos would
+                        // return int 0 !== false, incorrectly classifying case 1 as case 2.
+                        // Using $probe_err directly (the captured stderr pipe content) means we
+                        // only match when the pipe actually received "timed out" bytes.
                         $probe_classified = [
                             'code' => 'SOURCE_TIMEOUT',
                             'msg' => 'The source site took too long to respond during the health probe. Try again when the site is less busy.',
                         ];
-                    // case 3: yt-dlp exited with a real error — classify from stderr
+                        $probe_http_status = 504;
                     } else {
-                        $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit);
+                        // case 3: yt-dlp exited with a real error — classify from stderr.
+                        // classifyYtdlpError may return null for unrecognised patterns.
+                        // Null coalescing (? ?? ) ensures the raw error text is surfaced rather
+                        // than silently replaced with a generic message.
+                        $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit)
+                            ?? ['code' => 'PROBE_FAILED', 'msg' => $probe_raw_err ?: 'Unknown error during yt-dlp health probe.'];
+                        // Map known error codes to HTTP status for health-check alerting.
+                        if (in_array($probe_classified['code'] ?? '', ['SOURCE_TIMEOUT', 'CONNECTION_TIMEOUT'], true)) {
+                            $probe_http_status = 504;
+                        } elseif (($probe_classified['code'] ?? '') === 'PROC_OPEN_FAILED') {
+                            $probe_http_status = 500;
+                        }
                     }
                     $GLOBALS['__ytdlp_probe'] = [
                         'ok' => false,
                         'action' => 'health',
+                        'http_status' => $probe_http_status,
                         // Omit source_url_missing: the probe URL (HEALTH_PROBE_URL) is set
                         // below so the URL is not missing — only the fetch failed. The field
                         // would misleadingly suggest "URL was provided but not found" when
