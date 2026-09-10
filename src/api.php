@@ -715,7 +715,7 @@ if (($action ?? '') === 'download') {
 header('X-DL-RateLimit-Limit: ' . $dl_limit);
 header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
 header('X-DL-RateLimit-Reset: ' . $dl_reset);
-header('X-DL-RateLimit-Window: ' . $dl_window_label);
+header('X-DL-RateLimit-Window: ' . $dl_window);
 
 // ─── Lightweight internal check (no auth, no rate-limit, no referer check) ───
 // Dedicated endpoint for Docker healthchecks and load-balancer probes.
