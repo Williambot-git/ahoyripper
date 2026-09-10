@@ -659,6 +659,98 @@ window.addEventListener('appinstalled', function() {
 
   const API = '/src/api.php';
 
+  // Shared quota update function — reads X-DailyLimit-* response headers and updates
+  // the DOM. Extracted from fetchInfo() and placed at module scope so it is defined
+  // once rather than re-created on every fetchInfo() call. Uses no closure state from
+  // fetchInfo() (no references to url, sort, _fetchId, etc.) so this is safe.
+  // Persists quota state to localStorage so the correct value survives page reload.
+  function updateQuotaFromHeaders(resp) {
+    var rem = resp.headers.get('X-DailyLimit-Remaining');
+    var lim = resp.headers.get('X-DailyLimit-Limit');
+    var el = document.getElementById('quotaDisplay');
+    var limEl = document.getElementById('quotaLimit');
+    var labelEl = document.getElementById('quotaLabel');
+    var upgradeEl = document.getElementById('quotaUpgrade');
+    if (el && rem !== null && lim !== null) {
+      el.textContent = rem;
+      if (limEl) {
+        var limNum = parseInt(lim, 10);
+        limEl.textContent = (limNum > 0) ? '/' + limNum : '';
+      }
+      if (rem <= 2) {
+        el.classList.add('low');
+      } else {
+        el.classList.remove('low');
+      }
+      if (Number(rem) === 0) {
+        el.classList.add('exhausted');
+        if (_lastAnnouncedQuota !== 0) {
+          _lastAnnouncedQuota = 0;
+          announceQuotaExhausted();
+        }
+        if (limEl) limEl.style.display = 'none';
+      } else {
+        el.classList.remove('exhausted');
+        _lastAnnouncedQuota = null;
+        if (limEl) {
+          var limNum = parseInt(lim, 10);
+          limEl.style.display = (limNum > 0) ? '' : 'none';
+        }
+      }
+      if (upgradeEl) {
+        if (Number(rem) <= 0) {
+          upgradeEl.textContent = 'upgrade now';
+          upgradeEl.style.fontWeight = '700';
+          upgradeEl.style.color = 'var(--color-error)';
+        } else {
+          upgradeEl.textContent = 'get unlimited';
+          upgradeEl.style.fontWeight = '500';
+          upgradeEl.style.color = '';
+        }
+      }
+      var dlLim = resp.headers.get('X-DL-RateLimit-Limit');
+      var isRateLimited = (dlLim !== null && Number(dlLim) === -1);
+      if (Number(rem) === -1 && labelEl) {
+        if (isRateLimited) {
+          labelEl.textContent = 'Rate limited';
+          el.classList.add('exhausted');
+        } else {
+          labelEl.textContent = 'Unlimited';
+        }
+      } else if (labelEl) {
+        labelEl.textContent = 'free rips/day';
+      }
+      // Persist quota to localStorage so the correct value is shown on page reload.
+      // Only persist when the header is a real quota value (non-negative integer).
+      // -1 signals either unlimited-key holders (persist flag) or per-minute
+      // rate-limit hits (do NOT persist — resets automatically after 60 seconds).
+      if (Number(rem) === -1) {
+        if (!isRateLimited) {
+          localStorage.setItem('ahoyrip_quota_unlimited', '1');
+          localStorage.removeItem('ahoyrip_quota_remaining');
+          localStorage.removeItem('ahoyrip_quota_limit');
+          localStorage.removeItem('ahoyrip_quota_reset');
+        }
+      } else {
+        var remNum = parseInt(rem, 10);
+        var limNum = parseInt(lim, 10);
+        if (!isNaN(remNum) && remNum >= 0) {
+          localStorage.setItem('ahoyrip_quota_remaining', remNum);
+          localStorage.removeItem('ahoyrip_quota_unlimited');
+          if (!isNaN(limNum) && limNum > 0) {
+            localStorage.setItem('ahoyrip_quota_limit', limNum);
+          } else {
+            localStorage.removeItem('ahoyrip_quota_limit');
+          }
+          var resetTs = resp.headers.get('X-DailyLimit-Reset');
+          if (resetTs) {
+            localStorage.setItem('ahoyrip_quota_reset', resetTs);
+          }
+        }
+      }
+    }
+  }
+
   // Shared error hint map — single source of truth for human-readable error messages
   // keyed by error_code (from API response) and by HTTP status code (fallback).
   // Used by both the !resp.ok branch and the catch branch so they stay in sync.
@@ -1399,129 +1491,7 @@ window.addEventListener('appinstalled', function() {
     // because async function rejections bypass the error-handling branches
     // that call setLoading(false).
     try {
-      // Read quota from last info response and update the display.
-      // Also hides the "free rips/day" label when X-DailyLimit-Remaining is -1
-      // (unlimited-key holder), since the quota concept does not apply.
-      function updateQuotaFromHeaders(resp) {
-      var rem = resp.headers.get('X-DailyLimit-Remaining');
-      var lim = resp.headers.get('X-DailyLimit-Limit');
-      var el = document.getElementById('quotaDisplay');
-      var limEl = document.getElementById('quotaLimit');
-      var labelEl = document.getElementById('quotaLabel');
-      var upgradeEl = document.getElementById('quotaUpgrade');
-      if (el && rem !== null && lim !== null) {
-        el.textContent = rem;
-        // Show the limit (e.g. "5") next to the remaining count for transparency.
-        // Omit when limit is -1 (unlimited key holder) since the entire quota UI
-        // is hidden for those users below.
-        if (limEl) {
-          var limNum = parseInt(lim, 10);
-          limEl.textContent = (limNum > 0) ? '/' + limNum : '';
-        }
-        // Warn user when quota is nearly exhausted (1–2 left)
-        if (rem <= 2) {
-          el.classList.add('low');
-        } else {
-          el.classList.remove('low');
-        }
-        // Fully exhausted: distinct visual state (darker red, faster pulse)
-        // signals the user must take action (upgrade or wait) right now.
-        // Only announce via screen-reader live region on the transition TO 0,
-        // not on every info call that returns 0 (avoids repeated announcements).
-        if (Number(rem) === 0) {
-          el.classList.add('exhausted');
-          if (_lastAnnouncedQuota !== 0) {
-            _lastAnnouncedQuota = 0;
-            announceQuotaExhausted();
-          }
-          // Hide the "/5" limit suffix when quota is exhausted — it is
-          // irrelevant and visually misleading once the counter reads 0.
-          if (limEl) limEl.style.display = 'none';
-        } else {
-          el.classList.remove('exhausted');
-          _lastAnnouncedQuota = null;
-          // Restore the limit suffix if quota is no longer exhausted.
-          if (limEl) {
-            var limNum = parseInt(lim, 10);
-            limEl.style.display = (limNum > 0) ? '' : 'none';
-          }
-        }
-        // When quota is exhausted, make the upgrade link more prominent
-        if (upgradeEl) {
-          if (Number(rem) <= 0) {
-            upgradeEl.textContent = 'upgrade now';
-            upgradeEl.style.fontWeight = '700';
-            upgradeEl.style.color = 'var(--color-error)';
-          } else {
-            upgradeEl.textContent = 'get unlimited';
-            upgradeEl.style.fontWeight = '500';
-            upgradeEl.style.color = '';
-          }
-        }
-        // Unlimited-key holders get -1 remaining — hide both the count and the
-        // "free rips/day" label since the quota concept does not apply to them.
-        // Use Number() to normalise the header value (always a string) to an integer
-        // so the strict-equality check works regardless of type (e.g. "-1" vs -1).
-        //
-        // Rate-limit sentinel: when X-DL-RateLimit-Limit is -1 the -1 on
-        // X-DailyLimit-Remaining signals a per-minute rate-limit hit, NOT an
-        // unlimited-key holder. Show "Rate limited" with the exhausted animation
-        // and keep the UI visible so the user sees their actual quota on reload.
-        // Do NOT persist a rate-limit -1 to localStorage (it would be mistaken
-        // for the unlimited-key flag and suppress the quota UI after the window resets).
-        var dlLim = resp.headers.get('X-DL-RateLimit-Limit');
-        var isRateLimited = (dlLim !== null && Number(dlLim) === -1);
-        if (Number(rem) === -1 && labelEl) {
-          if (isRateLimited) {
-            // Per-minute rate-limit hit — show "Rate limited" with exhausted style.
-            el.textContent = 'Rate limited';
-            el.classList.add('exhausted');
-            el.classList.remove('low');
-            labelEl.style.display = '';
-            el.style.display = '';
-            if (limEl) limEl.style.display = 'none';
-          } else {
-            // Unlimited-key holder — hide the quota UI entirely.
-            labelEl.style.display = 'none';
-            el.style.display = 'none';
-            if (limEl) limEl.style.display = 'none';
-          }
-        }
-        // Persist quota to localStorage so the correct value is shown on page reload.
-        // Only persist when the header is a real quota value (non-negative integer).
-        // -1 signals either unlimited-key holders (persist flag) or per-minute
-        // rate-limit hits (do NOT persist — resets automatically after 60 seconds).
-        if (Number(rem) === -1) {
-          if (!isRateLimited) {
-            localStorage.setItem('ahoyrip_quota_unlimited', '1');
-            localStorage.removeItem('ahoyrip_quota_remaining');
-            localStorage.removeItem('ahoyrip_quota_limit');
-            localStorage.removeItem('ahoyrip_quota_reset');
-          }
-          // Rate-limit state is intentionally NOT persisted — it would incorrectly
-          // suppress the quota UI after the rate-limit window expires (60 seconds).
-        } else {
-          var remNum = parseInt(rem, 10);
-          var limNum = parseInt(lim, 10);
-          if (!isNaN(remNum) && remNum >= 0) {
-            localStorage.setItem('ahoyrip_quota_remaining', remNum);
-            localStorage.removeItem('ahoyrip_quota_unlimited');
-            // Also persist limit so restoreQuota() can show "N/M" on reload.
-            if (!isNaN(limNum) && limNum > 0) {
-              localStorage.setItem('ahoyrip_quota_limit', limNum);
-            } else {
-              localStorage.removeItem('ahoyrip_quota_limit');
-            }
-            // Persist the reset timestamp so restoreQuota() can detect stale
-            // quota from a previous UTC day and clear it before displaying.
-            var resetTs = resp.headers.get('X-DailyLimit-Reset');
-            if (resetTs) {
-              localStorage.setItem('ahoyrip_quota_reset', resetTs);
-            }
-          }
-        }
-      }
-    }
+      updateQuotaFromHeaders(resp);
 
     // Updates the quota UI from a JSON response body (success or error).
     // Reads quota_remaining / quota_limit from the body rather than headers,
