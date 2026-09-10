@@ -2367,6 +2367,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // 'format_id_missing' is false — URL validation fires before format validation.
             'format_id_missing' => false,
             'format_id' => null,
+            // 'video_url' mirrors source_url in error responses for consistency with
+            // the info response (where video_url holds the resolved page URL).
+            // Null here because the URL was too long and no video was resolved.
+            'video_url' => null,
             // platform: null — URL too-long validation fires before platform detection.
             // Consistent with the same null value in MISSING_URL, INVALID_URL,
             // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
@@ -2527,6 +2531,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // API consumers can check this flag for precise error routing without
                 // relying on string matching on the error message.
                 'format_id_missing' => false,
+                // 'video_url' mirrors source_url in error responses for consistency with
+                // the info response (where video_url holds the resolved page URL).
+                // $url is set here — INVALID_FORMAT_ID fires after URL validation.
+                'video_url' => $url,
                 'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -2534,9 +2542,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
                 // quota_remaining: -1 signals that quota tracking is not available at this
-                // early validation stage (before the quota file is opened). Matches the
-                // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
-                // same reason. API consumers should treat -1 as "unknown remaining quota".
+                // early validation stage (before the quota file is opened).
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
                 'quota_reset' => -1,

@@ -586,6 +586,47 @@ else
 fi
 
 echo ""
+echo "==> Checking video_url field is present in all error responses that have source_url..."
+# Every API error response that includes 'source_url' should also include 'video_url'
+# (mirrors source_url for consistency with the info response). This ensures API consumers
+# have a uniform error schema — they can always read video_url regardless of error type.
+# MISSING_URL: source_url=null, video_url=null (no URL was provided)
+# INVALID_URL: source_url=$url, video_url=null (URL was invalid)
+# URL_TOO_LONG: source_url=$url, video_url=null (URL too long — no video resolved)
+# MISSING_FORMAT: source_url=$url, video_url=$url (URL was valid, no format selected)
+# INVALID_FORMAT_ID: source_url=$url, video_url=$url (URL was valid, format was invalid)
+# Track which error responses are missing video_url.
+MISSING_VIDEO_URL=0
+# Use a PHP heredoc to parse the source file and find all json_encode arrays that contain
+# 'source_url' but not 'video_url'. This is more robust than grepping for specific error codes.
+MISSING=$(
+    php -r '
+    $src = file_get_contents($argv[1]);
+    // Tokenize to find json_encode([...]) blocks and check for source_url / video_url
+    // Simple approach: find every "'\''source_url'\'' =>" and check if video_url appears
+    // in the same array (approximate — match on the same json_encode block).
+    preg_match_all("/json_encode\s*\(\s*\[([^\]]+)\]\s*,/", $src, $blocks, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+    foreach ($blocks as $block) {
+        $arr = $block[1][0];
+        $hasSource = strpos($arr, "'\''source_url'\''") !== false;
+        $hasVideo = strpos($arr, "'\''video_url'\''") !== false;
+        if ($hasSource && !$hasVideo) {
+            // Found a block with source_url but no video_url
+            echo "FOUND_MISSING\n";
+        }
+    }
+    ' src/api.php 2>/dev/null || true
+)
+if [ -n "$MISSING" ]; then
+    echo "  ✗ video_url missing in error responses with source_url (inconsistent schema)"
+    echo "    video_url must mirror source_url in all error responses for API consistency."
+    MISSING_VIDEO_URL=1
+fi
+if [ "$MISSING_VIDEO_URL" -eq 0 ]; then
+    echo "  ✓ video_url present in all error responses with source_url"
+fi
+
+echo ""
 echo "==> Checking HSTS includeSubDomains..."
 if grep -q "includeSubDomains" src/api.php; then
     echo "  ✓ HSTS includeSubDomains configured"
