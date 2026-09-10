@@ -3300,10 +3300,16 @@ switch ($action) {
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unavailable');
+            // X-DL-RateLimit-*: download-specific rate limit.
+            // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
+            // was consumed. Use -1 sentinel to signal "not applicable", consistent
+            // with the same sentinel used by other pre-limit-gate errors.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unavailable');
+            // X-DailyLimit-*: daily quota sentinels (-1) since proc_open failure means
+            // no quota was consumed. Consistent with other pre-gate error responses.
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
