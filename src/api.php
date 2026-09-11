@@ -879,6 +879,12 @@ if (in_array($action, $internal_actions, true)) {
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: mirrors the header set in the non-FPM fallback block.
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Status: mirrors the header set in the non-FPM fallback block.
+            header('X-FFProbe-Status: skipped');
+            // Retry-After: 0 — client-error is a fire-and-forget endpoint with no
+            // server-side backoff; clients can immediately retry their original action.
+            // Mirrors the Retry-After header set in the non-FPM fallback block.
+            header('Retry-After: 0');
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
