@@ -989,55 +989,6 @@ if (in_array($action, $internal_actions, true)) {
     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
     echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
-    // All other internal_actions (check, health, progress)
-    // receive X-Robots-Tag via the nginx add_header in deploy/nginx.conf
-    // when served through the = /src/api.php location block (line ~98).
-    // api.php also sets this header at the top of the script (line 20)
-    // for all non-download responses.
-    header('Content-Type: application/json; charset=utf-8');
-    header('X-Request-ID: ' . $request_id);
-    // Return PHP version as a minimal version signal for load-balancer health checks.
-    // load-balancer probes can confirm expected version without triggering a full yt-dlp probe.
-    // NOTE: Connection: close is intentionally NOT set here. Sending "Connection: close"
-    // breaks HTTP keep-alive, forcing a new TCP connection for every check request and
-    // negating connection-pooling benefits. For high-frequency pings (every 10s), the
-    // overhead of establishing a new connection each time is measurable. With keep-alive,
-    // the same connection is reused across multiple requests, which is the correct
-    // default for a lightweight JSON API endpoint.
-    // Daily quota fields — check is a read-only probe (does not consume quota)
-    // so quota_remaining is -1 (unlimited signal). quota_limit, quota_reset, and
-    // quota_reset_unix are included for API surface consistency with health/info
-    // responses, allowing clients to always determine the limit and reset from the body.
-    echo json_encode([
-        'status' => 'ok',
-        'server_time' => date('c'),
-        'server_time_unix' => time(),
-        'request_id' => $request_id,
-        'app_version' => AHOYRIPPER_VERSION,
-        'php_version' => PHP_VERSION,
-        'api_version' => AHOYRIPPER_VERSION,
-        'os' => PHP_OS,
-        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-        // yt_dlp_ok: true when yt-dlp binary is installed and callable.
-        // Mirrors the field in action=health so monitoring scripts that hit
-        // action=check (the lightweight no-probe endpoint) can determine binary
-        // status without parsing the version string.
-        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
-        // ffprobe_version: version string for the ffprobe binary (part of ffmpeg suite).
-        // Mirrors the field in action=health for consistency across all endpoints.
-        'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
-        // ffmpeg_ok: true when ffprobe binary is installed and callable.
-        // Mirrors the field in action=health so monitoring can confirm ffprobe
-        // availability without parsing the version string.
-        'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
-        'source_url' => null,
-        'upgrade_url' => UPGRADE_URL,
-        'quota_remaining' => -1,
-        'quota_limit' => getDailyQuotaLimit(),
-        'quota_reset' => -1,
-        'quota_reset_unix' => -1,
-    ], JSON_INVALID_UTF8_SUBSTITUTE);
-    exit;
 }
 
 // Only allow HTTPS URLs and block private IP ranges to prevent SSRF attacks.
