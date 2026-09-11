@@ -2710,6 +2710,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'quota_limit' => -1,
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
+        // server_time: ISO 8601 + Unix for client clock synchronization.
+        // Present on all other API responses (MISSING_URL, client-error, info,
+        // download, health, check) — this METHOD_NOT_ALLOWED block was missing
+        // these fields, breaking generic response parsers that expect consistent
+        // field coverage across all API code paths.
+        'server_time' => date('c'),
+        'server_time_unix' => time(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
@@ -2787,6 +2794,13 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'quota_limit' => -1,
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
+        // server_time: ISO 8601 + Unix for client clock synchronization.
+        // Present on all other API responses (MISSING_URL, METHOD_NOT_ALLOWED,
+        // client-error, info, download, health, check) — this NOT_ACCEPTABLE
+        // block was missing these fields, breaking generic response parsers that
+        // expect consistent field coverage across all API code paths.
+        'server_time' => date('c'),
+        'server_time_unix' => time(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
