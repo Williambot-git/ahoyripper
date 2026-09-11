@@ -1010,6 +1010,42 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 - `X-DailyLimit-Reset` — Unix timestamp of the next daily reset (midnight UTC)
 - `X-DailyLimit-Window` — always `daily` (unlimited-key holders see `unlimited`)
 
+### Health Response Headers
+
+`action=health` and `action=check` return the same comprehensive security and rate-limit header family as `info` and `download`, ensuring consistent hardening and monitoring across all API endpoints.
+
+| Header | Description |
+|--------|-------------|
+| `X-Request-ID` | Unique per-request correlation ID (16 hex chars) — use to correlate browser, API, and server-side logs |
+| `X-Info-Timeout` | Server-side info timeout in seconds (integer). Present on every API response so clients always have this value for retry logic. Matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). |
+| `X-Download-Timeout` | Server-side download timeout in seconds (integer). Present on every API response so clients always have this value for retry logic. Matches `DOWNLOAD_TIMEOUT` (default: 300 seconds). |
+| `X-DL-RateLimit-Limit: -1` | Health is a read-only probe — it does not consume the download rate limit. Value is `-1` (unlimited sentinel). |
+| `X-DL-RateLimit-Remaining: -1` | No download rate limit consumed by health probes. |
+| `X-DL-RateLimit-Reset: -1` | No download rate limit window active for health probes. |
+| `X-DL-RateLimit-Window: unlimited` | Sentinel indicating no download rate limit applies. |
+| `X-RateLimit-Limit: -1` | Health is a read-only probe — it does not consume the shared request rate limit. Value is `-1` (unlimited sentinel). |
+| `X-RateLimit-Remaining: -1` | No request rate limit consumed by health probes. |
+| `X-RateLimit-Reset: -1` | No request rate limit window active for health probes. |
+| `X-RateLimit-Window: unlimited` | Sentinel indicating no request rate limit applies. |
+| `X-DailyLimit-Limit: -1` | Health is a read-only probe — it does not consume the daily quota. Value is `-1` (unlimited sentinel). |
+| `X-DailyLimit-Remaining: -1` | Health probes do not consume quota. |
+| `X-DailyLimit-Reset: -1` | No daily quota consumed by health probes. |
+| `X-DailyLimit-Window: unlimited` | Sentinel indicating no daily quota applies to health probes. |
+| `Content-Security-Policy` | Full CSP header set explicitly on health responses (not relying on the top-of-script block) so health responses are always fully hardened regardless of how the endpoint is served. |
+| `Reporting-Endpoints` | CSP reporting endpoint configuration. |
+| `Report-To` | CSP reporting group configuration. |
+| `X-Content-Type-Options: nosniff` | Prevents MIME-type sniffing. |
+| `X-Frame-Options: SAMEORIGIN` | Prevents clickjacking via iframe embedding. |
+| `X-Download-Options: noopen` | Prevents automatic file opening in the browser context. |
+| `X-Robots-Tag: noindex, noai, noimage, noydir` | Prevents indexing by search engines and AI training crawlers. |
+| `Referrer-Policy: strict-origin-when-cross-origin` | Controls referrer transmission on cross-origin requests. |
+| `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` | Enforces HTTPS for all subdomains. |
+| `Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()` | Disables all browser APIs not needed by the API. |
+| `Cross-Origin-Opener-Policy: same-origin` | Prevents cross-origin documents from accessing this window. |
+| `Cross-Origin-Resource-Policy: same-origin` | Prevents cross-origin resource loading. |
+| `Cache-Control: no-store` | Health is a live system probe — responses must not be cached by intermediaries. |
+| `Date` | RFC 9110 §6.5.1 requires origin servers to send a Date header on all responses. |
+
 ### Download Response Headers
 
 When `action=download` succeeds (HTTP 200), the response includes binary file data with these headers:
