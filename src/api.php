@@ -6051,10 +6051,14 @@ switch ($action) {
         // Build a structured log entry from the error payload.
         // Fields: message (string, required), stack (string, optional), type
         // (string: Error|TypeError|SyntaxError|etc), page_request_id (string,
-        // optional — correlates with server-side access logs), url (string,
+        // optional — correlates with server-side access logs), page_url (string,
         // optional — URL of the page where the error occurred), line (int,
         // optional), col (int, optional).
         // All string fields are truncated to 500 chars to prevent log flooding.
+        // NOTE: 'page_url' (not 'url') is used as the key so the value is not
+        // stripped by logRequest()'s URL-filter blocklist ['api_key','key','url',
+        // 'filename'] — the blocklist targets video URLs and API keys in log
+        // entries; the page URL where a JS error occurred is safe to log.
         $entry = [
             'ts' => date('c'),
             'req_id' => $request_id,
@@ -6064,7 +6068,7 @@ switch ($action) {
                 ? substr($data['type'], 0, 80) : 'unknown',
             'msg' => is_string($data['message'] ?? null)
                 ? substr($data['message'], 0, 500) : null,
-            'url' => is_string($data['url'] ?? null)
+            'page_url' => is_string($data['url'] ?? null)
                 ? substr($data['url'], 0, 500) : null,
             'line' => is_int($data['line'] ?? null) ? $data['line'] : null,
             'col' => is_int($data['col'] ?? null) ? $data['col'] : null,

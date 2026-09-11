@@ -972,11 +972,27 @@ Both fields carry the same reset moment. The Unix variant exists because the `X-
 ```json
 {
   "ok": true,
+  "action": "client-error",
+  "server_time": "2026-09-11T04:00:00+00:00",
+  "server_time_unix": 1728624000,
   "request_id": "a3f1b2c9d4e5f678",
   "api_version": "1.0.0",
-  "yt_dlp_version": "2026.03.17"
+  "yt_dlp_version": "2026.09.24",
+  "upgrade_url": "https://ahoyvpn.com",
+  "retry_after": 0,
+  "source_url": null,
+  "source_url_missing": false,
+  "format_id_missing": false,
+  "format_id": null,
+  "platform": null,
+  "quota_remaining": -1,
+  "quota_limit": -1,
+  "quota_reset": -1,
+  "quota_reset_unix": -1
 }
 ```
+
+All `client-error` POST responses include `quota_remaining: -1`, `quota_limit: -1`, and `platform: null` — these sentinel values indicate that the fire-and-forget endpoint does not consume from the quota budget and has no associated video URL or platform.
 
 ### Rate Limits
 
