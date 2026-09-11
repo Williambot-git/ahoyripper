@@ -268,10 +268,10 @@ function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_inc
 }
 
 function resolvePlaylistFlag($playlist_get) {
-    // Reject booleans explicitly — isset(true) is true and 1&&!is_string(true)
-    // is true, causing boolean true to incorrectly return --yes-playlist via
-    // the ($playlist_get === 1 && !is_string()) arm. URL params are always
-    // strings; booleans should never reach this function.
+    // Booleans should never reach this function (URL params are always strings),
+    // but defend against them anyway — isset(true) is true, and loose int comparison
+    // would incorrectly classify boolean true as truthy. Rejecting booleans as
+    // --no-playlist keeps the function safe for any input type.
     if (is_bool($playlist_get)) {
         return ['--no-playlist'];
     }
