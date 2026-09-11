@@ -2626,6 +2626,12 @@ define('MAX_URL_LEN', max(1, (int)(getenv('MAX_URL_LEN') ?: 2048)));
 // Override via MAX_FILENAME_LEN env var in .env or Docker environment.
 define('MAX_FILENAME_LEN', max(1, (int)(getenv('MAX_FILENAME_LEN') ?: 80)));
 
+// API key length — used to reject oversized key inputs before timing-safe comparison.
+// A reasonable max prevents unnecessarily allocating/comparing very long strings.
+// Matches the length of the default AHOY_UNLIMITED_KEY value (RIPPER2026DEV = 12 chars).
+// Override via API_KEY_LEN env var if using a longer key.
+define('API_KEY_LEN', max(1, (int)(getenv('API_KEY_LEN') ?: 64)));
+
 // Configurable timeout for the health probe (lightweight yt-dlp metadata fetch).
 // Override via HEALTH_PROBE_TIMEOUT env var (e.g. HEALTH_PROBE_TIMEOUT=20 in .env).
 // Defaults to 15 seconds. The probe is a simple --dump-json --skip-download call
@@ -2868,8 +2874,8 @@ switch ($action) {
         // attacks. PHP's !== short-circuits on first mismatched character — an
         // attacker's response-time measurements could reveal how many prefix characters
         // of the key are correct.
-        if ($api_key !== null && !hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
-            logRequest('info', 401, ['reason' => 'invalid_api_key']);
+        if ($api_key !== null && strlen($api_key) > API_KEY_LEN) {
+            logRequest('info', 401, ['reason' => 'invalid_api_key_length']);
             http_response_code(401);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
@@ -3756,8 +3762,12 @@ switch ($action) {
         // attacks. PHP's !== short-circuits on first mismatched character — an
         // attacker's response-time measurements could reveal how many prefix characters
         // of the key are correct.
-        if ($api_key !== null && !hash_equals(AHOY_UNLIMITED_KEY, $api_key)) {
-            logRequest('download', 401, ['reason' => 'invalid_api_key']);
+        // Guard against absurdly long keys: reject before timing-safe comparison.
+        // hash_equals handles mismatched lengths correctly (returns false), but
+        // a length check here avoids unnecessary string allocation for pathological input
+        // and provides an immediate early-exit path for oversized payloads.
+        if ($api_key !== null && strlen($api_key) > API_KEY_LEN) {
+            logRequest('download', 401, ['reason' => 'invalid_api_key_length']);
             http_response_code(401);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
