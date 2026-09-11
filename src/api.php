@@ -2777,6 +2777,10 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
+    // X-Info-Timeout and X-Download-Timeout: consistent with all other info/download
+    // error responses — present on MISSING_URL, METHOD_NOT_ALLOWED, client-error, etc.
+    header('X-Info-Timeout: ' . INFO_TIMEOUT);
+    header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
     // Consistent with the METHOD_NOT_ALLOWED (405) response: include all
     // rate-limit headers so API clients always get complete header coverage
     // regardless of which early-exit code path they hit.
