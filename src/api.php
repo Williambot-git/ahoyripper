@@ -5866,7 +5866,7 @@ switch ($action) {
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unlimited');
+        header('X-DailyLimit-Window: unavailable');
         // no-store: consistent with all other API responses — prevents intermediate
         // proxies (CDN, corporate proxies, load balancers) from caching this response.
         // no-cache would allow caching while revalidating on every request, which is
@@ -6057,7 +6057,7 @@ switch ($action) {
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
-            header('X-DailyLimit-Window: unlimited');
+            header('X-DailyLimit-Window: unavailable');
             // Timeout headers: client-error is a fire-and-forget endpoint (no yt-dlp
             // involvement) but X-Info-Timeout/X-Download-Timeout are included for
             // complete API surface parity — clients can always find these headers.
@@ -6141,7 +6141,7 @@ switch ($action) {
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unlimited');
+        header('X-DailyLimit-Window: unavailable');
 
 
         $body = file_get_contents('php://input');
