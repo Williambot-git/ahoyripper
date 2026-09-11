@@ -6043,10 +6043,13 @@ switch ($action) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             // Rate-limit sentinels: -1 = not applicable (fire-and-forget endpoint).
+            // X-DL-RateLimit-Window: unavailable — client-error fires before the download
+            // rate-limit gate; no download counter has been initialized. Consistent with
+            // the MISSING_URL/METHOD_NOT_ALLOWED pattern (lines 2234/2457).
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: unavailable');
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
