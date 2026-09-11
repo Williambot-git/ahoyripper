@@ -6377,14 +6377,14 @@ switch ($action) {
             // platform: null for health (no associated video URL). Mirrors source_url
             // being null for probe endpoints — consistent field presence across all actions.
             'platform' => null,
-            // Daily quota fields — health is a read-only probe (does not consume quota)
-            // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
-            // configured daily limit for API surface consistency. quota_reset and
-            // quota_reset_unix are always valid timestamps (never -1) per API contract.
+            // Daily quota fields — health is a read-only probe (does not consume quota).
+            // All four quota fields use -1 sentinels (unlimited/unknown signal) to match
+            // the X-DailyLimit-* HTTP headers and the quota_remaining: -1 pattern used
+            // by all other probe/read-only actions (check, analytics, UNKNOWN_ACTION).
             'quota_remaining' => -1,
-            'quota_limit' => $daily_limit,
-            'quota_reset' => $quota_reset_iso,
-            'quota_reset_unix' => $quota_reset_ts,
+            'quota_limit' => -1,
+            'quota_reset' => -1,
+            'quota_reset_unix' => -1,
             // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
             // can always surface the upsell opportunity regardless of which endpoint
             // was called. Health is a probe endpoint (no content rip), but the upsell
