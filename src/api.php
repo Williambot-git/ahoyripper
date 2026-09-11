@@ -287,6 +287,12 @@ if ($blocked) {
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+        // COOP and CORP: required on all API error responses so browsers apply
+        // cross-origin isolation consistently. Omitting these allows Spectre-class
+        // attacks to bypass same-origin policy. Consistent with every other error
+        // path in the API (sendServiceUnavailable503, csp-report 405, client-error 405, etc.).
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
         // CORS origin validation happens before any action is dispatched, so
         // quota tracking has not started. Use -1 sentinels consistent with
         // other pre-quota-gate errors (MISSING_URL, INVALID_URL, etc.).
