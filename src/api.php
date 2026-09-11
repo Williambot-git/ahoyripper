@@ -6019,6 +6019,13 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses (MISSING_URL, NOT_ACCEPTABLE,
+                // METHOD_NOT_ALLOWED, info, download, health, check) — this 405 block
+                // was missing these fields, breaking generic response parsers that
+                // expect consistent field coverage across all API code paths.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return;
         }
