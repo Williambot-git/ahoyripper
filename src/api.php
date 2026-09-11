@@ -5869,6 +5869,12 @@ switch ($action) {
             'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
+            // X-Info-Timeout and X-Download-Timeout headers are set above
+            // (lines 5792-5793) alongside the other security headers so they are
+            // present on the wire. The JSON body also includes these values so
+            // consumers can read them without parsing HTTP headers.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             // yt_dlp_ok: true when yt-dlp binary is installed and callable.
             // Mirrors the field in action=health so monitoring scripts that hit
