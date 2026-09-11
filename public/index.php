@@ -1489,8 +1489,6 @@ window.addEventListener('appinstalled', function() {
     // state. Without this, a failed fetch leaves the UI stuck on "Fetching…"
     // because async function rejections bypass the error-handling branches
     // that call setLoading(false).
-    try {
-      updateQuotaFromHeaders(resp);
 
     // Updates the quota UI from a JSON response body (success or error).
     // Reads quota_remaining / quota_limit from the body rather than headers,
