@@ -94,6 +94,17 @@ define('QUOTA_DIR', getenv('QUOTA_DIR') !== false && getenv('QUOTA_DIR') !== ''
     ? rtrim(getenv('QUOTA_DIR'), '/')
     : '/tmp');
 
+// Ensure QUOTA_DIR exists before any fopen() calls that write state files.
+// This prevents 503 SERVICE_UNAVAILABLE errors when /tmp is wiped between
+// container restarts (QUOTA_DIR=/tmp default), or when a custom QUOTA_DIR
+// path does not yet exist. Mkdir with 0755 permissions — readable by web
+// server user (www-data), writable for quota file writes. The 'if (!is_dir())'
+// guard skips creation when the directory already exists (no syscalls in the
+// hot path after first startup).
+if (!is_dir(QUOTA_DIR)) {
+    @mkdir(QUOTA_DIR, 0755, true);
+}
+
 // URL shown to users when they hit quota/rate-limit barriers — directs users to
 // the upsell destination (e.g. AhoyVPN landing page for the public deploy).
 // Override via UPGRADE_URL env var so self-hosted deployments can point to
