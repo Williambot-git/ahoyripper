@@ -451,6 +451,12 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'quota_limit' => getDailyQuotaLimit(),
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
+        // server_time: ISO 8601 + Unix for client clock synchronization.
+        // Present on all other API responses — SERVICE_UNAVAILABLE was missing
+        // these fields, breaking generic response parsers that expect consistent
+        // field coverage across all API code paths.
+        'server_time' => date('c'),
+        'server_time_unix' => time(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
