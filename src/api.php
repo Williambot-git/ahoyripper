@@ -5867,6 +5867,12 @@ switch ($action) {
             // Mirrors the field in action=health so monitoring can confirm ffprobe
             // availability without parsing the version string.
             'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // curl_cffi_version: version string for the curl_cffi Python library
+            // (required for yt-dlp --impersonate support). Mirrors the field in
+            // action=health for consistency across all probe endpoints.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            // curl_cffi_ok: true when curl_cffi is installed and callable.
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             // Daily quota fields — check is a read-only probe (does not consume quota)
             // so quota_remaining is -1 (unlimited signal). quota_limit mirrors the
             // configured daily limit for API surface consistency with info/download
