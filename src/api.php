@@ -635,7 +635,7 @@ foreach (glob(QUOTA_DIR . '/ahoyrip_daily_*') as $f) {
         @unlink($f);
     }
 }
-// Clean up stale version cache files (yt-dlp and ffprobe) and the yt-dlp
+// Clean up stale version cache files (yt-dlp, ffprobe, curl_cffi) and the yt-dlp
 // connectivity probe cache — they expire after their respective TTLs but the
 // files themselves accumulate on long-running servers if not removed.
 // When the cache is cleared, also clear the in-memory global so the next request
@@ -646,7 +646,8 @@ foreach (glob(QUOTA_DIR . '/ahoyrip_daily_*') as $f) {
 foreach (array_merge(
     glob('/tmp/ahoyrip_ytdlp_*.cache') ?: [],
     glob('/tmp/ahoyrip_ffprobe_*.cache') ?: [],
-    is_file('/tmp/ahoyrip_ytdlp_probe.cache') ? ['/tmp/ahoyrip_ytdlp_probe.cache'] : []
+    is_file('/tmp/ahoyrip_ytdlp_probe.cache') ? ['/tmp/ahoyrip_ytdlp_probe.cache'] : [],
+    is_file('/tmp/ahoyrip_curl_cffi_ver.cache') ? ['/tmp/ahoyrip_curl_cffi_ver.cache'] : []
 ) as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
@@ -659,6 +660,9 @@ foreach (array_merge(
         }
         if (strpos($cache, 'ahoyrip_ytdlp_probe') === 0) {
             $GLOBALS['__ytdlp_probe'] = null;
+        }
+        if (strpos($cache, 'ahoyrip_curl_cffi_') === 0) {
+            $GLOBALS['__curl_cffi_version'] = null;
         }
     }
 }
@@ -1277,6 +1281,48 @@ if (!$GLOBALS['__ffmpeg_version']) {
             // requests don't re-probe every time (matches yt-dlp pattern at line 848).
             @file_put_contents($ffmpeg_cache_file, json_encode(['ver' => $GLOBALS['__ffmpeg_version'], 'hash' => '', 'exp' => time() + VERSION_CACHE_TTL]));
         }
+    }
+}
+
+// curl_cffi version probe — yt-dlp --impersonate (yt-dlp 2024.09+) requires
+// the curl_cffi Python library to spoof browser TLS fingerprints. Without it,
+// --impersonate silently fails and yt-dlp falls back to its default TLS
+// fingerprint, causing unexpected 403/422 errors on protected sites.
+// curl_cffi has no binary to hash-check (it's a Python library), so we probe
+// it via `python3 -c "import curl_cffi; print(curl_cffi.__version__)"`.
+// A failed import (module not installed, wrong Python version) returns empty.
+// Cache with the same TTL as yt-dlp/ffprobe versions since the library
+// rarely changes and probing via python3 on every request adds measurable
+// overhead under load.
+$CURL_CFFI_CACHE_FILE = '/tmp/ahoyrip_curl_cffi_ver.cache';
+$GLOBALS['__curl_cffi_version'] = null;
+if ($CURL_CFFI_CACHE_FILE && is_readable($CURL_CFFI_CACHE_FILE)) {
+    $cached = @json_decode(@file_get_contents($CURL_CFFI_CACHE_FILE), true);
+    if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
+        $GLOBALS['__curl_cffi_version'] = $cached['ver'] ?? null;
+    }
+}
+if ($GLOBALS['__curl_cffi_version'] === null) {
+    // python3 -c "import curl_cffi; print(curl_cffi.__version__)" — the version
+    // string is always on the first (and only) line of stdout. Using proc_open
+    // with bypass_shell=true avoids any shell interpretation of the command.
+    $cc_ver_cmd = ['python3', '-c', 'import curl_cffi; print(curl_cffi.__version__)'];
+    $cc_ver_proc = proc_open($cc_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $cc_ver_pipes2, null, [], ['bypass_shell' => true]);
+    $cc_ver = '';
+    if ($cc_ver_proc) {
+        fclose($cc_ver_pipes2[0]);
+        unset($cc_ver_pipes2[0]);
+        $cc_first_line = fgets($cc_ver_pipes2[1]);
+        if ($cc_first_line !== false) {
+            $cc_ver = trim($cc_first_line);
+        }
+        fclose($cc_ver_pipes2[1]);
+        fclose($cc_ver_pipes2[2]);
+        proc_close($cc_ver_proc);
+    }
+    $GLOBALS['__curl_cffi_version'] = $cc_ver ?: 'not installed';
+    if ($CURL_CFFI_CACHE_FILE) {
+        @file_put_contents($CURL_CFFI_CACHE_FILE, json_encode(['ver' => $GLOBALS['__curl_cffi_version'], 'exp' => time() + VERSION_CACHE_TTL]));
     }
 }
 
@@ -6272,8 +6318,10 @@ switch ($action) {
             // confusion since ffprobe is the actual binary being checked, while
             // ffmpeg_version is kept for backwards compatibility with existing clients.
             'ffprobe_version' => $ffmpeg,
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
             'yt_dlp_ok' => $yt_dlp_ok,
             'ffmpeg_ok' => $ffmpeg_ok,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
             'ffmpeg_cache_expires_at' => $ffmpeg_cache_expires_at,
