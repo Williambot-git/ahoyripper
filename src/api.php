@@ -7087,14 +7087,16 @@ switch ($action) {
             'format_id_missing' => false,
             // platform: null — unknown actions have no associated source platform.
             'platform' => null,
-            // quota_remaining and quota_limit: -1 signals that quota tracking is not
-            // available for unknown actions. Matches MISSING_URL and INVALID_URL which
-            // both use -1 for these fields since they fire before the quota gate.
-            // API consumers should treat -1 as "unknown remaining quota".
+            // quota_remaining: -1 signals that quota tracking is not available for
+            // unknown actions (they fire before the quota gate). API consumers should
+            // treat -1 as "unknown remaining quota".
+            // quota_limit: set to the configured daily limit (always known, even pre-gate)
+            // to match MISSING_URL which also sets quota_limit even though quota_remaining
+            // is -1. API consumers can always determine the configured limit from the body.
             'quota_remaining' => -1,
-            'quota_limit' => -1,
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_limit' => getDailyQuotaLimit(),
+            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+            'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             // upgrade_url: included on all API responses for consistent AhoyVPN upsell
             // opportunity. The UNKNOWN_ACTION response is the last-resort fallback for
             // unrecognized action names — even an invalid action is a valid conversion
