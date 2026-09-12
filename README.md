@@ -905,10 +905,11 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
-  "quota_limit": 5,
-  "quota_reset": "2026-08-28T00:00:00+00:00",
-  "quota_reset_unix": 1756080000,
-  "source_url": null
+  "quota_limit": -1,
+  "quota_reset": -1,
+  "quota_reset_unix": -1,
+  "source_url": null,
+  "source_url_missing": true
 }
 ```
 
@@ -930,6 +931,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "ffprobe_version": "ffmpeg version 6.x",
   "yt_dlp_ok": true,
   "ffmpeg_ok": true,
+  "curl_cffi_version": "0.8.0",
+  "curl_cffi_ok": true,
   "yt_dlp_cache_expires_at": "2026-05-21T17:00:00+00:00",
   "yt_dlp_cache_ttl_seconds": 542,
   "ffmpeg_cache_expires_at": "2026-05-21T17:00:00+00:00",
@@ -948,9 +951,11 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
-  "quota_limit": 5,
-  "quota_reset": "2026-08-28T00:00:00+00:00",
-  "quota_reset_unix": 1756080000
+  "quota_limit": -1,
+  "quota_reset": -1,
+  "quota_reset_unix": -1,
+  "source_url": null,
+  "source_url_missing": true
 }
 ```
 
