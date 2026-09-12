@@ -6739,6 +6739,7 @@ switch ($action) {
             header('Allow: POST');
             // Standard security headers for consistency with all other API responses.
             // Mirrors the headers set in the action=check and action=analytics 405 blocks.
+            header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
@@ -6807,6 +6808,9 @@ switch ($action) {
         if (!$report || !is_array($report)) {
             // Return 204 anyway — browsers don't retry CSP reports and a
             // malformed report should not cause client-side error display.
+            // Prevent caching of the 204 response so intermediate proxies do not
+            // suppress subsequent valid reports from the same origin.
+            header('Cache-Control: no-store');
             http_response_code(204);
             break;
         }
