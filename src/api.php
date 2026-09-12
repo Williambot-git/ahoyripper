@@ -5271,6 +5271,66 @@ switch ($action) {
                     // verification failure path was taken.
                     $probe_err_truncated = $probe_err;
                     header('X-FFProbe-Status: skipped');
+                    // Exit here — do NOT fall through to the else block below. Without this,
+                    // the next else (ffprobe failure handler) would overwrite X-FFProbe-Status
+                    // to 'failed' and clobber the correct 'skipped' status set above.
+                    //
+                    // Refund quota inline since ffprobe succeeded (exit 0) but found no video
+                    // stream — the file is unusable. Unlimited-key holders ($unlimited=true)
+                    // were never incremented, so only refund for regular users.
+                    $ffprobe_post_refund_count = $unlimited ? $daily_limit : refundQuota($ip, $unlimited, $daily_limit, $dl_quota_before_refund);
+                    // Build the ffprobe-verification-failure response and exit immediately.
+                    // This is the same response shape as the else block below (ffprobe non-zero
+                    // exit), but with 'skipped' status and the no-stream error message.
+                    http_response_code(500);
+                    header('Cache-Control: no-store');
+                    header('X-Request-ID: ' . $request_id);
+                    header('X-Content-Type-Options: nosniff');
+                    header('X-Frame-Options: SAMEORIGIN');
+                    header('Referrer-Policy: strict-origin-when-cross-origin');
+                    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                    header('Cross-Origin-Opener-Policy: same-origin');
+                    header('Cross-Origin-Resource-Policy: same-origin');
+                    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                    header('X-Download-Options: noopen');
+                    header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                    header('Reporting-Endpoints: csp-report="/csp-report"');
+                    header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+                    header('X-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$rate_limit));
+                    header('X-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$rate_remaining));
+                    header('X-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$rate_reset_ts));
+                    header('X-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$rate_window));
+                    header('X-DL-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$dl_rate_limit));
+                    header('X-DL-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$dl_rate_remaining));
+                    header('X-DL-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$dl_rate_reset_ts));
+                    header('X-DL-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$dl_rate_window));
+                    header('X-DailyLimit-Limit: ' . ($unlimited ? '-1' : (string)$daily_limit));
+                    header('X-DailyLimit-Remaining: ' . ($unlimited ? '-1' : (string)$ffprobe_post_refund_count));
+                    header('X-DailyLimit-Reset: ' . ($unlimited ? '-1' : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c')));
+                    header('X-DailyLimit-Window: ' . ($unlimited ? 'unlimited' : 'day'));
+                    header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                    header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                    header('Retry-After: 30');
+                    echo json_encode([
+                        'error' => 'Download could not be verified (no video stream in file). The downloaded file is empty or uses an unsupported container format. Please try again or choose a different format.',
+                        'error_code' => 'VERIFICATION_FAILED',
+                        'action' => 'download',
+                        'retry_after' => 30,
+                        'request_id' => $request_id,
+                        'source_url' => $url,
+                        'source_url_missing' => false,
+                        'format_id' => $format_id,
+                        'platform' => null,
+                        'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                        'api_version' => AHOYRIPPER_VERSION,
+                        'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
+                        'quota_limit' => $unlimited ? -1 : $daily_limit,
+                        'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+                        'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                        'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
+                    ], JSON_INVALID_UTF8_SUBSTITUTE);
+                    exit;
                 }
             } else {
                 // ffprobe failed (non-zero exit, timeout, or unreadable output).
