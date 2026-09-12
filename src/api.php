@@ -3920,6 +3920,14 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses (MISSING_URL, INVALID_URL,
+                // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
+                // download, health, check, analytics) — this 503 block was missing
+                // these fields, breaking generic response parsers that expect
+                // consistent field coverage across all API code paths.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3969,6 +3977,7 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url ?? null,
                 'source_url_missing' => ($url ?? '') === '',
+                'format_id_missing' => false,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // quota fields: daily quota was not consumed since lock couldn't be acquired.
@@ -3977,6 +3986,14 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses (MISSING_URL, INVALID_URL,
+                // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
+                // download, health, check, analytics) — this 503 block was missing
+                // these fields, breaking generic response parsers that expect
+                // consistent field coverage across all API code paths.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -4136,8 +4153,8 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url ?? null,
                     'source_url_missing' => ($url ?? '') === '',
-                    // format_id_missing: false — fopen fails before format validation runs.
                     'format_id_missing' => false,
+                    'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     // quota fields: unavailable — the quota file could not be opened.
@@ -4146,6 +4163,14 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => -1,
                     'quota_reset_unix' => -1,
+                    // server_time: ISO 8601 + Unix for client clock synchronization.
+                    // Present on all other API responses (MISSING_URL, INVALID_URL,
+                    // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
+                    // download, health, check, analytics) — this 503 block was missing
+                    // these fields, breaking generic response parsers that expect
+                    // consistent field coverage across all API code paths.
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -4201,12 +4226,21 @@ switch ($action) {
                     'source_url' => null,
                     'source_url_missing' => false,
                     'format_id_missing' => false,
+                    'platform' => null,
                     // quota fields: unavailable — the quota file could not be locked.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
                     'quota_limit' => $daily_limit,
                     'quota_reset' => -1,
                     'quota_reset_unix' => -1,
+                    // server_time: ISO 8601 + Unix for client clock synchronization.
+                    // Present on all other API responses (MISSING_URL, INVALID_URL,
+                    // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
+                    // download, health, check, analytics) — this 503 block was missing
+                    // these fields, breaking generic response parsers that expect
+                    // consistent field coverage across all API code paths.
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
