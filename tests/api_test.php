@@ -1750,6 +1750,16 @@ $health_response = [
     'memory_available_pct' => 72.4,
     'disk_free_gb' => 48.2,
     'platform' => null,
+    // quota fields: -1 sentinel (unlimited/unknown) for read-only probe endpoint.
+    'quota_remaining' => -1,
+    'quota_limit' => -1,
+    'quota_reset' => -1,
+    'quota_reset_unix' => -1,
+    // upgrade_url: AhoyVPN upsell on all API responses.
+    'upgrade_url' => UPGRADE_URL,
+    // source_url: null for probe endpoints (no associated video URL).
+    'source_url' => null,
+    'source_url_missing' => true,
 ];
 test('health endpoint response includes api_version key',
     array_key_exists('api_version', $health_response));
@@ -1764,6 +1774,33 @@ test('health endpoint response includes platform key',
     array_key_exists('platform', $health_response));
 test('health endpoint platform is null',
     $health_response['platform'] === null);
+
+// upgrade_url: AhoyVPN upsell URL included on all API responses.
+test('health endpoint response includes upgrade_url key',
+    array_key_exists('upgrade_url', $health_response));
+test('health endpoint upgrade_url is a non-empty https URL',
+    is_string($health_response['upgrade_url'] ?? '')
+    && strpos($health_response['upgrade_url'], 'https://') === 0);
+
+// source_url: null for probe endpoints (no associated video URL).
+test('health endpoint response includes source_url key',
+    array_key_exists('source_url', $health_response));
+test('health endpoint source_url is null',
+    ($health_response['source_url'] ?? null) === null);
+test('health endpoint response includes source_url_missing key',
+    array_key_exists('source_url_missing', $health_response));
+test('health endpoint source_url_missing is true',
+    ($health_response['source_url_missing'] ?? null) === true);
+
+// quota fields: -1 sentinel for read-only probe endpoint.
+test('health endpoint response includes quota_remaining key',
+    array_key_exists('quota_remaining', $health_response));
+test('health endpoint quota_remaining is -1 sentinel',
+    ($health_response['quota_remaining'] ?? -2) === -1);
+test('health endpoint response includes quota_limit key',
+    array_key_exists('quota_limit', $health_response));
+test('health endpoint quota_limit is -1 sentinel',
+    ($health_response['quota_limit'] ?? -2) === -1);
 
 // The default: case in api.php also includes api_version (line 3373).
 // Verify the unknown-action error response includes api_version.
