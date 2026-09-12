@@ -6466,10 +6466,12 @@ switch ($action) {
             // All four quota fields use -1 sentinels (unlimited/unknown signal) to match
             // the X-DailyLimit-* HTTP headers and the quota_remaining: -1 pattern used
             // by all other probe/read-only actions (check, analytics, UNKNOWN_ACTION).
+            // quota_reset uses the ISO format to match MISSING_URL and all other responses;
+            // quota_reset_unix provides the Unix timestamp for callers that need it.
             'quota_remaining' => -1,
             'quota_limit' => -1,
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_reset' => $quota_reset_iso,
+            'quota_reset_unix' => $quota_reset_ts,
             // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
             // can always surface the upsell opportunity regardless of which endpoint
             // was called. Health is a probe endpoint (no content rip), but the upsell
