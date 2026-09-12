@@ -2480,6 +2480,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // Cache-Control: no-store — prevents all API responses from being cached.
             header('Cache-Control: no-store');
+            // X-FFProbe-Status: ffprobe was never reached — MISSING_FORMAT fires before
+            // yt-dlp runs, so no file was ever produced for ffprobe to verify.
+            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
+            header('X-FFProbe-Status: skipped');
+            http_response_code(400);
             echo json_encode([
                 'error' => 'No format was selected. Call the info action first to see available formats, then pass a format id to the download action.',
                 'error_code' => 'MISSING_FORMAT',
@@ -2567,6 +2572,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-FFProbe-Status: ffprobe was never reached — INVALID_FORMAT_ID fires before
+            // yt-dlp runs, so no file was ever produced for ffprobe to verify.
+            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
+            header('X-FFProbe-Status: skipped');
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
