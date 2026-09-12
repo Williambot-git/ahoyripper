@@ -3676,8 +3676,9 @@ switch ($action) {
                 // quota fields: consistent with success and other error responses.
                 // Quota was incremented then refunded (refundQuota reverts it on error).
                 // post-refund count = pre-increment baseline (refund decremented the file),
-                // so quota_remaining = limit - baseline.
-                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $info_quota_before_refund - 1) : -1,
+                // so quota_remaining = limit - baseline. $daily_data['c'] (captured before
+                // increment at line 3195) equals the post-refund count — no further offset needed.
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
