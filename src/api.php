@@ -3702,6 +3702,9 @@ switch ($action) {
 
         $parsed['request_id'] = $request_id;
         $parsed['source_url'] = $url;
+        // source_url_missing: false — URL was validated and present in the request.
+        // Included for consistency with error responses and documented API surface parity.
+        $parsed['source_url_missing'] = false;
         $parsed['yt_dlp_version'] = $GLOBALS['__ytdlp_version'] ?? null;
         // api_version was previously missing from the info response but present on
         // check and health endpoints — add it for consistent API surface metadata.
