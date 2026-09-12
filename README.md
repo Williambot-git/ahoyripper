@@ -1116,6 +1116,7 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 | [TikTok](https://tiktok.com) | Video + Audio | |
 | [SoundCloud](https://soundcloud.com) | Audio | |
 | [Instagram](https://instagram.com) | Video + Audio | Reels, stories, posts |
+| [Threads](https://threads.net) | Video + Audio | Threads posts, reels |
 | [Facebook](https://facebook.com) | Video | |
 | [Vimeo](https://vimeo.com) | Video | |
 | [Reddit](https://reddit.com) | Video + Audio | |
