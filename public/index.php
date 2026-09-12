@@ -1336,6 +1336,12 @@ window.addEventListener('appinstalled', function() {
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
             if (navigateOnSuccess) {
+              // Update quota display from X-DailyLimit-* headers on successful download
+              // responses. The download action sets these headers so the frontend quota
+              // reflects the post-download state (quota decremented after yt-dlp writes
+              // the file). This mirrors the updateQuotaFromHeaders(resp) call that
+              // fetchInfo() makes after the info action response.
+              updateQuotaFromHeaders(resp);
               // Check if yt-dlp substituted a different format (e.g. 1080p requested
               // but 720p delivered because higher quality was unavailable). Surface this
               // as a brief toast so the user understands why their file is lower quality.
