@@ -7164,6 +7164,9 @@ switch ($action) {
             'source_url_missing' => false,
             // format_id_missing: false — format ID is not relevant to unknown actions.
             'format_id_missing' => false,
+            // format_id: null — unknown actions have no associated download format.
+            // Consistent with the same null value in MISSING_FORMAT and INVALID_FORMAT_ID.
+            'format_id' => null,
             // platform: null — unknown actions have no associated source platform.
             'platform' => null,
             // quota_remaining: -1 signals that quota tracking is not available for
