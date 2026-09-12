@@ -5559,7 +5559,11 @@ switch ($action) {
         // (from X-Requested-Format header). yt-dlp may substitute with a nearby format
         // when the requested one is unavailable. Clients can compare this to the format
         // actually delivered to determine whether substitution occurred.
+        // Strip CR/LF before reflecting into a response header — a malformed client could
+        // inject control characters to forge headers via the X-Requested-Format request
+        // header, even though PHP's header() silently rejects embedded CRLF in the value.
         $req_fmt = $_SERVER['HTTP_X_REQUESTED_FORMAT'] ?? '';
+        $req_fmt = str_replace(["\r", "\n"], '', $req_fmt);
         if ($req_fmt !== '') {
             header('X-Requested-Format: ' . $req_fmt);
         }
