@@ -812,6 +812,12 @@ if (in_array($action, $internal_actions, true)) {
             header('Cross-Origin-Resource-Policy: same-origin');
             // Location-level nginx headers that may be missed after fastcgi_finish_request()
             // flushes — set them explicitly here to guarantee they're present in all deployments.
+            // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
+            // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unlimited');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
