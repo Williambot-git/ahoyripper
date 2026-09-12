@@ -945,6 +945,7 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
     "ok": false,
     "error_code": "SOURCE_FORBIDDEN",
     "error_msg": "The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.",
+    "http_status": 403,
     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "probe_age_seconds": 45
   },
@@ -961,6 +962,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 ```
 
 `yt_dlp_probe.error_code` uses the same classified error codes as the `info` and `download` endpoints (e.g. `SOURCE_FORBIDDEN`, `SSL_ERROR`, `CONNECTION_FAILED`, `SOURCE_TIMEOUT`, `PROBE_FAILED`). See the [error codes table](#error-codes) for the full list and their meanings.
+
+`yt_dlp_probe.http_status` mirrors the semantically appropriate HTTP status code for the classified error (e.g. `403` for `SOURCE_FORBIDDEN`, `504` for `SOURCE_TIMEOUT`, `500` for `PROC_OPEN_FAILED`, `502` for upstream yt-dlp errors). When the probe fails, the health endpoint also sets the HTTP response code to this value, so monitoring systems that use HTTP-level alerting (PagerDuty, cloud health checks) fire on the correct status without needing to inspect the JSON body.
 
 `server_uptime_seconds` is Linux-only — available on servers, omitted in Docker containers or non-Linux environments.
 

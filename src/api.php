@@ -6797,6 +6797,15 @@ switch ($action) {
             }
             $out['yt_dlp_probe'] = $probe_result;
         }
+        // When the yt-dlp probe has failed, set the HTTP status code to match the
+        // classified error so monitoring systems using HTTP-level alerting
+        // (PagerDuty, etc.) fire on the correct status without having to
+        // inspect the JSON body. The probe result's http_status field carries
+        // the semantically appropriate code (500=proc_open, 502=upstream error,
+        // 504=timeout) so HTTP-level health checks work correctly.
+        if ($do_probe && isset($probe_result['ok']) && $probe_result['ok'] === false && isset($probe_result['http_status'])) {
+            http_response_code((int) $probe_result['http_status']);
+        }
         // When no probe is requested, the yt_dlp_probe field is intentionally
         // omitted from the response (not null, absent) so the response shape
         // is stable and clients can distinguish "probe disabled" from errors.
