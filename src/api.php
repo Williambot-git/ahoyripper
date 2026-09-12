@@ -202,7 +202,15 @@ header('X-Robots-Tag: noindex, noai, noimage, noydir');
 // Echoing the client's own ID back lets them confirm receipt and correlate
 // their local error events with server-side log entries. If no ID was sent
 // (direct API call, non-browser client), generate a server-side ID.
-$request_id = $_SERVER['HTTP_X_REQUEST_ID'] ?: bin2hex(random_bytes(8));
+//
+// Use isset()+strlen cap instead of ?: — an empty string '' from the client
+// would be falsy with ?: and trigger a new ID, breaking client-server log
+// correlation. The strlen cap (64 chars, matching nginx's $request_id length)
+// prevents a long-value client header from overflowing the X-Request-ID response
+// header or bloating logs.
+$request_id = (isset($_SERVER['HTTP_X_REQUEST_ID']) && strlen($_SERVER['HTTP_X_REQUEST_ID']) <= 64)
+    ? $_SERVER['HTTP_X_REQUEST_ID']
+    : bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
 
 // Make request ID available to logRequest via a static global
