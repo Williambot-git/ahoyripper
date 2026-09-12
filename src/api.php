@@ -998,12 +998,10 @@ if (in_array($action, $internal_actions, true)) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-        // retry_after: 0 — client-error is a fire-and-forget endpoint with no
-        // server-side backoff; clients can immediately retry their original action.
         echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
-        fastcgi_finish_request();
         exit;
     }
+
     // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers.
     // NOTE: exit is REQUIRED here — without it, the script falls through to the
     // check/health handler below (line 913) and returns a spurious status:ok from
