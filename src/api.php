@@ -3679,6 +3679,10 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, $retry_delta),
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses — this block was missing these fields.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota fields: consistent with success and other error responses.
                 // Quota was incremented then refunded (refundQuota reverts it on error).
                 // post-refund count = pre-increment baseline (refund decremented the file),
