@@ -2829,6 +2829,10 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'source_url_missing' => false,
         // format_id_missing: false — format validation fires after Accept validation.
         'format_id_missing' => false,
+        // format_id: null — NOT_ACCEPTABLE fires before format validation.
+        // Consistent with the same null value in MISSING_URL, INVALID_URL,
+        // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
+        'format_id' => null,
         // source_url: null — NOT_ACCEPTABLE fires before URL processing
         // (it is an Accept-header validation failure, not a URL validation failure).
         'source_url' => null,
