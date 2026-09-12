@@ -15,6 +15,18 @@
   "orientation": "any",
   "lang": "en-US",
   "dir": "ltr",
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.ahoyvpn.app",
+      "id": "com.ahoyvpn.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/ahoyvpn/id1520018967"
+    }
+  ],
   "categories": [
     "utilities",
     "multimedia"
