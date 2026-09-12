@@ -636,7 +636,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 | Code | Meaning |
 |------|---------|
-| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`), missing format on download (`MISSING_FORMAT`), or invalid format ID (`INVALID_FORMAT_ID`) |
+| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`, `URL_TOO_LONG`), missing format on download (`MISSING_FORMAT`), or invalid format ID (`INVALID_FORMAT_ID`) |
 | `401` | Invalid API key (`INVALID_API_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
@@ -664,6 +664,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Sign in to the platform in your browser, or pass cookies to yt-dlp for server-side auth (see [cookies section](#passing-cookies-to-yt-dlp) for setup) |
 | `PARSE_ERROR` | The site returned a non-standard or unparseable response | The site may be temporarily unavailable or not supported |
 | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp | Check the supported sites list at github.com/yt-dlp/yt-dlp |
+| `URL_TOO_LONG` | The submitted URL exceeds the maximum allowed length (2048 characters) | Shorten the URL by removing unnecessary query parameters, or use a URL shortener |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available | Try another video |
 | `AGE_RESTRICTED` | Video is age-restricted and requires verification | Sign in to the source platform to verify your age |
