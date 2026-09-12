@@ -2363,9 +2363,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
             // same reason. API consumers should treat -1 as "unknown remaining quota".
             'quota_remaining' => -1,
-            'quota_limit' => -1,
-            'quota_reset' => -1,
-            'quota_reset_unix' => -1,
+            'quota_limit' => $daily_limit,
+            'quota_reset' => $quota_reset_iso,
+            'quota_reset_unix' => $quota_reset_ts,
             // 'video_url' mirrors source_url in error responses for consistency with
             // the info response (where video_url holds the resolved page URL).
             // Null here because the URL was invalid and no video was resolved.
