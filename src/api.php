@@ -6833,6 +6833,8 @@ switch ($action) {
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
+                'format_id' => null,
+                'platform' => null,
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
                 'quota_reset' => -1,
