@@ -113,14 +113,25 @@
   sendEvent('pagevisit');
 
   // Re-fire on History API navigations (SPA-style, if ever added).
+  // Wraps pushState, replaceState, and popstate — together these three cover
+  // all URL changes that represent a new page state without a full navigation.
+  // replaceState is included separately because it updates the current history
+  // entry (e.g. after form submission or state change) and should also be tracked.
   var originalPushState = window.history.pushState;
+  var originalReplaceState = window.history.replaceState;
   if (originalPushState) {
     window.history.pushState = function () {
       originalPushState.apply(window.history, arguments);
       sendEvent('pagevisit');
     };
-    window.addEventListener('popstate', function () {
-      sendEvent('pagevisit');
-    });
   }
+  if (originalReplaceState) {
+    window.history.replaceState = function () {
+      originalReplaceState.apply(window.history, arguments);
+      sendEvent('pagevisit');
+    };
+  }
+  window.addEventListener('popstate', function () {
+    sendEvent('pagevisit');
+  });
 })();
