@@ -359,6 +359,12 @@ if ($blocked) {
             'quota_limit' => -1,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // server_time: ISO 8601 + Unix for client clock synchronization.
+            // Present on all other API responses — FORBIDDEN_ORIGIN was missing
+            // these fields, breaking generic response parsers that expect consistent
+            // field coverage across all API code paths.
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
