@@ -615,7 +615,11 @@ if ($is_rate_limited) {
                 // a concrete reset timestamp or -1 only when the daily-quota concept
                 // itself does not apply (e.g. check/health actions).
                 'quota_reset_unix' => $rate_quota_reset,
-            ], JSON_INVALID_UTF8_SUBSTITUTE);
+            // server_time: ISO 8601 + Unix for client clock synchronization.
+            // Present on all other API responses; rate-limit block was missing these.
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
         $data['c']++;
