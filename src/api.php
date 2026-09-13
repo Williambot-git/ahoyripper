@@ -5084,6 +5084,9 @@ switch ($action) {
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'source_url_missing' => false,
+                    // 'video_url' mirrors source_url: yt-dlp ran but exited with an
+                    // unclassified error; the canonical URL is unchanged from the request.
+                    'video_url' => $url,
                     'format_id' => $format_id,
                     'format_id_missing' => false,
                     'platform' => null,
