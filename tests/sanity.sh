@@ -1687,13 +1687,12 @@ for err_code in MISSING_URL INVALID_URL; do
         INVALID_URL)  anchor="error_code.*INVALID_URL" ;;
     esac
     # Compute start/end around the anchor to capture headers that may appear
-    # before the anchor line. MISSING_URL headers are 26 lines before the anchor
-    # ("No URL was provided" at line 1685 vs X-Content-Type-Options at line 1659).
-    # INVALID_URL headers are 18 lines before the anchor ("Invalid URL. Please paste"
-    # at line 1732 vs X-Content-Type-Options at line 1714). Use 30-line lookback
-    # to reliably capture both; 20 lines was insufficient for MISSING_URL.
+    # before the anchor line. Headers for MISSING_URL and INVALID_URL can be
+    # 31+ lines before their error message anchors. Use 40-line lookback to
+    # reliably capture headers regardless of how many lines of context precede
+    # the error block in future refactors. 30 lines was insufficient (gap=31).
     anchor_line=$(grep -n "$anchor" src/api.php | head -1 | cut -d: -f1)
-    start_line=$(( anchor_line > 30 ? anchor_line - 30 : 1 ))
+    start_line=$(( anchor_line > 40 ? anchor_line - 40 : 1 ))
     end_line=$(( anchor_line + 20 ))
     BLOCK_LINES=$(sed -n "${start_line},${end_line}p" src/api.php)
     for header in "X-Content-Type-Options" "X-Frame-Options" "X-RateLimit-Limit" "Referrer-Policy"; do
