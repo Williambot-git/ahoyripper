@@ -2766,11 +2766,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // source_url: null — METHOD_NOT_ALLOWED fires before URL processing.
         // source_url_missing: false — METHOD_NOT_ALLOWED fires before URL processing
         // (it is a HTTP-method validation failure, not a URL validation failure).
         'source_url' => null,
-        // source_url_missing: false — METHOD_NOT_ALLOWED fires before URL processing
-        // (it is a HTTP-method validation failure, not a URL validation failure).
         'source_url_missing' => false,
         // format_id_missing: false — format validation fires after method validation.
         'format_id_missing' => false,
