@@ -963,7 +963,12 @@ if (in_array($action, $internal_actions, true)) {
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
             // retry_after: 0 — client-error is a fire-and-forget endpoint with no
             // server-side backoff; clients can immediately retry their original action.
-            echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
+            echo json_encode([
+                'status' => 'ok',
+                'retry_after' => 0,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
         }
@@ -1042,7 +1047,12 @@ if (in_array($action, $internal_actions, true)) {
     header('Reporting-Endpoints: csp-report="/csp-report"');
     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
-    echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode([
+        'status' => 'ok',
+        'retry_after' => 0,
+        'server_time' => date('c'),
+        'server_time_unix' => time(),
+    ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
