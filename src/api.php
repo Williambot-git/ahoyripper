@@ -4545,6 +4545,13 @@ switch ($action) {
             // a standard metadata operation for both audio and video files.
             '--write-thumbnail',
             '--embed-thumbnail',
+            // --embed-metadata: embed video/audio metadata (title, uploader, upload date,
+            // description, chapters, etc.) into the downloaded file. Works for both video
+            // and audio formats. yt-dlp defaults to not embedding metadata — adding this
+            // flag meaningfully improves the downloaded file's completeness and discoverability
+            // (e.g. title/artist visible in file explorers, media players, and portable devices).
+            // Does not conflict with --embed-thumbnail; both can be used together.
+            '--embed-metadata',
         ];
         // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
         // --no-playlist is the safe default (single video); --yes-playlist is
