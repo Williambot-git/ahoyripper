@@ -476,6 +476,20 @@ else
 fi
 
 echo ""
+echo "==> Checking og:title:alt and og:description:alt are present in index.php (RFC 6947 §4.1)... "
+# RFC 6947 §4.1 defines og:title:alt and og:description:alt as text alternatives for
+# og:title and og:description, used by screen readers and non-visual clients when the
+# primary og:title/og:description contain logos/branding that are not readable as text.
+# Guard against accidental removal in future edits.
+if grep -q 'og:title:alt' public/index.php \
+    && grep -q 'og:description:alt' public/index.php; then
+    echo "  ✓ og:title:alt and og:description:alt present (RFC 6947 §4.1 text alternatives)"
+else
+    echo "  ✗ og:title:alt or og:description:alt missing (RFC 6947 §4.1 text alternatives)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking platform count consistency across og-image.svg, index.php, and manifest.json... "
 # The platform count (e.g. 1872+) appears in og-image.svg (as +1872 in the badge),
 # in index.php meta tags (og:description, twitter:description, meta description), and in
