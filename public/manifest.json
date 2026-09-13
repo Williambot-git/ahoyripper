@@ -75,6 +75,14 @@
       "purpose": "any"
     }
   ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "name",
+      "url": "url"
+    }
+  },
   "shortcuts": [
     {
       "name": "Rip a Video",
