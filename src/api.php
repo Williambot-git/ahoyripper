@@ -5658,6 +5658,7 @@ switch ($action) {
                 'aac'  => 'audio/aac',
                 'm4b'  => 'audio/mp4',
                 'weba' => 'audio/webm',
+                '3gp'  => 'video/3gpp',
             ];
             if (isset($ext_mimes[$ext_lower])) {
                 $mime = $ext_mimes[$ext_lower];
