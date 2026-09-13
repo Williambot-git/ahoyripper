@@ -1963,8 +1963,8 @@ fi
 # Extract just the hash value (after sha384- prefix)
 HASH_B64=$(echo "$SRI_VALUE" | sed 's/sha384-//')
 # Compute the actual hash of the file and compare.
-# sha384 produces 48 raw bytes = 64 base64 chars — NO padding is needed or correct.
-# Compare unpadded hashes directly.
+# sha384 produces 48 raw bytes = 64 base64 chars — no padding needed.
+# Actual current hash: sha384-EAhteuodHOb8VsIqJLmdkirlY7F+XUzx0g4vaQv0PNYuDnH7rey69W0Kr242F9B/
 ACTUAL_HASH=$(openssl dgst -sha384 -binary "$ANALYTICS_SCRIPT" | openssl base64 -A)
 if [ "$HASH_B64" != "$ACTUAL_HASH" ]; then
     echo "  ✗ analytics.js SRI hash mismatch in index.php"
