@@ -29,7 +29,13 @@ function validateRefererParam(string $referer): string {
     if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
         return 'https://ahoyripper.com/';
     }
-    return $referer;
+    // Return the origin + path, but strip query string and fragment.
+    // Query params (UTM tags, session IDs, video IDs) and fragments must not be
+    // forwarded as the Referer header to the destination platform via yt-dlp's
+    // --referer flag — that would leak user browsing data to third-party sites.
+    // yt-dlp only needs scheme://host/path for platform anti-bot Referer checks.
+    $path = $parts['path'] ?? '/';
+    return $origin . ($path === '' ? '/' : $path);
 }
 
 $failures = 0;
@@ -88,17 +94,17 @@ test('http (not https) is rejected with fallback',
 
 echo "\n==> Testing paths are preserved for allowed origins\n";
 
-test('https://ahoyripper.com/any/path is returned unchanged',
+test('https://ahoyripper.com/any/path — path preserved, query+fragment stripped',
     validateRefererParam('https://ahoyripper.com/any/path') === 'https://ahoyripper.com/any/path');
 
-test('https://ahoyripper.com/path?query=1 is returned unchanged',
-    validateRefererParam('https://ahoyripper.com/path?query=1') === 'https://ahoyripper.com/path?query=1');
+test('https://ahoyripper.com/path?query=1 — query string stripped to prevent Referer leakage',
+    validateRefererParam('https://ahoyripper.com/path?query=1') === 'https://ahoyripper.com/path');
 
-test('https://ahoyripper.com/path#fragment is returned unchanged',
-    validateRefererParam('https://ahoyripper.com/path#fragment') === 'https://ahoyripper.com/path#fragment');
+test('https://ahoyripper.com/path#fragment — fragment stripped to prevent Referer leakage',
+    validateRefererParam('https://ahoyripper.com/path#fragment') === 'https://ahoyripper.com/path');
 
-test('https://www.ahoyvpn.com/landing page?ref=ahoyripper is returned unchanged',
-    validateRefererParam('https://www.ahoyvpn.com/landing?ref=ahoyripper') === 'https://www.ahoyvpn.com/landing?ref=ahoyripper');
+test('https://www.ahoyvpn.com/landing?ref=ahoyripper — query string stripped to prevent Referer leakage',
+    validateRefererParam('https://www.ahoyvpn.com/landing?ref=ahoyripper') === 'https://www.ahoyvpn.com/landing');
 
 // ─── Rejected origins — returns safe fallback ───────────────────────────────
 
