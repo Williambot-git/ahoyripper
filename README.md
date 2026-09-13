@@ -15,6 +15,7 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 - Files streamed directly to your download - nothing stored on our servers
 - Built-in AhoyVPN upsell (supports the tool)
 - OpenSearch — add AhoyRipper to your browser's search bar for one-click ripping
+- Installable PWA — add to your home screen for app-like experience and offline access
 
 ---
 
