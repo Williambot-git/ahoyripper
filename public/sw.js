@@ -18,12 +18,17 @@
  * script wasn't run), the fallback 'unversioned' string ensures the
  * SW still installs and functions — it simply won't auto-update.
  */
-// '{{CACHE_VERSION}}' is replaced at deploy time by scripts/generate-sw-version.php
-// with the short git commit hash. If the placeholder was not replaced (deploy script
-// ran outside a git repo or failed), '{{CACHE_VERSION}}' still equals 'PLACEHOLDER',
-// so the ternary evaluates to 'unversioned' and the SW still installs and functions —
-// it simply won't auto-update until the next deploy.
-const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER' ? '{{CACHE_VERSION}}' : 'unversioned';
+// {{CACHE_VERSION}} — deployed git hash, replaced by scripts/generate-sw-version.php.
+// The multiline ternary pattern is intentional: when the deploy script replaces
+// {{CACHE_VERSION}} with the git hash (e.g. '3f9b2c'), the comparison
+// '{{CACHE_VERSION}}' !== 'PLACEHOLDER' evaluates to true and the hash is returned.
+// When running outside a git repo (or the replacement fails), the deploy script
+// sets PLACEHOLDER as the replacement token, the comparison is false, and the
+// fallback 'unversioned' is returned — the SW still installs and functions, it just
+// won't auto-update until the next successful deploy.
+const CACHE_VERSION = 'dfa6e68' === 'PLACEHOLDER'
+    ? 'unversioned'
+    : 'dfa6e68';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 

@@ -20,7 +20,6 @@
  *    When the placeholder is left unreplaced, it falls back to 'unversioned'.)
  *
  * Old single-line ternary (broken — both branches had same hash):
- *   // '{{CACHE_VERSION}}' is replaced at deploy time...
  *   const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
  *
  * Legacy single-line (pre-ternary):
@@ -59,21 +58,38 @@ $placeholder = '{{CACHE_VERSION}}';
 $content = file_get_contents($swFile);
 
 // If the placeholder token is still present, do a targeted replacement
-// on just the CACHE_VERSION const declaration line.
+// across all variants of the CACHE_VERSION declaration (single-line and multiline).
+// Handles:
+//   - Multiline ternary (current, recommended):
+//       const CACHE_VERSION = '{{CACHE_VERSION}}' === 'PLACEHOLDER'
+//           ? 'unversioned'
+//           : '{{CACHE_VERSION}}';
+//   - Old single-line ternary (broken):
+//       const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER' ? '{{CACHE_VERSION}}' : 'unversioned';
+//   - Legacy single-line (pre-ternary):
+//       const CACHE_VERSION = '{{CACHE_VERSION}}';
 if (strpos($content, $placeholder) !== false) {
-    $newContent = preg_replace_callback(
-        '/^const CACHE_VERSION = .*/m',
-        function ($m) use ($version, $placeholder) {
-            $line = $m[0];
-            // Replace all occurrences of the placeholder token in this line.
-            // This handles:
-            //   - New multiline ternary: const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER' ? '{{CACHE_VERSION}}' : 'unversioned';
-            //   - Old broken ternary:   const CACHE_VERSION = '{{CACHE_VERSION}}' === '{{CACHE_VERSION}}' ? 'unversioned' : '{{CACHE_VERSION}}';
-            //   - Legacy single-line:   const CACHE_VERSION = '{{CACHE_VERSION}}';
-            return str_replace($placeholder, $version, $line);
-        },
-        $content
-    );
+    // Split into lines, process every line that is part of the CACHE_VERSION
+    // declaration block (starts with "const CACHE_VERSION"), and reassemble.
+    // This handles both single-line and multi-line declarations correctly.
+    $lines = explode("\n", $content);
+    $in_block = false;
+    foreach ($lines as $i => $line) {
+        if (preg_match('/^const CACHE_VERSION =/', $line)) {
+            $in_block = true;
+        }
+        if ($in_block) {
+            $lines[$i] = str_replace($placeholder, $version, $line);
+            // Declaration ends at the first line whose trimmed content ends with a
+            // semicolon (with optional trailing comment). This handles single-line
+            // declarations and multi-line ternary blocks correctly.
+            $trimmed = rtrim($line);
+            if (preg_match('/;\s*(\/\/.*)?$/', $trimmed)) {
+                $in_block = false;
+            }
+        }
+    }
+    $newContent = implode("\n", $lines);
 } else {
     // No placeholder found — CACHE_VERSION already has a real hash value.
     // Check if it needs updating (different from current version).
@@ -82,14 +98,21 @@ if (strpos($content, $placeholder) !== false) {
         $current = $m[1];
         if ($current !== $version) {
             // Version mismatch — update all occurrences of the old hash in the
-            // CACHE_VERSION line to the new version.
-            $newContent = preg_replace_callback(
-                '/^const CACHE_VERSION = .*/m',
-                function ($m) use ($version, $current) {
-                    return str_replace("'{$current}'", "'{$version}'", $m[0]);
-                },
-                $content
-            );
+            // CACHE_VERSION line(s) to the new version.
+            $lines = explode("\n", $content);
+            $in_block = false;
+            foreach ($lines as $i => $line) {
+                if (preg_match('/^const CACHE_VERSION =/', $line)) {
+                    $in_block = true;
+                }
+                if ($in_block) {
+                    $lines[$i] = str_replace("'{$current}'", "'{$version}'", $line);
+                    if (preg_match('/;\s*(\/\/.*)?$/', rtrim($line))) {
+                        $in_block = false;
+                    }
+                }
+            }
+            $newContent = implode("\n", $lines);
         }
     }
 }
