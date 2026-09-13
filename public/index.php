@@ -280,6 +280,7 @@ header_remove('X-Powered-By');
         "operatingSystem": "Any",
         "browserRequirements": "Any modern browser with JavaScript enabled.",
         "softwareVersion": "<?= $VERSION ?>",
+        "programmingLanguage": "PHP",
         "image": "<?= $BASE_URL ?>/og-image.webp",
         "author": {
           "@type": "Organization",
@@ -314,6 +315,7 @@ header_remove('X-Powered-By');
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
         "softwareVersion": "<?= $VERSION ?>",
+        "programmingLanguage": "PHP",
         "image": "<?= $BASE_URL ?>/og-image.webp",
         "author": {
           "@type": "Organization",
