@@ -212,19 +212,6 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
 }
 
 /**
- * Resolve the playlist URL parameter to yt-dlp playlist flags.
- * Mirrors the canonical implementation in src/api.php.
- *
- * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
- * --no-playlist (fetch single video only). yt-dlp does NOT support
- * --playlist true/false — that syntax is rejected as ambiguous.
- *
- * @param string|null $playlist_get  $_GET['playlist'] value
- * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
- * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
- */
-
-/**
  * Reverse a daily quota increment when a download request fails before
  * any file is served. Prevents users from losing quota on failed downloads.
  * Mirrors the canonical implementation in src/api.php.
@@ -269,6 +256,18 @@ function refundQuota(string $ip, bool $unlimited, int $daily_limit, int $pre_inc
     return $undo_data['c'];
 }
 
+/**
+ * Resolve the playlist URL parameter to yt-dlp playlist flags.
+ * Mirrors the canonical implementation in src/api.php.
+ *
+ * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
+ * --no-playlist (fetch single video only). yt-dlp does NOT support
+ * --playlist true/false — that syntax is rejected as ambiguous.
+ *
+ * @param string|null $playlist_get  $_GET['playlist'] value
+ * @return array  Array of flag strings, e.g. ['--yes-playlist'] or ['--no-playlist']
+ * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
+ */
 function resolvePlaylistFlag($playlist_get) {
     // Booleans should never reach this function (URL params are always strings),
     // but defend against them anyway — isset(true) is true, and loose int comparison
