@@ -783,7 +783,6 @@ window.addEventListener('appinstalled', function() {
     'PROC_OPEN_FAILED': 'The download could not be started. The server may be restarting or overloaded. Try again in a moment.',
     'SOURCE_FORBIDDEN': 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.',
     'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been moved or deleted.',
-    'SOURCE_HTTP_ERROR': 'The source site returned HTTP 4xx/5xx and is having issues. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'FORMAT_UNAVAILABLE': 'That format is not available for this video. Select another from the list above.',
     'ANALYTICS_ACTION': 'Internal analytics action — not usable directly. Use a supported action: info, download, check, health, progress, analytics, client-error, or csp-report.',
     'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
