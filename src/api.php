@@ -857,6 +857,12 @@ if (in_array($action, $internal_actions, true)) {
         // Cache-Control: no-store — prevents all API responses from being cached.
         // Set explicitly here since the top-of-script header block is bypassed.
         header('Cache-Control: no-store');
+        // X-Info-Timeout / X-Download-Timeout: consistent with all other internal
+        // action blocks (health, check, client-error). These are set in the FPM-path
+        // block above via the global header section so they are absent here — add
+        // them explicitly to the non-FPM fallback so both paths are equivalent.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
         // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
         header('X-RateLimit-Limit: -1');
