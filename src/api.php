@@ -2637,7 +2637,14 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
 // The env var takes precedence; falling back to a compile-time default
 // only for local development / docker where env is not set.
 // Keep the value in a single place to simplify rotation.
-define('AHOY_UNLIMITED_KEY', getenv('AHOY_KEY') ?: (getenv('AHOY_UNLIMITED_KEY') ?: 'RIPPER2026DEV'));
+// Uses an explicit guard so both unset (false) and empty-string ('') fall through
+// to the next env var or default. This matches the pattern used for all other
+// configurable constants in this file (INFO_TIMEOUT, RATE_LIMIT, etc.).
+$_raw_key1 = getenv('AHOY_KEY');
+$_raw_key2 = getenv('AHOY_UNLIMITED_KEY');
+define('AHOY_UNLIMITED_KEY', ($_raw_key1 !== false && $_raw_key1 !== '') ? $_raw_key1
+    : (($_raw_key2 !== false && $_raw_key2 !== '') ? $_raw_key2 : 'RIPPER2026DEV'));
+unset($_raw_key1, $_raw_key2);
 
 // Configurable User-Agent — follows the same env-var pattern as AHOY_UNLIMITED_KEY.
 // Override via AHOY_USER_AGENT env var in docker-compose or cloud dashboard.
