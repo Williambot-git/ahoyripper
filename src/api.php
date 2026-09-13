@@ -5368,6 +5368,8 @@ switch ($action) {
                         'platform' => null,
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        'server_time' => date('c'),
+                        'server_time_unix' => time(),
                         'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
                         'quota_limit' => $unlimited ? -1 : $daily_limit,
                         'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
