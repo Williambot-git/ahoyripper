@@ -2267,11 +2267,14 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // Content-Type: required for correct JSON rendering in browsers and API clients.
+        // Missing from the original block — added for consistency with all other API responses.
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'No URL was provided. Paste a valid link from YouTube, Twitter, SoundCloud, TikTok, Instagram, etc.',
             'error_code' => 'MISSING_URL',
             'action' => $action,
-            // retry_after: 0 signals "retry immediately once input is corrected" — a
+            // retry_after: 0 signals "retry immediately once input is corrected" —
             // validation error has no server-side backoff; the client just needs to
             // provide valid input. Consistent with INVALID_URL and INVALID_FORMAT_ID.
             'retry_after' => 0,
@@ -2344,6 +2347,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // Content-Type: required for correct JSON rendering in browsers and API clients.
+        // Missing from the original block — added for consistency with all other API responses.
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
@@ -2409,6 +2415,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // Content-Type: required for correct JSON rendering in browsers and API clients.
+        // Missing from the original block — added for consistency with all other API responses.
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
             'error_code' => 'URL_TOO_LONG',
