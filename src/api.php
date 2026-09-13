@@ -3476,9 +3476,9 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
-                // 'video_url' mirrors source_url: yt-dlp had not yet run when this
-                // error was raised (proc_open itself failed before yt-dlp could start).
                 'video_url' => $url,
+                'format_id_missing' => false,
+                'format_id' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
