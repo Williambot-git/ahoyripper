@@ -1325,6 +1325,7 @@ window.addEventListener('appinstalled', function() {
                 showError(dlMsg);
                 setLoading(false);
                 card.classList.remove('downloading');
+                return;
               }).catch(function() {
                 // resp.json() failed — response body was not valid JSON (e.g. a proxy
                 // error page). Fall back to the HTTP status code lookup so 502/504/503
@@ -1338,7 +1339,6 @@ window.addEventListener('appinstalled', function() {
                 setLoading(false);
                 card.classList.remove('downloading');
               });
-              return;
             }
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
