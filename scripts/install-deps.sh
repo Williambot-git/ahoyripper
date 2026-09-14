@@ -209,11 +209,21 @@ fi
 # use --impersonate when AHOY_IMPERSONATE is set, but having curl_cffi available
 # means the flag is always valid if the env var is set.
 echo "==> Installing curl_cffi (required for --impersonate)..."
-$PIP_BIN install -q curl-cffi 2>&1 | tail -1
+# Use the same --break-system-packages fallback chain as yt-dlp install above.
+# On Ubuntu 22.04+ (PEP 668), --break-system-packages is required for pip to
+# write outside virtualenvs. Without it, pip silently skips the install and
+# curl_cffi is never available, causing yt-dlp --impersonate to fail at runtime.
 if python3 -c "import curl_cffi; print('  curl_cffi version:', curl_cffi.__version__)" 2>/dev/null; then
     echo "  curl_cffi installed."
 else
-    echo "  ! curl_cffi not installed (yt-dlp --impersonate will silently fail)"
+    $PIP_BIN install -q --break-system-packages curl-cffi 2>&1 | tail -1 || \
+    $PIP_BIN install -q curl-cffi 2>&1 | tail -1 || \
+    $PIP_BIN install -q --user curl-cffi 2>&1 | tail -1
+    if python3 -c "import curl_cffi; print('  curl_cffi version:', curl_cffi.__version__)" 2>/dev/null; then
+        echo "  curl_cffi installed."
+    else
+        echo "  ! curl_cffi not installed (yt-dlp --impersonate will silently fail)"
+    fi
 fi
 
 echo "==> Installing ffmpeg..."
