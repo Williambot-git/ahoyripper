@@ -1855,7 +1855,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     $thumbnail = clean($data['thumbnail'] ?? '');
     $duration = (int)($data['duration'] ?? 0);
     $uploader = clean($data['uploader'] ?? '');
-    // extractor_key is the platform name yt-dlp uses (e.g. "YouTube", "Twitter", "TikTok").
+    $upload_date = isset($data['upload_date']) && preg_match('/^\d{8}$/', $data['upload_date'])
+        ? $data['upload_date']  // YYYYMMDD — returned as-is for consumer formatting
+        : null;
+    $description = clean(mb_substr($data['description'] ?? '', 0, 1000)) ?: null;
     // Surface it in the info response so the UI can display "From: YouTube" to confirm
     // the URL was parsed by the correct extractor.
     $platform = clean($data['extractor_key'] ?? '');
@@ -2130,6 +2133,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         'duration' => $duration,
         'uploader' => $uploader,
         'uploader_url' => $uploader_url,
+        'upload_date' => $upload_date,  // YYYYMMDD or null — consumer formats (e.g. Oct 14, 2026)
+        'description' => $description,  // First 1000 chars of video description, or null
         'platform' => $platform,
         'derived_filename' => $derived_filename,
         'formats' => $formats,
