@@ -2819,6 +2819,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // Consistent with the same null value in MISSING_URL, INVALID_URL,
         // NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
         'platform' => null,
+        // 'video_url' mirrors source_url — null because METHOD_NOT_ALLOWED fires
+        // before any URL processing. Consistent with MISSING_URL and INVALID_URL.
+        'video_url' => null,
         // quota fields: -1 signals that quota tracking is not applicable at this
         // early pre-action validation stage (before any action is dispatched).
         'quota_remaining' => -1,
@@ -2907,6 +2910,9 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // source_url: null — NOT_ACCEPTABLE fires before URL processing
         // (it is an Accept-header validation failure, not a URL validation failure).
         'source_url' => null,
+        // 'video_url' mirrors source_url — null because NOT_ACCEPTABLE fires
+        // before any URL processing. Consistent with MISSING_URL and INVALID_URL.
+        'video_url' => null,
         // platform: null — NOT_ACCEPTABLE fires before platform detection.
         // Consistent with the same null value in MISSING_URL, INVALID_URL,
         // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
