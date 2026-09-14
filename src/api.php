@@ -6797,6 +6797,11 @@ switch ($action) {
                         // upgrade_url: mirrors the health response body for consistency
                         // when clients read the probe sub-field directly.
                         'upgrade_url' => UPGRADE_URL,
+                        // server_time: ISO 8601 + Unix for clock synchronization — mirrors
+                        // the top-level health response fields so probe sub-objects have the
+                        // same temporal metadata as the parent response.
+                        'server_time' => date('c'),
+                        'server_time_unix' => time(),
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
@@ -6876,6 +6881,11 @@ switch ($action) {
                         // upgrade_url: included on failed probe responses so clients can
                         // always surface the AhoyVPN upsell regardless of probe outcome.
                         'upgrade_url' => UPGRADE_URL,
+                        // server_time: ISO 8601 + Unix for clock synchronization — mirrors
+                        // the top-level health response fields so probe sub-objects have the
+                        // same temporal metadata as the parent response.
+                        'server_time' => date('c'),
+                        'server_time_unix' => time(),
                     ];
                 }
                 if ($probe_cache_file) {
