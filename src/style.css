@@ -74,7 +74,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   line-height: 1.6;
+  /* 100dvh (dynamic viewport height) expands/contracts with iOS Safari's
+     dynamic toolbar — unlike 100vh which is fixed to the initial viewport
+     and causes the bottom content to be obscured by the browser chrome.
+     100vh fallback for browsers that don't support dvh yet (no regression). */
   min-height: 100vh;
+  min-height: 100dvh;
   /* Pad for iOS safe areas (notch / home indicator) when viewport-fit=cover is used */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
