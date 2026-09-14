@@ -967,6 +967,7 @@ if (in_array($action, $internal_actions, true)) {
             echo json_encode([
                 'status' => 'ok',
                 'retry_after' => 0,
+                'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1051,6 +1052,7 @@ if (in_array($action, $internal_actions, true)) {
     echo json_encode([
         'status' => 'ok',
         'retry_after' => 0,
+        'api_version' => AHOYRIPPER_VERSION,
         'server_time' => date('c'),
         'server_time_unix' => time(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
