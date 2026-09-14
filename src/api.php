@@ -2497,7 +2497,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
     if ($action === 'download') {
         $format_id = trim($_GET['format'] ?? '');
         if ($format_id === '') {
-            http_response_code(400);
             logRequest($action, 400, ['reason' => 'missing_format']);
             // Security headers — same set as MISSING_URL / INVALID_URL.
             header('X-Content-Type-Options: nosniff');
@@ -2617,6 +2616,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // Cache-Control: no-store — prevents all API responses from being cached.
+            // Validation errors must never be cached or reused by shared caches/CDNs.
+            header('Cache-Control: no-store');
             // X-FFProbe-Status: ffprobe was never reached — INVALID_FORMAT_ID fires before
             // yt-dlp runs, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
