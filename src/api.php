@@ -4176,7 +4176,16 @@ switch ($action) {
         header('X-DL-RateLimit-Window: ' . $dl_rate_window);
         // Mirrors the X-RateLimit-Limit header sent by the info action so
         // generic API consumers always see a consistent rate-limit envelope.
+        // Uses download-specific values ($dl_rate_limit, $dl_remaining, $dl_reset)
+        // since this is the download action's post-gate response — consistent with
+        // the classified and unclassified yt-dlp error blocks which do the same.
+        // X-RateLimit-Window uses $rate_window (60s), not $dl_rate_window, because
+        // the generic header tracks the per-minute request-rate window (shared by
+        // both info and download actions), not the download-specific window.
         header('X-RateLimit-Limit: ' . $dl_rate_limit);
+        header('X-RateLimit-Remaining: ' . max(0, $dl_remaining));
+        header('X-RateLimit-Reset: ' . $dl_reset);
+        header('X-RateLimit-Window: ' . $rate_window);
 
         // ─── Daily download quota (free tier limit, skip if unlimited key) ───
         if (!$unlimited) {
