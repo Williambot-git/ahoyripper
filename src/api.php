@@ -4149,6 +4149,8 @@ switch ($action) {
                     'action' => 'download',
                     'source_url' => $url,
                     'source_url_missing' => false,
+                    'video_url' => $url,
+                    'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
                     'platform' => null,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
