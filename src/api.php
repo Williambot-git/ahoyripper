@@ -114,7 +114,7 @@ define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/')
 
 // Plausible analytics host — '' (empty, default) routes events through the
 // /src/api.php?action=analytics proxy so no third-party requests leave the browser.
-// Set PLAUSIBLE_HOST to a hostname (e.g. 'plausible.io' or 'analytics.yourdomain.com')
+// Set PLAUSIBLE_HOST to a hostname (e.g. 'plausible.io' or 'analytics.example.com')
 // to forward events directly to a self-hosted or hosted Plausible server.
 // Set to '' to disable analytics entirely (endpoint returns 204 silently).
 define('PLAUSIBLE_HOST', getenv('PLAUSIBLE_HOST') ?: '');
