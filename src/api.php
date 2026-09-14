@@ -2498,7 +2498,6 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $format_id = trim($_GET['format'] ?? '');
         if ($format_id === '') {
             logRequest($action, 400, ['reason' => 'missing_format']);
-            http_response_code(400);
             // Security headers — same set as MISSING_URL / INVALID_URL.
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
