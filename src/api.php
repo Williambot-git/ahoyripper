@@ -4146,6 +4146,8 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                     // quota fields: included for consistency with other download error responses.
                     // Quota state is not available at this gate (quota file not yet opened).
                     'quota_remaining' => -1,
@@ -4688,6 +4690,8 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota fields: quota was refunded before this response.
                 // $post_refund_count is the post-refund daily count returned by
                 // refundQuota() — it IS the remaining quota, not an offset from the limit.
@@ -4834,6 +4838,8 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
