@@ -1233,6 +1233,7 @@ if (!$GLOBALS['__ytdlp_version']) {
     // stdout; stderr contains non-version info. Reading only stdout is sufficient.
     // If the binary is absent, proc_open returns false and $ver stays empty.
     $ver = '';
+    $ytdlp_ver_pipes = null;
     $ytdlp_ver_cmd = [YTDLP_PATH, '--version'];
     $ytdlp_ver_proc = proc_open($ytdlp_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ytdlp_ver_pipes, null, [], ['bypass_shell' => true]);
     if ($ytdlp_ver_proc) {
@@ -1314,6 +1315,7 @@ if (!$GLOBALS['__ffmpeg_version']) {
     // pipe — consistent with the shell-escaping approach used throughout the rest
     // of this file. The pipe (| head -1) is unnecessary since ffprobe's version
     // string is always on the first line of stdout; we read exactly one line.
+    $ffprobe_ver_pipes = null;
     $ffprobe_ver_cmd = [FFPROBE_PATH, '-version'];
     $ffprobe_ver_proc = proc_open($ffprobe_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ffprobe_ver_pipes, null, [], ['bypass_shell' => true]);
     $ffmpeg_ver = '';
