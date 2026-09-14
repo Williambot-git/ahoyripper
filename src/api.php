@@ -5379,6 +5379,7 @@ switch ($action) {
                     // the downloaded file is a broken container. Flag as verification
                     // failure so the quota is refunded and the user sees a clear error.
                     $probe_exit = -1;
+                    $probe_timed_out = false; // not a timeout — ffprobe ran to completion but found no streams
                     $probe_err = 'No video stream found in downloaded file (malformed or empty container).';
                     // ffprobe exited 0 but found no streams — ffprobe itself did not "fail"
                     // per se, but verification could not be completed. Use 'skipped' to
