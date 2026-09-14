@@ -5697,6 +5697,7 @@ switch ($action) {
         // with all other download response paths (empty-file, timeout, proc failure, etc.).
         // NOTE: Connection: close was already sent before the streaming loop (line 4864).
         header('X-FFProbe-Status: ' . (!$probe_attempted ? 'skipped' : ($probe_exit === 0 ? 'success' : 'failed')));
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('X-Request-ID: ' . $request_id);
         header('Retry-After: 0');
 
