@@ -83,6 +83,40 @@
       "url": "url"
     }
   },
+  "file_handlers": [
+    {
+      "name": "Video Files",
+      "description": "Open video files with AhoyRipper",
+      "accept": [
+        {
+          "mime_type": "video/*"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/favicon-180.png",
+          "sizes": "180x180",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Audio Files",
+      "description": "Open audio files with AhoyRipper",
+      "accept": [
+        {
+          "mime_type": "audio/*"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/favicon-180.png",
+          "sizes": "180x180",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "shortcuts": [
     {
       "name": "Rip a Video",
