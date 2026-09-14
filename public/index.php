@@ -1578,7 +1578,13 @@ window.addEventListener('appinstalled', function() {
         signal: _fetchController.signal,
       });
 
-      updateQuotaFromHeaders(resp);
+      // Update quota display from X-DailyLimit-* headers on successful info responses.
+      // Guard with resp.ok to prevent a rate-limit/5xx error response from briefly
+      // setting stale header values before the error handler's updateQuotaFromBody
+      // call overwrites them with the correct post-error quota state.
+      if (resp.ok) {
+        updateQuotaFromHeaders(resp);
+      }
 
       setProgress(80, 'Parsing...');
 
