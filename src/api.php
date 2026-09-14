@@ -5900,13 +5900,6 @@ switch ($action) {
             header('X-DailyLimit-Remaining: ' . (!$unlimited ? $post_refund_count : -1));
             header('X-DailyLimit-Reset: ' . (!$unlimited ? $quota_reset_ts : -1));
             header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            // X-FFProbe-Status: ffprobe was never reached — the file could not be opened
-            // for reading, so no file was ever produced for ffprobe to verify.
-            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
-            // (where ffprobe ran but found the file corrupt/unreadable).
-            header('X-FFProbe-Status: skipped');
             $retry_delta = DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
             echo json_encode([
@@ -5915,7 +5908,7 @@ switch ($action) {
                 'action' => 'download',
                 'upgrade_url' => UPGRADE_URL,
                 'hint' => 'The server temporarily could not read the downloaded file. Try again — if it persists, the file may be too large for the server to handle.',
-                'retry_after' => max(0, DOWNLOAD_TIMEOUT),
+                'retry_after' => max(0, $retry_delta),
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
