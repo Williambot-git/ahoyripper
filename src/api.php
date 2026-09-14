@@ -6656,6 +6656,10 @@ switch ($action) {
             // a consistent null reference for probe endpoints rather than a hardcoded URL.
             'source_url' => null,
             'source_url_missing' => true,
+            // retry_after: 0 — health is a read-only probe with no rate limit or quota
+            // consumption. Clients may call again immediately without backoff.
+            // Mirrors the same 0 value used by the check and client-error actions.
+            'retry_after' => 0,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
