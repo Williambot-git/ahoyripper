@@ -5861,6 +5861,11 @@ switch ($action) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+            // X-FFProbe-Status: ffprobe was never reached — the file could not be opened
+            // for reading, so no file was ever produced for ffprobe to verify.
+            // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
+            // (where ffprobe ran but found the file corrupt/unreadable).
+            header('X-FFProbe-Status: skipped');
             // X-RateLimit-*: download action consumed the per-minute request rate limit
             // (info call was made). Use $rate_window (60s) — the request-level window,
             // not $dl_rate_window (60s). Consistent with VERIFICATION_FAILED block.
