@@ -728,6 +728,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `X-DailyLimit-Window` | Reset window in seconds (`86400`) |
 | `X-Download-Timeout` | Server-side download timeout in seconds (integer). Clients should set their fetch timeout to at least this value so the client deadline never exceeds the server deadline. The value matches `YTDLP_DOWNLOAD_TIMEOUT` (default: 300 seconds). |
 | `X-Info-Timeout` | Server-side info timeout in seconds (integer). Present for consistency with info-action responses. The value matches `INFO_TIMEOUT` (default: 45 seconds). |
+| `X-FFProbe-Status` | Post-download verification result: `success` (ffprobe confirmed codec/resolution), `failed` (ffprobe ran but could not verify — quota is refunded), or `skipped` (ffprobe was not reached — e.g. audio-only, yt-dlp error, or missing file). Present on every download response. |
 
 **Download error response (422 with classified error):**
 ```json
