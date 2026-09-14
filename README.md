@@ -899,8 +899,12 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "server_uptime_seconds": 86400,
   "yt_dlp_probe": {
     "ok": true,
+    "action": "health",
     "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)",
     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "yt_dlp_version": "2026.03.17",
+    "api_version": "1.0.0",
+    "upgrade_url": "https://ahoyvpn.com",
     "probe_age_seconds": 120
   },
   "load_avg": 0.15,
@@ -944,10 +948,14 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "server_uptime_seconds": 86400,
   "yt_dlp_probe": {
     "ok": false,
+    "action": "health",
+    "http_status": 403,
     "error_code": "SOURCE_FORBIDDEN",
     "error_msg": "The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.",
-    "http_status": 403,
     "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "yt_dlp_version": "2026.03.17",
+    "api_version": "1.0.0",
+    "upgrade_url": "https://ahoyvpn.com",
     "probe_age_seconds": 45
   },
   "load_avg": 0.15,
