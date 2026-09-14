@@ -3028,6 +3028,10 @@ switch ($action) {
                 // error was raised, but the input URL was valid and accepted.
                 'video_url' => $url,
                 'upgrade_url' => UPGRADE_URL,
+                // platform: null — INVALID_API_KEY fires before platform detection.
+                // Consistent with the same null value in MISSING_URL, INVALID_URL,
+                // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
