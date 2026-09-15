@@ -4529,6 +4529,7 @@ switch ($action) {
                     // error was raised (daily-quota gate fires before the yt-dlp probe).
                     'video_url' => $url,
                     'upgrade_url' => UPGRADE_URL,
+                    'platform' => null,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . $quota_reset_iso . ' UTC.',
                     'quota_remaining' => 0,
