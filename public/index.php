@@ -1568,10 +1568,13 @@ window.addEventListener('appinstalled', function() {
       if (key) {
         headers['Authorization'] = 'Bearer ' + encodeURIComponent(key);
       }
-      // Forward the browser's language preference to the API so yt-dlp can
-      // request localized metadata from the source platform. Without this,
-      // yt-dlp always gets English regardless of the user's actual locale.
-      headers['Accept-Language'] = navigator.language || 'en-US';
+      // Always send en-US to yt-dlp. Some platforms (YouTube, etc.) return
+      // localized metadata (titles, descriptions) based on the Accept-Language
+      // header. Hardcoding en-US ensures consistent, English-language metadata
+      // regardless of the user's browser locale — important for reliable parsing
+      // and display. The Accept-Language header is still sent (not omitted) so
+      // the API and nginx can log/use it independently of yt-dlp's behavior.
+      headers['Accept-Language'] = 'en-US';
       // Forward page_request_id so API responses and server-side logs can be
       // correlated with the browser's page view when users report issues.
       headers['X-Request-ID'] = PAGE_REQUEST_ID;
