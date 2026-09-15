@@ -190,7 +190,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #     "yt_dlp_version": "2026.03.17",
 #     "api_version": "...",
 #     "upgrade_url": "https://ahoyvpn.com",
-#     "probe_age_seconds": 0
+#     "probe_age_seconds": 120,
+#     "probe_cached_at": "2026-08-06T03:30:00+00:00"
 #   },
 #   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
 #   "yt_dlp_probe_cache_ttl_seconds": 300,
@@ -207,7 +208,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 # }
 ```
 
-The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, and `upgrade_url` on all probe results (not just failures), plus `ok`, `title`, `source_url`, and `probe_age_seconds`. `yt_dlp_version` and `api_version` are included even when the probe fails, so clients always have version information regardless of probe outcome.
+The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, and `upgrade_url` on all probe results (not just failures), plus `ok`, `title`, `source_url`, `probe_age_seconds`, and `probe_cached_at`. `yt_dlp_version` and `api_version` are included even when the probe fails, so clients always have version information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`).
 
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
@@ -960,7 +961,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
     "yt_dlp_version": "2026.03.17",
     "api_version": "1.0.0",
     "upgrade_url": "https://ahoyvpn.com",
-    "probe_age_seconds": 45
+    "probe_age_seconds": 45,
+    "probe_cached_at": "2026-05-21T16:00:00+00:00"
   },
   "load_avg": 0.15,
   "memory_available_pct": 72.4,

@@ -7097,6 +7097,10 @@ switch ($action) {
             if (!$probe_age_set) {
                 $probe_result['probe_age_seconds'] = 0; // freshly computed
             }
+            // Surface probe_cached_at (ISO 8601) so consumers know when the cached
+            // result was originally computed. null when the result was freshly computed
+            // (no cache file existed yet or cache was expired/stale).
+            $probe_result['probe_cached_at'] = $probe_cached_at;
             $out['yt_dlp_probe'] = $probe_result;
         }
         // When the yt-dlp probe has failed, set the HTTP status code to match the
