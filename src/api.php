@@ -6456,7 +6456,7 @@ switch ($action) {
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unavailable');
+        header('X-DailyLimit-Window: unlimited');
 
 
         $body = file_get_contents('php://input');
