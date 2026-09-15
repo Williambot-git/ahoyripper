@@ -1442,6 +1442,34 @@ function clean($s) {
 }
 
 /**
+ * Sanitize a user-supplied download filename for safe use in Content-Disposition
+ * and yt-dlp output filenames.
+ *
+ * @param string|null $raw_fn  Raw $_GET['filename'] value (may be URL-encoded)
+ * @return string  Sanitized filename safe for filesystem and HTTP headers
+ */
+function sanitizeFilename($raw_fn) {
+    $download_filename = trim(urldecode($raw_fn ?? ''));
+    if ($download_filename !== '') {
+        // Strip control characters including newlines and carriage returns
+        // before sanitizing so that a filename like "evil\r\nContent-Type:..."
+        // cannot inject headers through the Content-Disposition header below.
+        // Unicode letters, numbers, spaces, dots, underscores, hyphens are preserved.
+        $download_filename = preg_replace('/[\x00-\x1F\x7F]/u', '', $download_filename);
+        $download_filename = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $download_filename);
+        $download_filename = preg_replace('/\s+/u', '_', $download_filename);
+        // Validate trimmed result — a filename that trims to empty is invalid.
+        // Check this AFTER sanitization so inputs like "   " fall through to fallback.
+        $trimmed = trim($download_filename);
+        if (strlen($trimmed) === 0 || strlen($trimmed) > MAX_FILENAME_LEN) {
+            return 'ahoyrip';
+        }
+        return $trimmed;
+    }
+    return 'ahoyrip';
+}
+
+/**
  * Resolve the playlist URL parameter to yt-dlp playlist flags.
  *
  * yt-dlp accepts --yes-playlist (fetch all videos in a playlist) and
@@ -4589,31 +4617,7 @@ switch ($action) {
         // (a newline in the Content-Disposition filename parameter could allow
         // header injection attacks even though the filename field itself is not
         // directly used in binary download responses).
-        // URL-decode first: the frontend sends this as a URL-encoded query parameter,
-        // so a filename like "My%20Video" must be decoded to "My Video" before
-        // length validation. Without urldecode(), encoded chars are counted literally
-        // (strlen("My%20Video") = 13) but the actual decoded value is shorter,
-        // causing valid filenames to fail the length check unexpectedly.
-        $download_filename = trim(urldecode($_GET['filename'] ?? ''));
-        if ($download_filename !== '') {
-            // Strip control characters including newlines and carriage returns
-            // before sanitizing so that a filename like "evil\r\nContent-Type:..."
-            // cannot inject headers through the Content-Disposition header below.
-            // Unicode letters, numbers, spaces, dots, underscores, hyphens are preserved.
-            $download_filename = preg_replace('/[\x00-\x1F\x7F]/u', '', $download_filename);
-            $download_filename = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $download_filename);
-            $download_filename = preg_replace('/\s+/u', '_', $download_filename);
-            // Validate trimmed result — a filename that trims to empty is invalid.
-            // Check this AFTER sanitization so inputs like "   " fall through to fallback.
-            $trimmed = trim($download_filename);
-            if (strlen($trimmed) === 0 || strlen($trimmed) > MAX_FILENAME_LEN) {
-                $download_filename = 'ahoyrip';
-            } else {
-                $download_filename = $trimmed;
-            }
-        } else {
-            $download_filename = 'ahoyrip';
-        }
+        $download_filename = sanitizeFilename($_GET['filename'] ?? null);
 
         // Build output template — use exec array to bypass shell entirely.
         // yt-dlp appends the file extension to the output path automatically,
