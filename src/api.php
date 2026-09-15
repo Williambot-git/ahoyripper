@@ -4668,6 +4668,12 @@ switch ($action) {
             // should never make unexpected outbound connections — --version is read
             // directly via proc_open, so yt-dlp's home calls are unnecessary.
             '--no-call-home',
+            // --no-check-certificates: skip SSL certificate verification. Some extractors
+            // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
+            // without verification on failure, so this flag provides a fast fallback path.
+            // Mirrors the info action (line 3381) and health probe (line 6848) for
+            // consistency — SSL errors during download should use the same fallback.
+            '--no-check-certificates',
             '--restrict-filenames',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
