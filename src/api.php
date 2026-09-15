@@ -6223,11 +6223,15 @@ switch ($action) {
         header('X-RateLimit-Reset: -1');
         header('X-RateLimit-Window: unlimited');
         // Daily-limit sentinels (-1) signal clients this is a read-only probe,
-        // not a rip-consuming action — mirrors the pattern used by action=health.
+        // not a rip-consuming action — consistent with action=health, client-error,
+        // analytics, and csp-report. All use 'unlimited' (not 'unavailable') to
+        // signal that the endpoint completed preprocessing but elected to return
+        // early without consuming quota, distinct from pre-gate errors where
+        // 'unavailable' correctly indicates rate-limit state was never initialized.
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
-        header('X-DailyLimit-Window: unavailable');
+        header('X-DailyLimit-Window: unlimited');
         // no-store: consistent with all other API responses — prevents intermediate
         // proxies (CDN, corporate proxies, load balancers) from caching this response.
         // no-cache would allow caching while revalidating on every request, which is
