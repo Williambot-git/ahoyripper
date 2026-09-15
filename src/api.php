@@ -3415,7 +3415,11 @@ switch ($action) {
             $ytdlp_cmd[] = COOKIES_PATH;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E;,=]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
+            // Hardcode en-US: yt-dlp uses this as the Accept-Language header when
+            // requesting metadata from source platforms. Consistent English-language
+            // metadata ensures reliable parsing and display regardless of the browser's
+            // actual locale (which is forwarded separately via the Referer header).
+            '--add-header', 'Accept-Language: en-US',
             '--',
             $url,
         ]);
@@ -4641,7 +4645,9 @@ switch ($action) {
             $ytdlp_cmd[] = COOKIES_PATH;
         }
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            '--add-header', 'Accept-Language: ' . preg_replace('/[^\x20-\x7E;,=]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5'),
+            // Hardcode en-US: consistent English-language metadata regardless of browser
+            // locale — mirrors the fix applied to the info action at line 3417.
+            '--add-header', 'Accept-Language: en-US',
             '--',
             $url,
         ]);
@@ -6763,8 +6769,10 @@ switch ($action) {
                     $probe_cmd[] = '--cookies';
                     $probe_cmd[] = COOKIES_PATH;
                 }
+                // Hardcode en-US: health probe metadata should also be consistent English
+                // to avoid probe failures caused by locale-specific content restrictions.
                 $probe_cmd[] = '--add-header';
-                $probe_cmd[] = 'Accept-Language: ' . preg_replace('/[^\x20-\x7E;,=]/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en-US;q=0.9,*;q=0.5');
+                $probe_cmd[] = 'Accept-Language: en-US';
                 $probe_cmd[] = '--';
                 $probe_cmd[] = HEALTH_PROBE_URL;
                 $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
