@@ -795,6 +795,7 @@ window.addEventListener('appinstalled', function() {
     'FORBIDDEN_ORIGIN': 'Requests must come from ahoyripper.com or ahoyvpn.com.',
     'METHOD_NOT_ALLOWED': 'That request method is not allowed. Use GET.',
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
+    'MISSING_SORT': 'Unknown sort value. Use height, filesize, filesize_asc, tbr, quality, or audio_quality. Default is height.',
     'MISSING_URL': 'No URL was provided. Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit.',
     'URL_TOO_LONG': 'That URL is too long. Try shortening it — remove unnecessary query parameters or use a direct video link.',
     'SERVICE_UNAVAILABLE': 'Server-side lock or quota file could not be opened. Please try again in a few seconds.',

@@ -2965,10 +2965,53 @@ switch ($action) {
         // Read and validate sort parameter — must be declared before parseFormats
         // is called. Controls format ordering: height (default), filesize (largest
         // first), filesize_asc (smallest first), tbr, or quality.
-        // Invalid values fall back to 'height'.
         $raw_sort = $_GET['sort'] ?? 'height';
         $allowed_sorts = ['height', 'filesize', 'filesize_asc', 'tbr', 'quality', 'audio_quality'];
-        $sort = in_array($raw_sort, $allowed_sorts, true) ? $raw_sort : 'height';
+        if (!in_array($raw_sort, $allowed_sorts, true)) {
+            http_response_code(400);
+            header('Cache-Control: no-store');
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Download-Options: noopen');
+            header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+            header('Cross-Origin-Opener-Policy: same-origin');
+            header('Cross-Origin-Resource-Policy: same-origin');
+            logRequest($action, 400, ['reason' => 'invalid_sort', 'raw_sort' => $raw_sort]);
+            $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+            $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
+            $sendDailyLimitHeaders($daily_limit, null);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'error' => "Unknown sort value '$raw_sort'. Use one of: height, filesize, filesize_asc, tbr, quality, audio_quality.",
+                'error_code' => 'MISSING_SORT',
+                'action' => $action,
+                'retry_after' => 0,
+                'hint' => "Pass &sort= with one of: height, filesize, filesize_asc, tbr, quality, audio_quality. Default is height.",
+                'request_id' => $request_id,
+                'source_url' => $url ?: null,
+                'video_url' => $url ?: null,
+                'source_url_missing' => $url === '',
+                'format_id_missing' => false,
+                'format_id' => null,
+                'platform' => null,
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'api_version' => AHOYRIPPER_VERSION,
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
+                'upgrade_url' => UPGRADE_URL,
+                'quota_remaining' => -1,
+                'quota_limit' => $daily_limit,
+                'quota_reset' => $quota_reset_iso,
+                'quota_reset_unix' => $quota_reset_ts,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
+            exit;
+        }
+        $sort = $raw_sort;
 
         // ─── Check for unlimited API key ───
         // Prefer Authorization: Bearer header (keeps key out of URLs and server logs).
@@ -3726,6 +3769,7 @@ switch ($action) {
                 'INVALID_URL' => 400,
                 'LOGIN_REQUIRED' => 401,
                 'MISSING_FORMAT' => 400,
+                'MISSING_SORT' => 400,
                 'MISSING_URL' => 400,
                 'PARSE_ERROR' => 422,
                 'PLAYLIST_MISSING' => 404,
