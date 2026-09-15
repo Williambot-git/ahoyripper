@@ -5126,6 +5126,11 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => $format_id,
                     'format_id_missing' => false,
+                    // video_url mirrors source_url: yt-dlp ran (the file was downloaded to
+                    // temp) but the post-download ffprobe verification failed or the process
+                    // exited non-zero. The input URL is the canonical URL — set video_url to it
+                    // for consistency with all other download error responses.
+                    'video_url' => $url,
                     // platform: the download action runs after the info action in normal usage
                     // (the UI always fetches info first), so the platform is known from the
                     // info response in the client state. This endpoint has no access to that
