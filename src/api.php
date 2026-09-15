@@ -3161,6 +3161,12 @@ switch ($action) {
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('Cache-Control: no-store');
                 http_response_code(503);
+                // X-DailyLimit-*: -1 sentinels since the quota file could not be
+                // locked. Mirrors the fopen failure block above for header parity.
+                header('X-DailyLimit-Limit: -1');
+                header('X-DailyLimit-Remaining: -1');
+                header('X-DailyLimit-Reset: -1');
+                header('X-DailyLimit-Window: unavailable');
                 // Rate-limit and CSP headers — mirrors the download action's quota-gate
                 // flock block. The X-DL-RateLimit-* family uses -1 sentinels because
                 // the quota file could not be locked (quota state is unreadable).
