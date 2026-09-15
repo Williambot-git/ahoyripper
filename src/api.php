@@ -3400,6 +3400,13 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
+            // --no-call-home: disable all outbound calls to yt-dlp's home server
+            // (update checks, extractor telemetry pings, etc.). A server-side media
+            // ripper should never make unexpected outbound connections. The update check
+            // alone can trigger rate limits or blocklist detections on some platforms.
+            // This is safe: yt-dlp's home calls are never needed for ripping and
+            // --version is read from the binary directly via proc_open (line 1237).
+            '--no-call-home',
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
             // via ?referer= URL param (same pattern used by the download action at line 4213).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
@@ -4599,6 +4606,11 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
+            // --no-call-home: disable all outbound calls to yt-dlp's home server
+            // (update checks, extractor telemetry pings). A server-side media ripper
+            // should never make unexpected outbound connections — --version is read
+            // directly via proc_open, so yt-dlp's home calls are unnecessary.
+            '--no-call-home',
             '--restrict-filenames',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
@@ -6759,6 +6771,9 @@ switch ($action) {
                     // 5xx) separately from generic --retries. Mirrors the info and download
                     // action pattern so the health probe accurately reflects real ripping behavior.
                     '--extractor-retries', '3',
+                    // --no-call-home: disable all outbound calls to yt-dlp's home server.
+                    // A health probe should not generate unexpected outbound traffic.
+                    '--no-call-home',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
