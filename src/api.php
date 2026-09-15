@@ -5416,14 +5416,20 @@ switch ($action) {
         // Track whether ffprobe was actually attempted: $probe_exit is set to 0 or -1
         // depending on audio detection, but $probe_attempted is only set to true when
         // the ffprobe proc_open block is entered (covers all skip reasons: missing file,
-        // non-executable binary, audio-only format). The refund condition uses
+        // missing ffprobe binary, audio-only format). The refund condition uses
         // $probe_attempted to distinguish "ffprobe skipped" from "ffprobe failed".
         $probe_exit = $is_audio_only_format ? 0 : -1;
         $probe_attempted = false;
         if (!$is_audio_only_format && !$is_bare_audio_id
-            && is_file($actual_file) && is_executable($ffprobe_bin)) {
-            // JSON probe — video stream only, no audio needed for substitution check.
-            // Exit code 0 is required; ffprobe returns non-zero for unreadable files.
+            && is_file($actual_file) && is_file($ffprobe_bin)) {
+            // Skip ffprobe when: audio-only format, bare audio format ID (no video stream
+            // to probe), downloaded file not found, or ffprobe binary missing.
+            // is_file() is used for the binary check rather than is_executable() because
+            // the executable-bit check (e.g. mode 0755) is unreliable across different
+            // group memberships of the PHP-FPM process owner — the web server user may lack
+            // execute permission even though ffprobe is a runnable system binary invoked by
+            // absolute path. is_file() is sufficient: if the path exists, the OS will
+            // execute it regardless of the caller's permission bits.
             $probe_cmd = [
                 $ffprobe_bin,
                 '-v', 'quiet',
