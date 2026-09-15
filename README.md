@@ -1055,6 +1055,27 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 - `X-DailyLimit-Reset` — Unix timestamp of the next daily reset (midnight UTC)
 - `X-DailyLimit-Window` — always `daily` (unlimited-key holders see `unlimited`)
 
+### Security Headers
+
+Every API response — `info`, `download`, `check`, `health`, `analytics`, `client-error`, and all error responses — carries a comprehensive set of security headers. This ensures consistent hardening across all endpoints regardless of response type or HTTP status code.
+
+|| Header | Description |
+|--------|-------------|
+| `Strict-Transport-Security` | HSTS with `max-age=31536000; includeSubDomains; preload` — browsers must use HTTPS for this domain for 1 year |
+| `Content-Security-Policy` | Strict CSP: `default-src 'self'`, scripts and styles locked to `'self'`, img-src allows YouTube/TikTok/Twitter thumbnails and CDN assets, frame-src `none`, object-src `none` |
+| `X-Content-Type-Options` | `nosniff` — browsers must honour the declared Content-Type and not MIME-sniff |
+| `X-Frame-Options` | `SAMEORIGIN` — prevents the API response from being embedded in an iframe on other origins |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` — only the origin (not full URL) is sent as referer when linking out to third-party CDNs (thumbnails, etc.) |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=()` — disables all browser features irrelevant to a media ripper |
+| `Cross-Origin-Opener-Policy` | `same-origin` — prevents other origins from navigating or accessing the API page's window object, closing clickjacking and Spectre-class exploit chains |
+| `Cross-Origin-Resource-Policy` | `same-origin` — prevents the API response from being embedded as a cross-origin subresource |
+| `X-Download-Options` | `noopen` — prevents the file download dialog from automatically opening downloaded files, reducing drive-by download attacks |
+| `X-Robots-Tag` | `noindex, noai, noydir` — prevents search engines and AI training pipelines from indexing or scraping the API |
+| `Date` | RFC 7231 server timestamp — use to detect clock skew relative to `X-Request-ID` correlation logs |
+| `X-Request-ID` | 16-character hex correlation ID present on every response — use when reporting issues to correlate browser, API, and server-side logs |
+
+> **COEP note:** `Cross-Origin-Embedding-Policy` (COEP) is intentionally NOT set on API responses. Setting `require-corp` would break cross-origin image loads for YouTube thumbnails, TikTok covers, and Twitter video cards — all loaded by the JavaScript frontend via `fetch()`. The frontend degrades gracefully to a non-isolated context; COEP is not required for the API layer to function.
+
 ### Health Response Headers
 
 `action=health` and `action=check` return the same comprehensive security and rate-limit header family as `info` and `download`, ensuring consistent hardening and monitoring across all API endpoints.
