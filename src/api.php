@@ -7262,6 +7262,7 @@ switch ($action) {
             header('Allow: POST');
             // Standard security headers for consistency with all other API responses.
             // Mirrors the headers set in the action=check and action=csp-report 405 blocks.
+            header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
