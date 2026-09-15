@@ -855,7 +855,12 @@ window.addEventListener('appinstalled', function() {
     // the stored quota is from a previous UTC day and must be discarded.
     var storedReset = localStorage.getItem('ahoyrip_quota_reset');
     if (storedReset !== null) {
-      var resetTs = parseInt(storedReset, 10);
+      // quota_reset is stored as Unix timestamp (int) but was previously
+      // stored as ISO-8601 string in some code paths. Detect format by
+      // checking for hyphen — ISO dates contain '-' but Unix timestamps don't.
+      var resetTs = storedReset.includes('-')
+        ? Math.floor(new Date(storedReset).getTime() / 1000)
+        : parseInt(storedReset, 10);
       if (!isNaN(resetTs) && resetTs <= Date.now() / 1000) {
         // Reset window has passed — clear all stale quota data.
         localStorage.removeItem('ahoyrip_quota_remaining');
