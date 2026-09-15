@@ -6404,21 +6404,24 @@ switch ($action) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             // Rate-limit sentinels: -1 = not applicable (fire-and-forget endpoint).
-            // X-DL-RateLimit-Window: unavailable — client-error fires before the download
-            // rate-limit gate; no download counter has been initialized. Consistent with
-            // the MISSING_URL/METHOD_NOT_ALLOWED pattern (lines 2234/2457).
+            // X-*-Window: unlimited — consistent with csp-report 405 and action=check,
+            // both equivalent fire-and-forget POST endpoints that bypass rate-limit gates.
+            // Unlike MISSING_URL (pre-gate with no counter), these endpoints have completed
+            // their pre-processing but elected to return early; 'unlimited' signals that
+            // no rate-limit budget was consumed rather than 'unavailable' which implies
+            // the gate was never reached (which is the case for MISSING_URL).
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: unlimited');
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unavailable');
+            header('X-DL-RateLimit-Window: unlimited');
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
-            header('X-DailyLimit-Window: unavailable');
+            header('X-DailyLimit-Window: unlimited');
             // Timeout headers: client-error is a fire-and-forget endpoint (no yt-dlp
             // involvement) but X-Info-Timeout/X-Download-Timeout are included for
             // complete API surface parity — clients can always find these headers.
