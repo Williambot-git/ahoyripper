@@ -77,7 +77,13 @@ self.addEventListener('install', (event) => {
         // back to the network for a few assets.
         new Promise((resolve) => {
           cache.addAll(STATIC_ASSETS).then(resolve).catch((err) => {
-            console.warn('[SW] install: cache.addAll failed, activating with network fallback:', err);
+            // Rejecting with DOMException (e.g. QuotaError) would prevent activation.
+            // Catch it here so we resolve (not reject) and let the SW activate.
+            if (err instanceof DOMException && err.name === 'QuotaError') {
+              console.warn('[SW] install: storage quota exceeded, activating with network fallback:', err);
+            } else {
+              console.warn('[SW] install: cache.addAll failed, activating with network fallback:', err);
+            }
             resolve();
           });
         })
@@ -149,7 +155,18 @@ self.addEventListener('fetch', (event) => {
           // Cache successful font responses for 30 days.
           if (response.ok) {
             const clone = response.clone();
-            caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
+            caches.open(STATIC_CACHE).then((c) =>
+              c.put(request, clone)
+                // Swallow QuotaError — storage full is non-fatal; the response
+                // was already returned to the page, we just couldn't cache it.
+                .catch((e) => {
+                  if (e instanceof DOMException && e.name === 'QuotaError') {
+                    console.warn('[SW] fonts: storage quota full, skipping cache write:', request.url);
+                  } else {
+                    console.warn('[SW] fonts: cache.put failed:', e);
+                  }
+                })
+            );
           }
           return response;
         }).catch(() => caches.match(request))
@@ -173,7 +190,16 @@ self.addEventListener('fetch', (event) => {
         return fetch(request).then((response) => {
           if (response.ok) {
             const clone = response.clone();
-            caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
+            caches.open(STATIC_CACHE).then((c) =>
+              c.put(request, clone)
+                .catch((e) => {
+                  if (e instanceof DOMException && e.name === 'QuotaError') {
+                    console.warn('[SW] static: storage quota full, skipping cache write:', request.url);
+                  } else {
+                    console.warn('[SW] static: cache.put failed:', e);
+                  }
+                })
+            );
           }
           return response;
         }).catch(() => caches.match(request));
@@ -189,7 +215,16 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
-            caches.open(SHELL_CACHE).then((c) => c.put(request, clone));
+            caches.open(SHELL_CACHE).then((c) =>
+              c.put(request, clone)
+                .catch((e) => {
+                  if (e instanceof DOMException && e.name === 'QuotaError') {
+                    console.warn('[SW] shell: storage quota full, skipping cache write:', request.url);
+                  } else {
+                    console.warn('[SW] shell: cache.put failed:', e);
+                  }
+                })
+            );
           }
           return response;
         })
