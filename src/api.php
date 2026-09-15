@@ -5563,18 +5563,19 @@ switch ($action) {
                     header('X-DL-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$dl_rate_remaining));
                     header('X-DL-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$dl_rate_reset_ts));
                     header('X-DL-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$dl_rate_window));
-                    header('X-DailyLimit-Limit: ' . ($unlimited ? '-1' : (string)$daily_limit));
-                    header('X-DailyLimit-Remaining: ' . ($unlimited ? '-1' : (string)$ffprobe_post_refund_count));
-                    header('X-DailyLimit-Reset: ' . ($unlimited ? '-1' : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c')));
-                    header('X-DailyLimit-Window: ' . ($unlimited ? 'unlimited' : 'day'));
+                    header('X-DailyLimit-Limit: ' . (!$unlimited ? $daily_limit : -1));
+                    header('X-DailyLimit-Remaining: ' . (!$unlimited ? $ffprobe_post_refund_count : -1));
+                    header('X-DailyLimit-Reset: ' . (!$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1));
+                    header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
                     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                     header('X-Info-Timeout: ' . INFO_TIMEOUT);
-                    header('Retry-After: 30');
+                    $retry_delta = DOWNLOAD_TIMEOUT;
+                    header('Retry-After: ' . max(0, $retry_delta));
                     echo json_encode([
                         'error' => 'Download could not be verified (no video stream in file). The downloaded file is empty or uses an unsupported container format. Please try again or choose a different format.',
                         'error_code' => 'VERIFICATION_FAILED',
                         'action' => 'download',
-                        'retry_after' => 30,
+                        'retry_after' => max(0, $retry_delta),
                         'request_id' => $request_id,
                         'source_url' => $url,
                         'source_url_missing' => false,
