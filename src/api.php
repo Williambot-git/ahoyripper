@@ -6634,12 +6634,17 @@ switch ($action) {
         // probe result will be refreshed without needing to read the cache file directly.
         $probe_cache_ttl = null;
         $probe_cache_expires_at = null;
+        $probe_cached_at = null; // captured here so probe_age_seconds is always available
         if ($probe_cache_file && is_readable($probe_cache_file)) {
             $cached = @json_decode(@file_get_contents($probe_cache_file), true);
             if ($cached && is_array($cached)) {
                 $exp = $cached['exp'] ?? 0;
                 $probe_cache_expires_at = date('c', $exp);
                 $probe_cache_ttl = max(0, $exp - time());
+                // Extract cached_at now (not just exp) — needed for probe_age_seconds
+                // computation below. If the cache file disappears between this read and
+                // the probe_age_seconds read, having it here ensures the age is still computable.
+                $probe_cached_at = $cached['cached_at'] ?? null;
             }
         }
         // If the cache file doesn't exist yet (probe has never run), the TTL is
@@ -6989,14 +6994,22 @@ switch ($action) {
             // (GLOBALS holds the freshly-computed probe result, but a previous
             // request's cache file might be older than the computed one, and we
             // want the age relative to when it was actually cached, not computed).
+            // Use $probe_cached_at (extracted in the TTL-read block above) as
+            // a fallback in case the cache file disappears between the two reads.
             $probe_result = $GLOBALS['__ytdlp_probe'];
+            $probe_age_set = false;
             if (is_readable($probe_cache_file)) {
                 $cached = @json_decode(@file_get_contents($probe_cache_file), true);
                 if ($cached && isset($cached['cached_at'])) {
                     $probe_result['probe_age_seconds'] = max(0, time() - (int)$cached['cached_at']);
+                    $probe_age_set = true;
                 }
             }
-            if (!isset($probe_result['probe_age_seconds'])) {
+            if (!$probe_age_set && $probe_cached_at !== null) {
+                $probe_result['probe_age_seconds'] = max(0, time() - (int)$probe_cached_at);
+                $probe_age_set = true;
+            }
+            if (!$probe_age_set) {
                 $probe_result['probe_age_seconds'] = 0; // freshly computed
             }
             $out['yt_dlp_probe'] = $probe_result;
