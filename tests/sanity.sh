@@ -1239,15 +1239,17 @@ echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcem
 #   4. API-location report-only (same location, mirrors server-level report-only).
 #      Needed so Safari and older Firefox (< Firefox 79) which support neither
 #      Reporting-Endpoints nor Report-To can still submit CSP violation reports.
-#   5. /csp/report location enforcement CSP (location = /csp/report block)
-#   6. /csp/report location report-only CSP
-# The test checks that there are exactly 6 (not 1-5, which would indicate
+#   5. / (root) location enforcement CSP — mirrors index.php meta tag at the
+#      network layer for defense-in-depth; added in 260915.
+#   6. /csp/report location enforcement CSP (location = /csp/report block)
+#   7. /csp/report location report-only CSP
+# The test checks that there are exactly 8 (not fewer, which would indicate
 # duplicate server-level or spurious entries).
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
-if [ "$CSP_COUNT" -eq 6 ]; then
-    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (enforcement + report-only at server, API override + csp-report location)"
+if [ "$CSP_COUNT" -eq 8 ]; then
+    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (server + PHP/block-level + API + / root + csp-report)"
 else
-    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 6: enforcement + report-only at server, API override + csp-report location)"
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 8: server + PHP/block-level + API + / root + csp-report)"
     exit 1
 fi
 
