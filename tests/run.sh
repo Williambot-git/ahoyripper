@@ -106,6 +106,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (probe_age_seconds_test.php) ──────────
+echo "==> Running probe_age_seconds_test.php (probe_age_seconds cache bug regression)..."
+if php "$SCRIPT_DIR/probe_age_seconds_test.php"; then
+    echo "✓ probe_age_seconds_test.php: passed"
+else
+    echo "✗ probe_age_seconds_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── PHP unit tests (refund_quota_test.php) ───────────
 echo "==> Running refund_quota_test.php (download-quota refund logic)..."
 if php "$SCRIPT_DIR/refund_quota_test.php"; then
