@@ -787,6 +787,7 @@ window.addEventListener('appinstalled', function() {
     'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
     'DOWNLOAD_CANCELLED': 'Download was cancelled — you may have closed the tab or lost connection. Your daily quota was not charged.',
     'DOWNLOAD_EMPTY': 'The downloaded file was empty — this is a server-side issue, not your format choice. Try again in a moment, or pick a different format.',
+    'DISALLOWED_CONTENT': 'This content is not available due to a terms of service or legal violation. Use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'VERIFICATION_FAILED': 'The downloaded file could not be verified as valid. This is a server-side issue — try another format or try again in a moment.',
     'VERIFICATION_TIMEOUT': 'Verification timed out — the file may be valid but could not be confirmed within the server time limit. Try a smaller format (audio-only is fastest) or try again.',
     'FILE_READ_ERROR': 'The server could not read the downloaded file back for streaming. This is a temporary server issue — try again or pick a different format.',
