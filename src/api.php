@@ -6641,6 +6641,13 @@ switch ($action) {
         header('Content-Type: application/json; charset=utf-8');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-Server-Time: wire-level clock metadata for clients that need to
+        // synchronize without parsing the JSON body. Mirrors the same ISO 8601
+        // timestamp and Unix value that appear in the JSON response body
+        // (server_time / server_time_unix), giving API consumers the same
+        // temporal reference in both HTTP headers and JSON payload.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         // CSP and Reporting headers — set here explicitly (not relying on the
         // top-of-script block) so health responses are always fully hardened.
         // NOTE: 'upgrade-insecure-requests' is intentionally ABSENT from this
