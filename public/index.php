@@ -780,7 +780,7 @@ window.addEventListener('appinstalled', function() {
     'SOURCE_HTTP_ERROR': 'The source site is having issues. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP: https://ahoyvpn.com',
     'SSL_ERROR': 'Secure connection to the source failed. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
-    'CONNECTION_TIMEOUT': 'Connection timed out before the source responded. Try again — if it persists, the server\'s network route to the source may be degraded.',
+    'CONNECTION_TIMEOUT': 'Connection timed out before the source responded. Try again — if it persists, the server\'s network route to the source may be degraded. Use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'FILE_TOO_LARGE': 'This file is too large for the server. Try audio-only or a lower resolution.',
     'DOWNLOAD_TIMEOUT': 'Download timed out. The file may be too large or the source is slow. Try a smaller format (audio-only is fastest) or try again when the site is less busy.',
     'YTDLP_ERROR': 'The source returned an error. Try another format in the list, or wait a moment and try again.',
