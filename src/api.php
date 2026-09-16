@@ -3507,11 +3507,8 @@ switch ($action) {
             // This is safe: yt-dlp's home calls are never needed for ripping and
             // --version is read from the binary directly via proc_open (line 1237).
             '--no-call-home',
-            // --no-check-certificates: skip SSL certificate verification. Some extractors
-            // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
-            // without verification on failure, so this flag provides a fast fallback path.
-            // Consistent with the download action (line 4676) and health probe (line 6856).
-            '--no-check-certificates',
+            // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
+            // --no-check-certificates; SSL errors now trigger extractor retry logic).
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
             // via ?referer= URL param (same pattern used by the download action at line 4213).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
@@ -4694,12 +4691,8 @@ switch ($action) {
             // should never make unexpected outbound connections — --version is read
             // directly via proc_open, so yt-dlp's home calls are unnecessary.
             '--no-call-home',
-            // --no-check-certificates: skip SSL certificate verification. Some extractors
-            // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
-            // without verification on failure, so this flag provides a fast fallback path.
-            // Mirrors the info action (line 3467) and health probe (line 6859) for
-            // consistency — SSL errors during download should use the same fallback.
-            '--no-check-certificates',
+            // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
+            // --no-check-certificates; SSL errors now trigger extractor retry logic).
             '--restrict-filenames',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
@@ -6894,10 +6887,8 @@ switch ($action) {
                     // --no-call-home: disable all outbound calls to yt-dlp's home server.
                     // A health probe should not generate unexpected outbound traffic.
                     '--no-call-home',
-                    // --no-check-certificates: skip SSL certificate verification. Mirrors
-                    // the info action (line 3467) and download action (line 4676) so the
-                    // health probe accurately reflects real ripping SSL error handling.
-                    '--no-check-certificates',
+                    // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
+                    // --no-check-certificates; SSL errors now trigger extractor retry logic).
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,

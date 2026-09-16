@@ -98,8 +98,9 @@ jobs:
       - name: Check yt-dlp flags
         run: |
           # --no-warning (singular) is deprecated; --no-warnings (plural) is current
+          # --no-check-certificates is deprecated/removed in yt-dlp 2024.09+
           # The grep below catches the deprecated singular form as a failure.
-          # The codebase should use --no-warnings (plural) throughout.
+          # sanity.sh also checks these via the BAD_FLAGS loop (no-check-certificates).
           if grep -q -- '--no-warning$' src/api.php; then echo "FAIL: deprecated --no-warning (singular) found — use --no-warnings"; exit 1; fi
 
       - name: Check shell injection prevention

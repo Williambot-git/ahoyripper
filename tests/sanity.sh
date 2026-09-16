@@ -203,7 +203,12 @@ echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # yt-dlp now handles HLS/DASH fragment concurrency internally; passing the flag
 # produces a stderr warning that can pollute JSON output in the info action and
 # corrupt error classification in both info and download actions.
-BAD_FLAGS="concurrent-fragments"
+# --no-check-certificates: deprecated alias for --no-certificate-check (removed in yt-dlp 2024.09).
+# yt-dlp 2024.09+ removed this flag entirely. It is not needed since yt-dlp validates
+# certificates correctly by default, and some extractors (TED, Vimeo) that previously
+# needed it have fixed their SSL configuration. Using it produces a stderr warning that
+# can corrupt JSON output in the info action and cause unclassified YTDLP_ERROR responses.
+BAD_FLAGS="concurrent-fragments no-check-certificates"
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
 # \b word boundary after 'g' means `--no-warning\b` matches `--no-warning ` or
 # `--no-warning\n` (end of line) but NOT `--no-warnings` (boundary after 'g' is
@@ -226,7 +231,7 @@ for flag in $BAD_FLAGS; do
         exit 1
     fi
 done
-echo "  ✓ No deprecated yt-dlp flags (--no-warning singular, --concurrent-fragments)"
+echo "  ✓ No deprecated yt-dlp flags (--no-warning singular, --concurrent-fragments, --no-check-certificates)"
 
 echo ""
 echo "==> Checking old YouTube URL-rewrite age-bypass is NOT present..."
