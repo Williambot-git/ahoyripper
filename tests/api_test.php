@@ -925,6 +925,8 @@ test('SOURCE_HTTP_ERROR (non-standard code) includes upgrade_url',
 $result = classifyYtdlpError('ERROR: Process timed out after 45s');
 test('SOURCE_TIMEOUT status is 504',
     ($result['status'] ?? null) === 504);
+test('SOURCE_TIMEOUT includes upgrade_url',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: Connection failed');
 test('CONNECTION_FAILED status is 502',
