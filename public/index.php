@@ -731,6 +731,15 @@ window.addEventListener('appinstalled', function() {
           localStorage.removeItem('ahoyrip_quota_remaining');
           localStorage.removeItem('ahoyrip_quota_limit');
           localStorage.removeItem('ahoyrip_quota_reset');
+          localStorage.removeItem('ahoyrip_quota_rate_limited');
+        } else {
+          // Rate-limited: persist flag so restoreQuota can restore "Rate limited"
+          // on page reload (otherwise shows blank until next API call).
+          localStorage.setItem('ahoyrip_quota_rate_limited', '1');
+          localStorage.removeItem('ahoyrip_quota_unlimited');
+          localStorage.removeItem('ahoyrip_quota_remaining');
+          localStorage.removeItem('ahoyrip_quota_limit');
+          localStorage.removeItem('ahoyrip_quota_reset');
         }
       } else {
         var remNum = parseInt(rem, 10);
@@ -901,7 +910,19 @@ window.addEventListener('appinstalled', function() {
       }
     }
     var storedUnlimited = localStorage.getItem('ahoyrip_quota_unlimited');
-    if (storedUnlimited === '1' && labelEl) {
+    var storedRateLimited = localStorage.getItem('ahoyrip_quota_rate_limited');
+    if (storedRateLimited === '1' && labelEl) {
+      // Rate-limited state from a previous page load — restore UI.
+      labelEl.textContent = 'Rate limited';
+      el.classList.add('exhausted');
+      el.textContent = '';
+      if (limEl) limEl.style.display = 'none';
+      if (upgradeEl) {
+        upgradeEl.textContent = 'upgrade now';
+        upgradeEl.style.fontWeight = '700';
+        upgradeEl.style.color = 'var(--color-error)';
+      }
+    } else if (storedUnlimited === '1' && labelEl) {
       labelEl.style.display = 'none';
       el.style.display = 'none';
       if (limEl) limEl.style.display = 'none';
