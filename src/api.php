@@ -5606,6 +5606,7 @@ switch ($action) {
                         'quota_limit' => $unlimited ? -1 : $daily_limit,
                         'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                         'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                        'hint' => 'Download verification failed — the file may be corrupt or in an unsupported format. Try another format or try again.',
                         'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
                     ], JSON_INVALID_UTF8_SUBSTITUTE);
                     exit;
