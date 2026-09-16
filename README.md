@@ -812,8 +812,8 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `404` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted |
 | `502` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues (specific status propagated to response) |
 | `502` | `SSL_ERROR` | SSL/TLS error when connecting to the source — try again or use AhoyVPN |
+| `502` | `CONNECTION_FAILED` | Could not connect to the source — the TCP handshake was refused or errored before data transfer. Distinct from `CONNECTION_TIMEOUT` (504) where the connection stalled waiting for a response. |
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
-| `502` | `CONNECTION_FAILED` | Could not connect to the source |
 | `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
