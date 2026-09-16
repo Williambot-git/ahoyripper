@@ -1494,6 +1494,20 @@ done
 echo "  ✓ Production nginx.conf CSP allows all required media thumbnail domains"
 
 echo ""
+echo "==> Checking production nginx.conf types_hash_max_size for mime.types overflow..."
+# nginx's default types_hash_max_size is 512 bytes, which overflows when
+# mime.types has 700+ type mappings. When it overflows nginx falls back to
+# default_type application/octet-stream for unknown extensions (e.g. .webp
+# served as binary instead of image/webp). Must match nginx-docker.conf value.
+if grep -q "types_hash_max_size 2048" deploy/nginx.conf; then
+    echo "  ✓ production nginx.conf has types_hash_max_size 2048"
+else
+    echo "  ✗ production nginx.conf missing types_hash_max_size 2048 (mime.types hash table overflow)"
+    echo "    Add 'types_hash_max_size 2048;' in the http {} block after 'include /etc/nginx/mime.types;'"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking API key input styling (rip-key-input class)..."
 if grep -q "rip-key-input" src/style.css; then
     echo "  ✓ .rip-key-input styling present"
