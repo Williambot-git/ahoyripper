@@ -27,7 +27,7 @@ Preferred-Languages: en
 # Update this date annually. After expiration, scanners should treat
 # this file as expired and may fall back to outdated contact methods.
 # Format: YYYY-MM-DDTHH:MM:SS.000Z (always UTC/Zulu)
-Expires: 2027-09-03T00:00:00.000Z
+Expires: 2028-09-01T00:00:00.000Z
 
 # Hiring: if you have a security research bounty or disclosure program,
 # link to it here (optional).
