@@ -6213,6 +6213,13 @@ switch ($action) {
         header('X-Request-ID: ' . $request_id);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-Server-Time: wire-level clock metadata for clients that need to
+        // synchronize without parsing the JSON body. Mirrors the same ISO 8601
+        // timestamp and Unix value that appear in the JSON response body
+        // (server_time / server_time_unix), giving API consumers the same
+        // temporal reference in both HTTP headers and JSON payload.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
