@@ -7183,6 +7183,11 @@ switch ($action) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // X-FFProbe-Status: always 'skipped' on health responses since ffprobe only runs
+        // after a download completes. Adding it here completes the "always present" invariant
+        // documented in the README for all API responses — including the health endpoint.
+        // Mirrors the X-FFProbe-Status: skipped set in every other non-download action.
+        header('X-FFProbe-Status: skipped');
         // Retry-After: 0 — health is a read-only probe with no server-side backoff;
         // the client should retry immediately. Mirrors the same pattern in the 'check'
         // action (which also uses Retry-After: 0 alongside X-*-Limit: -1 sentinels).
