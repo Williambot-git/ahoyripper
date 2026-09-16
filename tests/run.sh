@@ -136,6 +136,16 @@ else
 fi
 echo ""
 
+# ─── PHP unit tests (sanitize_filename_test.php) ─────
+echo "==> Running sanitize_filename_test.php (filename sanitization tests)..."
+if php "$SCRIPT_DIR/sanitize_filename_test.php"; then
+    echo "✓ sanitize_filename_test.php: passed"
+else
+    echo "✗ sanitize_filename_test.php: FAILED"
+    FAILED=1
+fi
+echo ""
+
 # ─── Shell sanity checks ──────────────────────────────
 echo "==> Running sanity.sh (binary/syntax/deprecated-flag checks)..."
 if bash "$SCRIPT_DIR/sanity.sh"; then
