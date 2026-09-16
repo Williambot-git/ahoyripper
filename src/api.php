@@ -3021,7 +3021,7 @@ switch ($action) {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'error' => "Unknown sort value '$raw_sort'. Use one of: height, filesize, filesize_asc, tbr, quality, audio_quality.",
-                'error_code' => 'MISSING_SORT',
+                'error_code' => 'INVALID_SORT',
                 'action' => $action,
                 'retry_after' => 0,
                 'hint' => "Pass &sort= with one of: height, filesize, filesize_asc, tbr, quality, audio_quality. Default is height.",
@@ -3820,6 +3820,7 @@ switch ($action) {
                 'LOGIN_REQUIRED' => 401,
                 'MISSING_FORMAT' => 400,
                 'MISSING_SORT' => 400,
+                'INVALID_SORT' => 400,
                 'MISSING_URL' => 400,
                 'PARSE_ERROR' => 422,
                 'PLAYLIST_MISSING' => 404,
