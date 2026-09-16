@@ -3511,7 +3511,7 @@ switch ($action) {
             // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
             // without verification on failure, so this flag provides a fast fallback path.
             // Consistent with the download action (line 4676) and health probe (line 6856).
-            '--no-check-certificate',
+            '--no-check-certificates',
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
             // via ?referer= URL param (same pattern used by the download action at line 4213).
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
@@ -4699,7 +4699,7 @@ switch ($action) {
             // without verification on failure, so this flag provides a fast fallback path.
             // Mirrors the info action (line 3467) and health probe (line 6859) for
             // consistency — SSL errors during download should use the same fallback.
-            '--no-check-certificate',
+            '--no-check-certificates',
             '--restrict-filenames',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
@@ -6889,10 +6889,10 @@ switch ($action) {
                     // --no-call-home: disable all outbound calls to yt-dlp's home server.
                     // A health probe should not generate unexpected outbound traffic.
                     '--no-call-home',
-                    // --no-check-certificate: skip SSL certificate verification. Mirrors
+                    // --no-check-certificates: skip SSL certificate verification. Mirrors
                     // the info action (line 3467) and download action (line 4676) so the
                     // health probe accurately reflects real ripping SSL error handling.
-                    '--no-check-certificate',
+                    '--no-check-certificates',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
