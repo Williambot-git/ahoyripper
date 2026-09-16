@@ -446,6 +446,12 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     // all other API response paths (info, download, health, check, etc.) which
     // set COOP. Without it, the 503 response lacks this security hardening.
     header('Cross-Origin-Opener-Policy: same-origin');
+    // Reporting-Endpoints and Report-To: required for the CSP report-uri directive
+    // to function. Without these, browsers silently drop CSP violation reports for
+    // the SERVICE_UNAVAILABLE 503 response. Consistent with all other API response
+    // paths that set CSP with report-to csp-report.
+    header('Reporting-Endpoints: csp-report="/csp-report"');
+    header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
     // Content-Security-Policy for the SERVICE_UNAVAILABLE response — mirrors the
     // enforcement CSP set in all other API response paths. Without this, browsers
     // apply a default restrictive CSP and ServiceWorker registrations at this origin
@@ -1699,6 +1705,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
  */
 function validateRefererParam(string $referer): string {
     global $allowed_origins;
+    $referer = trim($referer);
     if ($referer === '') {
         return 'https://ahoyripper.com/';
     }

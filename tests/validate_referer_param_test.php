@@ -18,6 +18,7 @@ $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'htt
 
 function validateRefererParam(string $referer): string {
     global $allowed_origins;
+    $referer = trim($referer);
     if ($referer === '') {
         return 'https://ahoyripper.com/';
     }
@@ -171,6 +172,25 @@ test('integer input is rejected at type-hint level (not tested here — handled 
 
 test('array input is rejected at type-hint level (not tested here — handled at call site)',
     true);
+
+// ─── Whitespace trimming ─────────────────────────────────────────────────────────
+
+echo "\n==> Testing whitespace trimming (consistent with URL validation)\n";
+
+test('leading whitespace is trimmed — https://ahoyripper.com/ returns unchanged',
+    validateRefererParam('  https://ahoyripper.com/') === 'https://ahoyripper.com/');
+
+test('trailing whitespace is trimmed — https://ahoyripper.com/ returns unchanged',
+    validateRefererParam('https://ahoyripper.com/  ') === 'https://ahoyripper.com/');
+
+test('whitespace-only string returns fallback (trimmed to empty)',
+    validateRefererParam('   ') === 'https://ahoyripper.com/');
+
+test('mixed leading/trailing whitespace on allowed origin returns unchanged',
+    validateRefererParam("  \t\n  https://ahoyvpn.com/path  \r\n") === 'https://ahoyvpn.com/path');
+
+test('whitespace on rejected origin still rejected after trim',
+    validateRefererParam('  https://evil.com/  ') === 'https://ahoyripper.com/');
 
 // ─── Security invariants ─────────────────────────────────────────────────────
 
