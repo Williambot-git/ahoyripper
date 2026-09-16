@@ -657,6 +657,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 |------------|---------|-------------|
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
+| `MISSING_SORT` | Sort parameter value is invalid or unrecognized | Pass `&sort=` with one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality`. Default is `height`. |
 | `INVALID_URL` | URL is malformed, uses an unsupported scheme, or exceeds the 2048-character limit | Paste a valid public video URL (YouTube, TikTok, X, SoundCloud, Instagram, etc.) |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
 | `RATE_LIMIT_EXCEEDED` | Too many requests — rate limit exceeded. The response includes `retry_after` (delta-seconds, integer — seconds to wait before retrying) and `upgrade_url` (AhoyVPN upsell link). | Wait a minute and try again, or upgrade to an unlimited API key |
