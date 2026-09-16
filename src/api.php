@@ -847,6 +847,11 @@ if (in_array($action, $internal_actions, true)) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
+            // X-Info-Timeout / X-Download-Timeout: consistent with all other internal
+            // action blocks (health, check, client-error). Set explicitly here since
+            // the top-of-script headers are flushed before this block runs in FPM mode.
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
