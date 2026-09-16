@@ -3507,7 +3507,7 @@ switch ($action) {
             // This is safe: yt-dlp's home calls are never needed for ripping and
             // --version is read from the binary directly via proc_open (line 1237).
             '--no-call-home',
-            // --no-check-certificate: skip SSL certificate verification. Some extractors
+            // --no-check-certificates: skip SSL certificate verification. Some extractors
             // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
             // without verification on failure, so this flag provides a fast fallback path.
             // Consistent with the download action (line 4676) and health probe (line 6856).
@@ -4694,7 +4694,7 @@ switch ($action) {
             // should never make unexpected outbound connections — --version is read
             // directly via proc_open, so yt-dlp's home calls are unnecessary.
             '--no-call-home',
-            // --no-check-certificate: skip SSL certificate verification. Some extractors
+            // --no-check-certificates: skip SSL certificate verification. Some extractors
             // (e.g. TED, Vimeo) have expired or misconfigured certificates. yt-dlp retries
             // without verification on failure, so this flag provides a fast fallback path.
             // Mirrors the info action (line 3467) and health probe (line 6859) for
