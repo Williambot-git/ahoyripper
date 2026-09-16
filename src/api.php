@@ -3225,6 +3225,12 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => -1,
                     'quota_reset_unix' => -1,
+                    // server_time: ISO 8601 + Unix for client clock synchronization.
+                    // Present on all other API responses — this 503 block was missing
+                    // these fields, breaking generic response parsers that expect
+                    // consistent field coverage across all API code paths.
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -3284,6 +3290,12 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => -1,
                     'quota_reset_unix' => -1,
+                    // server_time: ISO 8601 + Unix for client clock synchronization.
+                    // Present on all other API responses — this 503 block was missing
+                    // these fields, breaking generic response parsers that expect
+                    // consistent field coverage across all API code paths.
+                    'server_time' => date('c'),
+                    'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
