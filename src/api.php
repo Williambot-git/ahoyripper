@@ -6620,6 +6620,11 @@ switch ($action) {
             'format_id_missing' => false,
             'format_id' => null,
             'platform' => null,
+            // video_url: null — client-error is a fire-and-forget endpoint with no
+            // associated video URL. Consistent with the same null value in action=check
+            // and action=health. Every other API response includes video_url for
+            // consistent API surface coverage; this action was missing it.
+            'video_url' => null,
             // quota fields: -1 sentinel = not applicable (client-error is a fire-and-forget
             // endpoint that does not consume quota). Matches the pattern used by the
             // check, health, and analytics actions for consistent API surface coverage.
@@ -7245,6 +7250,10 @@ switch ($action) {
                 'format_id_missing' => false,
                 'format_id' => null,
                 'platform' => null,
+                // video_url: null — csp-report is an internal endpoint with no
+                // associated video URL. Consistent with the same null value in
+                // action=check, action=health, and action=client-error.
+                'video_url' => null,
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
                 'quota_reset' => -1,
@@ -7366,6 +7375,10 @@ switch ($action) {
                 'format_id_missing' => false,
                 'format_id' => null,
                 'platform' => null,
+                // video_url: null — analytics is an internal endpoint with no
+                // associated video URL. Consistent with the same null value in
+                // action=check, action=health, and action=client-error.
+                'video_url' => null,
                 // Analytics is an internal action — quota does not apply.
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
