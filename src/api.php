@@ -4158,6 +4158,9 @@ switch ($action) {
             // X-FFProbe-Status: skipped — ffprobe was never reached since the invalid-key
             // check fires before yt-dlp or ffprobe are invoked.
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with the success-path header at line 5953.
+            // ffprobe was never reached, but include the timeout value for full header coverage.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_API_KEY',
@@ -4290,6 +4293,9 @@ switch ($action) {
             // X-FFProbe-Status: skipped — ffprobe was never reached since the
             // flock failure check fires before yt-dlp or ffprobe are invoked.
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with the success-path header at line 5953.
+            // ffprobe was never reached, but include the timeout value for full header coverage.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // Download-rate-limit state unavailable (could not acquire lock).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
