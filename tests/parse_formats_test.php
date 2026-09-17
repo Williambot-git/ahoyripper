@@ -234,7 +234,8 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
         ? (string)$data['uploader_url']
         : null;
     $platform = clean($data['extractor_key'] ?? '');
-    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $title);
+    $raw_fn = preg_replace('/[\x00-\x1F\x7F]/', '', $title);
+    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $raw_fn);
     $raw_fn = preg_replace('/\s+/u', '_', trim($raw_fn));
     if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Use ctype_digit() to catch ALL purely-numeric titles, not just "0".

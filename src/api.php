@@ -1937,7 +1937,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     // matches ASCII letters in PHP. This preserves non-Latin titles
     // (Japanese, Chinese, Arabic, Cyrillic, etc.) in the derived filename.
     // The /u flag enables UTF-8 mode for Unicode property escapes.
-    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $title);
+    // Strip control characters (CR/LF/etc.) first — a title with embedded
+    // \r\n could inject headers into the Content-Disposition download response.
+    $raw_fn = preg_replace('/[\x00-\x1F\x7F]/', '', $title);
+    $raw_fn = preg_replace('/[^\p{L}\p{N}\s._-]/u', '', $raw_fn);
     $raw_fn = preg_replace('/\s+/u', '_', trim($raw_fn));
     if (strlen($raw_fn) > MAX_FILENAME_LEN) $raw_fn = substr($raw_fn, 0, MAX_FILENAME_LEN);
     // Fall back to 'ahoyrip' when the title was entirely numeric (e.g. "0", "1080")
