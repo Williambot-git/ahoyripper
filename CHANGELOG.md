@@ -71,6 +71,12 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   (line ~3050). Previously only `X-DailyLimit-*` and `Retry-After` were set, leaving
   this response unhardened compared to the per-minute rate-limit 429 which had full
   coverage. Both 429 paths now return equally hardened responses.
+- **`src/api.php` yt-dlp probe cache stale `cached_at`** — On a cache hit (serving
+  a cached yt-dlp probe result via `?probe=1`), the cache file's `cached_at`
+  timestamp was never updated. This made `probe_age_seconds` always wrong for cached
+  responses — it reported time since original compute, not time since the cached
+  result was read. Fixed by rewriting the cache file on each cache hit with a fresh
+  `cached_at = time()`, preserving the `result` and `exp` fields unchanged.
 
 ### Changed
 - **README Environment Variables table** — Added three missing env vars that were
