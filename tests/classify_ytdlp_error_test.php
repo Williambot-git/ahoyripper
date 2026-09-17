@@ -216,6 +216,33 @@ test('classifies "impersonate not available" (lowercase, standalone)',
 test('CONFIG_ERROR is case-insensitive',
     assert_classify('ERROR: [YouTube] abc: Impersonate Is Not Available On This System', 'CONFIG_ERROR', 503));
 
+// ─── CONNECTION_TIMEOUT ──────────────────────────────────────────────────────
+// CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
+// before any data was transferred. yt-dlp emits "connection timed out" for this.
+// Returns 504 so the client distinguishes it from CONNECTION_FAILED (502).
+// CONNECTION_FAILED is checked BEFORE CONNECTION_TIMEOUT, so generic "connection
+// failed" text matches CONNECTION_FAILED; bare "connection timed out" matches here.
+
+echo "\n==> Testing CONNECTION_TIMEOUT\n";
+
+test('classifies "connection timed out" (bare)',
+    assert_classify('ERROR: [YouTube] abc: Connection timed out', 'CONNECTION_TIMEOUT', 504));
+
+test('classifies "Connection Timed Out" (capitalized)',
+    assert_classify('ERROR: [YouTube] abc: Connection Timed Out', 'CONNECTION_TIMEOUT', 504));
+
+// "connection timed out" with a trailing qualifier should NOT match CONNECTION_TIMEOUT
+// — those patterns should be handled by CONNECTION_FAILED. The negative lookahead
+// (?!\\s) prevents matching when whitespace follows "timeout", and (?!\\s+after)
+// prevents matching when "after N seconds" follows (PHP-side process timeout).
+test('"Connection timed out after 30s" does NOT match CONNECTION_TIMEOUT',
+    assert_classify('ERROR: Connection timed out after 30s', 'CONNECTION_TIMEOUT', 504) === false);
+
+// "connection failed" (generic) should match CONNECTION_FAILED (502), not CONNECTION_TIMEOUT (504).
+// This is the precedence test: CONNECTION_FAILED is checked before CONNECTION_TIMEOUT in the function.
+test('"connection failed" matches CONNECTION_FAILED (precedence over CONNECTION_TIMEOUT)',
+    classifyYtdlpError('Connection failed')['code'] === 'CONNECTION_FAILED');
+
 // ─── SOURCE_TIMEOUT ───────────────────────────────────────────────────────────
 
 echo "\n==> Testing SOURCE_TIMEOUT\n";
@@ -239,8 +266,9 @@ test('classifies "could not connect"',
 test('classifies "DNS fail"',
     assert_classify('ERROR: [YouTube] abc: DNS failure', 'CONNECTION_FAILED', 502));
 
-test('classifies "connection timed out"',
-    assert_classify('ERROR: [YouTube] abc: Connection timed out', 'CONNECTION_FAILED', 502));
+// NOTE: "connection timed out" is NOT in CONNECTION_FAILED — it routes to
+// CONNECTION_TIMEOUT (504) via the dedicated check below. This was previously
+// a bug (missing negative lookbehind) that has been corrected.
 
 test('classifies "connection reset"',
     assert_classify('ERROR: [YouTube] abc: Connection reset by peer', 'CONNECTION_FAILED', 502));
