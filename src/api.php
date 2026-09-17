@@ -4142,6 +4142,9 @@ switch ($action) {
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: mirrors the header set on all other download-action responses.
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Status: skipped — ffprobe was never reached since the invalid-key
+            // check fires before yt-dlp or ffprobe are invoked.
+            header('X-FFProbe-Status: skipped');
             echo json_encode([
                 'error' => 'Invalid API key.',
                 'error_code' => 'INVALID_API_KEY',
@@ -4271,6 +4274,9 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // X-FFProbe-Status: skipped — ffprobe was never reached since the
+            // flock failure check fires before yt-dlp or ffprobe are invoked.
+            header('X-FFProbe-Status: skipped');
             // Download-rate-limit state unavailable (could not acquire lock).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
@@ -4364,6 +4370,9 @@ switch ($action) {
                 // X-Info-Timeout: present on every download-action error response so clients
                 // can always read the info timeout value without branching on the response code.
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // X-FFProbe-Status: skipped — ffprobe was never reached since the
+                // download rate limit check fires before yt-dlp or ffprobe are invoked.
+                header('X-FFProbe-Status: skipped');
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
