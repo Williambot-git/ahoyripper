@@ -4386,12 +4386,17 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => date('c'),
                     'server_time_unix' => time(),
-                    // quota fields: included for consistency with other download error responses.
-                    // Quota state is not available at this gate (quota file not yet opened).
+                    // quota fields: set to configured limit and tomorrow's midnight UTC reset.
+                    // Consistent with the info action's RATE_LIMIT_EXCEEDED block which
+                    // also reports quota from getDailyQuotaLimit() when the rate limit fires
+                    // before the daily quota gate. The X-DailyLimit-* headers above use -1
+                    // sentinels to signal "this is a per-minute rate limit, not a daily
+                    // quota hit" — but the JSON body fields correctly carry the daily quota
+                    // values so generic API clients always have them available.
                     'quota_remaining' => -1,
-                    'quota_limit' => -1,
-                    'quota_reset' => -1,
-                    'quota_reset_unix' => -1,
+                    'quota_limit' => getDailyQuotaLimit(),
+                    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+                    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
