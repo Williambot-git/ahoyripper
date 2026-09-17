@@ -481,18 +481,21 @@ else
 fi
 
 echo ""
-echo "==> Checking og:title:alt and og:description:alt are present in index.php (RFC 6947 §4.1)... "
-# RFC 6947 §4.1 defines og:title:alt and og:description:alt as text alternatives for
-# og:title and og:description, used by screen readers and non-visual clients when the
-# primary og:title/og:description contain logos/branding that are not readable as text.
-# Guard against accidental removal in future edits.
+echo "==> Checking og:title:alt and og:description:alt are ABSENT from index.php... "
+# og:title:alt and og:description:alt are NOT valid Open Graph protocol properties.
+# The Open Graph protocol only supports :alt on image properties (og:image:alt).
+# RFC 6947 (§4.1) is about HTTP API documentation (content negotiation), not social
+# meta tags. Adding :alt to text-based og: properties is silently ignored by all
+# major social platforms (Facebook/Meta, Twitter/X, LinkedIn) and creates a false
+# sense of accessibility coverage. The <title> and <meta name="description"> tags
+# serve as the correct text alternatives for og:title and og:description.
+# Guard against accidental re-introduction in future edits.
 if grep -q 'og:title:alt' public/index.php \
-    && grep -q 'og:description:alt' public/index.php; then
-    echo "  ✓ og:title:alt and og:description:alt present (RFC 6947 §4.1 text alternatives)"
-else
-    echo "  ✗ og:title:alt or og:description:alt missing (RFC 6947 §4.1 text alternatives)"
+    || grep -q 'og:description:alt' public/index.php; then
+    echo "  ✗ og:title:alt or og:description:alt found (not valid Open Graph properties)"
     exit 1
 fi
+echo "  ✓ og:title:alt and og:description:alt absent (not valid OG properties)"
 
 echo ""
 echo "==> Checking platform count consistency across og-image.svg, index.php, and manifest.json... "

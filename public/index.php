@@ -157,11 +157,6 @@ header_remove('X-Powered-By');
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms">
-  <!-- RFC 6947 §4.1: og:title:alt and og:description:alt provide text alternatives
-       for og:title and og:description when they contain logos or branding graphics
-       that are not readable as text. Used by screen readers and non-visual clients. -->
-  <meta property="og:title:alt" content="AhoyRipper — Free Online Media Ripper">
-  <meta property="og:description:alt" content="Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms. Free, no signup, no ads.">
   <!-- <title> and <meta name="description"> serve as text alternatives for og:title
        and og:description — used by screen readers, non-visual clients, and indexing
        bots. They complement (not replace) the og: tags above. Keep og:title and
