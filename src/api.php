@@ -2998,6 +2998,16 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
 // ─── Daily download quota (free tier limit, skip if unlimited key) ───
 switch ($action) {
     case 'info': {
+        // Set Content-Type before any output so error responses (INVALID_SORT,
+        // INVALID_API_KEY, quota gates) are also correctly typed. Mirrors the
+        // header placement in the 'check' (line ~6287) and 'health' (line ~6715)
+        // action blocks, which both set Content-Type immediately after opening.
+        header('Content-Type: application/json; charset=utf-8');
+        // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+        // the 'check' (line ~6292) and 'health' (line ~6727) action blocks.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
+
         // Get video info + formats
         $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
 
@@ -3033,7 +3043,6 @@ switch ($action) {
             $sendDailyLimitHeaders($daily_limit, null);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'error' => "Unknown sort value '$raw_sort'. Use one of: height, filesize, filesize_asc, tbr, quality, audio_quality.",
                 'error_code' => 'INVALID_SORT',
