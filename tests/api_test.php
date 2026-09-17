@@ -1993,6 +1993,24 @@ test('INVALID_FORMAT_ID: format_id_missing is boolean false',
 test('INVALID_FORMAT_ID: error_code is INVALID_FORMAT_ID',
     ($invalid_format_id_response['error_code'] ?? '') === 'INVALID_FORMAT_ID');
 
+// URL_TOO_LONG: quota_limit/reset fields must be populated (not -1 sentinels)
+// like INVALID_URL and MISSING_URL — the daily limit is known at this stage.
+$url_too_long_response = [
+    'error_code' => 'URL_TOO_LONG',
+    'quota_remaining' => -1,
+    'quota_limit' => 5,
+    'quota_reset' => '2026-09-18T00:00:00+00:00',
+    'quota_reset_unix' => 1789689600,
+];
+test('URL_TOO_LONG: quota_limit is a positive integer (not -1)',
+    is_int($url_too_long_response['quota_limit'] ?? null) && $url_too_long_response['quota_limit'] > 0);
+test('URL_TOO_LONG: quota_reset is a non-empty string (not -1)',
+    is_string($url_too_long_response['quota_reset'] ?? null) && $url_too_long_response['quota_reset'] !== '-1');
+test('URL_TOO_LONG: quota_reset_unix is a positive integer (not -1)',
+    is_int($url_too_long_response['quota_reset_unix'] ?? null) && $url_too_long_response['quota_reset_unix'] > 0);
+test('URL_TOO_LONG: quota_reset and quota_reset_unix are a consistent pair',
+    $url_too_long_response['quota_reset_unix'] === (new DateTime($url_too_long_response['quota_reset']))->getTimestamp());
+
 // INVALID_FORMAT_ID (download action validation): X-Info-Timeout header is set
 // alongside X-Download-Timeout so the client knows both timeouts when it retries
 // by calling info→download. Added to match MISSING_FORMAT coverage.
