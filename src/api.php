@@ -861,6 +861,11 @@ if (in_array($action, $internal_actions, true)) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
+            // Cache-Control: no-store — csp-report is a live feed of policy violations;
+            // it must never be cached. Set explicitly here since the top-of-script header
+            // block is bypassed by fastcgi_finish_request(). The non-FPM fallback below
+            // also sets this (line ~881) so both paths are equivalent.
+            header('Cache-Control: no-store');
             echo json_encode(['status' => 'ok'], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
