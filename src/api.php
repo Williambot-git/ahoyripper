@@ -5621,6 +5621,11 @@ switch ($action) {
                     header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                     header('X-Download-Options: noopen');
                     header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                    // http_response_code must be set AFTER all response headers (including CSP)
+                    // so the response line reflects the correct status. All other download-action
+                    // error blocks follow this pattern; the early-exit ffprobe verification
+                    // path was missing this ordering.
+                    http_response_code(500);
                     header('Reporting-Endpoints: csp-report="/csp-report"');
                     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
@@ -5630,7 +5635,7 @@ switch ($action) {
                     header('X-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$rate_window));
                     header('X-DL-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$dl_rate_limit));
                     header('X-DL-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$dl_rate_remaining));
-                    header('X-DL-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$dl_rate_reset_ts));
+                    header('X-DL-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$dl_reset_ts));
                     header('X-DL-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$dl_rate_window));
                     header('X-DailyLimit-Limit: ' . (!$unlimited ? $daily_limit : -1));
                     header('X-DailyLimit-Remaining: ' . (!$unlimited ? $ffprobe_post_refund_count : -1));
@@ -5759,10 +5764,6 @@ switch ($action) {
                 header('X-Download-Options: noopen');
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-                // VERIFICATION_TIMEOUT uses 504 to distinguish from VERIFICATION_FAILED (500).
-                // Both are retryable, but 504 signals the verification step timed out
-                // rather than finding a corrupt/unverifiable file.
-                http_response_code($is_verification_timeout ? 504 : 500);
                 // retry_after: delta-seconds until the download can be retried.
                 // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
                 // delta-seconds is simpler and consistent with all other Retry-After
@@ -5778,6 +5779,11 @@ switch ($action) {
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
+                // http_response_code must be set AFTER all headers including CSP.
+                // VERIFICATION_TIMEOUT uses 504 to distinguish from VERIFICATION_FAILED (500).
+                // Both are retryable, but 504 signals the verification step timed out
+                // rather than finding a corrupt/unverifiable file.
+                http_response_code($is_verification_timeout ? 504 : 500);
                 echo json_encode([
                     'error' => $error_msg,
                     'error_code' => $error_code,
