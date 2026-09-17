@@ -6903,13 +6903,17 @@ switch ($action) {
             // being null for probe endpoints — consistent field presence across all actions.
             'platform' => null,
             // Daily quota fields — health is a read-only probe (does not consume quota).
-            // All four quota fields use -1 sentinels (unlimited/unknown signal) to match
-            // the X-DailyLimit-* HTTP headers and the quota_remaining: -1 pattern used
-            // by all other probe/read-only actions (check, analytics, UNKNOWN_ACTION).
+            // quota_remaining is -1 (unlimited signal) to match the X-DailyLimit-* HTTP
+            // headers and the quota_remaining: -1 pattern used by all other probe/read-only
+            // actions (check, analytics, UNKNOWN_ACTION).
+            // quota_limit: mirrors the configured daily limit for consistency with the
+            // check action and info/download responses — the health action declares
+            // $daily_limit locally (line 6772) for this purpose, so the value is
+            // always available even though the action does not consume quota.
             // quota_reset uses the ISO format to match MISSING_URL and all other responses;
             // quota_reset_unix provides the Unix timestamp for callers that need it.
             'quota_remaining' => -1,
-            'quota_limit' => -1,
+            'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
             // upgrade_url: AhoyVPN upsell URL included on all API responses so clients
