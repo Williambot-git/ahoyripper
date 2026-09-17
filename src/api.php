@@ -345,8 +345,10 @@ if ($blocked) {
         // sets it, and to ensure intermediate proxies don't cache this response.
         header('Cache-Control: no-store');
         echo json_encode([
-            'error' => 'Requests must originate from ahoyripper.com or ahoyvpn.com.',
-            'error_code' => 'FORBIDDEN_ORIGIN',
+            'error' => $referer
+                ? 'The Referer header must be from ahoyripper.com or ahoyvpn.com.'
+                : 'API requests require a Referer header (e.g. -H "Referer: https://ahoyripper.com/").',
+            'error_code' => strtoupper($block_reason), // MISSING_REFERER or INVALID_ORIGIN
             'action' => $action ?: null,
             // retry_after: 0 — CORS validation failure is a client configuration issue
             // with no server-side backoff needed. The client just needs to use a
@@ -3898,7 +3900,8 @@ switch ($action) {
                 'DOWNLOAD_TIMEOUT' => 504,
                 'FILE_READ_ERROR' => 500,
                 'FILE_TOO_LARGE' => 413,
-                'FORBIDDEN_ORIGIN' => 403,
+                'MISSING_REFERER' => 403,
+                'INVALID_ORIGIN' => 403,
                 'FORMAT_UNAVAILABLE' => 422,
                 'GEOBLOCKED' => 451,
                 'INVALID_FORMAT_ID' => 400,

@@ -1294,7 +1294,9 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `VERIFICATION_FAILED` | ffprobe could not verify the downloaded file — file may be corrupt | Try another format |
 | `VERIFICATION_TIMEOUT` | ffprobe verification timed out — file may be valid but could not be confirmed within the server's time limit | Try a smaller format or try again |
 | `DOWNLOAD_CANCELLED` | Download was cancelled (tab closed or connection lost) | Your quota was not charged — try again when ready |
-| `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | API requests must include a Referer or Origin header from an allowed domain |
+| `MISSING_REFERER` | No Referer header was provided | Include `-H "Referer: https://ahoyripper.com/"` in your request |
+| `INVALID_ORIGIN` | Referer header is present but from an unauthorized origin | Referer must be from `ahoyripper.com` or `ahoyvpn.com` |
+| `FORBIDDEN_ORIGIN` | Direct embedding or cross-origin access blocked | Use the AhoyRipper web interface at https://ahoyripper.com |
 | `METHOD_NOT_ALLOWED` | HTTP method not allowed for this endpoint | Use GET for info/download/health; POST for CSP report submission |
 | `NOT_ACCEPTABLE` | Client requested an unsupported response format | API only returns application/json — ensure Accept: application/json header is sent |
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
