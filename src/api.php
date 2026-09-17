@@ -6745,6 +6745,17 @@ switch ($action) {
             $cached = @json_decode(@file_get_contents($probe_cache_file), true);
             if ($cached && is_array($cached) && ($cached['exp'] ?? 0) > time()) {
                 $GLOBALS['__ytdlp_probe'] = $cached['result'] ?? null;
+                // Rewrite the cache file with a fresh cached_at timestamp so
+                // probe_age_seconds reflects the actual age of this served response
+                // (time since it was most recently read), not the original compute time.
+                // The exp field is left unchanged — only cached_at is updated here.
+                // This is safe: the cache entry is still valid (exp > time()) and
+                // rewriting does not extend the TTL, it just records when it was read.
+                @file_put_contents($probe_cache_file, json_encode([
+                    'result' => $cached['result'] ?? null,
+                    'exp' => $cached['exp'] ?? (time() + PROBE_CACHE_TTL),
+                    'cached_at' => time(),
+                ]));
             }
         }
 
