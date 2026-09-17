@@ -2581,6 +2581,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
             header('X-FFProbe-Status: skipped');
             http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'error' => 'No format was selected. Call the info action first to see available formats, then pass a format id to the download action.',
                 'error_code' => 'MISSING_FORMAT',
@@ -2675,6 +2676,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // yt-dlp runs, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
             header('X-FFProbe-Status: skipped');
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'error' => 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
                 'error_code' => 'INVALID_FORMAT_ID',
