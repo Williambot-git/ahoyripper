@@ -472,6 +472,10 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // Consistent with the same null value in MISSING_URL, INVALID_URL,
         // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
         'platform' => null,
+        // video_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+        // Consistent with the same null value in all other pre-validation error
+        // responses (MISSING_URL, INVALID_URL, METHOD_NOT_ALLOWED, UNKNOWN_ACTION).
+        'video_url' => null,
         // quota fields: unavailable — the rate-limit file could not be accessed.
         // Use -1 sentinels so clients can distinguish this from a known limit.
         'quota_remaining' => -1,
@@ -6463,6 +6467,10 @@ switch ($action) {
             // return null since neither processes a video URL. Consistent field presence
             // across all actions allows API consumers to always expect this field.
             'platform' => null,
+            // video_url: null — check is a read-only server probe with no source video URL.
+            // Consistent with the same null value in action=health, client-error,
+            // analytics, and all other API responses that have no associated video URL.
+            'video_url' => null,
             // source_url: null — check is a read-only server probe with no source video URL.
             // source_url_missing: true — no video URL was provided (probe endpoint).
             'source_url' => null,
