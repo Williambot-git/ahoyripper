@@ -4024,6 +4024,10 @@ switch ($action) {
         // source_url_missing: false — URL was validated and present in the request.
         // Included for consistency with error responses and documented API surface parity.
         $parsed['source_url_missing'] = false;
+        // format_id_missing: false — the info action does not use a format selector;
+        // the format_id is only relevant to the download action. Present for complete
+        // API surface parity so clients can always read format_id_missing from any response.
+        $parsed['format_id_missing'] = false;
         $parsed['yt_dlp_version'] = $GLOBALS['__ytdlp_version'] ?? null;
         // api_version was previously missing from the info response but present on
         // check and health endpoints — add it for consistent API surface metadata.
