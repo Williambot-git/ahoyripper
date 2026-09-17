@@ -190,6 +190,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #     "yt_dlp_version": "2026.03.17",
 #     "api_version": "...",
 #     "upgrade_url": "https://ahoyvpn.com",
+#     "server_time": "2026-08-06T03:30:00+00:00",
+#     "server_time_unix": 1749180000,
 #     "probe_age_seconds": 120,
 #     "probe_cached_at": "2026-08-06T03:30:00+00:00"
 #   },
@@ -208,7 +210,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 # }
 ```
 
-The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, and `upgrade_url` on all probe results (not just failures), plus `ok`, `title`, `source_url`, `probe_age_seconds`, and `probe_cached_at`. `yt_dlp_version` and `api_version` are included even when the probe fails, so clients always have version information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`).
+The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, `upgrade_url`, `server_time`, and `server_time_unix` on all probe results (not just failures), plus `ok`, `title`, `source_url`, `probe_age_seconds`, and `probe_cached_at`. `yt_dlp_version`, `api_version`, `server_time`, and `server_time_unix` are included even when the probe fails, so clients always have version and clock-synchronization information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`).
 
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
