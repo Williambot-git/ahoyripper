@@ -508,7 +508,7 @@ INDEX_COUNT=$(php -r '
 ' public/index.php)
 SVG_COUNT=$(php -r '
     $content = file_get_contents($argv[1]);
-    preg_match("/\+(\d{4})<\/text>/", $content, $m);
+    preg_match("/(\d{4})\+<\/text>/", $content, $m);
     echo $m[1] ?? "0";
 ' public/og-image.svg)
 if [ "$MANIFEST_COUNT" = "$INDEX_COUNT" ] && [ "$INDEX_COUNT" = "$SVG_COUNT" ]; then
