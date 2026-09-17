@@ -3630,6 +3630,10 @@ switch ($action) {
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
             // (where ffprobe ran but found the file corrupt/unreadable).
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with the success-path header at line 5943.
+            // ffprobe was never reached (proc_open failed), but include the timeout value
+            // so clients have the full diagnostic header set regardless of outcome.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             echo json_encode([
                 'error' => 'Failed to start info process.',
                 'error_code' => 'PROC_OPEN_FAILED',
@@ -4905,6 +4909,10 @@ switch ($action) {
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
             // (where ffprobe ran but found the file corrupt/unreadable).
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with the success-path header at line 5943.
+            // ffprobe was never reached (proc_open failed), but include the timeout value
+            // so clients have the full diagnostic header set regardless of outcome.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
