@@ -2583,6 +2583,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // yt-dlp runs, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with PROC_OPEN_FAILED blocks (lines 3636 and 4919).
+            // ffprobe was never reached (validation fires before yt-dlp), but include the
+            // timeout value so clients have the full diagnostic header set regardless of outcome.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
@@ -2679,6 +2683,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // yt-dlp runs, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED.
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with PROC_OPEN_FAILED blocks (lines 3636 and 4919).
+            // ffprobe was never reached (validation fires before yt-dlp), but include the
+            // timeout value so clients have the full diagnostic header set regardless of outcome.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
