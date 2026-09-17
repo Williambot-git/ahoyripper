@@ -866,7 +866,7 @@ window.addEventListener('appinstalled', function() {
       var resetTs = storedReset.includes('-')
         ? Math.floor(new Date(storedReset).getTime() / 1000)
         : parseInt(storedReset, 10);
-      if (!isNaN(resetTs) && resetTs <= Date.now() / 1000) {
+      if (!isNaN(resetTs) && resetTs < Date.now() / 1000) {
         // Reset window has passed — clear all stale quota data.
         localStorage.removeItem('ahoyrip_quota_remaining');
         localStorage.removeItem('ahoyrip_quota_limit');
