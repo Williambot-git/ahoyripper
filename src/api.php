@@ -7142,6 +7142,7 @@ switch ($action) {
                         $probe_classified = [
                             'code' => 'SOURCE_TIMEOUT',
                             'msg' => 'The source site took too long to respond during the health probe. Try again when the site is less busy.',
+                            'upgrade_url' => UPGRADE_URL,
                         ];
                         $probe_http_status = 504;
                     } else {
