@@ -2930,7 +2930,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     if ($action === 'info') {
         $dl = getDailyQuotaLimit();
         header('X-DailyLimit-Limit: ' . $dl);
-        header('X-DailyLimit-Remaining: ' . $dl);
+        header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: ' . (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp());
         header('X-DailyLimit-Window: 86400');
     } else {
