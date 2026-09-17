@@ -5617,6 +5617,9 @@ switch ($action) {
                     // Build the ffprobe-verification-failure response and exit immediately.
                     // This is the same response shape as the else block below (ffprobe non-zero
                     // exit), but with 'skipped' status and the no-stream error message.
+                    // http_response_code must be set AFTER all response headers (including CSP)
+                    // so the response line reflects the correct status. All other download-action
+                    // error blocks follow this pattern.
                     http_response_code(500);
                     header('Cache-Control: no-store');
                     header('X-Request-ID: ' . $request_id);
@@ -5629,11 +5632,6 @@ switch ($action) {
                     header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
                     header('X-Download-Options: noopen');
                     header('X-Robots-Tag: noindex, noai, noimage, noydir');
-                    // http_response_code must be set AFTER all response headers (including CSP)
-                    // so the response line reflects the correct status. All other download-action
-                    // error blocks follow this pattern; the early-exit ffprobe verification
-                    // path was missing this ordering.
-                    http_response_code(500);
                     header('Reporting-Endpoints: csp-report="/csp-report"');
                     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report;');
