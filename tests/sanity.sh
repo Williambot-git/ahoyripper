@@ -1548,6 +1548,26 @@ done
 echo "  ✓ Health response contains all required fields"
 
 echo ""
+echo "==> Checking check action includes ffprobe_ok and x_ffprobe_status fields..."
+# The check action (lines 4261-4350) is used for Docker healthchecks and
+# load-balancer probes. It must include ffprobe_ok and x_ffprobe_status
+# fields for consistency with the health action monitoring response.
+# Both fields were added to the check action in the 2026-09-17 caretaker run.
+CHECK_CASE=$(sed -n "/case 'check':/,/case '/p" src/api.php | head -n -1)
+if echo "$CHECK_CASE" | grep -q "'x_ffprobe_status'"; then
+    echo "  ✓ check action includes x_ffprobe_status field"
+else
+    echo "  ✗ check action missing x_ffprobe_status field (inconsistent with health action)"
+    exit 1
+fi
+if echo "$CHECK_CASE" | grep -q "'ffprobe_ok'"; then
+    echo "  ✓ check action includes ffprobe_ok field"
+else
+    echo "  ✗ check action missing ffprobe_ok field (inconsistent with health action)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking JS does not hard-code gap=0 on formatGrid (regression)..."
 # The JS inline style was previously setting formatGrid.style.gap = '0' which
 # overrode the CSS gap value. The CSS .format-grid { gap: 0.75rem; } should

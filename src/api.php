@@ -6429,6 +6429,17 @@ switch ($action) {
             // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
             // upsell opportunity. Mirrors the same field in the health response.
             'upgrade_url' => UPGRADE_URL,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — present
+            // as a header on all API responses (including check). Adding it to the body
+            // lets API consumers read the ffprobe status from the JSON without parsing
+            // HTTP headers, consistent with how x_info_timeout and x_download_timeout
+            // are already exposed in the check body.
+            'x_ffprobe_status' => 'skipped',
+            // ffprobe_ok: true when ffprobe binary is installed and callable.
+            // Mirrors the field in action=health so monitoring scripts that use
+            // the lightweight check endpoint can determine ffprobe availability
+            // without calling the heavier health endpoint.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
