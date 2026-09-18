@@ -7562,6 +7562,10 @@ switch ($action) {
             // Analytics 405 block was missing these — add them now.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Timeout: always 'skipped' on analytics responses since ffprobe only
+            // runs after a download completes. Adding it for consistent header coverage
+            // so clients can always find this header on all API responses.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // X-RateLimit-* sentinels: analytics is a read-only internal action
             // that does not consume from the per-minute download or info rate budget.
             // Mirrors the same -1 sentinel pattern used in check/health/client-error.
@@ -7841,6 +7845,10 @@ switch ($action) {
         // are included for consistency with the rest of the API surface.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: always 'skipped' on default: responses since ffprobe only
+        // runs after a download completes. Adding it here completes the "always present"
+        // invariant for all API responses — clients can always find this header.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // Retry-After: 0 — unknown-action is a validation error (the action name is
         // not recognized), not a server-side backoff situation. The client should
         // retry immediately with a corrected action name. Consistent with MISSING_URL,
