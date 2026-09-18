@@ -3081,6 +3081,13 @@ switch ($action) {
             $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
             $sendDailyLimitHeaders($daily_limit, null);
+            // X-FFProbe-Status: ffprobe never runs for info-only actions (validation
+            // errors like INVALID_SORT fire before yt-dlp runs). Mark as skipped to
+            // complete the "always present" invariant for all API responses.
+            header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: include the configured timeout so clients always have
+            // this header in the response, enabling consistent client-side retry logic.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             echo json_encode([
