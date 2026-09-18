@@ -401,7 +401,8 @@ ahoyripper/
 │   ├── 404.html                 # Custom 404 error page
 │   ├── sitemap.xml              # XML sitemap for search engines
 │   ├── opensearch.xml           # OpenSearch description (browser search)
-│   ├── og-image.png             # Open Graph social share image
+│   ├── og-image.webp           # Open Graph + Twitter Card image (used in meta tags)
+│   ├── og-image.png             # PNG source for og-image
 │   ├── og-image.svg             # SVG source for og-image
 │   ├── favicon.ico              # Favicon (legacy browsers)
 │   ├── favicon.svg              # Favicon (vector)
