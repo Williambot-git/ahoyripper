@@ -2623,6 +2623,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // ffprobe was never reached (validation fires before yt-dlp), but include the
             // timeout value so clients have the full diagnostic header set regardless of outcome.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // CSP + Reporting: consistent with all other error responses.
+            // CSP is report-only on public API; blocking CSP lives in nginx.
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":31536000,"endpoints":[{"url":"/csp-report"}]}');
+            header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; frame-ancestors 'none'; report-to csp-report; report-uri /csp-report;");
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
@@ -2723,6 +2728,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // ffprobe was never reached (validation fires before yt-dlp), but include the
             // timeout value so clients have the full diagnostic header set regardless of outcome.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // CSP + Reporting: consistent with all other error responses.
+            // CSP is report-only on public API; blocking CSP lives in nginx.
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":31536000,"endpoints":[{"url":"/csp-report"}]}');
+            header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; frame-ancestors 'none'; report-to csp-report; report-uri /csp-report;");
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
