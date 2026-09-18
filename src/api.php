@@ -6268,6 +6268,12 @@ switch ($action) {
                 // Both are included for consistency with other download action responses.
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+                // X-FFProbe-Status: ffprobe was never reached — the client disconnected
+                // before the file could be verified. Mark as skipped so clients can distinguish
+                // this from VERIFICATION_FAILED (where ffprobe ran but found the file corrupt).
+                // Also consistent with FILE_READ_ERROR (skipped) and DOWNLOAD_CANCELLED itself.
+                header('X-FFProbe-Status: skipped');
+                header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
                 // Use DOWNLOAD_TIMEOUT (not 0) to prevent clients from rapid-retrying
                 // a cancelled download. FILE_READ_ERROR uses the same value for the same
                 // reason — the download was partially or fully consumed; retry immediately
