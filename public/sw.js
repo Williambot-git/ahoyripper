@@ -50,6 +50,16 @@ const STATIC_ASSETS = [
   '/og-image.webp',
   '/og-image.png',
   '/og-image.svg',
+  // Google Fonts (Inter) — pre-cached so the PWA is fully functional offline.
+  // Without these, the PWA renders with a visible font flash/retry on re-open
+  // after going offline, and may show browser-default fallback fonts instead.
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+  // gstatic font files referenced by the Google Fonts CSS above — without these,
+  // the fonts render at 0 weight/size until the network request finally fails.
+  // Listed as just the directory since exact file URLs are version-controlled
+  // by Google and change with each font update. The SW's fonts-specific handler
+  // (network-first with cache fallback) will cache whatever URLs the CSS links.
+  'https://fonts.gstatic.com/',
 ];
 
 // ─── Install: pre-cache static assets ────────────────────────────────────────
