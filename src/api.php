@@ -5235,6 +5235,11 @@ switch ($action) {
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
                 // clients can distinguish this from a ffprobe-verification failure.
                 header('X-FFProbe-Status: skipped');
+                // X-FFProbe-Timeout: consistent with the same header set in every other
+                // download-action error block where ffprobe was not reached. ffprobe was
+                // never invoked here (yt-dlp failed before producing a file), but the
+                // header is included so clients always receive the full diagnostic set.
+                header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
                 // CSP headers: classified errors exit() from within a switch block that
                 // bypasses the global headers set at the top of the script. These three
                 // headers are needed to maintain consistent CSP reporting and browser
@@ -5345,6 +5350,11 @@ switch ($action) {
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
                 // clients can distinguish this from a ffprobe-verification failure.
                 header('X-FFProbe-Status: skipped');
+                // X-FFProbe-Timeout: consistent with the same header set in every other
+                // download-action error block where ffprobe was not reached. ffprobe was
+                // never invoked here (yt-dlp failed before producing a file), but the
+                // header is included so clients always receive the full diagnostic set.
+                header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
                 // CSP headers: unclassified errors exit() from within a switch block that
                 // bypasses the global headers set at the top of the script. These three
                 // headers are needed to maintain consistent CSP reporting and browser
