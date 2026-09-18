@@ -6824,6 +6824,12 @@ switch ($action) {
         header('Content-Type: application/json; charset=utf-8');
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: ffprobe runs post-download for file verification; health
+        // is a read-only probe with no file on disk so ffprobe never runs here. Set the
+        // header for consistency with every other API action (including action=check),
+        // where it appears in the same position after X-Download-Timeout. This completes
+        // the "always present" invariant documented in the README for all API responses.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata for clients that need to
         // synchronize without parsing the JSON body. Mirrors the same ISO 8601
         // timestamp and Unix value that appear in the JSON response body
