@@ -216,9 +216,9 @@ echo "==> Installing curl_cffi (required for --impersonate)..."
 if python3 -c "import curl_cffi; print('  curl_cffi version:', curl_cffi.__version__)" 2>/dev/null; then
     echo "  curl_cffi installed."
 else
-    $PIP_BIN install -q --break-system-packages curl-cffi 2>&1 | tail -1 || \
-    $PIP_BIN install -q curl-cffi 2>&1 | tail -1 || \
-    $PIP_BIN install -q --user curl-cffi 2>&1 | tail -1
+    $PIP_BIN install -q --break-system-packages curl_cffi 2>&1 | tail -1 || \
+    $PIP_BIN install -q curl_cffi 2>&1 | tail -1 || \
+    $PIP_BIN install -q --user curl_cffi 2>&1 | tail -1
     if python3 -c "import curl_cffi; print('  curl_cffi version:', curl_cffi.__version__)" 2>/dev/null; then
         echo "  curl_cffi installed."
     else
