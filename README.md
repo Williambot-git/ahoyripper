@@ -130,8 +130,8 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https%3A%2F%2
 curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 # {
 #   "status": "ok",
-#   "server_time": "2026-08-17T00:00:00+00:00",
-#   "server_time_unix": 1752787200,
+#   "server_time": "2026-09-18T00:00:00+00:00",
+#   "server_time_unix": 1789689600,
 #   "request_id": "...",
 #   "app_version": "...",
 #   "php_version": "8.2.0",
@@ -145,8 +145,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 #   "upgrade_url": "https://ahoyvpn.com",
 #   "quota_remaining": -1,
 #   "quota_limit": 5,
-#   "quota_reset": -1,
-#   "quota_reset_unix": -1,
+#   "quota_reset": "2026-09-19T00:00:00+00:00",
+#   "quota_reset_unix": 1789776000,
 #   "source_url": null
 # }
 ```
@@ -164,8 +164,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 # {
 #   "status": "ok",
 #   "api_ok": true,
-#   "server_time": "2026-08-06T03:30:00+00:00",
-#   "server_time_unix": 1749180000,
+#   "server_time": "2026-09-18T00:00:00+00:00",
+#   "server_time_unix": 1789689600,
 #   "request_id": "...",
 #   "app_version": "...",
 #   "php_version": "8.2.0",
@@ -178,10 +178,10 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "ffmpeg_ok": true,
 #   "curl_cffi_version": "0.8.0",
 #   "curl_cffi_ok": true,
-#   "yt_dlp_cache_expires_at": "2026-08-06T03:35:00+00:00",
-#   "yt_dlp_cache_ttl_seconds": 3600,
-#   "ffmpeg_cache_expires_at": "2026-08-06T03:35:00+00:00",
-#   "ffmpeg_cache_ttl_seconds": 3600,
+#   "yt_dlp_cache_expires_at": "2026-09-18T00:05:00+00:00",
+#   "yt_dlp_cache_ttl_seconds": 300,
+#   "ffmpeg_cache_expires_at": "2026-09-18T00:05:00+00:00",
+#   "ffmpeg_cache_ttl_seconds": 300,
 #   "yt_dlp_probe": {
 #     "ok": true,
 #     "action": "health",
@@ -190,12 +190,12 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #     "yt_dlp_version": "2026.03.17",
 #     "api_version": "...",
 #     "upgrade_url": "https://ahoyvpn.com",
-#     "server_time": "2026-08-06T03:30:00+00:00",
-#     "server_time_unix": 1749180000,
+#     "server_time": "2026-09-18T00:00:00+00:00",
+#     "server_time_unix": 1789689600,
 #     "probe_age_seconds": 120,
-#     "probe_cached_at": "2026-08-06T03:30:00+00:00"
+#     "probe_cached_at": "2026-09-18T00:00:00+00:00"
 #   },
-#   "yt_dlp_probe_cache_expires_at": "2026-08-06T03:35:00+00:00",
+#   "yt_dlp_probe_cache_expires_at": "2026-09-18T00:05:00+00:00",
 #   "yt_dlp_probe_cache_ttl_seconds": 300,
 #   "server_uptime_seconds": 86400,
 #   "load_avg": 0.15,
@@ -579,8 +579,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "api_version": "1.0.0",
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": "2026-08-28T00:00:00+00:00",
-  "quota_reset_unix": 1756080000
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000
 }
 ```
 
@@ -599,8 +599,8 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "retry_after": 300,
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": "2026-08-28T00:00:00+00:00",
-  "quota_reset_unix": 1756080000,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -752,14 +752,14 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "platform": "YouTube",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
-  "server_time": "2026-09-06T22:30:00+00:00",
-  "server_time_unix": 1725658200,
+  "server_time": "2026-09-18T12:30:00+00:00",
+  "server_time_unix": 1789734600,
   "upgrade_url": "https://ahoyvpn.com",
   "retry_after": 300,
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": "2026-09-07T00:00:00+00:00",
-  "quota_reset_unix": 1725686400,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "raw_error": "ERROR: [youtube] NGeR...: This video is available in United States."
 }
 ```
@@ -779,14 +779,14 @@ The `format_id` comes from the `id` field in the info response. The API reads th
   "platform": "YouTube",
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
-  "server_time": "2026-09-06T22:30:00+00:00",
-  "server_time_unix": 1725658200,
+  "server_time": "2026-09-18T12:30:00+00:00",
+  "server_time_unix": 1789734600,
   "upgrade_url": "https://ahoyvpn.com",
   "retry_after": 0,
   "quota_remaining": 4,
   "quota_limit": 5,
-  "quota_reset": "2026-09-07T00:00:00+00:00",
-  "quota_reset_unix": 1725686400,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "raw_error": "ERROR: [youtube] NGeR...: requested format not available"
 }
 ```
@@ -850,8 +850,8 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
 {
   "status": "ok",
   "action": "check",
-  "server_time": "2026-08-17T00:00:00+00:00",
-  "server_time_unix": 1752787200,
+  "server_time": "2026-09-18T00:00:00+00:00",
+  "server_time_unix": 1789689600,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
   "php_version": "8.2.0",
@@ -863,8 +863,8 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "curl_cffi_ok": true,
   "quota_remaining": -1,
   "quota_limit": 5,
-  "quota_reset": "2026-08-18T00:00:00+00:00",
-  "quota_reset_unix": 1753056000,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "source_url": null,
   "platform": null
 }
@@ -993,8 +993,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 
 `quota_reset` and `quota_reset_unix` are a dual-field pair that represents the daily quota reset time:
 
-- `quota_reset` — ISO 8601 date string (e.g. `"2026-08-28T00:00:00+00:00"`) for HTTP-header parity and human-readable timestamps.
-- `quota_reset_unix` — Unix timestamp integer (e.g. `1756080000`) for clients that prefer integer comparison without date parsing.
+- `quota_reset` — ISO 8601 date string (e.g. `"2026-09-19T00:00:00+00:00"`) for HTTP-header parity and human-readable timestamps.
+- `quota_reset_unix` — Unix timestamp integer (e.g. `1789776000`) for clients that prefer integer comparison without date parsing.
 
 Both fields carry the same reset moment. The Unix variant exists because the `X-DailyLimit-Reset` HTTP header accepts only an integer, not an ISO string. For active quota both fields are set; for inactive/unlimited states both are `-1`. Clients should check `quota_remaining === -1` to detect unlimited status rather than comparing against the timestamp fields.
 
@@ -1007,8 +1007,8 @@ Both fields carry the same reset moment. The Unix variant exists because the `X-
 {
   "ok": true,
   "action": "client-error",
-  "server_time": "2026-09-11T04:00:00+00:00",
-  "server_time_unix": 1728624000,
+  "server_time": "2026-09-18T00:00:00+00:00",
+  "server_time_unix": 1789689600,
   "request_id": "a3f1b2c9d4e5f678",
   "api_version": "1.0.0",
   "yt_dlp_version": "2026.09.24",
