@@ -556,6 +556,12 @@ if ($is_rate_limited) {
             $reset_timestamp = $data['t'] + $rate_window;
             flock($fp, LOCK_UN);
             fclose($fp);
+            logRequest($action, 429, [
+                'reason' => 'rate_limit_exceeded',
+                'rate_limit' => $rate_limit,
+                'rate_window' => $rate_window,
+                'client_ip' => $ip,
+            ]);
             http_response_code(429);
             header('X-RateLimit-Limit: ' . $rate_limit);
             header('X-RateLimit-Remaining: 0');
