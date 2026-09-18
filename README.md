@@ -202,9 +202,9 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "memory_available_pct": 72.4,
 #   "disk_free_gb": 48.2,
 #   "quota_remaining": -1,
-#   "quota_limit": -1,
-#   "quota_reset": -1,
-#   "quota_reset_unix": -1,
+#   "quota_limit": 5,
+#   "quota_reset": "2026-09-19T00:00:00+00:00",
+#   "quota_reset_unix": 1789776000,
 #   "source_url": null,
 #   "source_url_missing": true
 # }
@@ -919,9 +919,9 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
-  "quota_limit": -1,
-  "quota_reset": -1,
-  "quota_reset_unix": -1,
+  "quota_limit": 5,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "source_url": null,
   "source_url_missing": true
 }
@@ -971,9 +971,9 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "memory_available_pct": 72.4,
   "disk_free_gb": 48.2,
   "quota_remaining": -1,
-  "quota_limit": -1,
-  "quota_reset": -1,
-  "quota_reset_unix": -1,
+  "quota_limit": 5,
+  "quota_reset": "2026-09-19T00:00:00+00:00",
+  "quota_reset_unix": 1789776000,
   "source_url": null,
   "source_url_missing": true
 }
