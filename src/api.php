@@ -7101,6 +7101,10 @@ switch ($action) {
             // a consistent null reference for probe endpoints rather than a hardcoded URL.
             'source_url' => null,
             'source_url_missing' => true,
+            // format_id_missing: false — health is a read-only probe; no format selector
+            // is presented or processed in the health action. API surface parity so clients
+            // can always read format_id_missing from any response without null-checking.
+            'format_id_missing' => false,
             // retry_after: 0 — health is a read-only probe with no rate limit or quota
             // consumption. Clients may call again immediately without backoff.
             // Mirrors the same 0 value used by the check and client-error actions.
