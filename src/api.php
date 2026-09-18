@@ -5730,6 +5730,10 @@ switch ($action) {
                     // verification failure path was taken.
                     $probe_err_truncated = $probe_err;
                     header('X-FFProbe-Status: skipped');
+                    // X-FFProbe-Timeout: ffprobe ran (exit 0) but found no video stream.
+                    // Include the timeout value for complete header parity with all other
+                    // download-action error responses — clients can always find this header.
+                    header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
                     // Exit here — do NOT fall through to the else block below. Without this,
                     // the next else (ffprobe failure handler) would overwrite X-FFProbe-Status
                     // to 'failed' and clobber the correct 'skipped' status set above.
