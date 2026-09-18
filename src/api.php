@@ -1399,6 +1399,7 @@ if ($GLOBALS['__curl_cffi_version'] === null) {
     // python3 -c "import curl_cffi; print(curl_cffi.__version__)" — the version
     // string is always on the first (and only) line of stdout. Using proc_open
     // with bypass_shell=true avoids any shell interpretation of the command.
+    $cc_ver_pipes2 = null;
     $cc_ver_cmd = ['python3', '-c', 'import curl_cffi; print(curl_cffi.__version__)'];
     $cc_ver_proc = proc_open($cc_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $cc_ver_pipes2, null, [], ['bypass_shell' => true]);
     $cc_ver = '';
