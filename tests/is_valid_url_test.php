@@ -315,7 +315,7 @@ echo "\n==> Testing hostname format validation (RFC 1123 / RFC 952)\n";
 test('accepts single-label alphanumeric hostname (example.com)', isValidUrl('https://example.com/'));
 test('accepts multi-label hostname (www.example.com)',            isValidUrl('https://www.example.com/'));
 test('accepts hostname with hyphens in label (cnn.com)',         isValidUrl('https://cnn.com/'));
-test('accepts hostname starting with digit (3domain.com)',         isValidUrl('https://3domain.com/'));
+test('accepts hostname starting with digit (3m.com)',              isValidUrl('https://3m.com/'));
 test('accepts hostname with numbers (google.com)',                  isValidUrl('https://google.com/'));
 
 // Invalid: consecutive dots — reject before DNS
