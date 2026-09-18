@@ -1602,7 +1602,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // This means the server reached the source but it was too slow to respond within
     // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
     // (502) which implies a network or DNS issue on our end.
-    if (preg_match('/process timed out|read at byte.*timeout/i', $err_lower)) {
+    if (preg_match('/process timed out|read at byte [1-9][0-9]* timeout/i', $err_lower)) {
         return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
 
@@ -1623,11 +1623,14 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
     // transferred but the source took too long). yt-dlp emits "connection timed out"
-    // for this case. Runs AFTER CONNECTION_FAILED so that generic connection failures
-    // (reset, broken pipe, etc.) are caught first; a bare "connection timed out"
-    // with no other qualifier routes here (504) instead of CONNECTION_FAILED (502).
-    if (preg_match('#\bconnection timed out\b(?!\s)(?!\s+after)#i', $err_lower)) {
-        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Try again — if it persists, the server\'s network route to the source may be degraded. Use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
+    // for this case. "read at byte 0 timeout" is the same class — the TCP connection
+    // established but the source sent no data within the socket timeout. The negative
+    // lookahead (?!\\s) checks what comes immediately after "timeout" — rejecting
+    // "connection timed out <suffix>" (e.g. "connection timed out after 45s") which is
+    // a SOURCE_TIMEOUT (504). A second (?!\\s+after) guards against the specific "after"
+    // form as belt-and-suspenders. CONNECTION_FAILED catches everything else.
+    if (preg_match('#\\bconnection timed out\\b(?!\\s)(?!\\s+after)|read at byte 0 timeout#i', $err_lower)) {
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413];

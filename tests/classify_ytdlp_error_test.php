@@ -250,7 +250,10 @@ echo "\n==> Testing SOURCE_TIMEOUT\n";
 test('classifies "Process timed out" (PHP-side timeout)',
     assert_classify("ERROR: [YouTube] abc: Process timed out after 45s", 'SOURCE_TIMEOUT', 504));
 
-test('classifies "read at byte timeout"',
+test('classifies "read at byte 0 timeout" (no data transferred = CONNECTION_TIMEOUT)',
+    assert_classify('ERROR: [YouTube] abc: read at byte 0 timeout', 'CONNECTION_TIMEOUT', 504));
+
+test('classifies "read at byte N>0 timeout" (source slow = SOURCE_TIMEOUT)',
     assert_classify('ERROR: [YouTube] abc: read at byte 12345 timeout', 'SOURCE_TIMEOUT', 504));
 
 // ─── CONNECTION_FAILED ────────────────────────────────────────────────────────
