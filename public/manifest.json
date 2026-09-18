@@ -10,6 +10,13 @@
     "client_mode": "navigate-existing"
   },
   "handle_links": "prefer_current_view",
+  "display_override": [
+    {
+      "display": "standalone",
+      "mode": "standalone",
+      "minimum_suitable_display": "standalone"
+    }
+  ],
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "orientation": "any",
