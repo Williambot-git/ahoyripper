@@ -4814,12 +4814,14 @@ switch ($action) {
             // temporary 5xx, etc.) separately from generic --retries. Useful for
             // recovering from transient source-platform errors without escalating to
             // the generic retry budget. Default is 3 when omitted; set explicitly
-            // so the behavior is intentional and documented.
+            // so the behavior is intentional and documented. Mirrors the info action
+            // at line ~3547.
             '--extractor-retries', '3',
             // --no-call-home: disable all outbound calls to yt-dlp's home server
             // (update checks, extractor telemetry pings). A server-side media ripper
             // should never make unexpected outbound connections — --version is read
             // directly via proc_open, so yt-dlp's home calls are unnecessary.
+            // Mirrors the info action at line ~3554.
             '--no-call-home',
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
