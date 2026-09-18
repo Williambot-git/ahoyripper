@@ -2482,6 +2482,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // and the format parameter is not relevant for non-download actions.
             'format_id_missing' => false,
             'format_id' => null,
+            // platform: null — INVALID_URL fires before platform detection.
+            // Consistent with the same null value in MISSING_URL, URL_TOO_LONG,
+            // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
+            'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => date('c'),
