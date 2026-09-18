@@ -38,6 +38,14 @@
     "utilities",
     "multimedia"
   ],
+  "screenshots": [
+    {
+      "src": "/screenshot-ui.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "AhoyRipper format selection interface showing available video and audio formats"
+    }
+  ],
   "icons": [
     {
       "src": "/favicon-512.png",
