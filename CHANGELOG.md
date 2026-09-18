@@ -24,6 +24,7 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   of just "quality or file size".
 
 ### Fixed
+- **`README.md` `X-FFProbe-Timeout` documentation stale** — Two tables (Info Response Headers and Download Response Headers) said the header was "Present on `download` responses where ffprobe was attempted." After the 260918-1226 commit that added `X-FFProbe-Timeout` to ALL API responses (check, health, analytics, default/UNKNOWN_ACTION), the README still described it as download-only. Updated both tables to document that the header is present on every API response, with an explanation of why probe/read-only actions always show `FFPROBE_TIMEOUT` (ffprobe only runs post-download).
 - **`.dockerignore` missing `public/.well-known/`** — `public/.well-known/security.txt`
   (RFC 9116 security contact policy) was excluded from the Docker image by the
   catch-all `.*/` rule. Security scanners (GitHub, OpenBugBounty) and browsers
