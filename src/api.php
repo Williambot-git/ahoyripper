@@ -2359,6 +2359,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-FFProbe-Status: skipped');
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // Content-Type: required for correct JSON rendering in browsers and API clients.
         // Missing from the original block — added for consistency with all other API responses.
         header('Content-Type: application/json; charset=utf-8');
@@ -2439,8 +2441,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
-        // Content-Type: required for correct JSON rendering in browsers and API clients.
-        // Missing from the original block — added for consistency with all other API responses.
+        header('X-FFProbe-Status: skipped');
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
@@ -2507,8 +2509,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         $sendDailyLimitHeaders($daily_limit, null);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
-        // Content-Type: required for correct JSON rendering in browsers and API clients.
-        // Missing from the original block — added for consistency with all other API responses.
+        header('X-FFProbe-Status: skipped');
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'URL is too long. Please paste a shorter link.',
@@ -2940,6 +2942,8 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     // error responses — present on MISSING_URL, METHOD_NOT_ALLOWED, client-error, etc.
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    header('X-FFProbe-Status: skipped');
+    header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
     // Consistent with the METHOD_NOT_ALLOWED (405) response: include all
     // rate-limit headers so API clients always get complete header coverage
     // regardless of which early-exit code path they hit.
