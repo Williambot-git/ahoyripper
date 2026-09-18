@@ -5519,6 +5519,10 @@ switch ($action) {
             // ffprobe to verify. Mark as skipped so clients can distinguish this from
             // VERIFICATION_FAILED (where ffprobe ran but found the file corrupt/unreadable).
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: ffprobe was never reached, but include the timeout value
+            // so clients have the full diagnostic header set regardless of outcome.
+            // Consistent with other "skipped" blocks (PROC_OPEN_FAILED, DOWNLOAD_CANCELLED).
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
