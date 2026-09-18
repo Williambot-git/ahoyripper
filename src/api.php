@@ -6602,6 +6602,8 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            // Cache-Control: no-store — prevents browsers from caching this error response.
+            header('Cache-Control: no-store');
             // Set the same CSP and Reporting-Endpoints headers that the top-of-script
             // block applies to all other responses. Mirrors the csp-report and analytics
             // POST-gate 405 responses for consistency.
