@@ -213,6 +213,13 @@ $request_id = (isset($_SERVER['HTTP_X_REQUEST_ID']) && strlen($_SERVER['HTTP_X_R
     : bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
 
+// Track request start time (microsecond resolution) for Server-Timing and
+// X-Response-Time headers. These headers help API consumers measure round-trip
+// latency and are especially useful for distinguishing network delay from
+// server processing time. $request_start_microtime is used in the global
+// header block below to emit timing headers on every API response.
+$request_start_microtime = microtime(true);
+
 // Make request ID available to logRequest via a static global
 $GLOBALS['__request_id'] = $request_id;
 header('Cross-Origin-Opener-Policy: same-origin');
@@ -731,6 +738,13 @@ header('X-RateLimit-Limit: ' . $rate_limit);
 header('X-RateLimit-Remaining: ' . max(0, $rate_limit - $data['c']));
 header('X-RateLimit-Reset: ' . $reset);
 header('X-RateLimit-Window: ' . $rate_window);
+
+// Server-Timing and X-Response-Time: latency metrics for every API response.
+// These headers help clients distinguish network delay from server processing
+// time and are especially useful on 429 rate-limit responses where slow clients
+// may be hitting the limit due to high latency rather than excessive requests.
+header('Server-Timing: core;dur=' . round((microtime(true) - $request_start_microtime) * 1000, 2));
+header('X-Response-Time: ' . round((microtime(true) - $request_start_microtime) * 1000, 2) . 'ms');
 
 // X-DL-* headers reflect the download-specific rate limit (DL_RATE_LIMIT).
 // For the 'download' action: read the dl_rate file and report actual state.
