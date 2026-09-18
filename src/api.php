@@ -6344,6 +6344,10 @@ switch ($action) {
         header('X-Request-ID: ' . $request_id);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: always 'skipped' on check responses since ffprobe only runs
+        // after a download completes. Adding it here completes the "always present" invariant
+        // documented in the README for all API responses — including the check endpoint.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata for clients that need to
         // synchronize without parsing the JSON body. Mirrors the same ISO 8601
         // timestamp and Unix value that appear in the JSON response body
@@ -7386,6 +7390,9 @@ switch ($action) {
             // CSP-report 405 block was missing these — add for consistency with check/health.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Timeout: always 'skipped' on csp-report responses since ffprobe
+            // only runs after a download completes. Adding it for consistent header coverage.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
