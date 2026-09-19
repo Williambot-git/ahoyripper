@@ -6765,6 +6765,18 @@ switch ($action) {
         // these fields without special-casing the client-error action.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: ffprobe runs post-download for file verification; client-error
+        // is a fire-and-forget endpoint with no file on disk so ffprobe never runs here.
+        // Set the header for consistency with every other API action (including action=check),
+        // where it appears in the same position after X-Download-Timeout. This completes
+        // the "always present" invariant documented in the README for all API responses.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-Server-Time: wire-level clock metadata for clients that need to synchronize
+        // without parsing the JSON body. Mirrors the same headers set in the health action
+        // and every other API response, giving API consumers the same temporal reference
+        // in both HTTP headers and JSON payload.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         // CSP: client-error 200 OK bypasses the top-of-script header block by sending
         // its own response — repeat CSP here so the action is always fully hardened.
         // Note: upgrade-insecure-requests is intentionally ABSENT — this is a JSON API
