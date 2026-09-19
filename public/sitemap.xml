@@ -5,17 +5,17 @@
   xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://ahoyripper.com/</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://ahoyripper.com/og-image.webp</image:loc>
-      <image:caption>Rip any video from YouTube, TikTok, X, SoundCloud, Instagram and 1872+ platforms</image:caption>
+      <image:caption>Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms — free, no signup required.</image:caption>
       <image:title>AhoyRipper - Free Online Media Ripper</image:title>
     </image:image>
     <image:image>
       <image:loc>https://ahoyripper.com/og-image.png</image:loc>
-      <image:caption>Rip any video from YouTube, TikTok, X, SoundCloud, Instagram and 1872+ platforms</image:caption>
+      <image:caption>Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms — free, no signup required.</image:caption>
       <image:title>AhoyRipper - Free Online Media Ripper</image:title>
     </image:image>
   </url>
