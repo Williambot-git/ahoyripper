@@ -6222,6 +6222,10 @@ switch ($action) {
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
             // (where ffprobe ran but found the file corrupt/unreadable).
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: ffprobe was never reached, but include the timeout value
+            // so clients have the full diagnostic header set regardless of outcome.
+            // Consistent with other "skipped" blocks (PROC_OPEN_FAILED, DOWNLOAD_EMPTY).
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // X-RateLimit-*: download action consumed the per-minute request rate limit
             // (info call was made). Use $rate_window (60s) — the request-level window,
             // not $dl_rate_window (60s). Consistent with VERIFICATION_FAILED block.
