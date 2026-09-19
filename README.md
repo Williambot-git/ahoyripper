@@ -889,7 +889,7 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "php_version": "8.2.0",
   "api_version": "1.0.0",
   "yt_dlp_version": "2026.03.17",
-  "ffprobe_version": "ffmpeg version 6.x",
+  "ffmpeg_version": "ffmpeg version 6.x",
   "ffmpeg_ok": true,
   "curl_cffi_version": "0.8.0",
   "curl_cffi_ok": true,
@@ -898,7 +898,12 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "quota_reset": "2026-09-19T00:00:00+00:00",
   "quota_reset_unix": 1789776000,
   "source_url": null,
-  "platform": null
+  "platform": null,
+  "x_ffprobe_status": "skipped",
+  "ffprobe_ok": true,
+  "yt_dlp_ok": true,
+  "video_url": null,
+  "source_url_missing": true
 }
 ```
 
@@ -955,7 +960,8 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "quota_reset": "2026-09-19T00:00:00+00:00",
   "quota_reset_unix": 1789776000,
   "source_url": null,
-  "source_url_missing": true
+  "source_url_missing": true,
+  "x_ffprobe_status": "skipped"
 }
 ```
 
@@ -1018,6 +1024,8 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
 `server_uptime_seconds` is Linux-only — available on servers, omitted in Docker containers or non-Linux environments.
 
 `yt_dlp_probe` is only present when the request includes `&probe=1`. It runs a lightweight metadata fetch against a known-stable YouTube video to confirm end-to-end connectivity and parsing capability. The result is cached for 5 minutes; `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds` surface the cache expiration so monitoring dashboards can track when the cached result will be refreshed.
+
+`x_ffprobe_status` mirrors the `X-FFProbe-Status` HTTP header. Always `skipped` on `action=health` since ffprobe only runs after a download completes. Present on every API response body (including `check` and `health`) for consistent field coverage — clients can always read this value from the JSON body without parsing HTTP headers.
 
 `yt_dlp_cache_expires_at` / `yt_dlp_cache_ttl_seconds` track the yt-dlp version cache (1-hour TTL). `ffmpeg_cache_expires_at` / `ffmpeg_cache_ttl_seconds` track the ffmpeg version cache (1-hour TTL). `yt_dlp_probe_cache_expires_at` / `yt_dlp_probe_cache_ttl_seconds` track the yt-dlp connectivity probe cache (5-minute TTL).
 
