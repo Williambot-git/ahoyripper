@@ -3619,13 +3619,10 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
-            // --no-call-home: disable all outbound calls to yt-dlp's home server
-            // (update checks, extractor telemetry pings, etc.). A server-side media
-            // ripper should never make unexpected outbound connections. The update check
-            // alone can trigger rate limits or blocklist detections on some platforms.
-            // This is safe: yt-dlp's home calls are never needed for ripping and
-            // --version is read from the binary directly via proc_open (line 1237).
-            '--no-call-home',
+            // --no-update: disable all outbound calls to yt-dlp's home server.
+            // A health probe should not generate unexpected outbound traffic.
+            // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
+            '--no-update',
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
@@ -4897,12 +4894,12 @@ switch ($action) {
             // post-processing (merging streams, transcoding, etc.) so this flag
             // ensures reliable operation in non-standard deployments.
             '--ffmpeg-location', FFMPEG_PATH,
-            // --no-call-home: disable all outbound calls to yt-dlp's home server
+            // --no-update: disable all outbound calls to yt-dlp's home server
             // (update checks, extractor telemetry pings). A server-side media ripper
             // should never make unexpected outbound connections — --version is read
             // directly via proc_open, so yt-dlp's home calls are unnecessary.
-            // Mirrors the info action at line ~3554.
-            '--no-call-home',
+            // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
+            '--no-update',
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
             '--restrict-filenames',
@@ -7212,9 +7209,10 @@ switch ($action) {
                     // 5xx) separately from generic --retries. Mirrors the info and download
                     // action pattern so the health probe accurately reflects real ripping behavior.
                     '--extractor-retries', '3',
-                    // --no-call-home: disable all outbound calls to yt-dlp's home server.
+                    // --no-update: disable all outbound calls to yt-dlp's home server.
                     // A health probe should not generate unexpected outbound traffic.
-                    '--no-call-home',
+                    // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
+                    '--no-update',
                     // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
                     // --no-check-certificates; SSL errors now trigger extractor retry logic).
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
