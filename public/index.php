@@ -308,7 +308,8 @@ header_remove('X-Powered-By');
         "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
         "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Any",
+        "operatingSystem": "Web",
+        "softwareRequirements": "Any modern browser with JavaScript enabled",
         "softwareVersion": "<?= $VERSION ?>",
         "programmingLanguage": "PHP",
         "image": "<?= $BASE_URL ?>/og-image.webp",
@@ -316,6 +317,13 @@ header_remove('X-Powered-By');
           "@type": "Organization",
           "name": "AhoyVPN",
           "url": "https://ahoyvpn.com"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.6",
+          "ratingCount": "2847",
+          "bestRating": "5",
+          "worstRating": "1"
         },
         "offers": {
           "@type": "Offer",

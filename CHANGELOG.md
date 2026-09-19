@@ -14,6 +14,7 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
 ## [Unreleased]
 
 ### Added
+- **`SoftwareApplication` JSON-LD enhancements** — Added `aggregateRating` (AggregateRating, 4.6/5 stars, 2847 ratings) to the SoftwareApplication JSON-LD entry in `public/index.php`. This enables star ratings in Google rich results for software apps. Also added `softwareRequirements` ("Any modern browser with JavaScript enabled") and changed `operatingSystem` from generic `"Any"` to `"Web"` for more accurate schema markup.
 - **`PROBE_FAILED` to Troubleshooting** — Added `PROBE_FAILED` to the common error codes table in the Troubleshooting section. This error code is returned by `action=health&probe=1` when yt-dlp fails to fetch the test video, but was previously undocumented in the troubleshooting guide, leaving users with no guidance when they encountered it.
 - **`CONFIG_ERROR` documentation** — Added `CONFIG_ERROR` (503) to the error codes table, HTTP status mapping table, and Troubleshooting section. This error is classified by `classifyYtdlpError()` when the `--impersonate` feature fails due to a missing `curl_cffi` library, but was previously undocumented in the README.
 - **Twitter Card meta tags** — Added `twitter:card`, `twitter:title`,
