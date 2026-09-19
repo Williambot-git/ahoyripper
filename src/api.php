@@ -7220,6 +7220,12 @@ switch ($action) {
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
+                    // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
+                    // Mirrors the download action at line ~4898. A health probe that passes
+                    // without --ffmpeg-location could still fail downloads if ffmpeg is not
+                    // in the system PATH. Including this flag ensures the probe accurately
+                    // reflects real-world download capability in non-standard deployments.
+                    '--ffmpeg-location', FFMPEG_PATH,
                 ];
                 if (AHOY_IMPERSONATE !== '') {
                     $probe_cmd[] = '--impersonate';
