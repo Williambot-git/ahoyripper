@@ -4102,6 +4102,10 @@ switch ($action) {
                 // other info-action error responses (e.g. MISSING_URL).
                 'format_id_missing' => false,
                 'format_id' => null,
+                // platform: null — parseFormats errors fire before platform detection
+                // in the info action. All other info-action error responses include
+                // 'platform' => null for consistent field coverage.
+                'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'upgrade_url' => UPGRADE_URL,
