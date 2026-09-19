@@ -6482,10 +6482,13 @@ switch ($action) {
         // Standard rate-limit header family for generic API consumers.
         // X-RateLimit-Limit: -1 = no rate limit applies (convention: -1 means
         // "unlimited", 0 means "limit exhausted"). Mirrors X-DL-RateLimit-Limit.
+        // X-RateLimit-Window: use $rate_window (60s) — the shared request-rate
+        // window always runs at 60s even when no rate limit is consumed, so
+        // clients see the correct window size for the generic envelope.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         // Daily-limit sentinels (-1) signal clients this is a read-only probe,
         // not a rip-consuming action — consistent with action=health, client-error,
         // analytics, and csp-report. All use 'unlimited' (not 'unavailable') to
@@ -6927,8 +6930,12 @@ switch ($action) {
         // Rate-limit sentinels for the health probe endpoint — mirrors the same
         // header family set in the 'check' action block (lines 4959-4975).
         // Health is a read-only probe: it does not consume the download rate limit
-        // or the daily quota. Use -1 (unlimited signal) for all counter values,
+        // or the daily quota. Use -1 (unlimited signal) for counter values,
         // consistent with the 'check' action pattern.
+        // X-DL-RateLimit-Window: unlimited — no download rate limit applies.
+        // X-RateLimit-Window: use $rate_window (60s) — the shared request-rate
+        // window always runs at 60s even when no rate limit is consumed, so
+        // clients see the correct window size for the generic envelope.
         header('X-DL-RateLimit-Limit: -1');
         header('X-DL-RateLimit-Remaining: -1');
         header('X-DL-RateLimit-Reset: -1');
@@ -6936,7 +6943,7 @@ switch ($action) {
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
