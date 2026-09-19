@@ -1723,6 +1723,8 @@ $check_response = [
     'app_version' => AHOYRIPPER_VERSION,
     'php_version' => PHP_VERSION,
     'api_version' => AHOYRIPPER_VERSION,
+    // curl_cffi_ok: mirrors health endpoint for consistency across probe endpoints.
+    'curl_cffi_ok' => true,
 ];
 test('check endpoint response includes api_version key',
     array_key_exists('api_version', $check_response));
@@ -1730,6 +1732,10 @@ test('check endpoint api_version matches AHOYRIPPER_VERSION',
     ($check_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
 test('check endpoint api_version is non-empty string',
     is_string($check_response['api_version']) && $check_response['api_version'] !== '');
+test('check endpoint includes curl_cffi_ok (mirrors health endpoint)',
+    array_key_exists('curl_cffi_ok', $check_response));
+test('check endpoint curl_cffi_ok is boolean',
+    is_bool($check_response['curl_cffi_ok']));
 
 // The health endpoint response is constructed inline in the case block.
 // Verify api_version is included in the health-style response structure.
