@@ -73,5 +73,8 @@ services:
     # writing to /tmp. Using a tmpfs (ramdisk) keeps the quota state in memory,
     # preserving the security benefit of stateless /tmp (wiped on container restart)
     # while enabling the quota subsystem to function.
+    # uid=1000,gid=1000 must match the www-data user/group created in the
+    # Dockerfile (groupadd --gid 1000 www-data && useradd --uid 1000 ...).
+    # If the Dockerfile's www-data uid/gid changes, update these values to match.
     tmpfs:
-      - /tmp/quota:size=16M,mode=01775,uid=82,gid=82
+      - /tmp/quota:size=16M,mode=01775,uid=1000,gid=1000
