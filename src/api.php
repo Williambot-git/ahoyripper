@@ -986,6 +986,8 @@ if (in_array($action, $internal_actions, true)) {
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // X-FFProbe-Status: mirrors the header set in the non-FPM fallback block.
             header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: mirrors the header set in the non-FPM fallback block.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // Retry-After: 0 — client-error is a fire-and-forget endpoint with no
             // server-side backoff; clients can immediately retry their original action.
             // Mirrors the Retry-After header set in the non-FPM fallback block.
@@ -1055,6 +1057,7 @@ if (in_array($action, $internal_actions, true)) {
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-FFProbe-Status: skipped');
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
