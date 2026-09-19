@@ -7186,6 +7186,16 @@ switch ($action) {
             // is presented or processed in the health action. API surface parity so clients
             // can always read format_id_missing from any response without null-checking.
             'format_id_missing' => false,
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+            // (lines 6965-6966). Adding them to the body lets API consumers read these
+            // values without parsing HTTP headers — consistent with the check action pattern.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_status: always 'skipped' on health since ffprobe only runs after
+            // a completed download. Mirrors the same field in the check action body.
+            // ffprobe_status in the JSON body mirrors the X-FFProbe-Status header so
+            // API consumers can read ffprobe status without parsing HTTP headers.
+            'x_ffprobe_status' => 'skipped',
             // retry_after: 0 — health is a read-only probe with no rate limit or quota
             // consumption. Clients may call again immediately without backoff.
             // Mirrors the same 0 value used by the check and client-error actions.
