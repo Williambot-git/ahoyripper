@@ -3089,11 +3089,23 @@ switch ($action) {
             header('X-Frame-Options: SAMEORIGIN');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
+            header('X-Request-ID: ' . $request_id);
             header('Referrer-Policy: strict-origin-when-cross-origin');
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
+            // X-RateLimit-*: validation errors occur before rate-limit tracking is consulted,
+            // so these sentinels (-1/unavailable) are consistent with MISSING_URL and INVALID_URL.
+            header('X-RateLimit-Limit: -1');
+            header('X-RateLimit-Remaining: -1');
+            header('X-RateLimit-Reset: -1');
+            header('X-RateLimit-Window: unavailable');
+            // X-DL-RateLimit-*: mirrors X-RateLimit-* for download-specific monitoring.
+            header('X-DL-RateLimit-Limit: -1');
+            header('X-DL-RateLimit-Remaining: -1');
+            header('X-DL-RateLimit-Reset: -1');
+            header('X-DL-RateLimit-Window: unavailable');
             logRequest($action, 400, ['reason' => 'invalid_sort', 'raw_sort' => $raw_sort]);
             $quota_reset_ts = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             $quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
@@ -3107,6 +3119,8 @@ switch ($action) {
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            // Content-Type: required for correct JSON rendering in browsers and API clients.
+            header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'error' => "Unknown sort value '$raw_sort'. Use one of: height, filesize, filesize_asc, tbr, quality, audio_quality.",
                 'error_code' => 'INVALID_SORT',
