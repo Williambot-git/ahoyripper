@@ -685,10 +685,23 @@ body {
   color: var(--color-error);
   font-size: 0.9rem;
   margin-bottom: 1rem;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  /* Transition visibility with a 0.2s delay so it only becomes hidden AFTER
+     the opacity fade-out completes. Without the delay, visibility would snap
+     to 'hidden' immediately when .active is removed (before the 0.2s opacity
+     transition finishes), making the fade-out invisible to the user. The
+     transition on visibility must come AFTER the opacity transition in the
+     shorthand so both are applied correctly. */
+  transition: opacity 0.2s ease, visibility 0.2s ease 0.2s;
 }
 /* .active class switches visibility so the opacity transition always fires */
-.rip-error.active { visibility: visible; opacity: 1; }
+.rip-error.active {
+  visibility: visible;
+  opacity: 1;
+  /* Override the visibility transition delay when showing: visibility should
+     become visible immediately (not after a 0.2s delay) so the error box
+     appears without any timing lag. The 0s delay restores instant visibility. */
+  transition: opacity 0.2s ease, visibility 0s ease 0s;
+}
 
 /* Retry button — appears when an error is shown so the user can immediately
    retry a failed rip without re-pasting or refocusing the input field. */
