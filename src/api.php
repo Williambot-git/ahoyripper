@@ -4027,11 +4027,13 @@ switch ($action) {
             $err_status = $err_status_map[$parsed['error_code']] ?? 422;
             logRequest('info', $err_status, ['reason' => 'parse_formats_ytdlp_error', 'err_code' => $err_code]);
             // Undo the quota increment — parseFormats succeeded (returned a classified error
-            // like GEOBLOCKED/PRIVATE_VIDEO) but the content is not downloadable. We don't
-            // burn the user's daily limit for content that simply can't be ripped.
+            // like GEOBLOCKED, AGE_RESTRICTED, COPYRIGHT_REMOVED, or PRIVATE_VIDEO) but the
+            // content is not downloadable. We don't burn the user's daily limit for content
+            // that simply can't be ripped.
             // Refund guard: if parseFormats returned a classified error (GEOBLOCKED,
-            // PRIVATE_VIDEO, etc.), the user burned a quota hit but got no usable
-            // content. Undo the increment so it doesn't count against their daily cap.
+            // AGE_RESTRICTED, COPYRIGHT_REMOVED, PRIVATE_VIDEO, etc.), the user burned a
+            // quota hit but got no usable content. Undo the increment so it doesn't count
+            // against their daily cap.
             // Uses the same c > baseline guard as the download action to prevent
             // double-refund when concurrent requests hit different error paths.
             if (!$unlimited) {
