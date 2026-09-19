@@ -29,6 +29,13 @@ define('YTDLP_PATH', getenv('YTDLP_PATH') !== false && getenv('YTDLP_PATH') !== 
 // version cache so that changing FFPROBE_PATH invalidates stale cache entries.
 define('FFPROBE_PATH', getenv('FFPROBE_PATH') !== false && getenv('FFPROBE_PATH') !== '' ? getenv('FFPROBE_PATH') : '/usr/bin/ffprobe');
 
+// Path to ffmpeg binary — configurable via FFMPEG_PATH env var so deployments
+// can override the default /usr/bin/ffmpeg (e.g. to /usr/local/bin/ffmpeg).
+// yt-dlp uses ffmpeg for post-processing (merging streams, transcoding, etc.)
+// and needs to locate it at runtime. Passing --ffmpeg-location to yt-dlp
+// prevents failures when ffmpeg is not in the system PATH.
+define('FFMPEG_PATH', getenv('FFMPEG_PATH') !== false && getenv('FFMPEG_PATH') !== '' ? getenv('FFMPEG_PATH') : '/usr/bin/ffmpeg');
+
 // Timeout (seconds) for ffprobe post-download verification. ffprobe should finish
 // in well under 10s for any real file; 10s is generous for large or slow files.
 // Override via FFPROBE_TIMEOUT env var (e.g. FFPROBE_TIMEOUT=20 in .env).
@@ -4875,6 +4882,12 @@ switch ($action) {
             // so the behavior is intentional and documented. Mirrors the info action
             // at line ~3547.
             '--extractor-retries', '3',
+            // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
+            // Prevents failures when ffmpeg is not in the system PATH or when
+            // multiple ffmpeg versions are installed. yt-dlp uses ffmpeg for
+            // post-processing (merging streams, transcoding, etc.) so this flag
+            // ensures reliable operation in non-standard deployments.
+            '--ffmpeg-location', FFMPEG_PATH,
             // --no-call-home: disable all outbound calls to yt-dlp's home server
             // (update checks, extractor telemetry pings). A server-side media ripper
             // should never make unexpected outbound connections — --version is read
