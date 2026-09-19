@@ -46,13 +46,14 @@ Allow: /
 
 # General crawlers (User-agent: *) — applies to all bots not listed above.
 # IMPORTANT: Disallow rules MUST come BEFORE Allow rules in the same
-# User-agent block. Googlebot uses first-matching-rule precedence (not
+# User-agent block. crawlers use first-matching-rule precedence (not
 # "most specific wins"), so "Allow: /" before "Disallow: /src/" means
-# Googlebot never sees the /src/ block. Place more-specific rules first.
-# Specific crawlers (GPTBot, ClaudeBot, etc.) have their own blocks above
-# and do NOT fall through to this section.
+# the API would be allowed for bots without specific blocks. Place more-specific
+# rules first. Specific crawlers (GPTBot, ClaudeBot, etc.) have their own blocks
+# above and do NOT fall through to this section.
 User-agent: *
 # Block all crawlers from the API endpoint — returns JSON, not crawlable.
+# This must come BEFORE Allow: / so the disallow is evaluated first.
 Disallow: /src/
 # og-image.webp is referenced by index.php's og:image meta tag and used in
 # social shares. Allow explicitly so crawlers can fetch the preview image.
@@ -62,6 +63,8 @@ Allow: /og-image.webp
 # /.well-known/ path ensures security researchers and vulnerability scanners
 # can discover the security policy regardless of other robots rules.
 Allow: /.well-known/security.txt
+# Allow all other paths — must come AFTER /src/ disallow so the API is blocked.
+Allow: /
 
 # Security contact — RFC 9116
 Sitemap: https://ahoyripper.com/sitemap.xml
