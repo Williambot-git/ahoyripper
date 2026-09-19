@@ -1121,6 +1121,9 @@ Every API response — `info`, `download`, `check`, `health`, `analytics`, `clie
 | `X-Request-ID` | Unique per-request correlation ID (16 hex chars) — use to correlate browser, API, and server-side logs |
 | `X-Info-Timeout` | Server-side info timeout in seconds (integer). Present on every API response so clients always have this value for retry logic. Matches `INFO_TIMEOUT` (default: 45 seconds, configurable via `YTDLP_TIMEOUT` env var). |
 | `X-Download-Timeout` | Server-side download timeout in seconds (integer). Present on every API response so clients always have this value for retry logic. Matches `DOWNLOAD_TIMEOUT` (default: 300 seconds). |
+| `X-FFProbe-Timeout` | Server-side ffprobe verification timeout in seconds (integer). Present on every API response for consistent client retry logic — on probe/read-only actions (check, health) this is always `FFPROBE_TIMEOUT` since ffprobe only runs after a download. |
+| `X-Server-Time` | Wire-level server clock in RFC 7231 format (e.g. `Sat, 19 Sep 2026 05:55:00 GMT`). Mirrors the `server_time` ISO 8601 value in the JSON response body — present on every API response so clients can synchronize clocks without parsing the body. |
+| `X-Server-Time-Unix` | Unix timestamp of server clock (seconds since epoch). Mirrors the `server_time_unix` integer in the JSON response body — present on every API response. |
 | `X-DL-RateLimit-Limit: -1` | Health is a read-only probe — it does not consume the download rate limit. Value is `-1` (unlimited sentinel). |
 | `X-DL-RateLimit-Remaining: -1` | No download rate limit consumed by health probes. |
 | `X-DL-RateLimit-Reset: -1` | No download rate limit window active for health probes. |
