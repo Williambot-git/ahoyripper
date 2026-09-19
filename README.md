@@ -820,19 +820,49 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
-| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video |
-| `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation |
-| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field) |
-| `500` | `PROC_OPEN_FAILED` | The download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing (contact the operator). |
-| `503` | `SERVICE_UNAVAILABLE` | The quota or rate-limit subsystem is temporarily unavailable — try again in a few seconds. If persistent, the server may be overloaded. |
-| `422` | `PARSE_ERROR` | Could not fetch video info during download. The site may be temporarily unavailable. |
-| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the 5-minute server timeout — try a smaller format or audio-only |
-| `500` | `FILE_READ_ERROR` | The downloaded file could not be read — rare server-side issue. Try again or pick a different format. |
-| `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty or invalid — try another format from the list |
+| `400` | `UNKNOWN_ACTION` | The requested API action is not recognized. Use a valid action (`info`, `download`, `check`, `health`). |
+| `400` | `MISSING_URL` | No URL was provided on the request. Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
+| `400` | `MISSING_FORMAT` | No format was selected on a download request. Select a format from the list above first. |
+| `400` | `INVALID_SORT` | Sort parameter value is invalid or unrecognized. Pass `&sort=` with one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality`. |
+| `400` | `INVALID_URL` | URL is malformed, uses an unsupported scheme, or exceeds the 2048-character limit. |
+| `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid. Refresh to get a fresh format list, then pick a valid format. |
+| `400` | `URL_TOO_LONG` | The submitted URL exceeds the maximum allowed length (2048 characters). |
+| `400` | `INVALID_API_KEY` | The API key is invalid or malformed. |
+| `401` | `INVALID_API_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key. |
+| `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
+| `403` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed. |
+| `403` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP. |
+| `405` | `METHOD_NOT_ALLOWED` | Request used an HTTP method other than GET. The API accepts GET only. |
+| `406` | `NOT_ACCEPTABLE` | Request did not send an `Accept: application/json` header. The API only serves JSON. |
+| `422` | `GEOBLOCKED` | Video is geo-restricted in your server's region. Use AhoyVPN to route through an unblocked region. |
+| `422` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded. Try a public video instead. |
+| `422` | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform. |
+| `422` | `PARSE_ERROR` | The site returned a non-standard or unparseable response. The site may be temporarily unavailable or not supported. |
+| `422` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp. Check the supported sites list. |
+| `422` | `PLAYLIST_MISSING` | Playlist not found or no longer exists. Verify the playlist is public and still available. |
+| `422` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available. Try another video. |
+| `422` | `AGE_RESTRICTED` | Video is age-restricted and requires verification. Sign in to the source platform to verify your age. |
+| `422` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP. |
+| `422` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues. Try again shortly. |
+| `422` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted. |
+| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video. Choose another from the list. |
+| `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation. |
+| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field). Try another format from the list, or wait and try again. |
+| `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation. |
+| `500` | `PROC_OPEN_FAILED` | The info or download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing. |
+| `500` | `FILE_READ_ERROR` | The downloaded file could not be read even though it exists. Try again or pick a different format. |
+| `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data. Try another format or wait and retry. Your quota was not charged. |
 | `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
+| `502` | `CONNECTION_FAILED` | Could not connect to the source. Check your network and try again. |
+| `502` | `SSL_ERROR` | Secure connection to the source failed. Try again shortly. |
+| `502` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP. |
+| `502` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx. Try again shortly. |
+| `503` | `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. Try again in a few seconds. |
+| `503` | `CONFIG_ERROR` | Browser impersonation is not available — the `curl_cffi` Python library may be missing. Set `AHOY_IMPERSONATE=` (empty) to disable impersonation, or update yt-dlp and install `pip install curl_cffi`. |
+| `504` | `SOURCE_TIMEOUT` | The source site took too long to respond. Distinct from `CONNECTION_TIMEOUT` which fires when the TCP handshake stalls before any data is transferred. Try a smaller format or try again. |
+| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `504` | `VERIFICATION_TIMEOUT` | ffprobe verification timed out — the file may be valid but could not be confirmed within the server's time limit. Try a smaller format or try again. |
 | `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. Try again when ready. |
-| `503` | `CONFIG_ERROR` | Browser impersonation is not available — the `curl_cffi` Python library may be missing. Set `AHOY_IMPERSONATE=` (empty) to disable impersonation, or update yt-dlp and install `pip install curl_cffi`. |
 
 ### Health check / progress
 ```
