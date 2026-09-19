@@ -398,13 +398,17 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
             return $type_cmp;
         }
         if ($sort === 'filesize') {
-            $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+            // Use PHP_INT_MAX as the null sentinel so unknown sizes sort LAST
+            // (descending = largest first, so null = unknown = treat as largest = sort last).
+            $cmp = ($b['filesize_mb'] ?? PHP_INT_MAX) <=> ($a['filesize_mb'] ?? PHP_INT_MAX);
         } elseif ($sort === 'filesize_asc') {
             // Put unknown-size formats at the bottom of an ascending (smallest-first) sort.
             // Using PHP_INT_MAX (not 0) ensures null values sort last, not first.
             $cmp = ($a['filesize_mb'] ?? PHP_INT_MAX) <=> ($b['filesize_mb'] ?? PHP_INT_MAX);
         } elseif ($sort === 'tbr') {
-            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+            // Use -1 as the null sentinel so unknown tbr sorts LAST in a descending sort.
+            // tbr=0 is a valid (low) bitrate, so null (unknown) must sort below it.
+            $cmp = ($b['tbr'] ?? -1) <=> ($a['tbr'] ?? -1);
         } elseif ($sort === 'quality') {
             $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
@@ -935,6 +939,21 @@ test('filesize sort (desc): largest first (20MB before 10MB before 5MB)',
 test('filesize sort (desc): combined formats still grouped together',
     $result_size_desc['formats'][0]['format_type'] === 'combined');
 
+// filesize sort: null/unknown filesize should sort LAST (desc = largest first,
+// null = unknown = treat as largest = sort last), consistent with filesize_asc
+// which also uses PHP_INT_MAX as the null sentinel.
+$formats_size_desc_null = [
+    makeFormat(['format_id' => 'known_5mb', 'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 5242880]),
+    makeFormat(['format_id' => 'unknown',   'height' => 240, 'vcodec' => 'avc1', 'acodec' => 'mp4a']),
+    makeFormat(['format_id' => 'known_10mb', 'height' => 480, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'filesize' => 10485760]),
+];
+$json_size_desc_null = makeJson('Size Sort Desc Null', $formats_size_desc_null);
+$raw_err = null;
+$result_size_desc_null = parseFormats($json_size_desc_null, $raw_err, 'filesize');
+$ids_size_desc_null = array_column($result_size_desc_null['formats'], 'id');
+test('filesize sort (desc): null/unknown filesize sorts LAST (after all known sizes)',
+    $ids_size_desc_null[0] === 'known_10mb' && $ids_size_desc_null[1] === 'known_5mb' && $ids_size_desc_null[2] === 'unknown');
+
 // ─── parseFormats: quality sort (numeric quality tier) ─────────────────────────────
 // quality sort: video formats by pixel height, audio by bitrate tier.
 // Within video: height desc (1080 > 720 > 480 > 240).
@@ -1030,6 +1049,20 @@ $result_tbr_same = parseFormats($json_tbr_same, $raw_err, 'tbr');
 $ids_tbr_same = array_column($result_tbr_same['formats'], 'id');
 test('tbr sort: same tbr tiebreak by fps desc (60 > 30 > 24)',
     $ids_tbr_same[0] === 'a60' && $ids_tbr_same[1] === 'a30' && $ids_tbr_same[2] === 'a24');
+
+// tbr sort: null/unknown tbr should sort LAST (desc = highest first,
+// null = unknown = -1 sentinel = sort below tbr=0). This is consistent with
+// the filesize sort null sentinel (PHP_INT_MAX) and quality sort null sentinel (-1).
+$formats_tbr_null = [
+    makeFormat(['format_id' => 'a_128', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 128, 'tbr' => 128]),
+    makeFormat(['format_id' => 'unknown', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => null, 'tbr' => null]),
+    makeFormat(['format_id' => 'a_320', 'vcodec' => 'none', 'acodec' => 'mp4a', 'abr' => 320, 'tbr' => 320]),
+];
+$json_tbr_null = makeJson('TBR Null', $formats_tbr_null);
+$result_tbr_null = parseFormats($json_tbr_null, $raw_err, 'tbr');
+$ids_tbr_null = array_column($result_tbr_null['formats'], 'id');
+test('tbr sort: null/unknown tbr sorts LAST (320 > 128 > null)',
+    $ids_tbr_null[0] === 'a_320' && $ids_tbr_null[1] === 'a_128' && $ids_tbr_null[2] === 'unknown');
 
 // ─── parseFormats: fps tiebreaker within same resolution tier ──────────────────
 

@@ -2192,12 +2192,16 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         // Using -PHP_INT_MAX (negative) would make null sort as the smallest value
         // in an ascending sort — the opposite of the intended behavior.
         if ($sort === 'filesize') {
-            $cmp = ($b['filesize_mb'] ?? 0) <=> ($a['filesize_mb'] ?? 0);
+            // Use PHP_INT_MAX as the null sentinel so unknown sizes sort LAST
+            // (descending = largest first, so null = unknown = treat as largest = sort last).
+            $cmp = ($b['filesize_mb'] ?? PHP_INT_MAX) <=> ($a['filesize_mb'] ?? PHP_INT_MAX);
         } elseif ($sort === 'filesize_asc') {
             $cmp = ($a['filesize_mb'] ?? PHP_INT_MAX) <=> ($b['filesize_mb'] ?? PHP_INT_MAX);
             // Put unknown-size formats at the bottom of an ascending (smallest-first) sort.
         } elseif ($sort === 'tbr') {
-            $cmp = ($b['tbr'] ?? 0) <=> ($a['tbr'] ?? 0);
+            // Use -1 as the null sentinel so unknown tbr sorts LAST in a descending sort.
+            // tbr=0 is a valid (low) bitrate, so null (unknown) must sort below it.
+            $cmp = ($b['tbr'] ?? -1) <=> ($a['tbr'] ?? -1);
         } elseif ($sort === 'quality') {
             $cmp = ($b['quality'] ?? -1) <=> ($a['quality'] ?? -1);
         } else {
