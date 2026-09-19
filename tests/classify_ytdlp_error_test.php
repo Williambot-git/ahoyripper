@@ -401,6 +401,18 @@ test('exit code 2 returns YTDLP_ERROR',
 test('exit code 3 returns YTDLP_ERROR',
     classifyYtdlpError('post-processing failed', 3)['code'] === 'YTDLP_ERROR');
 
+test('exit code 143 (SIGTERM/proc_terminate) returns SOURCE_TIMEOUT',
+    classifyYtdlpError('generic yt-dlp error', 143)['code'] === 'SOURCE_TIMEOUT');
+
+test('exit code 137 (SIGKILL/OOM) returns SOURCE_TIMEOUT',
+    classifyYtdlpError('download failed', 137)['code'] === 'SOURCE_TIMEOUT');
+
+test('exit code 130 (SIGINT/Ctrl+C) returns SOURCE_TIMEOUT',
+    classifyYtdlpError('post-processing failed', 130)['code'] === 'SOURCE_TIMEOUT');
+
+test('exit code 124 (SIGALRM/timeout) returns SOURCE_TIMEOUT',
+    classifyYtdlpError('download interrupted', 124)['code'] === 'SOURCE_TIMEOUT');
+
 test('exit code 0 returns null',
     classifyYtdlpError('all good here', 0) === null);
 

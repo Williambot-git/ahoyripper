@@ -1718,6 +1718,11 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         if ($exit_code === 1) {
             return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
         }
+        // Signal-induced exits: SIGTERM=143 (from proc_terminate), SIGKILL=137, SIGINT=130, SIGALRM=124 (timeout)
+        // Classify as SOURCE_TIMEOUT (504) — same UX as "process timed out"
+        if (in_array($exit_code, [143, 137, 130, 124], true)) {
+            return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
+        }
         // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
         if ($exit_code >= 2) {
             return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
