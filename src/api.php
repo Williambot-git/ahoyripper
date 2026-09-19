@@ -3623,6 +3623,17 @@ switch ($action) {
             // A health probe should not generate unexpected outbound traffic.
             // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
             '--no-update',
+            // --max-filesize: prevent unexpectedly large downloads. yt-dlp's format
+            // selection (e.g. bestvideo) can resolve to a very high bitrate when a
+            // video has many resolution/codec variants, and a user browsing info could
+            // inadvertently request a 4K/8K format that exceeds server disk/RAM limits.
+            // Setting --max-filesize 50G catches these cases with a clear yt-dlp error
+            // (FilesizeExceeded) rather than a partial download that exhausts resources.
+            // yt-dlp exits with code 1 when the selected format exceeds the limit,
+            // and classifyYtdlpError() maps this to FILE_SIZE_EXCEEDED for the client.
+            // The limit is intentionally very high (50 GB) to only fire on genuine
+            // oversized-content cases, not ordinary downloads.
+            '--max-filesize', '50G',
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
@@ -4904,6 +4915,15 @@ switch ($action) {
             '--no-update',
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
+            // --max-filesize: prevent unexpectedly large downloads. yt-dlp's format
+            // selection can resolve to a very high bitrate (4K/8K) that exhausts server
+            // disk or memory. Setting --max-filesize 50G catches these cases with a clear
+            // yt-dlp error (FilesizeExceeded) rather than a partial download that causes
+            // resource exhaustion. yt-dlp exits with code 1 when the format exceeds the
+            // limit, and classifyYtdlpError() maps this to FILE_SIZE_EXCEEDED for clients.
+            // The limit is intentionally very high (50 GB) to only fire on genuine
+            // oversized-content edge cases, not ordinary downloads.
+            '--max-filesize', '50G',
             '--restrict-filenames',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
