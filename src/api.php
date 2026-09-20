@@ -3773,10 +3773,6 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
-                // server_time: ISO 8601 + Unix for client clock synchronization.
-                // Present on all other API responses — this block was missing these fields.
-                'server_time' => date('c'),
-                'server_time_unix' => time(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         } else {
