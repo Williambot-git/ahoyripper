@@ -1735,8 +1735,11 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
             return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
         }
         // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
+        // Surface the actual yt-dlp error text so callers get a meaningful diagnostic message
+        // rather than a generic opaque string. $raw_err is already sanitized by the caller
+        // (strip_tags, whitespace normalized, truncated to 200 chars).
         if ($exit_code >= 2) {
-            return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
+            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422];
         }
         // Unrecognised error with no specific classification — return null so callers
         // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
@@ -1745,7 +1748,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // Unclassified/unrecognised yt-dlp error — surface a generic error so the client
     // knows something went wrong without being able to infer the specific cause.
     // This is the fallback for classifyYtdlpError() returning null above.
-    return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422];
 }
 
 /**
