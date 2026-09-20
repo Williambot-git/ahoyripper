@@ -3758,6 +3758,10 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses — this block was missing these fields.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
                 // quota fields: quota was refunded before this response.
                 // Unlimited-key holders ($unlimited=true) were never incremented, so
                 // $post_refund_count is $daily_limit for them (no change from baseline).
