@@ -918,6 +918,12 @@ if (in_array($action, $internal_actions, true)) {
         // them explicitly to the non-FPM fallback so both paths are equivalent.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: always 'skipped' on csp-report responses since ffprobe only
+        // runs after a download completes. Adding it for consistent header coverage
+        // so clients can always find this header on all API responses.
+        // Mirrors the FPM-path header added at line 885 and the non-FPM 405-block
+        // header at line 997.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
         // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
         header('X-RateLimit-Limit: -1');
