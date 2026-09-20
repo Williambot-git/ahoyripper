@@ -3236,6 +3236,7 @@ switch ($action) {
         if ($api_key !== null && strlen($api_key) > API_KEY_LEN) {
             logRequest('info', 401, ['reason' => 'invalid_api_key_length']);
             http_response_code(401);
+            header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
             header('Referrer-Policy: strict-origin-when-cross-origin');
