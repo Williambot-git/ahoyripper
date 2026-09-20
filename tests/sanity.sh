@@ -1731,6 +1731,31 @@ done
 echo "  ✓ MISSING_FORMAT and INVALID_FORMAT_ID return HTTP 400"
 
 echo ""
+echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID CSP includes CDN domains and fonts..."
+# MISSING_FORMAT and INVALID_FORMAT_ID return 400 on the download action before
+# yt-dlp runs. Their inline CSP headers (set in the validation block) must
+# include all CDN domains and font sources — not a stripped-down CSP that
+# would break thumbnails, fonts, or inline styles on the error page rendered
+# by the API itself. The full CSP (with CDN domains) was missing until fixed.
+# Guard against regression: check that these blocks contain a CDN domain
+# and font source that the stripped CSP (img-src 'self' data:, no fonts) lacks.
+#
+# MISSING_FORMAT CSP is on line 2649; INVALID_FORMAT_ID CSP is on line 2754.
+# Both should include googleapis.com (font sources) and i.ytimg.com (thumbnails).
+for linenum in 2649 2754; do
+    csp_line=$(sed -n "${linenum}p" src/api.php)
+    if ! echo "$csp_line" | grep -q "googleapis.com"; then
+        echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID CSP missing googleapis.com (font source stripped)"
+        exit 1
+    fi
+    if ! echo "$csp_line" | grep -q "i.ytimg.com"; then
+        echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID CSP missing i.ytimg.com (thumbnail domain stripped)"
+        exit 1
+    fi
+done
+echo "  ✓ MISSING_FORMAT and INVALID_FORMAT_ID CSP includes CDN domains and fonts"
+
+echo ""
 echo "==> Checking MISSING_URL and INVALID_URL responses have security headers..."
 # Both URL validation error responses exit before the normal response-building pipeline
 # where headers are typically set — mirror the protection already added to MISSING_FORMAT
