@@ -669,6 +669,8 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `INVALID_API_KEY` | The API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `DAILY_LIMIT` | Daily free quota (5 rips/day) has been exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
 | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com | Requests must come from the AhoyRipper web page — direct API calls are not allowed |
+| `MISSING_REFERER` | No Referer header was provided | Include `-H "Referer: https://ahoyripper.com/"` in your request |
+| `INVALID_ORIGIN` | Referer header is present but from an unauthorized origin | Referer must be from `ahoyripper.com` or `ahoyvpn.com` |
 | `GEOBLOCKED` | Video is geo-restricted in your region | Use AhoyVPN to route through an unblocked region |
 | `PRIVATE_VIDEO` | Video is private and cannot be downloaded | Try a public video instead |
 | `LOGIN_REQUIRED` | Video requires login or subscription on the source platform | Sign in to the platform in your browser, or pass cookies to yt-dlp for server-side auth (see [cookies section](#passing-cookies-to-yt-dlp) for setup) |
