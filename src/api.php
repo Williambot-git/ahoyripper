@@ -8047,6 +8047,10 @@ switch ($action) {
         // runs after a download completes. Adding it here completes the "always present"
         // invariant for all API responses — clients can always find this header.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-FFProbe-Status: always 'skipped' on default: responses since ffprobe only
+        // runs after a download completes. Adding it here completes the "always present"
+        // invariant for all API responses — clients can always find this header.
+        header('X-FFProbe-Status: skipped');
         // Retry-After: 0 — unknown-action is a validation error (the action name is
         // not recognized), not a server-side backoff situation. The client should
         // retry immediately with a corrected action name. Consistent with MISSING_URL,
