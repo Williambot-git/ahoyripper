@@ -487,6 +487,9 @@ GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sor
 
 # Bitrate-first — high-bitrate streams when bandwidth is plentiful
 GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=tbr
+
+# Quality tier — resolution-based quality ranking (4K > 1080p > 720p > 480p, audio by bitrate tier)
+GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=quality
 ```
 
 The `quality` field in each format is a numeric tier that enables cross-format comparisons:

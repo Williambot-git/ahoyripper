@@ -1743,16 +1743,37 @@ echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID CSP includes CDN domains
 # Guard against regression: check that these blocks contain a CDN domain
 # and font source that the stripped CSP (img-src 'self' data:, no fonts) lacks.
 #
-# MISSING_FORMAT CSP is on line 2649; INVALID_FORMAT_ID CSP is on line 2754.
+# MISSING_FORMAT and INVALID_FORMAT_ID CSP lines are identified dynamically by
+# searching for the Content-Security-Policy header within a 25-line window
+# after each error_code line. Hardcoded line numbers become stale as code changes.
 # Both should include googleapis.com (font sources) and i.ytimg.com (thumbnails).
-for linenum in 2649 2754; do
-    csp_line=$(sed -n "${linenum}p" src/api.php)
-    if ! echo "$csp_line" | grep -q "googleapis.com"; then
-        echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID CSP missing googleapis.com (font source stripped)"
+MISSING_FORMAT_ERR_LINE=$(grep -n "'error_code' => 'MISSING_FORMAT'" src/api.php | head -1 | cut -d: -f1)
+INVALID_FORMAT_ERR_LINE=$(grep -n "'error_code' => 'INVALID_FORMAT_ID'" src/api.php | head -1 | cut -d: -f1)
+
+for err_line in "$MISSING_FORMAT_ERR_LINE" "$INVALID_FORMAT_ERR_LINE"; do
+    # Search backward (up to 15 lines) from error_code for the Content-Security-Policy
+    # header. The CSP appears before the error_code in MISSING_FORMAT
+    # (header() calls precede the json_encode block).
+    csp_line=$(awk -v start="$err_line" '
+        found { print; exit }
+        /Content-Security-Policy.*googleapis/ && NR >= start - 15 && NR < start { found=1; print }
+    ' src/api.php)
+    if [ -z "$csp_line" ]; then
+        csp_line=$(awk -v start="$err_line" '
+            found { print; exit }
+            /Content-Security-Policy/ && NR >= start - 15 && NR < start { found=1; print }
+        ' src/api.php)
+    fi
+    # Extract just the CSP directive value (strip header("..."); wrapper).
+    # The awk above returns the full CSP line:  header("Content-Security-Policy: ...");
+    # We want just the quoted string content between header( " ... " );
+    csp_content=$(echo "$csp_line" | sed 's/.*Content-Security-Policy: *//; s/";*$//')
+    if ! echo "$csp_content" | grep -q "googleapis.com"; then
+        echo "  ✗ MISSING_FORMAT/INVALID_FORMAT_ID CSP missing googleapis.com (font source stripped)"
         exit 1
     fi
-    if ! echo "$csp_line" | grep -q "i.ytimg.com"; then
-        echo "  ✗ Line $linenum: MISSING_FORMAT/INVALID_FORMAT_ID CSP missing i.ytimg.com (thumbnail domain stripped)"
+    if ! echo "$csp_content" | grep -q "i.ytimg.com"; then
+        echo "  ✗ MISSING_FORMAT/INVALID_FORMAT_ID CSP missing i.ytimg.com (thumbnail domain stripped)"
         exit 1
     fi
 done
