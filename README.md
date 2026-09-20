@@ -956,7 +956,8 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
     "yt_dlp_version": "2026.03.17",
     "api_version": "1.0.0",
     "upgrade_url": "https://ahoyvpn.com",
-    "probe_age_seconds": 120
+    "probe_age_seconds": 120,
+    "probe_cached_at": "2026-05-21T16:00:00+00:00"
   },
   "load_avg": 0.15,
   "memory_available_pct": 72.4,
