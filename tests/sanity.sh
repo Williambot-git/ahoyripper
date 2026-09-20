@@ -74,10 +74,13 @@ echo "  ✓ All PHP syntax OK"
 
 echo ""
 echo "==> Checking error suppression in public entry points..."
-# api.php and public/index.php must call error_reporting(0) and ini_set('display_errors','0')
-# at runtime to prevent PHP warnings/notices from leaking into JSON/HTML responses
-# even when php.ini has display_errors=On (a misconfigured production setup).
-for f in src/api.php public/index.php; do
+# api.php, public/index.php, and public error pages must call error_reporting(0) and
+# ini_set('display_errors','0') at runtime to prevent PHP warnings/notices from
+# leaking into JSON/HTML responses even when php.ini has display_errors=On (a
+# misconfigured production setup). The error pages are static HTML in normal
+# deployments (served by nginx), but adding the guards here defends against any
+# future deployment that dynamically serves them via PHP.
+for f in src/api.php public/index.php public/404.html public/50x.html; do
     if ! grep -q "error_reporting(0)" "$PROJECT_ROOT/$f"; then
         echo "  ✗ $f missing error_reporting(0)"
         exit 1
@@ -87,7 +90,7 @@ for f in src/api.php public/index.php; do
         exit 1
     fi
 done
-echo "  ✓ Error suppression present in api.php and public/index.php"
+echo "  ✓ Error suppression present in api.php, public/index.php, public/404.html, and public/50x.html"
 
 # --no-warnings in the info action breaks error classification: yt-dlp emits
 # error messages (GEOBLOCKED, AGE_RESTRICTED, etc.) to stderr, and
