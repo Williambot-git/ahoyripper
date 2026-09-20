@@ -3469,10 +3469,13 @@ switch ($action) {
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 // X-RateLimit-*: -1 sentinels since the per-minute rate-limit gate was
                 // not yet passed when this daily-quota check fires (for info action).
+                // X-RateLimit-Window is still $rate_window (60s) — the generic request-rate
+                // window is always 60s regardless of which specific limit applies, consistent
+                // with all other error responses in the codebase.
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: unlimited');
+                header('X-RateLimit-Window: ' . $rate_window);
                 // X-DL-RateLimit-*: -1 sentinels — dl_rate_file is opened later in the
                 // download action (line 3185), so not yet available here for the info action.
                 header('X-DL-RateLimit-Limit: -1');
@@ -4768,13 +4771,14 @@ switch ($action) {
                 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
                 header('Cross-Origin-Opener-Policy: same-origin');
                 header('Cross-Origin-Resource-Policy: same-origin');
-                // Daily-quota 429 uses -1 sentinels for per-minute rate-limit headers
-                // since the per-minute gate was already passed (this is a daily limit).
-                // Consistent with the -1 pattern used by other pre-gate error responses.
+                // X-RateLimit-*: -1 sentinels since the per-minute gate was already passed
+                // when this daily-quota 429 fires. X-RateLimit-Window is still $rate_window (60s)
+                // — the generic request-rate window is always 60s regardless of which specific
+                // limit applies, consistent with all other error responses in the codebase.
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: unlimited');
+                header('X-RateLimit-Window: ' . $rate_window);
                 header('X-DL-RateLimit-Limit: -1');
                 header('X-DL-RateLimit-Remaining: -1');
                 header('X-DL-RateLimit-Reset: -1');
