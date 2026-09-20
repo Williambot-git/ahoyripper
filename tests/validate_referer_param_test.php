@@ -11,7 +11,11 @@
  * loading the full api.php (which includes DB/quota logic and constant
  * definitions that require environment configuration).
  *
- * KEEP IN SYNC with src/api.php validateRefererParam() (line ~1575).
+ * KEEP IN SYNC with src/api.php validateRefererParam() (line ~1765).
+ * NOTE: this function was updated to return only the origin (scheme + host)
+ * without the path — paths are never needed by yt-dlp's anti-bot Referer checks
+ * and forwarding them would leak AhoyRipper internal page URLs to third-party
+ * platforms.
  */
 
 $allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
@@ -30,13 +34,17 @@ function validateRefererParam(string $referer): string {
     if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
         return 'https://ahoyripper.com/';
     }
-    // Return the origin + path, but strip query string and fragment.
-    // Query params (UTM tags, session IDs, video IDs) and fragments must not be
-    // forwarded as the Referer header to the destination platform via yt-dlp's
-    // --referer flag — that would leak user browsing data to third-party sites.
-    // yt-dlp only needs scheme://host/path for platform anti-bot Referer checks.
-    $path = $parts['path'] ?? '/';
-    return $origin . ($path === '' ? '/' : $path);
+    // Return only the origin (scheme + host) — no path.
+    // yt-dlp uses this as the Referer header when contacting destination platforms.
+    // The path is stripped for two reasons:
+    //   1. yt-dlp's anti-bot Referer checks only look at the origin (scheme + host).
+    //      The path is never needed for platform bot detection.
+    //   2. Forwarding the path would leak AhoyRipper's internal page URLs to third-party
+    //      platforms (e.g. which videos a user browsed on ahoyripper.com), creating
+    //      unnecessary privacy exposure for users.
+    // The origin is lowercased on return so that the Referer header yt-dlp sends
+    // is always consistently cased (browsers normalize Referer to lowercase anyway).
+    return strtolower($origin);
 }
 
 $failures = 0;
@@ -69,43 +77,43 @@ test('null is not accepted by type-hint (string) — test skipped (type safety h
 
 echo "\n==> Testing allowed origins (exact matches)\n";
 
-test('https://ahoyripper.com/ returns unchanged',
-    validateRefererParam('https://ahoyripper.com/') === 'https://ahoyripper.com/');
+test('https://ahoyripper.com/ returns origin only (no trailing path)',
+    validateRefererParam('https://ahoyripper.com/') === 'https://ahoyripper.com');
 
-test('https://www.ahoyripper.com/ returns unchanged',
-    validateRefererParam('https://www.ahoyripper.com/') === 'https://www.ahoyripper.com/');
+test('https://www.ahoyripper.com/ returns origin only (no trailing path)',
+    validateRefererParam('https://www.ahoyripper.com/') === 'https://www.ahoyripper.com');
 
-test('https://ahoyvpn.com/ returns unchanged',
-    validateRefererParam('https://ahoyvpn.com/') === 'https://ahoyvpn.com/');
+test('https://ahoyvpn.com/ returns origin only (no trailing path)',
+    validateRefererParam('https://ahoyvpn.com/') === 'https://ahoyvpn.com');
 
-test('https://www.ahoyvpn.com/ returns unchanged',
-    validateRefererParam('https://www.ahoyvpn.com/') === 'https://www.ahoyvpn.com/');
+test('https://www.ahoyvpn.com/ returns origin only (no trailing path)',
+    validateRefererParam('https://www.ahoyvpn.com/') === 'https://www.ahoyvpn.com');
 
 // ─── Case-insensitivity ──────────────────────────────────────────────────────
 
 echo "\n==> Testing case-insensitivity of origin matching\n";
 
-test('HTTPS in uppercase is accepted (scheme is case-insensitive)',
-    validateRefererParam('HTTPS://AHoyRIPPER.COM/') === 'HTTPS://AHoyRIPPER.COM/');
+test('HTTPS in uppercase is accepted and normalized to lowercase origin',
+    validateRefererParam('HTTPS://AHoyRIPPER.COM/') === 'https://ahoyripper.com');
 
 test('http (not https) is rejected with fallback',
     validateRefererParam('http://ahoyripper.com/') === 'https://ahoyripper.com/');
 
-// ─── Paths on allowed origins ───────────────────────────────────────────────
+// ─── Allowed origin referer: only the origin is returned (no path, query, or fragment) ───
 
-echo "\n==> Testing paths are preserved for allowed origins\n";
+echo "\n==> Testing allowed origin referer: only origin is returned (no path, query, or fragment)\n";
 
-test('https://ahoyripper.com/any/path — path preserved, query+fragment stripped',
-    validateRefererParam('https://ahoyripper.com/any/path') === 'https://ahoyripper.com/any/path');
+test('https://ahoyripper.com/any/path — path stripped (only origin sent as Referer)',
+    validateRefererParam('https://ahoyripper.com/any/path') === 'https://ahoyripper.com');
 
-test('https://ahoyripper.com/path?query=1 — query string stripped to prevent Referer leakage',
-    validateRefererParam('https://ahoyripper.com/path?query=1') === 'https://ahoyripper.com/path');
+test('https://ahoyripper.com/path?query=1 — query string stripped (only origin sent as Referer)',
+    validateRefererParam('https://ahoyripper.com/path?query=1') === 'https://ahoyripper.com');
 
-test('https://ahoyripper.com/path#fragment — fragment stripped to prevent Referer leakage',
-    validateRefererParam('https://ahoyripper.com/path#fragment') === 'https://ahoyripper.com/path');
+test('https://ahoyripper.com/path#fragment — fragment stripped (only origin sent as Referer)',
+    validateRefererParam('https://ahoyripper.com/path#fragment') === 'https://ahoyripper.com');
 
-test('https://www.ahoyvpn.com/landing?ref=ahoyripper — query string stripped to prevent Referer leakage',
-    validateRefererParam('https://www.ahoyvpn.com/landing?ref=ahoyripper') === 'https://www.ahoyvpn.com/landing');
+test('https://www.ahoyvpn.com/landing?ref=ahoyripper — query string stripped (only origin sent as Referer)',
+    validateRefererParam('https://www.ahoyvpn.com/landing?ref=ahoyripper') === 'https://www.ahoyvpn.com');
 
 // ─── Rejected origins — returns safe fallback ───────────────────────────────
 
@@ -177,17 +185,17 @@ test('array input is rejected at type-hint level (not tested here — handled at
 
 echo "\n==> Testing whitespace trimming (consistent with URL validation)\n";
 
-test('leading whitespace is trimmed — https://ahoyripper.com/ returns unchanged',
-    validateRefererParam('  https://ahoyripper.com/') === 'https://ahoyripper.com/');
+test('leading whitespace is trimmed — https://ahoyripper.com/ returns origin only (no trailing path)',
+    validateRefererParam('  https://ahoyripper.com/') === 'https://ahoyripper.com');
 
-test('trailing whitespace is trimmed — https://ahoyripper.com/ returns unchanged',
-    validateRefererParam('https://ahoyripper.com/  ') === 'https://ahoyripper.com/');
+test('trailing whitespace is trimmed — https://ahoyripper.com/ returns origin only (no trailing path)',
+    validateRefererParam('https://ahoyripper.com/  ') === 'https://ahoyripper.com');
 
 test('whitespace-only string returns fallback (trimmed to empty)',
     validateRefererParam('   ') === 'https://ahoyripper.com/');
 
-test('mixed leading/trailing whitespace on allowed origin returns unchanged',
-    validateRefererParam("  \t\n  https://ahoyvpn.com/path  \r\n") === 'https://ahoyvpn.com/path');
+test('mixed leading/trailing whitespace on allowed origin returns origin only',
+    validateRefererParam("  \t\n  https://ahoyvpn.com/path  \r\n") === 'https://ahoyvpn.com');
 
 test('whitespace on rejected origin still rejected after trim',
     validateRefererParam('  https://evil.com/  ') === 'https://ahoyripper.com/');
@@ -196,11 +204,11 @@ test('whitespace on rejected origin still rejected after trim',
 
 echo "\n==> Testing security invariants\n";
 
-test('returned value is always a non-empty string starting with https://ahoyripper.com/',
-    strpos(validateRefererParam('https://evil.com/'), 'https://ahoyripper.com/') === 0);
+test('returned value is always a non-empty string starting with https://ahoyripper.com',
+    strpos(validateRefererParam('https://evil.com/'), 'https://ahoyripper.com') === 0);
 
-test('allowed origin referer is returned verbatim (no trimming/rewriting)',
-    validateRefererParam('https://ahoyripper.com/') === 'https://ahoyripper.com/');
+test('allowed origin referer is returned as origin only (no path appended)',
+    validateRefererParam('https://ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('fallback always returns the primary origin, not the user-supplied value',
     validateRefererParam('https://attacker.com/') === 'https://ahoyripper.com/');

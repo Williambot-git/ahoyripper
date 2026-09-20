@@ -1776,13 +1776,17 @@ function validateRefererParam(string $referer): string {
     if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
         return 'https://ahoyripper.com/';
     }
-    // Return the origin + path, but strip query string and fragment.
-    // Query params (UTM tags, session IDs, video IDs) and fragments must not be
-    // forwarded as the Referer header to the destination platform via yt-dlp's
-    // --referer flag — that would leak user browsing data to third-party sites.
-    // yt-dlp only needs scheme://host/path for platform anti-bot Referer checks.
-    $path = $parts['path'] ?? '/';
-    return $origin . ($path === '' ? '/' : $path);
+    // Return only the origin (scheme + host) — no path.
+    // yt-dlp uses this as the Referer header when contacting destination platforms.
+    // The path is stripped for two reasons:
+    //   1. yt-dlp's anti-bot Referer checks only look at the origin (scheme + host).
+    //      The path is never needed for platform bot detection.
+    //   2. Forwarding the path would leak AhoyRipper's internal page URLs to third-party
+    //      platforms (e.g. which videos a user browsed on ahoyripper.com), creating
+    //      unnecessary privacy exposure for users.
+    // The origin is lowercased on return so that the Referer header yt-dlp sends
+    // is always consistently cased (browsers normalize Referer to lowercase anyway).
+    return strtolower($origin);
 }
 
 // Parse yt-dlp output to extract formats
