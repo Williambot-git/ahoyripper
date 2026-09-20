@@ -7587,6 +7587,11 @@ switch ($action) {
         // documented in the README for all API responses — including the health endpoint.
         // Mirrors the X-FFProbe-Status: skipped set in every other non-download action.
         header('X-FFProbe-Status: skipped');
+        // X-FFProbe-Timeout: include the configured timeout so clients can always find this
+        // header on all API responses without null-checking. ffprobe is never invoked by the
+        // health action, but surfacing the timeout maintains complete HTTP header coverage
+        // and lets clients programmatically determine the ffprobe timeout value.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // Retry-After: 0 — health is a read-only probe with no server-side backoff;
         // the client should retry immediately. Mirrors the same pattern in the 'check'
         // action (which also uses Retry-After: 0 alongside X-*-Limit: -1 sentinels).
