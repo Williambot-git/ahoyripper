@@ -1327,10 +1327,12 @@ test('rejects object',
 // string in this context and should map to 'Unknown' alongside null and ''.
 
 function cleanForTest($s) {
+    // Strip C0 control characters and DEL — mirrors src/api.php clean()
     if (is_string($s)) {
         $s = trim($s);
+        $s = preg_replace('/[\x00-\x1F\x7F]/u', '', $s);
         if ($s === '') return 'Unknown';
-    } elseif ($s === null || $s === '') {
+    } elseif ($s === null) {
         return 'Unknown';
     }
     if (is_bool($s) || is_array($s) || is_object($s)) return 'Unknown';
@@ -1353,6 +1355,14 @@ test('clean("  Rick Astley  ") trims surrounding whitespace',
     cleanForTest('  Rick Astley  ') === 'Rick Astley');
 test('clean("valid string") passes through unchanged',
     cleanForTest('valid string') === 'valid string');
+test('clean("hello\x00world") strips C0 control chars (U+0000)',
+    cleanForTest("hello\x00world") === 'helloworld');
+test('clean("line1\x07bell\x07") strips BEL (U+0007)',
+    cleanForTest("line1\x07bell\x07") === 'line1bell');
+test('clean("\x1Fsecure\x1F") strips unit separator (U+001F)',
+    cleanForTest("\x1Fsecure\x1F") === 'secure');
+test('clean("\x7Fdel\x7F") strips DEL (U+007F)',
+    cleanForTest("\x7Fdel\x7F") === 'del');
 test('clean(42) numeric non-zero becomes string "42"',
     cleanForTest(42) === '42');
 test('clean([1,2]) array returns "Unknown" (not "Array")',
