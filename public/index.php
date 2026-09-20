@@ -97,7 +97,7 @@ header('X-Request-ID: ' . $page_request_id);
 header_remove('X-Powered-By');
 ?>
 <!DOCTYPE html>
-<html lang="en-US" dir="ltr" class="no-js">
+<html lang="en-US" xml:lang="en-US" dir="ltr" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -195,6 +195,12 @@ header_remove('X-Powered-By');
        the same page as the bare root, preventing SEO dilution across duplicate
        URLs. -->
   <link rel="canonical" href="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
+  <!-- hreflang="x-default" signals this is the default language variant of the page
+       to search engines — used alongside the canonical for full international SEO coverage.
+       x-default has no locale and indicates the page that should be shown when no
+       language/locale match is found. Together with lang="en-US" on <html>, this
+       establishes the correct language-canonical variant signal. -->
+  <link rel="alternate" hreflang="x-default" href="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
