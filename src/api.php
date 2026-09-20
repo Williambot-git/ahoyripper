@@ -1091,6 +1091,7 @@ if (in_array($action, $internal_actions, true)) {
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
     header('X-FFProbe-Status: skipped');
+    header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
     header('X-DL-RateLimit-Limit: -1');
     header('X-DL-RateLimit-Remaining: -1');
     header('X-DL-RateLimit-Reset: -1');
