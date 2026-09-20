@@ -7419,6 +7419,10 @@ switch ($action) {
                         // same temporal metadata as the parent response.
                         'server_time' => date('c'),
                         'server_time_unix' => time(),
+                        // request_id: included for traceability — mirrors the top-level
+                        // health response field so the probe sub-object can be correlated
+                        // to the parent request in distributed tracing scenarios.
+                        'request_id' => $request_id,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
@@ -7504,6 +7508,10 @@ switch ($action) {
                         // same temporal metadata as the parent response.
                         'server_time' => date('c'),
                         'server_time_unix' => time(),
+                        // request_id: included for traceability — mirrors the top-level
+                        // health response field so the probe sub-object can be correlated
+                        // to the parent request in distributed tracing scenarios.
+                        'request_id' => $request_id,
                     ];
                 }
                 if ($probe_cache_file) {
