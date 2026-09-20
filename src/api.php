@@ -7843,7 +7843,9 @@ switch ($action) {
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
             // Timestamps: complete the server-time header family for this 405 path.
-            header('X-Server-Time: ' . gmdate('Y-m-d H:i:s'));
+            // Use 'D, d M Y H:i:s GMT' format (RFC 7231) — consistent with all other
+            // API responses including the health, check, client-error, and info actions.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             header('X-Server-Time-Unix: ' . time());
             break;
         }
@@ -7887,7 +7889,9 @@ switch ($action) {
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
             // Timestamps: complete the server-time header family for this 204 sub-path.
-            header('X-Server-Time: ' . gmdate('Y-m-d H:i:s'));
+            // Use 'D, d M Y H:i:s GMT' format (RFC 7231) — consistent with all other
+            // API responses including the health, check, client-error, and info actions.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             header('X-Server-Time-Unix: ' . time());
             break;
         }
@@ -7960,7 +7964,9 @@ switch ($action) {
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
             // Timestamps: complete the server-time header family for this 204 success path.
-            header('X-Server-Time: ' . gmdate('Y-m-d H:i:s'));
+            // Use 'D, d M Y H:i:s GMT' format (RFC 7231) — consistent with all other
+            // API responses including the health, check, client-error, and info actions.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             header('X-Server-Time-Unix: ' . time());
             // CSP and Reporting headers: complete the security header family.
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report;');
