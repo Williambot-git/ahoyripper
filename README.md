@@ -176,6 +176,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 #   "ffprobe_version": "6.1...",
 #   "yt_dlp_ok": true,
 #   "ffmpeg_ok": true,
+#   "ffprobe_ok": true,
 #   "curl_cffi_version": "0.8.0",
 #   "curl_cffi_ok": true,
 #   "yt_dlp_cache_expires_at": "2026-09-18T00:05:00+00:00",

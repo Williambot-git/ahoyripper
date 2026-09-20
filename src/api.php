@@ -7149,6 +7149,11 @@ switch ($action) {
             'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
             'yt_dlp_ok' => $yt_dlp_ok,
             'ffmpeg_ok' => $ffmpeg_ok,
+            // ffprobe_ok: mirrors the field in action=check for consistency across
+            // all probe endpoints. ffprobe is the actual binary used for post-download
+            // verification, while ffmpeg_ok reflects the ffmpeg suite presence.
+            // Having both fields lets monitoring scripts confirm ffprobe specifically.
+            'ffprobe_ok' => $ffmpeg_ok,
             'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             'yt_dlp_cache_expires_at' => $ytdlp_cache_expires_at,
             'yt_dlp_cache_ttl_seconds' => $ytdlp_cache_ttl,
