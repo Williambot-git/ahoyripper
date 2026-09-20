@@ -2920,6 +2920,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
+    // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+    // the POST-gate 405 blocks (analytics, client-error, csp-report) and the
+    // main check/health/json actions, giving API consumers a consistent temporal
+    // reference in HTTP headers alongside the JSON body server_time field.
+    header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+    header('X-Server-Time-Unix: ' . time());
+    header('Cache-Control: no-store');
     // X-Info-Timeout and X-Download-Timeout: present on all API responses
     // (check, health, client-error) for generic header-parsing consistency.
     // GET-gate 405 was missing these — add them now to mirror POST-gate 405 blocks.
