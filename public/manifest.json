@@ -88,7 +88,8 @@
     "action": "/",
     "method": "GET",
     "params": {
-      "title": "name",
+      "title": "title",
+      "text": "description",
       "url": "url"
     }
   },

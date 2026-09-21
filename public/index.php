@@ -845,6 +845,29 @@ window.addEventListener('appinstalled', function() {
   const ripAgain = document.getElementById('ripAgain');
   const sortSelect = document.getElementById('sortSelect');
 
+  // ─── Pre-fill URL from share_target / deep-link params ─────────────────────
+  // When the OS shares a video link directly into AhoyRipper (e.g. from
+  // YouTube app → Share → AhoyRipper PWA), the manifest's share_target maps
+  // url → ?url= so we pre-fill the input and auto-trigger the info fetch.
+  // We check ?url= before ?title= since shared links carry the target URL.
+  (function prefillFromUrlParams() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var sharedUrl = params.get('url');
+      if (sharedUrl && sharedUrl.startsWith('http') && input) {
+        input.value = sharedUrl;
+        // Auto-submit the prefilled URL after a short delay to let the UI settle.
+        setTimeout(function() { fetchInfo(); }, 150);
+      } else {
+        // Check for ?title= alone (no URL) — pre-fill the results title hint.
+        var sharedTitle = params.get('title');
+        if (sharedTitle && resultsTitle) {
+          resultsTitle.textContent = sharedTitle;
+        }
+      }
+    } catch (e) {}
+  })();
+
   // Flag guarding successful-fetch navigation — prevents the browser from
   // downloading the JSON error body as a file when the fetch responds non-200.
   // Set to false in error branches; checked nowhere (safety net for code changes).
