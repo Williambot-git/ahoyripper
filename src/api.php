@@ -3851,12 +3851,15 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             header('X-Download-Options: noopen');
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            // Rate-limit sentinels (-1): no rate limit was consumed because proc_open
-            // itself failed before yt-dlp could run. Consistent with other pre-gate errors.
+            // Rate-limit sentinels (-1): no download rate limit was consumed because
+            // proc_open itself failed before yt-dlp could run. However, the info call
+            // above consumed the generic request rate limit, so X-RateLimit-Window
+            // reports $rate_window (60s) — not "unavailable". X-DL-RateLimit-Window
+            // remains "unavailable" since the download-specific limit was not consumed.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit.
             // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
             // was consumed. Use -1 sentinel to signal "not applicable", consistent
@@ -4013,7 +4016,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -4086,7 +4089,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -4222,9 +4225,10 @@ switch ($action) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-            // Rate-limit sentinels: -1/unavailable for all three families since the info
-            // action does not consume download-rate or daily-quota slots. Mirrors the
-            // MISSING_URL pattern (lines 2285-2290) and info action 401 block (line 3166).
+            // Rate-limit sentinels: info action uses the generic request rate limit
+            // (X-RateLimit-Window = $rate_window = 60s). X-DL-RateLimit and X-DailyLimit
+            // are "unavailable" since the info action does not consume those limits.
+            // Mirrors the MISSING_URL pattern (lines 2285-2290) and info action 401 block.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -4232,7 +4236,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
@@ -5044,10 +5048,15 @@ switch ($action) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            // Rate-limit sentinels (-1): no download rate limit was consumed because
+            // proc_open itself failed before yt-dlp could run. However, the info call
+            // above consumed the generic request rate limit, so X-RateLimit-Window
+            // reports $rate_window (60s) — not "unavailable". X-DL-RateLimit-Window
+            // remains "unavailable" since the download-specific limit was not consumed.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit.
             // PROC_OPEN_FAILED means proc_open itself failed — no download rate limit
             // was consumed. Use -1 sentinel to signal "not applicable", consistent
@@ -5606,12 +5615,15 @@ switch ($action) {
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
             // X-RateLimit-*: generic request-rate limit sentinels (-1) since
             // DOWNLOAD_EMPTY occurs before the download rate limit gate. yt-dlp exited 0
-            // but produced no/empty file — no download rate limit was consumed. Consistent
-            // with other pre-gate error responses in the download action.
+            // but produced no/empty file — no download rate limit was consumed.
+            // However, the info call above consumed the generic request rate limit,
+            // so X-RateLimit-Window reports $rate_window (60s) — not "unavailable".
+            // X-DL-RateLimit-Window remains "unavailable" since the download-specific
+            // limit was not consumed. Consistent with the DOWNLOAD_CANCELLED pattern.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit.
             // yt-dlp exited 0 but produced no/empty file — no download rate limit was
             // consumed. Use -1 sentinel to signal "not applicable", consistent with
