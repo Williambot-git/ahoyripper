@@ -1041,14 +1041,28 @@ if (in_array($action, $internal_actions, true)) {
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-            // retry_after: 0 — client-error is a fire-and-forget endpoint with no
-            // server-side backoff; clients can immediately retry their original action.
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached for client-error (no file involved).
+            // Completes the "always present" invariant documented in the README:
+            // every API response includes x_ffprobe_status in the JSON body.
+            // upgrade_url: included on all API responses for consistent AhoyVPN upsell
+            // opportunity. The client-error endpoint is a passive logging endpoint that
+            // doesn't consume quota — it still includes upgrade_url for consistency.
+            // quota_* fields: client-error is a passive logging endpoint that doesn't
+            // consume quota, but we include the sentinel values so API consumers always
+            // have a complete response shape without needing conditional logic.
             echo json_encode([
                 'status' => 'ok',
                 'retry_after' => 0,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                'x_ffprobe_status' => 'skipped',
+                'upgrade_url' => UPGRADE_URL,
+                'quota_remaining' => -1,
+                'quota_limit' => getDailyQuotaLimit(),
+                'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+                'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
