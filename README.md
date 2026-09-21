@@ -1152,7 +1152,7 @@ Every API response — `info`, `download`, `check`, `health`, `analytics`, `clie
 | `X-RateLimit-Limit: -1` | Health is a read-only probe — it does not consume the shared request rate limit. Value is `-1` (unlimited sentinel). |
 | `X-RateLimit-Remaining: -1` | No request rate limit consumed by health probes. |
 | `X-RateLimit-Reset: -1` | No request rate limit window active for health probes. |
-| `X-RateLimit-Window: unlimited` | Sentinel indicating no request rate limit applies. |
+| `X-RateLimit-Window: 60` | Window size for the shared request-rate limit — always `60` seconds even when no rate limit is consumed, so clients see the correct window size for the generic envelope. |
 | `X-DailyLimit-Limit: -1` | Health is a read-only probe — it does not consume the daily quota. Value is `-1` (unlimited sentinel). |
 | `X-DailyLimit-Remaining: -1` | Health probes do not consume quota. |
 | `X-DailyLimit-Reset: -1` | No daily quota consumed by health probes. |
