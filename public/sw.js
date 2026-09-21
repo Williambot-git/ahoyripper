@@ -26,9 +26,9 @@
 // sets PLACEHOLDER as the replacement token, the comparison is false, and the
 // fallback 'unversioned' is returned — the SW still installs and functions, it just
 // won't auto-update until the next successful deploy.
-const CACHE_VERSION = 'dfa6e68' === 'PLACEHOLDER'
+const CACHE_VERSION = '{{CACHE_VERSION}}' === 'PLACEHOLDER'
     ? 'unversioned'
-    : 'dfa6e68';
+    : '{{CACHE_VERSION}}';
 const STATIC_CACHE = 'ahoyrip-static-' + CACHE_VERSION;
 const SHELL_CACHE = 'ahoyrip-shell-' + CACHE_VERSION;
 
