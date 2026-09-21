@@ -1412,18 +1412,35 @@ window.addEventListener('appinstalled', function() {
             // Only navigate on HTTP success — don't navigate on error JSON responses,
             // which would otherwise cause the browser to download the error as a file.
             if (navigateOnSuccess) {
-              // Update quota display from X-DailyLimit-* headers on successful download
-              // responses. The download action sets these headers so the frontend quota
-              // reflects the post-download state (quota decremented after yt-dlp writes
-              // the file). This mirrors the updateQuotaFromHeaders(resp) call that
-              // fetchInfo() makes after the info action response.
-              updateQuotaFromHeaders(resp);
-              // Check if yt-dlp substituted a different format (e.g. 1080p requested
-              // but 720p delivered because higher quality was unavailable). Surface this
-              // as a brief toast so the user understands why their file is lower quality.
+              // Capture X-DailyLimit-* and X-Format-Substituted headers from the fetch
+              // Response before navigating. The file download Response (fetch(dl.url))
+              // carries these headers from the AhoyRipper API — they are NOT on the
+              // subsequent window.location.href navigation. updateQuotaFromHeaders()
+              // needs a Response object with .headers.get(), not a raw string value,
+              // so we build a minimal mock Response to pass the stored header values.
+              var dlRem = resp.headers.get('X-DailyLimit-Remaining');
+              var dlLim = resp.headers.get('X-DailyLimit-Limit');
+              var dlReset = resp.headers.get('X-DailyLimit-Reset');
               var substituted = resp.headers.get('X-Format-Substituted');
               if (substituted) {
                 showSubstitutionNotice(substituted);
+              }
+              // Update quota display from the captured header values. The mock Response
+              // object satisfies updateQuotaFromHeaders()'s .headers.get() interface.
+              // After window.location.href the page unloads so this update is the
+              // last chance to reflect post-download quota state before the reload.
+              if (dlRem !== null || dlLim !== null) {
+                var mockResp = {
+                  headers: {
+                    get: function(h) {
+                      if (h === 'X-DailyLimit-Remaining') return dlRem;
+                      if (h === 'X-DailyLimit-Limit') return dlLim;
+                      if (h === 'X-DailyLimit-Reset') return dlReset;
+                      return null;
+                    }
+                  }
+                };
+                updateQuotaFromHeaders(mockResp);
               }
               window.location.href = dl.url;
             }
