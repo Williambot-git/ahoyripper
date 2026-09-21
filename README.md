@@ -19,6 +19,30 @@ Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), styled to match the AhoyVPN
 
 ---
 
+## OpenSearch — One-Click Ripping from Your Browser's URL Bar
+
+AhoyRipper registers itself as a **Smart Search Keyword** in browsers that support OpenSearch 1.1. Once added, you can rip any video without visiting the AhoyRipper website first:
+
+**Adding AhoyRipper as a search engine:**
+
+- **Chrome / Edge:** When you visit ahoyripper.com, Chrome may show "Add search engine" in the address bar. If not, go to Settings → Search engine → Manage search engines → find AhoyRipper and click "Activate."
+- **Firefox:** Visit ahoyripper.com and look for the search icon (magnifying glass) in the address bar. Click "Add AhoyRipper" when prompted, or go to Settings → Search → find AhoyRipper and enable it.
+- **Safari:** Open Search preferences (Safari → Settings → Search) and enable "AhoyRipper" in the Quick Website Search list.
+
+**Using the search keyword:**
+
+1. Type `ahoyripper.com` in the URL bar and press **Tab**
+2. Paste any video URL (YouTube, TikTok, X, etc.)
+3. Press **Enter** — AhoyRipper opens with the URL pre-filled and starts ripping automatically
+
+Example URL bar sequence: `ahoyripper.com` [Tab] `https://www.youtube.com/watch?v=dQw4w9WgXcQ` [Enter]
+
+**Why this works:** OpenSearch lets sites declare a URL template (`{BASE_URL}/?url={searchTerms}`) that browsers call as a search engine. AhoyRipper's template pre-fills the `?url=` param, which the page's JavaScript auto-detects and triggers the rip flow immediately on load.
+
+**For custom-domain deployments:** The OpenSearch description is served by `opensearch.php` which derives the canonical base URL from the request's `Host` header. This means the search template always points to your deployed domain — no hardcoding needed.
+
+---
+
 ## Quick Start
 
 **1. Paste a URL** — Copy any video or audio link and paste it into the input field on the home page.

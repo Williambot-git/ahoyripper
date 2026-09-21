@@ -256,6 +256,7 @@ header_remove('X-Powered-By');
         "@id": "<?= $BASE_URL ?>/#website",
         "name": "AhoyRipper",
         "url": "<?= $BASE_URL ?>",
+        "inLanguage": "en",
         "description": "Free online media ripper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms.",
         "publisher": {
           "@type": "Organization",
@@ -277,6 +278,7 @@ header_remove('X-Powered-By');
         "name": "AhoyRipper",
         "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
         "url": "<?= $BASE_URL ?>",
+        "inLanguage": "en",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web",
         "softwareRequirements": "Any modern browser with JavaScript enabled",
@@ -321,6 +323,7 @@ header_remove('X-Powered-By');
         "name": "AhoyRipper",
         "description": "Free online media ripper supporting 1872+ platforms including YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
         "url": "<?= $BASE_URL ?>",
+        "inLanguage": "en",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web",
         "softwareRequirements": "Any modern browser with JavaScript enabled",
