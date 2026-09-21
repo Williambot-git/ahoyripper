@@ -8244,6 +8244,11 @@ switch ($action) {
             'quota_limit' => getDailyQuotaLimit(),
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above.
+            // ffprobe is never reached for unknown actions (no file on disk). Adding it
+            // completes the "always present" invariant documented in the README: every
+            // API response includes x_ffprobe_status in the JSON body.
+            'x_ffprobe_status' => 'skipped',
             // upgrade_url: included on all API responses for consistent AhoyVPN upsell
             // opportunity. The UNKNOWN_ACTION response is the last-resort fallback for
             // unrecognized action names — even an invalid action is a valid conversion
