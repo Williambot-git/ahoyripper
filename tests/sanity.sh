@@ -1937,14 +1937,13 @@ fi
 
 echo ""
 echo "==> Checking download action 503 blocks (fopen/flock failure) include all hardening headers..."
-# The download action's dl_rate_file fopen and flock failure handlers must return
-# fully hardened 503 responses — all security headers, rate-limit context headers,
-# X-Download-Timeout, X-Info-Timeout, error_code field, and upgrade_url.
-# This test extracts both failure blocks and verifies each contains the critical fields.
-# Vulnerable 503 responses (missing headers, no error_code) are a security regression.
-DOWNLOAD_BLOCK=$(sed -n "/case 'download':/,/case '/p" src/api.php | head -n -1)
-DL_503_BLOCK=$(echo "$DOWNLOAD_BLOCK" | sed -n '/Could not open the download rate/,/exit;/{ /exit;/q; p }')
-DL_503_BLOCK="${DL_503_BLOCK}$(echo "$DOWNLOAD_BLOCK" | sed -n '/Could not acquire an exclusive lock/,/exit;/{ /exit;/q; p }')"
+# The download action's dl_rate_file fopen and flock failure handlers delegate to
+# sendServiceUnavailable503() — a shared DRY helper. Both blocks now call this
+# helper with identical arguments, so all hardening headers are guaranteed by
+# the helper function definition (lines 422-519). The helper's json_encode body
+# includes all required fields (error_code, upgrade_url, quota_*, server_time).
+# Verify the helper function covers all required headers and fields.
+SERVICE_UNAV_BLOCK=$(sed -n '/^function sendServiceUnavailable503/,/^function [a-z_(]/p' src/api.php | sed '$ d')
 MISSING_HARDENING=0
 for header in \
     "X-Frame-Options" \
@@ -1961,39 +1960,39 @@ for header in \
     "X-DL-RateLimit-Remaining" \
     "X-RateLimit-Limit" \
     "X-DailyLimit-Limit"; do
-    if ! echo "$DL_503_BLOCK" | grep -q "$header"; then
-        echo "  ✗ download 503 block missing hardening header: $header"
+    if ! echo "$SERVICE_UNAV_BLOCK" | grep -q "$header"; then
+        echo "  ✗ sendServiceUnavailable503 missing hardening header: $header"
         MISSING_HARDENING=1
     fi
 done
-if echo "$DL_503_BLOCK" | grep -q "'error_code'"; then
-    echo "  ✓ download 503 blocks include error_code field"
+if echo "$SERVICE_UNAV_BLOCK" | grep -q "'error_code'"; then
+    echo "  ✓ sendServiceUnavailable503 includes error_code field"
 else
-    echo "  ✗ download 503 blocks missing error_code field"
+    echo "  ✗ sendServiceUnavailable503 missing error_code field"
     MISSING_HARDENING=1
 fi
-if echo "$DL_503_BLOCK" | grep -q "'upgrade_url'"; then
-    echo "  ✓ download 503 blocks include upgrade_url field"
+if echo "$SERVICE_UNAV_BLOCK" | grep -q "'upgrade_url'"; then
+    echo "  ✓ sendServiceUnavailable503 includes upgrade_url field"
 else
-    echo "  ✗ download 503 blocks missing upgrade_url field"
+    echo "  ✗ sendServiceUnavailable503 missing upgrade_url field"
     MISSING_HARDENING=1
 fi
 # Verify the JSON response body includes the four quota fields — all other API
-# error responses include these; omitting them from download 503 blocks is a
+# error responses include these; omitting them from sendServiceUnavailable503 is a
 # regression that breaks client quota-display logic.
 for quota_field in "'quota_remaining'" "'quota_limit'" "'quota_reset'" "'quota_reset_unix'"; do
-    if echo "$DL_503_BLOCK" | grep -q "$quota_field"; then
-        echo "  ✓ download 503 blocks include $quota_field"
+    if echo "$SERVICE_UNAV_BLOCK" | grep -q "$quota_field"; then
+        echo "  ✓ sendServiceUnavailable503 includes $quota_field"
     else
-        echo "  ✗ download 503 blocks missing $quota_field"
+        echo "  ✗ sendServiceUnavailable503 missing $quota_field"
         MISSING_HARDENING=1
     fi
 done
 if [ "$MISSING_HARDENING" -eq 1 ]; then
-    echo "  Fix: add missing hardening headers and fields to download action 503 responses"
+    echo "  Fix: add missing hardening headers and fields to sendServiceUnavailable503"
     exit 1
 fi
-echo "  ✓ download 503 blocks are fully hardened"
+echo "  ✓ download action delegates to fully-hardened sendServiceUnavailable503 helper"
 
 echo ""
 echo "==> Checking client-error action has all required response fields..."

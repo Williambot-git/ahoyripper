@@ -4462,149 +4462,18 @@ switch ($action) {
 
         $dl_fp = fopen($dl_rate_file, 'c+');
         if (!$dl_fp) {
-            // Could not open the download rate-limit file — respond with a fully
-            // hardened 503 so this subsystem failure is indistinguishable from any
-            // other server-side error. Mirrors the pattern used by the general
-            // rate-limit fopen failure at line ~316 and the download-rate-limit
-            // 429 block at line ~3190: all standard security headers, complete
-            // rate-limit context headers, error_code field, and retry_after guidance.
-            http_response_code(503);
-            header('Retry-After: 5');
-            header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            header('X-Request-ID: ' . $request_id);
-            header('Referrer-Policy: strict-origin-when-cross-origin');
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
-            header('Cross-Origin-Opener-Policy: same-origin');
-            header('Cross-Origin-Resource-Policy: same-origin');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            // Download-rate-limit state is unavailable (file couldn't be opened).
-            // Send -1 sentinels so clients can distinguish this from a known limit.
-            header('X-DL-RateLimit-Limit: -1');
-            header('X-DL-RateLimit-Remaining: -1');
-            header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unavailable');
-            // Generic rate-limit context headers — use -1 sentinels (same rationale).
-            // X-RateLimit-Window: 5 (NOT unavailable) — Retry-After is 5 (delta-seconds),
-            // so the generic rate-limit window must also be 5s to stay consistent.
-            // X-DL-RateLimit-Window stays unavailable because the download-specific
-            // rate-limit store itself is inaccessible (file couldn't be opened).
-            header('X-RateLimit-Limit: -1');
-            header('X-RateLimit-Remaining: -1');
-            header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: 5');
-            // Daily-limit sentinels — -1 signals "not applicable" at this early stage.
-            header('X-DailyLimit-Limit: -1');
-            header('X-DailyLimit-Remaining: -1');
-            header('X-DailyLimit-Reset: -1');
-            header('X-DailyLimit-Window: unavailable');
-            echo json_encode([
-                'error' => 'Service temporarily unavailable.',
-                'error_code' => 'SERVICE_UNAVAILABLE',
-                'action' => $action ?? 'download',
-                'upgrade_url' => UPGRADE_URL,
-                'platform' => null,
-                'retry_after' => 5,
-                'request_id' => $request_id,
-                'source_url' => $url ?? null,
-                'source_url_missing' => ($url ?? '') === '',
-                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-                'api_version' => AHOYRIPPER_VERSION,
-                // quota fields: daily quota was not consumed since the file couldn't be opened.
-                // Use -1 sentinels consistent with other pre-quota-gate errors.
-                'quota_remaining' => -1,
-                'quota_limit' => -1,
-                'quota_reset' => -1,
-                'quota_reset_unix' => -1,
-                // server_time: ISO 8601 + Unix for client clock synchronization.
-                // Present on all other API responses (MISSING_URL, INVALID_URL,
-                // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
-                // download, health, check, analytics) — this 503 block was missing
-                // these fields, breaking generic response parsers that expect
-                // consistent field coverage across all API code paths.
-                'server_time' => date('c'),
-                'server_time_unix' => time(),
-            ], JSON_INVALID_UTF8_SUBSTITUTE);
-            exit;
+            // Could not open the download rate-limit file — delegate to the shared
+            // DRY helper so all SERVICE_UNAVAILABLE responses share identical headers,
+            // JSON shape, and sentinel values. Mirrors the general rate-limit fopen
+            // failure at line ~316 and the download-rate-limit 429 block at line ~3190.
+            sendServiceUnavailable503($request_id, $action ?? 'download');
         }
         if (!flock($dl_fp, LOCK_EX)) {
             // Could not acquire an exclusive lock on the download rate-limit file —
-            // another process is currently writing to it. Respond with a fully
-            // hardened 503 consistent with the fopen failure block above and the
-            // general rate-limit flock failure at line ~347. Includes all standard
-            // security headers, complete rate-limit context headers, and error_code.
+            // delegate to the shared DRY helper so all SERVICE_UNAVAILABLE responses
+            // share identical headers, JSON shape, and sentinel values.
             fclose($dl_fp);
-            http_response_code(503);
-            header('Retry-After: 5');
-            header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
-            header('X-Download-Options: noopen');
-            header('X-Robots-Tag: noindex, noai, noimage, noydir');
-            header('X-Request-ID: ' . $request_id);
-            header('Referrer-Policy: strict-origin-when-cross-origin');
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-            header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
-            header('Cross-Origin-Opener-Policy: same-origin');
-            header('Cross-Origin-Resource-Policy: same-origin');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
-            header('X-Info-Timeout: ' . INFO_TIMEOUT);
-            // X-FFProbe-Status: skipped — ffprobe was never reached since the
-            // flock failure check fires before yt-dlp or ffprobe are invoked.
-            header('X-FFProbe-Status: skipped');
-            // X-FFProbe-Timeout: consistent with the success-path header at line 5953.
-            // ffprobe was never reached, but include the timeout value for full header coverage.
-            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
-            // Download-rate-limit state unavailable (could not acquire lock).
-            header('X-DL-RateLimit-Limit: -1');
-            header('X-DL-RateLimit-Remaining: -1');
-            header('X-DL-RateLimit-Reset: -1');
-            header('X-DL-RateLimit-Window: unavailable');
-            header('X-RateLimit-Limit: -1');
-            header('X-RateLimit-Remaining: -1');
-            header('X-RateLimit-Reset: -1');
-            // X-RateLimit-Window: 5 (NOT unavailable) — Retry-After is 5 (delta-seconds),
-            // so the generic rate-limit window must also be 5s to stay consistent.
-            // Mirrors the fopen failure block at line ~3495.
-            header('X-RateLimit-Window: 5');
-            header('X-DailyLimit-Limit: -1');
-            header('X-DailyLimit-Remaining: -1');
-            header('X-DailyLimit-Reset: -1');
-            header('X-DailyLimit-Window: unavailable');
-            echo json_encode([
-                'error' => 'Service temporarily unavailable.',
-                'error_code' => 'SERVICE_UNAVAILABLE',
-                'action' => $action ?? 'download',
-                'upgrade_url' => UPGRADE_URL,
-                'retry_after' => 5,
-                'request_id' => $request_id,
-                'source_url' => $url ?? null,
-                'source_url_missing' => ($url ?? '') === '',
-                'format_id_missing' => false,
-                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
-                'api_version' => AHOYRIPPER_VERSION,
-                // quota fields: daily quota was not consumed since lock couldn't be acquired.
-                // Use -1 sentinels consistent with other pre-quota-gate errors.
-                'quota_remaining' => -1,
-                'quota_limit' => -1,
-                'quota_reset' => -1,
-                'quota_reset_unix' => -1,
-                // server_time: ISO 8601 + Unix for client clock synchronization.
-                // Present on all other API responses (MISSING_URL, INVALID_URL,
-                // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
-                // download, health, check, analytics) — this 503 block was missing
-                // these fields, breaking generic response parsers that expect
-                // consistent field coverage across all API code paths.
-                'server_time' => date('c'),
-                'server_time_unix' => time(),
-                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
-                // ffprobe is never reached in the rate-limit gate path.
-                'x_ffprobe_status' => 'skipped',
-            ], JSON_INVALID_UTF8_SUBSTITUTE);
-            exit;
+            sendServiceUnavailable503($request_id, $action ?? 'download');
         }
 
         $dl_data = ['t' => time(), 'c' => 0];
