@@ -7014,6 +7014,14 @@ switch ($action) {
             'quota_limit' => -1,
             'quota_reset' => -1,
             'quota_reset_unix' => -1,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in a fire-and-forget client-error action with no
+            // file on disk. Present here to complete the "always present" invariant
+            // documented in the README: every API response includes x_ffprobe_status.
+            // Matches the same 'skipped' value returned by action=health (line 899),
+            // action=csp-report (line 899), action=download 503 block (line 4527),
+            // and action=client-error 405 block (line 6714).
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
