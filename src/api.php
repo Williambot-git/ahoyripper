@@ -2726,6 +2726,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the MISSING_FORMAT validation path (yt-dlp
+                // has not run yet, no file exists). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -2828,6 +2833,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the INVALID_FORMAT_ID validation path (yt-dlp
+                // has not run yet, no file exists). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
