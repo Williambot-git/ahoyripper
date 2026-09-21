@@ -213,6 +213,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 
 The `yt_dlp_probe` sub-object contains `action` (always `"health"`), `yt_dlp_version`, `api_version`, `upgrade_url`, `server_time`, and `server_time_unix` on all probe results (not just failures), plus `ok`, `title`, `source_url`, `probe_age_seconds`, and `probe_cached_at`. `yt_dlp_version`, `api_version`, `server_time`, and `server_time_unix` are included even when the probe fails, so clients always have version and clock-synchronization information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`).
 
+`probe_age_seconds` and `probe_cached_at` also appear at the **top-level** of the health response (alongside `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds`) — not only inside `yt_dlp_probe`. This lets monitoring clients read cache staleness without needing to dig into the nested sub-object.
+
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
 `yt_dlp_probe_cache_expires_at` is `null` when the probe has never been run (no cache exists yet). `yt_dlp_probe_cache_ttl_seconds` shows `300` (the configured TTL) in that case — use it to predict when the next `?probe=1` call will complete.
