@@ -1858,10 +1858,33 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
     }
     // If we successfully collected formats from multiple lines, this was a playlist.
     // Use the first entry's metadata and the merged formats array.
+    $is_playlist = false;
+    $playlist_count = null;
+    $playlist_title = null;
+    $playlist_id = null;
     if ($first_valid !== null && !empty($all_formats)) {
         $data = $first_valid;
         // Replace formats with the merged collection from all playlist entries.
         $data['formats'] = $all_formats;
+        $is_playlist = true;
+        // playlist_title and playlist_id are set on each entry by yt-dlp — extract
+        // from the first entry. yt-dlp always sets these on every playlist entry.
+        $playlist_title = isset($first_valid['playlist_title'])
+            ? clean($first_valid['playlist_title'])
+            : null;
+        $playlist_id = isset($first_valid['playlist_id'])
+            ? clean($first_valid['playlist_id'])
+            : null;
+        // yt-dlp may include playlist_count in any entry (first, last, or all).
+        // Search all entries to find the largest count value — this is the total.
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '' || $trimmed === '...') continue;
+            $decoded = json_decode($trimmed, true);
+            if (isset($decoded['playlist_count']) && is_numeric($decoded['playlist_count'])) {
+                $playlist_count = max($playlist_count ?? 0, (int)$decoded['playlist_count']);
+            }
+        }
         // The single-json-decode path below will process $data normally from here.
     } else {
         $data = json_decode($json_str, true);
@@ -2272,6 +2295,15 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
         'derived_filename' => $derived_filename,
         'formats' => $formats,
         'sort_applied' => $sort,
+        // Playlist metadata — null when the URL refers to a single video.
+        // is_playlist: true when the URL resolved to a multi-entry playlist.
+        // playlist_count: total number of videos in the playlist (int), or null if N/A.
+        // playlist_title: human-readable playlist name from yt-dlp, or null.
+        // playlist_id: yt-dlp's internal playlist identifier, or null.
+        'is_playlist' => $is_playlist,
+        'playlist_count' => $playlist_count,
+        'playlist_title' => $playlist_title,
+        'playlist_id' => $playlist_id,
     ];
 }
 
