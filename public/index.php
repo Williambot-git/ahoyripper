@@ -184,7 +184,7 @@ header_remove('X-Powered-By');
        avoiding a double-fetch that wastes bandwidth and can delay LCP.
        The crossorigin attribute here must match the og:image:alt text so the
        same CORS rules apply to both the preload and the meta tag reference. -->
-  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.webp" crossorigin="anonymous">
+  <link rel="preload" as="image" fetchpriority="high" href="<?= $BASE_URL ?>/og-image.webp" sizes="1200x630" crossorigin="anonymous">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
   <!-- Canonical URL: tells search engines the definitive URL for this page,
