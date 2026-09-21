@@ -7959,6 +7959,10 @@ switch ($action) {
             // runs after a download completes. Adding it for consistent header coverage
             // so clients can always find this header on all API responses.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // X-FFProbe-Status: always 'skipped' on analytics 204 responses since ffprobe
+            // never runs on the analytics endpoint. Adding it here completes the "always
+            // present" invariant for all API responses — clients can always find this header.
+            header('X-FFProbe-Status: skipped');
             // Rate-limit sentinels (-1) — analytics is a read-only internal action
             // that does not consume from the per-minute download or info rate budget.
             header('X-DL-RateLimit-Limit: -1');
