@@ -5125,8 +5125,12 @@ switch ($action) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unavailable');
-            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-Info-Timeout / X-Download-Timeout: consistent with the info-action
+            // PROC_OPEN_FAILED block (line ~3769) and DOWNLOAD_EMPTY block (line ~5665).
+            // Present on all other info/download error responses so clients always have
+            // timeout values available without branching on response code.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             // X-FFProbe-Status: ffprobe was never reached — proc_open itself failed
             // before yt-dlp could run, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
