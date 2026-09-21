@@ -345,6 +345,18 @@ if ($blocked) {
         header('X-DailyLimit-Window: unavailable');
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        header('X-Request-ID: ' . $request_id);
+        // X-FFProbe-Status: skipped — CORS validation fires before yt-dlp or ffprobe
+        // are reached, so ffprobe is never invoked in this path. Present for full
+        // header coverage consistent with every other API error response.
+        header('X-FFProbe-Status: skipped');
+        // X-FFProbe-Timeout: present for full header coverage consistent with every
+        // other API error response, even though ffprobe is never reached here.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+        // the 'check' (line ~6292) and 'health' (line ~6727) action blocks.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         // Content-Security-Policy, Reporting-Endpoints, and Report-To are set at
         // the top of the script (lines ~109-163) but are not inherited into this
         // exit path because this block calls exit() before the normal script flow
@@ -370,6 +382,9 @@ if ($blocked) {
             'retry_after' => 0,
             'request_id' => $request_id,
             'source_url' => null,
+            // video_url mirrors source_url for consistency with other error responses.
+            // CORS validation fires before URL validation, so no video URL is available.
+            'video_url' => null,
             // source_url_missing and format_id_missing are both false — CORS validation
             // fires before URL or format validation, so neither parameter has been checked.
             // The false values signal "validation has not run" rather than "value is invalid".

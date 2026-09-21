@@ -1432,6 +1432,46 @@ else
 fi
 
 echo ""
+echo "==> Checking FORBIDDEN_ORIGIN response has all required headers and JSON fields..."
+# The CORS/referer block response (MISSING_REFERER / INVALID_ORIGIN) was missing
+# X-Request-ID, X-FFProbe-Status, X-FFProbe-Timeout, X-Server-Time, X-Server-Time-Unix,
+# and video_url in the JSON body — all present on every other API error response.
+# Verify these are present to prevent regression.
+if grep -q "X-Request-ID: ' . \$request_id" src/api.php; then
+    echo "  ✓ X-Request-ID header present in FORBIDDEN_ORIGIN response"
+else
+    echo "  ✗ X-Request-ID header missing from FORBIDDEN_ORIGIN response"
+    exit 1
+fi
+if grep -q "X-FFProbe-Status: skipped" src/api.php; then
+    echo "  ✓ X-FFProbe-Status: skipped header present in api.php"
+else
+    echo "  ✗ X-FFProbe-Status: skipped missing"
+    exit 1
+fi
+# Verify the CORS block also sets X-FFProbe-Timeout and X-Server-Time
+if grep -A5 "X-FFProbe-Status: skipped" src/api.php | grep -q "X-FFProbe-Timeout"; then
+    echo "  ✓ X-FFProbe-Timeout header present in api.php"
+else
+    echo "  ✗ X-FFProbe-Timeout header missing"
+    exit 1
+fi
+if grep -q "X-Server-Time-Unix" src/api.php; then
+    echo "  ✓ X-Server-Time-Unix header present in api.php"
+else
+    echo "  ✗ X-Server-Time-Unix header missing"
+    exit 1
+fi
+# Verify video_url is present in the CORS block JSON body (grep for the pattern
+# inside the CORS block's json_encode — the key appears right after source_url => null)
+if grep -B2 -A2 "'video_url' => null" src/api.php | grep -q "source_url.*null"; then
+    echo "  ✓ video_url field present in error response JSON (mirrors source_url)"
+else
+    echo "  ✗ video_url field missing from error response JSON"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking yt-dlp stderr capture in download..."
 if grep -q "proc_stderr" src/api.php; then
     echo "  ✓ Download stderr capture present"
