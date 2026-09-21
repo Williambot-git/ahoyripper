@@ -13,6 +13,8 @@
 /tmp/ahoyrip_ffprobe_*.cache
 # Connectivity probe cache
 /tmp/ahoyrip_ytdlp_probe.cache
+# curl_cffi library version cache (probed by yt-dlp --impersonate health check)
+/tmp/ahoyrip_curl_cffi_ver.cache
 
 # OS artifacts
 .DS_Store
