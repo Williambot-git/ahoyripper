@@ -3714,6 +3714,13 @@ switch ($action) {
             // The limit is intentionally very high (50 GB) to only fire on genuine
             // oversized-content cases, not ordinary downloads.
             '--max-filesize', '50G',
+            // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
+            // Mirrors the download action at line ~4997 and health probe at ~7363.
+            // While --skip-download means ffmpeg is not invoked during info extraction,
+            // passing --ffmpeg-location here keeps the info action consistent with the
+            // download action and ensures correct behavior if post-processing is ever
+            // triggered by future yt-dlp changes.
+            '--ffmpeg-location', FFMPEG_PATH,
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
             // yt-dlp sends the URL itself as referer by default. Allow per-request override
