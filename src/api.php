@@ -422,6 +422,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('Retry-After: 5');
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+    // X-FFProbe-Status: skipped — ffprobe never runs in the SERVICE_UNAVAILABLE path
+    // (rate-limit subsystem failure fires before yt-dlp or ffprobe are reached).
+    header('X-FFProbe-Status: skipped');
+    // X-FFProbe-Timeout: present for full header coverage even though ffprobe was skipped.
+    header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
     // CSP violation reporting — mirrors the headers set in all other API response paths.
     // Without these, 'report-to csp-report' in the nginx-layer CSP has no defined endpoint
     // group and browser CSP violation reports are silently dropped.
@@ -492,6 +497,9 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'quota_limit' => getDailyQuotaLimit(),
         'quota_reset' => -1,
         'quota_reset_unix' => -1,
+        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+        // ffprobe is never reached in the SERVICE_UNAVAILABLE path.
+        'x_ffprobe_status' => 'skipped',
         // server_time: ISO 8601 + Unix for client clock synchronization.
         // Present on all other API responses — SERVICE_UNAVAILABLE was missing
         // these fields, breaking generic response parsers that expect consistent
@@ -4514,6 +4522,9 @@ switch ($action) {
                 // consistent field coverage across all API code paths.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the rate-limit gate path.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
