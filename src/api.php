@@ -6631,6 +6631,9 @@ switch ($action) {
         // after a download completes. Adding it here completes the "always present" invariant
         // documented in the README for all API responses — including the check endpoint.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-FFProbe-Status: ffprobe never runs on the check endpoint (no file on disk).
+        // Adding it completes the "always present" invariant alongside X-FFProbe-Timeout.
+        header('X-FFProbe-Status: skipped');
         // X-Server-Time: wire-level clock metadata for clients that need to
         // synchronize without parsing the JSON body. Mirrors the same ISO 8601
         // timestamp and Unix value that appear in the JSON response body
@@ -7112,6 +7115,10 @@ switch ($action) {
         // where it appears in the same position after X-Download-Timeout. This completes
         // the "always present" invariant documented in the README for all API responses.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-FFProbe-Status: ffprobe runs post-download for file verification; health
+        // is a read-only probe with no file on disk so ffprobe never runs here. Adding
+        // it here completes the "always present" invariant alongside X-FFProbe-Timeout.
+        header('X-FFProbe-Status: skipped');
         // X-Server-Time: wire-level clock metadata for clients that need to
         // synchronize without parsing the JSON body. Mirrors the same ISO 8601
         // timestamp and Unix value that appear in the JSON response body
