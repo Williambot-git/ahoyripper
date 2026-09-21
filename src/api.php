@@ -7630,10 +7630,13 @@ switch ($action) {
         // Standard rate-limit header family for generic API consumers.
         // X-RateLimit-Limit: -1 = no rate limit applies (convention: -1 means
         // "unlimited", 0 means "limit exhausted"). Mirrors X-DL-RateLimit-Limit.
+        // X-RateLimit-Window: use $rate_window (60s) — the shared request-rate
+        // window always runs at 60s even when no rate limit is consumed, so
+        // clients see the correct window size for the generic envelope.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         // Daily-limit sentinels (-1) signal clients this is a read-only probe,
         // not a rip-consuming action — mirrors the pattern used by action=check.
         header('X-DailyLimit-Limit: -1');
