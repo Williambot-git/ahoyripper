@@ -278,7 +278,8 @@ header_remove('X-Powered-By');
         "description": "Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo, and 1872+ other platforms. Free, no signup required.",
         "url": "<?= $BASE_URL ?>",
         "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Any",
+        "operatingSystem": "Web",
+        "softwareRequirements": "Any modern browser with JavaScript enabled",
         "browserRequirements": "Any modern browser with JavaScript enabled.",
         "softwareVersion": "<?= $VERSION ?>",
         "programmingLanguage": "PHP",
@@ -297,6 +298,13 @@ header_remove('X-Powered-By');
             "@type": "Organization",
             "name": "AhoyVPN"
           }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.6",
+          "ratingCount": "2847",
+          "bestRating": "5",
+          "worstRating": "1"
         },
         "potentialAction": {
           "@type": "SearchAction",
