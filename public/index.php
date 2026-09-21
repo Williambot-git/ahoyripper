@@ -795,6 +795,8 @@ window.addEventListener('appinstalled', function() {
     'SOURCE_RATE_LIMITED': 'The source site is rate-limiting us. Please try again in a few minutes, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'SOURCE_TIMEOUT': 'The source site took too long to respond. Try audio-only (fastest), a lower resolution, or try again when the site is less busy. Use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'SOURCE_HTTP_ERROR': 'The source site is having issues. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
+    'SOURCE_FORBIDDEN': 'The source site (YouTube, TikTok, etc.) blocked this request (HTTP 403). The video may be region-locked, age-restricted, or require login. Try a different format or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
+    'SOURCE_NOT_FOUND': 'The source site returned HTTP 404 — the content may have been removed, deleted, or the URL is incorrect. Check the link and try again.',
     'CONNECTION_FAILED': 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP: https://ahoyvpn.com',
     'SSL_ERROR': 'Secure connection to the source failed. Try again shortly, or use AhoyVPN for a different exit IP: https://ahoyvpn.com',
     'CONNECTION_TIMEOUT': 'Connection timed out before the source responded. Try again — if it persists, the server\'s network route to the source may be degraded. Use AhoyVPN for a different exit IP: https://ahoyvpn.com',
