@@ -37,6 +37,7 @@ const STATIC_ASSETS = [
   '/',
   '/src/style.css',
   '/manifest.json',
+  '/robots.txt',
   '/favicon.ico',
   '/favicon.svg',
   '/favicon-512.png',
