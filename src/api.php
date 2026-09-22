@@ -346,12 +346,7 @@ if ($blocked) {
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Request-ID: ' . $request_id);
-        // X-FFProbe-Status: skipped — CORS validation fires before yt-dlp or ffprobe
-        // are reached, so ffprobe is never invoked in this path. Present for full
-        // header coverage consistent with every other API error response.
         header('X-FFProbe-Status: skipped');
-        // X-FFProbe-Timeout: present for full header coverage consistent with every
-        // other API error response, even though ffprobe is never reached here.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
         // the 'check' (line ~6292) and 'health' (line ~6727) action blocks.
