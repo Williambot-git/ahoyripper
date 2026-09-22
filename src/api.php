@@ -6846,6 +6846,15 @@ switch ($action) {
             // complete API surface parity — clients can always find these headers.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-Server-Time: wire-level clock metadata. Mirrors the same headers set
+            // in the analytics 405 block and every other API response, giving API
+            // consumers the same temporal reference in both HTTP headers and JSON payload.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+            header('X-Server-Time-Unix: ' . time());
+            // Reporting-Endpoints + Report-To: enables CSP violation reporting for
+            // this endpoint. Mirrors the headers set in the csp-report and analytics 405 blocks.
+            header('Reporting-Endpoints: csp-report="/csp-report"');
+            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo json_encode([
                 'error' => 'Method not allowed. Use POST for action=client-error.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
