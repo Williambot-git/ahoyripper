@@ -6381,6 +6381,9 @@ switch ($action) {
                 'source_url_missing' => false,
                 'format_id' => $format_id,
                 'format_id_missing' => false,
+                // 'video_url' mirrors source_url: yt-dlp wrote the file but it could not
+                // be read back for streaming — the URL was valid and accepted.
+                'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
