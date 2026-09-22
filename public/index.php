@@ -146,6 +146,9 @@ header_remove('X-Powered-By');
        The XML file is referenced by this link tag for auto-discovery. -->
   <link rel="search" type="application/opensearchdescription+xml" title="AhoyRipper" href="/opensearch.xml">
 
+  <!-- humans.txt — RFC 9207 transparency file crediting the team -->
+  <link rel="author" type="text/plain" href="/humans.txt">
+
   <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">

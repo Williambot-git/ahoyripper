@@ -1,0 +1,55 @@
+# ahoyripper.com/humans.txt
+#
+# This file follows the standard established at humans.txt.org
+# and approved by the community. It provides transparency about
+# who built and maintains AhoyRipper.
+#
+# Syntax: each section starts with a header in brackets [SectionName].
+# Lines starting with # are comments and are ignored.
+
+[Site]
+
+Project: AhoyRipper
+URL: https://ahoyripper.com
+Description: Free, no-signup media ripper — download video and audio from
+  YouTube, X/Twitter, SoundCloud, TikTok, Instagram, Facebook, Vimeo,
+  and 1872+ other platforms. Powered by yt-dlp.
+  Built and maintained by the AhoyVPN team.
+
+[Maintainer]
+
+Team: AhoyVPN
+Website: https://ahoyvpn.com
+GitHub: https://github.com/Williambot-git/ahoyripper
+X/Twitter: https://x.com/ahoyvpn
+Location: Remote
+
+[Software]
+
+Backend: PHP 8.x
+Media Engine: yt-dlp (https://github.com/yt-dlp/yt-dlp)
+Media Processing: FFmpeg
+Web Server: nginx (PHP-FPM)
+PWA: Progressive Web App with offline support
+
+[Standards]
+
+Built with: modern HTML5, CSS3, vanilla JavaScript (no framework)
+Security: CSP, HSTS, COOP, CORP, Referrer-Policy, Permissions-Policy,
+  X-Frame-Options, X-Content-Type-Options, X-Download-Options
+robots.txt: Blocks AI training crawlers (ChatGPT, Claude, Gemini, DeepSeek,
+  Perplexity, Meta AI, and 34 others) while allowing indexing crawlers.
+OpenSearch: Supported — add ahoyripper.com as a browser search engine.
+
+[Services]
+
+API: https://ahoyripper.com/src/api.php
+OpenSearch XML: https://ahoyripper.com/opensearch.xml
+Security Policy: https://ahoyripper.com/.well-known/security.txt
+Sitemap: https://ahoyripper.com/sitemap.xml
+
+[Crafted With]
+
+Philosophy: Privacy-first, no-signup, no-ads, no-tracking.
+  No data stored server-side beyond temporary rate-limit files.
+  Downloads are proxied — source platforms never see your IP.
