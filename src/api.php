@@ -6829,10 +6829,14 @@ switch ($action) {
             // their pre-processing but elected to return early; 'unlimited' signals that
             // no rate-limit budget was consumed rather than 'unavailable' which implies
             // the gate was never reached (which is the case for MISSING_URL).
+            // X-RateLimit-Window: use $rate_window (60s) — the generic request-rate
+            // window always runs at 60s even when no rate limit is consumed, so
+            // clients see the correct window size for the generic envelope.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
+            // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -6931,6 +6935,9 @@ switch ($action) {
         // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
         // fire-and-forget endpoint that does not consume from the per-minute rate budget.
         // Mirrors the pattern used by action=check and action=health for consistency.
+        // X-RateLimit-Window: use $rate_window (60s) — the generic request-rate
+        // window always runs at 60s even when no rate limit is consumed, so
+        // clients see the correct window size for the generic envelope.
         // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
         header('X-DL-RateLimit-Limit: -1');
         header('X-DL-RateLimit-Remaining: -1');
@@ -6940,7 +6947,7 @@ switch ($action) {
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
