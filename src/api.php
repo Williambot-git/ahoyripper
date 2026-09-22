@@ -2724,6 +2724,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
             header('X-RateLimit-Window: unavailable');
+            // X-DL-RateLimit-*: mirrors X-RateLimit-* for download-specific monitoring.
+            // MISSING_FORMAT occurs before the download rate-limit gate; no download is involved.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
