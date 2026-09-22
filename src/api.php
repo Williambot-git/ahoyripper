@@ -3810,6 +3810,10 @@ switch ($action) {
             // metadata ensures reliable parsing and display regardless of the browser's
             // actual locale (which is forwarded separately via the Referer header).
             '--add-header', 'Accept-Language: en-US',
+            // --consecutive-title: yt-dlp 2024.12+ prevents path traversal via video titles
+            // containing "../" sequences. Defense-in-depth alongside sanitize_filename() and
+            // --restrict-filenames — this catches titles yt-dlp itself retrieves.
+            '--consecutive-title',
             '--',
             $url,
         ]);
@@ -5008,6 +5012,10 @@ switch ($action) {
             // Hardcode en-US: consistent English-language metadata regardless of browser
             // locale — mirrors the fix applied to the info action at line 3417.
             '--add-header', 'Accept-Language: en-US',
+            // --consecutive-title: yt-dlp 2024.12+ prevents path traversal via video titles
+            // containing "../" sequences. Defense-in-depth alongside sanitize_filename() and
+            // --restrict-filenames — this catches titles yt-dlp itself retrieves.
+            '--consecutive-title',
             '--',
             $url,
         ]);
