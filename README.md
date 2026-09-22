@@ -1433,6 +1433,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 | `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
+| `INVALID_SORT` | Sort parameter value is not recognised | Use one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality` |
 | `INVALID_API_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
 | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is unavailable | Try another video |
