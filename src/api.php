@@ -7363,6 +7363,10 @@ switch ($action) {
                 // to avoid probe failures caused by locale-specific content restrictions.
                 $probe_cmd[] = '--add-header';
                 $probe_cmd[] = 'Accept-Language: en-US';
+                // --consecutive-title: yt-dlp 2024.12+ prevents path traversal via video titles
+                // containing "../" sequences. Defense-in-depth alongside sanitize_filename() and
+                // --restrict-filenames — mirrors the same guard in info and download actions.
+                $probe_cmd[] = '--consecutive-title';
                 $probe_cmd[] = '--';
                 $probe_cmd[] = HEALTH_PROBE_URL;
                 $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
