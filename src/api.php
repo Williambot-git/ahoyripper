@@ -1728,7 +1728,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // a plain "disallowed content" (no violation language) is NOT classified here —
     // it falls through to SOURCE_FORBIDDEN (HTTP 403) if the message contains "content
     // is not allowed" specifically from yt-dlp, use the content-disallowed sentinel.
-    // Negative lookahead (?!\S+\s+\S+) prevents "disallowed content" (two separate words
+    // Negative lookahead (?!\\s+content\\b) prevents "disallowed content" (two separate words
     // where "content" immediately follows "disallowed") from matching — that pattern
     // fires for generic "disallowed content" errors that should route to SOURCE_FORBIDDEN.
     // (?<!\bdisallowed\s) prevents "content" preceded by "disallowed " from matching
