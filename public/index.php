@@ -224,8 +224,10 @@ header_remove('X-Powered-By');
        strip or not propagate the HTTP header. img-src must stay in sync with the
        HTTP header's img-src directive — specifically include https://fonts.googleapis.com
        (needed for OG image and font preloads) and https://*.tiktokcdn.com (CDN for
-       TikTok video thumbnails). -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report;">
+       TikTok video thumbnails). block-all-mixed-content prevents the browser from
+       loading any resources over HTTP when the page is served over HTTPS, closing
+       an attack vector where an active network attacker could swap in a HTTP resource. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; block-all-mixed-content; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report;">
   <!-- worker-src 'self' is also set in the nginx HTTP header (deploy/nginx.conf).
        The meta tag above serves as a fallback when the HTTP header is stripped
        or not propagated (e.g. reverse proxy, CDN). Nginx's header is authoritative;
@@ -459,7 +461,7 @@ header_remove('X-Powered-By');
          task. aria-atomic="true" ensures the full message is read even if only
          part of the text changes. -->
     <div class="rip-progress" id="progressBox" role="status" aria-live="polite" aria-atomic="true">
-      <div class="spinner"></div>
+      <div class="spinner" aria-label="Loading" role="status"></div>
       <p class="progress-text" id="progressText">Fetching info...</p>
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progressBar" style="width:30%"></div>
@@ -1048,7 +1050,7 @@ window.addEventListener('appinstalled', function() {
   function setLoading(on, label) {
     btn.disabled = on;
     if (on) {
-      btn.innerHTML = '<span class="btn-spinner"></span>' + (label || 'Ripping...');
+      btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + (label || 'Ripping...');
     } else {
       btn.textContent = 'Rip It';
     }
