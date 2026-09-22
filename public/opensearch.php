@@ -21,8 +21,42 @@
 error_reporting(0);
 ini_set('display_errors', '0');
 
+// ─── Security headers ────────────────────────────────────────────────────────
+// Hardens the OpenSearch XML endpoint against the same class of attacks
+// as api.php. Defense-in-depth: nginx sets most of these globally, but
+// the PHP layer mirrors them here so the endpoint is protected even when
+// served outside nginx (PHP built-in server, reverse proxy bypass, etc.).
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Resource-Policy: same-origin');
+header('X-Robots-Tag: noindex, noai, noimage, noydir');
+header_remove('X-Powered-By');
+// Generate a request correlation ID — mirrors the X-Request-ID added by api.php
+// so nginx access log, PHP error log, and client-side events can be correlated.
+$page_request_id = bin2hex(random_bytes(8));
+header('X-Request-ID: ' . $page_request_id);
+
 $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host   = htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'ahoyripper.com', ENT_QUOTES, 'UTF-8');
+$host_raw = $_SERVER['HTTP_HOST'] ?? '';
+// Reject obviously malformed Host headers early — a nonsense value like "\x00<meta>"
+// would produce an invalid URL template and confuse browser OpenSearch auto-discovery.
+// Return a JSON error instead of falling through to XML output with a broken BASE_URL.
+if ($host_raw === '' || strlen($host_raw) > 253 || preg_match('/[\x00-\x1F\x7F<>"\']/', $host_raw)) {
+    http_response_code(400);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo json_encode([
+        'error' => 'Invalid or missing Host header.',
+        'error_code' => 'INVALID_HOST',
+        'request_id' => $page_request_id,
+    ]);
+    exit;
+}
+$host = htmlspecialchars($host_raw, ENT_QUOTES, 'UTF-8');
 $BASE_URL = $scheme . '://' . $host;
 
 /* ── Output starts with XML declaration — no whitespace before it ── */

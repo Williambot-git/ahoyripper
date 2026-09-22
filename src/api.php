@@ -3347,6 +3347,12 @@ switch ($action) {
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: present on all API responses for consistent header coverage.
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Status: skipped — ffprobe was never reached since the invalid-key
+            // check fires before yt-dlp or ffprobe are invoked.
+            header('X-FFProbe-Status: skipped');
+            // X-FFProbe-Timeout: consistent with the success-path header at line 5943.
+            // ffprobe was never reached, but include the timeout value for full header coverage.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // Content-Type: required for correct JSON rendering in browsers and API clients.
             // Missing from the original block — added for consistency with all other API responses.
             header('Content-Type: application/json; charset=utf-8');
