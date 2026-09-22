@@ -850,7 +850,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `451` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
 | `404` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
 | `404` | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
-| `422` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
+| `410` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
 | `429` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests |
 | `403` | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) — try a different format or use AhoyVPN |
 | `404` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted |
@@ -880,7 +880,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `422` | `PARSE_ERROR` | The site returned a non-standard or unparseable response. The site may be temporarily unavailable or not supported. |
 | `422` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp. Check the supported sites list. |
 | `422` | `PLAYLIST_MISSING` | Playlist not found or no longer exists. Verify the playlist is public and still available. |
-| `422` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available. Try another video. |
+| `410` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available. Try another video. |
 | `422` | `AGE_RESTRICTED` | Video is age-restricted and requires verification. Sign in to the source platform to verify your age. |
 | `422` | `SOURCE_RATE_LIMITED` | The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP. |
 | `422` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues. Try again shortly. |
