@@ -6690,6 +6690,11 @@ switch ($action) {
             // source_url_missing: true — no video URL was provided (probe endpoint).
             'source_url' => null,
             'source_url_missing' => true,
+            // format_id_missing: false — check is a read-only probe with no format selector.
+            // Including this field completes the "always present" invariant documented
+            // in the README: every API response includes format_id_missing, letting API
+            // consumers always read this field without null-checking.
+            'format_id_missing' => false,
             // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
             // upsell opportunity. Mirrors the same field in the health response.
             'upgrade_url' => UPGRADE_URL,
