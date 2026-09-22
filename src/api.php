@@ -6800,6 +6800,12 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             // Cache-Control: no-store — prevents browsers from caching this error response.
             header('Cache-Control: no-store');
+            // X-Server-Time: wire-level clock metadata for clients that need to
+            // synchronize without parsing the JSON body. Mirrors the same headers
+            // set in the health action and every other API response, giving API
+            // consumers the same temporal reference in both HTTP headers and JSON payload.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+            header('X-Server-Time-Unix: ' . time());
             // Set the same CSP and Reporting-Endpoints headers that the top-of-script
             // block applies to all other responses. Mirrors the csp-report and analytics
             // POST-gate 405 responses for consistency.
