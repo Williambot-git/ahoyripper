@@ -3784,7 +3784,7 @@ switch ($action) {
             // Setting --max-filesize 50G catches these cases with a clear yt-dlp error
             // (FilesizeExceeded) rather than a partial download that exhausts resources.
             // yt-dlp exits with code 1 when the selected format exceeds the limit,
-            // and classifyYtdlpError() maps this to FILE_SIZE_EXCEEDED for the client.
+            // and classifyYtdlpError() maps this to FILE_TOO_LARGE for the client.
             // The limit is intentionally very high (50 GB) to only fire on genuine
             // oversized-content cases, not ordinary downloads.
             '--max-filesize', '50G',
@@ -4973,7 +4973,7 @@ switch ($action) {
             // disk or memory. Setting --max-filesize 50G catches these cases with a clear
             // yt-dlp error (FilesizeExceeded) rather than a partial download that causes
             // resource exhaustion. yt-dlp exits with code 1 when the format exceeds the
-            // limit, and classifyYtdlpError() maps this to FILE_SIZE_EXCEEDED for clients.
+            // limit, and classifyYtdlpError() maps this to FILE_TOO_LARGE for clients.
             // The limit is intentionally very high (50 GB) to only fire on genuine
             // oversized-content edge cases, not ordinary downloads.
             '--max-filesize', '50G',
