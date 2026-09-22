@@ -878,11 +878,13 @@ if (in_array($action, $internal_actions, true)) {
             // Location-level nginx headers that may be missed after fastcgi_finish_request()
             // flushes — set them explicitly here to guarantee they're present in all deployments.
             // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
-            // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+            // fire-and-forget endpoint. X-RateLimit-Window: always $rate_window (60s) per
+            // the rate-limit header invariant — the window size is always 60s regardless
+            // of whether any rate limit budget was consumed. Mirrors action=check and health.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
@@ -939,11 +941,13 @@ if (in_array($action, $internal_actions, true)) {
         // header at line 997.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         // Rate-limit headers: -1 sentinel (unlimited) since csp-report is a read-only
-        // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+        // fire-and-forget endpoint. X-RateLimit-Window: always $rate_window (60s) per
+        // the rate-limit header invariant — the window size is always 60s regardless
+        // of whether any rate limit budget was consumed. Mirrors action=check and health.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Content-Security-Policy-Report-Only: mirrors the nginx-layer header so non-FPM
@@ -1025,11 +1029,13 @@ if (in_array($action, $internal_actions, true)) {
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unlimited');
             // Rate-limit headers: -1 sentinel (unlimited) since client-error is a
-            // read-only fire-and-forget endpoint.
+            // read-only fire-and-forget endpoint. X-RateLimit-Window: always $rate_window (60s)
+            // per the rate-limit header invariant — the window size is always 60s regardless
+            // of whether any rate limit budget was consumed. Mirrors action=check and health.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
@@ -1079,11 +1085,13 @@ if (in_array($action, $internal_actions, true)) {
         // Mirrors the header set in the FPM fast-path block above.
         header('Cache-Control: no-store');
         // Rate-limit headers: -1 sentinel (unlimited) since client-error is a read-only
-        // fire-and-forget endpoint. Mirrors the pattern used by action=check and health.
+        // fire-and-forget endpoint. X-RateLimit-Window: always $rate_window (60s) per
+        // the rate-limit header invariant — the window size is always 60s regardless
+        // of whether any rate limit budget was consumed. Mirrors action=check and health.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
         header('X-DL-RateLimit-Limit: -1');
         header('X-DL-RateLimit-Remaining: -1');
@@ -1133,7 +1141,7 @@ if (in_array($action, $internal_actions, true)) {
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: unlimited');
+    header('X-RateLimit-Window: ' . $rate_window);
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
@@ -3039,7 +3047,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: unlimited');
+    header('X-RateLimit-Window: ' . $rate_window);
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
@@ -3121,7 +3129,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: unlimited');
+    header('X-RateLimit-Window: ' . $rate_window);
     // info action is subject to daily quota; others (check, health, progress) are not.
     if ($action === 'info') {
         $dl = getDailyQuotaLimit();
@@ -3337,7 +3345,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             // Matches the same pattern used in the download action's invalid-key block.
             header('X-DL-RateLimit-Limit: -1');
@@ -7720,10 +7728,13 @@ switch ($action) {
             header('X-DL-RateLimit-Reset: -1');
             header('X-DL-RateLimit-Window: unlimited');
             // X-RateLimit-*: generic rate-limit header family for API consumers.
+            // X-RateLimit-Window: always $rate_window (60s) — the read-only analytics
+            // endpoint doesn't consume from the per-minute rate budget, but the window
+            // size is always 60s regardless of consumption state.
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DailyLimit-*: daily quota sentinel (-1 = not applicable to this endpoint).
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
@@ -7979,7 +7990,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
@@ -8139,10 +8150,12 @@ switch ($action) {
         header('X-DL-RateLimit-Reset: -1');
         header('X-DL-RateLimit-Window: unlimited');
         // Rate-limit headers: -1 = no limit applies (0 = exhausted).
+        // X-RateLimit-Window: always $rate_window (60s) — the window size is always 60s
+        // regardless of whether any rate limit budget was consumed.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unlimited');
+        header('X-RateLimit-Window: ' . $rate_window);
         header('X-DailyLimit-Limit: -1');
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
