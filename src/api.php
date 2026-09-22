@@ -7159,6 +7159,12 @@ switch ($action) {
                 $ytdlp_cache_ttl = max(0, $exp - time());
             }
         }
+        // If the cache file doesn't exist yet (version never probed), surface
+        // VERSION_CACHE_TTL as the not-yet-computed TTL so callers can predict
+        // when the next info/download call will cache a version without guessing.
+        if ($ytdlp_cache_ttl === null) {
+            $ytdlp_cache_ttl = VERSION_CACHE_TTL;
+        }
 
         // yt-dlp probe cache — TTL controlled by PROBE_CACHE_TTL constant so repeated
         // health?probe=1 calls don't hammer YouTube. Declared early here (before the
@@ -7225,6 +7231,12 @@ switch ($action) {
                 $ffmpeg_cache_expires_at = date('c', $exp);
                 $ffmpeg_cache_ttl = max(0, $exp - time());
             }
+        }
+        // If the cache file doesn't exist yet (ffprobe never probed), surface
+        // VERSION_CACHE_TTL as the not-yet-computed TTL so callers can predict
+        // when the next download call will cache an ffprobe version without guessing.
+        if ($ffmpeg_cache_ttl === null) {
+            $ffmpeg_cache_ttl = VERSION_CACHE_TTL;
         }
 
         $sys = getSystemMetrics();
