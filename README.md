@@ -1339,6 +1339,44 @@ The `cookies.txt` file must be in the Netscape cookie format (the format produce
 
 ---
 
+## Dependencies
+
+AhoyRipper requires two server-side dependencies beyond yt-dlp and ffmpeg:
+
+### curl_cffi (required for browser impersonation)
+
+**What it is:** [curl_cffi](https://github.com/FFEARR/curl-cffi) is a Python library that provides cURL bindings with TLS fingerprint impersonation — it can mimic the TLS/ALPN handshake signatures of real browsers (Chrome, Firefox, Safari). yt-dlp 2024.09+ uses curl_cffi when invoked with `--impersonate` to bypass anti-bot detection.
+
+**Why it's needed:** Without curl_cffi, yt-dlp uses its default TLS fingerprint (`python-requests`), which sites like YouTube, Twitter, and TikTok detect and block with 403/422 errors. Browser impersonation dramatically reduces these errors.
+
+**What AhoyRipper does with it:** AhoyRipper passes `--impersonate chrome` (or the value of `AHOY_IMPERSONATE`) to yt-dlp for every info and download request. If curl_cffi is not installed, yt-dlp silently ignores the `--impersonate` flag and falls back to its default fingerprint — you'll see elevated 403/422 errors on protected sites with no error message explaining why.
+
+**How to install:**
+
+```bash
+# Self-hosted (pip — includes curl_cffi for --impersonate)
+pip install curl-cffi
+
+# Verify it's installed
+python3 -c "import curl_cffi; print(curl_cffi.__version__)"
+```
+
+**Docker:** curl_cffi is installed inside the container via `pip install curl-cffi` in the Dockerfile. Rebuilding the container (`docker compose build --no-cache`) pulls the latest version.
+
+**What happens without it:** The AhoyRipper health check (`action=health`) detects missing curl_cffi and reports `"curl_cffi_ok": false` in the response. The `CONFIG_ERROR` error code is returned on info/download requests when curl_cffi is absent. However, requests will still proceed — yt-dlp silently ignores `--impersonate`, and you'll experience elevated bot-detection failures on protected sites without any indication that curl_cffi is the missing piece.
+
+**To disable impersonation** (not recommended, but available if curl_cffi cannot be installed):
+
+```bash
+# Self-hosted: set AHOY_IMPERSONATE to empty in your environment
+export AHOY_IMPERSONATE=
+
+# Docker: set in docker-compose.yml environment or .env
+AHOY_IMPERSONATE=
+```
+
+---
+
 ## Troubleshooting
 
 ### Update yt-dlp first
