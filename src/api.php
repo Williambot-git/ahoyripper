@@ -7806,7 +7806,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unlimited');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DailyLimit-Limit: -1');
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
