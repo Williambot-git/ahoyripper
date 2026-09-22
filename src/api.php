@@ -3902,6 +3902,8 @@ switch ($action) {
             // before yt-dlp could run, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
             // (where ffprobe ran but found the file corrupt/unreadable).
+            header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('X-FFProbe-Status: skipped');
             // X-FFProbe-Timeout: consistent with the success-path header at line 5943.
             // ffprobe was never reached (proc_open failed), but include the timeout value
