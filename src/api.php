@@ -236,7 +236,7 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // or other COEP-locked features.
 
 // Reporting-Endpoints (modern CSP violation reporting — supersedes legacy report-uri).
-// Reporting-Endpoints (modern CSP violation reporting — CSP Level 3).
+// The report-to header below provides endpoint-group configuration for older clients.
 // Tells Chromium 84+ (May 2021) and Firefox 79+ to route CSP violation reports
 // to the /csp-report endpoint via the browser's Reporting API. nginx adds
 // report-uri /csp-report at the server level for Safari and older Firefox (<79)
