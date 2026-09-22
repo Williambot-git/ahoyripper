@@ -5392,13 +5392,12 @@ switch ($action) {
                 // ran (consuming the request slot) and exited with a classified error.
                 // Send -1 (unlimited) for all four fields so clients know no rate limit
                 // is currently active, consistent with the unclassified error block.
-                // X-RateLimit-Window is set to 'unlimited' rather than $rate_window (60s)
-                // because the per-minute rate limit has already been consumed and no new
-                // window is active — reporting a stale window value would be misleading.
+                // X-RateLimit-Window: always $rate_window (60s) — the request-rate
+                // window size is always 60s regardless of whether any limit is consumed.
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: unlimited');
+                header('X-RateLimit-Window: ' . $rate_window);
                 // X-FFProbe-Status: ffprobe was never reached in the classified-error path
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
                 // clients can distinguish this from a ffprobe-verification failure.
@@ -5506,13 +5505,12 @@ switch ($action) {
                 // ran (consuming the request slot) and exited with an unclassified error.
                 // Send -1 (unlimited) for all four fields so clients know no rate limit
                 // is currently active, consistent with how the 'check' action handles this.
-                // X-RateLimit-Window is set to 'unlimited' rather than $rate_window (60s)
-                // because the per-minute rate limit has already been consumed and no new
-                // window is active — reporting a stale window value would be misleading.
+                // X-RateLimit-Window: always $rate_window (60s) — the request-rate
+                // window size is always 60s regardless of whether any limit is consumed.
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: unlimited');
+                header('X-RateLimit-Window: ' . $rate_window);
                 header('X-Robots-Tag: noindex, noai, noimage, noydir');
                 // X-FFProbe-Status: ffprobe was never reached in the unclassified-error path
                 // (yt-dlp exited non-zero before ffprobe was called). Mark as skipped so
@@ -5987,7 +5985,7 @@ switch ($action) {
                     header('X-RateLimit-Limit: -1');
                     header('X-RateLimit-Remaining: -1');
                     header('X-RateLimit-Reset: -1');
-                    header('X-RateLimit-Window: unlimited');
+                    header('X-RateLimit-Window: ' . $rate_window);
                     header('X-DailyLimit-Limit: -1');
                     header('X-DailyLimit-Remaining: -1');
                     header('X-DailyLimit-Reset: -1');
