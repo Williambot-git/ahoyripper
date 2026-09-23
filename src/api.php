@@ -400,6 +400,12 @@ if ($blocked) {
             // field coverage across all API code paths.
             'server_time' => date('c'),
             'server_time_unix' => time(),
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in the MISSING_REFERER validation path (CORS
+            // validation fires before URL validation, so no platform is detected, no yt-dlp
+            // runs, no file to probe). Completes the "always present" invariant documented
+            // in the README: every API response includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -667,6 +673,12 @@ if ($is_rate_limited) {
             // Present on all other API responses; rate-limit block was missing these.
             'server_time' => date('c'),
             'server_time_unix' => time(),
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in the RATE_LIMIT_EXCEEDED path (rate limiting
+            // fires before any yt-dlp run, so no file exists to probe). Completes the
+            // "always present" invariant documented in the README: every API response
+            // includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
