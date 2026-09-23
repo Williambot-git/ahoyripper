@@ -5990,7 +5990,7 @@ switch ($action) {
                     header('X-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$rate_limit));
                     header('X-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$rate_remaining));
                     header('X-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$rate_reset_ts));
-                    header('X-RateLimit-Window: ' . ($unlimited ? 'unlimited' : (string)$rate_window));
+                    header('X-RateLimit-Window: ' . $rate_window);
                     header('X-DL-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$dl_rate_limit));
                     header('X-DL-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$dl_rate_remaining));
                     header('X-DL-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$dl_reset_ts));
