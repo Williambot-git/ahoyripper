@@ -4536,6 +4536,12 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the INVALID_API_KEY path (the invalid-key
+                // check fires before yt-dlp or ffprobe are invoked). Completes the
+                // "always present" invariant documented in the README: every API response
+                // includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
