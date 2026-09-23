@@ -7523,6 +7523,10 @@ switch ($action) {
                     // in the system PATH. Including this flag ensures the probe accurately
                     // reflects real-world download capability in non-standard deployments.
                     '--ffmpeg-location', FFMPEG_PATH,
+                    // --consecutive-title: yt-dlp 2024.12+ prevents path traversal via video
+                    // titles containing "../" sequences. Defense-in-depth alongside sanitize_filename()
+                    // and --restrict-filenames — this catches titles yt-dlp itself retrieves.
+                    '--consecutive-title',
                 ];
                 if (AHOY_IMPERSONATE !== '') {
                     $probe_cmd[] = '--impersonate';

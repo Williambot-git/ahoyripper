@@ -1390,6 +1390,38 @@ pip install -U yt-dlp curl-cffi
 docker compose down && docker compose build --no-cache && docker compose up -d
 ```
 
+### yt-dlp flags used
+
+AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info, download, and health probe). These flags are not configurable via environment variables — they are hardcoded for security and correctness. Understanding them helps with debugging:
+
+| Flag | Purpose |
+|------|---------|
+| `--impersonate <browser>` | Spoofs browser TLS/ALPN fingerprints (yt-dlp 2024.09+). Dramatically reduces 403/422 errors on protected sites. Disabled when `AHOY_IMPERSONATE` is empty. |
+| `--cookies <path>` | Reads browser cookies from a Netscape-format `cookies.txt` file for authenticated requests (age-restricted YouTube, Spotify, etc.). Only passed when `COOKIES_PATH` is configured. |
+| `--yes-playlist` / `--no-playlist` | Controls single-video vs. playlist fetching. `--no-playlist` is the default (safe); `--yes-playlist` is passed only when `playlist=1` is explicitly requested. |
+| `--no-progress` | Suppresses all progress output to stderr. Required — unfiltered progress output corrupts JSON parsing in PHP. |
+| `--socket-timeout <seconds>` | Per-connection timeout passed to yt-dlp. Set to `DOWNLOAD_TIMEOUT - 15s` (info: `INFO_TIMEOUT - 5s`) so PHP's outer timeout always fires first and classifies errors correctly. |
+| `--retries 3` | Generic retry count for transient network failures. |
+| `--extractor-retries 3` | Separate retry budget for extractor-specific errors (rate limits, 5xx, etc.). Recoveries don't consume the generic retry budget. |
+| `--no-update` | Disables yt-dlp's home-server update checks and telemetry pings (yt-dlp 2023.11+; older versions used `--no-call-home`). |
+| `--max-filesize 50G` | Prevents accidentally downloading 4K/8K content that would exhaust server disk. yt-dlp exits with `FilesizeExceeded` (→ `FILE_TOO_LARGE`) when the format exceeds this limit. |
+| `--ffmpeg-location <path>` | Points yt-dlp at the configured ffmpeg binary. Required when ffmpeg is not in the system PATH. |
+| `--restrict-filenames` | Converts filenames to ASCII-safe equivalents, preventing filesystem issues with unicode titles. |
+| `--no-mtime` | Does not set the downloaded file's modification time to the source video's upload date. The download moment is the meaningful timestamp for a streaming service. |
+| `--write-thumbnail --embed-thumbnail` | Downloads and embeds video thumbnail as metadata (album art for audio, file thumbnail for video). |
+| `--embed-metadata` | Embeds video/audio metadata (title, uploader, upload date, description, chapters) into the downloaded file. |
+| `--consecutive-title` | yt-dlp 2024.12+ prevents path traversal via video titles containing `../` sequences. Defense-in-depth alongside `sanitize_filename()` and `--restrict-filenames`. |
+| `--force-overwrite` | Overwrites existing files without prompting. Required for clean re-downloads. |
+| `--referer <url>` | Sets the HTTP Referer header sent to the source platform. Defaults to `https://ahoyripper.com/`. A custom referer can improve extraction success on platforms that validate the header. |
+| `--user-agent <ua>` | Sets the User-Agent string. AhoyRipper uses a stable, browser-like UA string. |
+| `--add-header Accept-Language: en-US` | Hardcoded Accept-Language for consistent English-language metadata regardless of server locale. |
+| `--dump-json` | (info/health only) Outputs video metadata as JSON without downloading. |
+| `--skip-download` | (info/health only) Skips the actual download — fetches metadata only. |
+| `-f <format>` | (download only) Format selector ID from the info response (e.g. `22`, `bestaudio[ext=m4a]`). |
+| `-o <template>` | (download only) Output filename template. yt-dlp auto-appends the file extension. |
+
+> **Note:** yt-dlp 2024.09 removed `--no-check-certificates` — SSL certificate validation is always enabled. SSL errors now trigger extractor retry logic instead.
+
 ### Common error codes
 
 | Error code | Cause | Solution |
