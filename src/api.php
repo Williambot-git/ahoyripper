@@ -3610,6 +3610,11 @@ switch ($action) {
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
+                // X-FFProbe-Timeout: ffprobe was never reached in the daily-quota gate
+                // (yt-dlp had not yet run). Adding it completes the "always present" invariant
+                // for all API response headers — every error block includes both
+                // X-FFProbe-Status and X-FFProbe-Timeout so clients can always read both.
+                header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
                 // CSP + Reporting headers — consistent with all other API error responses
                 // (health action at line ~6999 is the reference implementation).
                 // NOTE: 'upgrade-insecure-requests' is intentionally ABSENT — it only
