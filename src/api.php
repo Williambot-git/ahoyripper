@@ -3335,6 +3335,11 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the INVALID_SORT validation path (yt-dlp
+                // has not run yet, no file exists). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
                 'upgrade_url' => UPGRADE_URL,
                 'quota_remaining' => -1,
                 'quota_limit' => $daily_limit,
@@ -3442,6 +3447,11 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the INVALID_API_KEY validation path (yt-dlp
+                // has not run yet, no file exists). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
                 // quota fields: invalid key means no quota tracking applies — consistent
                 // with the -1 sent for unlimited-key responses.
                 'quota_remaining' => -1,
