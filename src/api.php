@@ -1122,7 +1122,16 @@ if (in_array($action, $internal_actions, true)) {
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-        echo json_encode(['status' => 'ok', 'retry_after' => 0], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode([
+            'status' => 'ok',
+            'retry_after' => 0,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
+            // (line 1120) — always 'skipped' on check responses since ffprobe only
+            // runs after a download. Present here to complete the "always present"
+            // invariant documented in the README: every API response body includes
+            // x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
@@ -7967,6 +7976,12 @@ switch ($action) {
                 'server_time_unix' => time(),
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
+                // (line 7968) — always 'skipped' on analytics since ffprobe only runs
+                // after a download. Present here to complete the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
                 'upgrade_url' => UPGRADE_URL,
                 'source_url' => null,
                 'source_url_missing' => false,
