@@ -428,9 +428,9 @@ ahoyripper/
 │   ├── index.php               # Main page
 │   ├── manifest.json           # PWA manifest (installable web app)
 │   ├── sw.js                    # Service worker (PWA offline support)
-│   ├── robots.txt               # SEO + AI-crawler blocking
+│   ├── robots.php               # SEO + AI-crawler blocking (dynamic, custom-domain aware)
 │   ├── 404.html                 # Custom 404 error page
-│   ├── sitemap.xml              # XML sitemap for search engines
+│   ├── sitemap.php              # XML sitemap for search engines (dynamic, custom-domain aware)
 │   ├── opensearch.xml           # OpenSearch description (browser search)
 │   ├── og-image.webp           # Open Graph + Twitter Card image (used in meta tags)
 │   ├── og-image.png             # PNG source for og-image
@@ -471,7 +471,7 @@ ahoyripper/
 └── LICENSE                      # GPL-3.0 license
 ```
 
-> **Note:** `robots.txt` lives in `public/` and is also served at the root by nginx — do not place a separate `robots.txt` at the project root.
+> **Note:** `robots.php` (served as `/robots.txt`) and `sitemap.php` (served as `/sitemap.xml`) live in `public/` and are routed through PHP by nginx — do not place static `robots.txt` or `sitemap.xml` at the project root. The dynamic endpoints derive the canonical base URL from the Host header, enabling correct SEO for custom-domain deployments.
 
 ---
 

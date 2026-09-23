@@ -1410,7 +1410,10 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 #   - 1 in /opensearch.xml location block (OpenSearch description)
 #   - 1 in /.well-known/ location block (security.txt and other well-known files)
 #   - 1 in /.well-known/security.txt location block (RFC 9116 security contact)
-#   - 1 in /sitemap.xml location block (XML sitemap for search engines)
+#   - 1 in /sitemap.xml rewrite block (dynamic sitemap via sitemap.php)
+#   - 1 in /sitemap.php location block (dynamic sitemap generation)
+#   - 1 in /robots.txt rewrite block (dynamic robots.txt via robots.php)
+#   - 1 in /robots.php location block (dynamic robots.txt generation)
 #   - 1 in /og-image.webp location block (social share preview image)
 #   - 1 in /og-image.png location block (social share preview image)
 #   - 1 in /404.html location block for not-found responses (defense-in-depth)
@@ -1424,10 +1427,10 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 16 ] && [ "$CORP_COUNT" -eq 16 ]; then
-    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /og-image.webp + /og-image.png + /robots.txt + /404.html + /50x.html + /src/api.php + catch-all location / + location ~ \.php$)"
+if [ "$COOP_COUNT" -eq 19 ] && [ "$CORP_COUNT" -eq 19 ]; then
+    echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /sitemap.php + /robots.txt + /robots.php + /og-image.webp + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location / + location ~ \.php$)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 16), CORP appears $CORP_COUNT times (expected 16)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 19), CORP appears $CORP_COUNT times (expected 19)"
     exit 1
 fi
 
