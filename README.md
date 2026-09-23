@@ -72,7 +72,7 @@ curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.y
   -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
 ```
 
-Response includes `title`, `thumbnail`, `duration`, `uploader`, `uploader_url`, `url`, `video_url`, `platform`, `derived_filename`, `sort_applied`, `is_playlist`, `playlist_count`, `playlist_title`, `playlist_id`, and `formats[]` with `id`, `label`, `description`, `format_note`, `format_description`, `filesize_mb`, `height`, `fps`, `quality`, `tbr`, `abr`, `ext`, `vcodec`, `acodec`, `format_type`, `type_group`, and `language` for each available format. `uploader_url` is the channel/uploader page URL (or `null`). `url` is the canonical video page URL after any redirect. `is_playlist` is `true` when the URL resolved to a multi-entry playlist; `playlist_count`, `playlist_title`, and `playlist_id` surface playlist metadata (all `null` for single-video URLs). `video_url` mirrors `url` for consistency with error responses (which always include `video_url`), making it a reliable field regardless of response type. `sort_applied` confirms which sort key was applied (e.g. `"height"`). `format_description` exposes yt-dlp's raw format notes without the resolution prefix (e.g. `"720p60 HDR 10bit"`), or `null` when not available. The response also includes `source_url` (the requested URL), `source_url_missing` (whether the URL param was absent), `yt_dlp_version`, `api_version`, and quota fields (`quota_remaining`, `quota_limit`, `quota_reset`, `quota_reset_unix`). Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
+Response includes `title`, `thumbnail`, `duration`, `uploader`, `uploader_url`, `url`, `video_url`, `platform`, `derived_filename`, `sort_applied`, `is_playlist`, `playlist_count`, `playlist_title`, `playlist_id`, and `formats[]` with `id`, `label`, `description`, `format_note`, `format_description`, `filesize_mb`, `height`, `fps`, `quality`, `tbr`, `abr`, `ext`, `vcodec`, `acodec`, `format_type`, `type_group`, and `language` for each available format. `uploader_url` is the channel/uploader page URL (or `null`). `url` is the canonical video page URL after any redirect. `is_playlist` is `true` when the URL resolved to a multi-entry playlist; `playlist_count`, `playlist_title`, and `playlist_id` surface playlist metadata (all `null` for single-video URLs). `video_url` mirrors `url` for consistency with error responses (which always include `video_url`), making it a reliable field regardless of response type. `sort_applied` confirms which sort key was applied (e.g. `"height"`). `format_description` exposes yt-dlp's raw format notes without the resolution prefix (e.g. `"720p60 HDR 10bit"`), or `null` when not available. The response also includes `source_url` (the requested URL), `source_url_missing` (whether the URL param was absent), `yt_dlp_version`, `api_version`, `server_time` (ISO 8601), `server_time_unix` (Unix timestamp), `quota_remaining`, `quota_limit`, `quota_reset`, `quota_reset_unix`, and `x_ffprobe_status` (always `skipped` on info responses). Sort formats with `&sort=height` (default), `&sort=filesize` (largest first), `&sort=filesize_asc` (smallest first), `&sort=tbr` (bitrate), `&sort=quality`, or `&sort=audio_quality`.
 
 ### Download a specific format
 
@@ -616,10 +616,13 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "source_url_missing": false,
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
+  "server_time": "2026-09-18T00:00:00+00:00",
+  "server_time_unix": 1726627200,
   "quota_remaining": 4,
   "quota_limit": 5,
   "quota_reset": "2026-09-19T00:00:00+00:00",
-  "quota_reset_unix": 1789776000
+  "quota_reset_unix": 1789776000,
+  "x_ffprobe_status": "skipped"
 }
 ```
 
