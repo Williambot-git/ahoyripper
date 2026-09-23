@@ -4094,7 +4094,11 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                // video_url: mirrors source_url since yt-dlp had not yet run when this
+                // error was raised — the fetch failed before video URL was available.
+                'video_url' => $url,
                 'format_id_missing' => false,
+                'format_id' => null,
                 'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -4109,6 +4113,11 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the YTDLP_ERROR path (yt-dlp fetch failed
+                // before any file was produced). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
@@ -4172,7 +4181,11 @@ switch ($action) {
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
+                // video_url: mirrors source_url since parseFormats failed before video URL
+                // was extracted — the yt-dlp output could not be parsed.
+                'video_url' => $url,
                 'format_id_missing' => false,
+                'format_id' => null,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
@@ -4184,6 +4197,11 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe is never reached in the PARSE_ERROR path (yt-dlp ran but
+                // parseFormats returned null). Completes the "always present" invariant
+                // documented in the README: every API response includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
