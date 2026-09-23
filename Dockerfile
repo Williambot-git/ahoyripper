@@ -83,14 +83,26 @@ RUN apt-get update && apt-get install -y \
 # --break-system-packages needed on Debian Bookworm (PEP 668 compliance).
 # -q suppresses progress output; the verification step immediately after confirms
 # the install actually succeeded rather than silently proceeding on partial failure.
-RUN pip3 install --break-system-packages -q curl_cffi 2>&1 | tail -5
+# CURL_CFFI_VERSION defaults to a pinned version for reproducible builds.
+# Pin to a specific version (e.g. '0.8.0') to lock in a known-working release.
+# Override at build time with: docker build --build-arg CURL_CFFI_VERSION=0.8.0.
+ARG CURL_CFFI_VERSION="0.8.0"
+RUN pip3 install --break-system-packages -q "curl_cffi==${CURL_CFFI_VERSION}" 2>&1 | tail -5
 # Verify curl_cffi is actually importable before the build continues.
 # Without this check, a broken or partial installation (e.g. missing shared
 # library, wrong Python version, pip bug) silently proceeds and --impersonate
 # fails at runtime with 403 errors on protected sites — with no indication
 # from the build that curl_cffi is broken. The import check fails fast and
-# loud if the install did not succeed.
-RUN python3 -c "import curl_cffi; print(f'curl_cffi {curl_cffi.__version__} installed')"
+# loud if the install did not succeed. Also verify the installed version
+# matches the pinned version — a mismatch means pip resolved to a different
+# release (e.g. due to a version being yanked or unavailable).
+RUN python3 -c "\
+import curl_cffi; \
+installed = curl_cffi.__version__; \
+expected = '${CURL_CFFI_VERSION}'; \
+if installed != expected: \
+    raise SystemExit(f'curl_cffi version mismatch: expected {expected}, got {installed}'); \
+print(f'curl_cffi {installed} verified')"
 
 # Verify yt-dlp is intact and runs before declaring the image good.
 # A corrupt or incomplete download produces a non-executable file;
