@@ -49,7 +49,6 @@ Allow: /
 User-agent: AdsBot
 User-agent: AiBot
 User-agent: Amazonbot
-User-agent: Applebot
 User-agent: Bytespider
 User-agent: CCBot
 User-agent: ChatGPT-User
@@ -58,7 +57,6 @@ User-agent: Claudebot
 User-agent: CohereBot
 User-agent: Cometbot
 User-agent: Diffbot
-User-agent: FacebookBot
 User-agent: Google-Extended
 User-agent: GPTBot
 User-agent: GoogleOther
@@ -77,6 +75,12 @@ User-agent: PerplexityBot
 User-agent: PetalBot
 User-agent: SemrushBot-Crawler
 User-agent: YouBot
+# Applebot and FacebookBot are allowed — they are legitimate crawlers used for
+# search indexing (Applebot: Spotlight/Siri) and social link previews (FacebookBot:
+# Open Graph meta tags). They are NOT AI training scrapers. Blocking them would
+# prevent AhoyRipper from appearing in Apple Spotlight search results and would
+# break rich link previews when AhoyRipper URLs are shared on Facebook/Meta.
+# Allow them to crawl the public-facing HTML pages (they respect the /src/ disallow).
 # AhoyBot is our own crawler — allow it to crawl the site normally so our
 # own SEO and indexing pipelines work correctly.
 User-agent: AhoyBot
