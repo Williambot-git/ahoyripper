@@ -1904,17 +1904,43 @@ else
 fi
 
 echo ""
+echo "==> Checking x_ffprobe_status is present in all validation-error JSON responses..."
+# Every API response must include x_ffprobe_status in the JSON body so clients can
+# always read this field without special-casing validation errors from success/probe responses.
+# This invariant is documented in the README. Validate the three pre-yt-dlp errors that were
+# historically missing it (before the x_ffprobe_status normalization pass).
+for err_code in MISSING_URL INVALID_URL URL_TOO_LONG; do
+    case "$err_code" in
+        MISSING_URL)   anchor="No URL was provided" ;;
+        INVALID_URL)   anchor="error_code.*INVALID_URL" ;;
+        URL_TOO_LONG)  anchor="URL is too long" ;;
+    esac
+    anchor_line=$(grep -n "$anchor" src/api.php | head -1 | cut -d: -f1)
+    # x_ffprobe_status appears AFTER the error_code line (in the json_encode body).
+    # Search within a 50-line forward window from the anchor to capture the full json_encode.
+    end_line=$(( anchor_line + 50 ))
+    BLOCK_LINES=$(sed -n "${anchor_line},${end_line}p" src/api.php)
+    if echo "$BLOCK_LINES" | grep -q "'x_ffprobe_status'"; then
+        echo "  ✓ $err_code includes x_ffprobe_status field"
+    else
+        echo "  ✗ $err_code missing x_ffprobe_status field (breaks \"always present\" invariant)"
+        exit 1
+    fi
+done
+echo "  ✓ MISSING_URL, INVALID_URL, and URL_TOO_LONG all include x_ffprobe_status"
+
+echo ""
 echo "==> Checking UNKNOWN_ACTION (default: case) response includes retry_after field..."
 # UNKNOWN_ACTION is a client-input validation error (the action name is not recognized).
 # Adding retry_after: 0 gives API clients a consistent field to read for backoff
-# timing — matching the contract of all other validation errors (MISSING_URL,
+# timing — matching the contract of all other error responses (MISSING_URL,
 # INVALID_URL, URL_TOO_LONG) which all include retry_after: 0.
 # Anchor on the unique error message so we get the actual JSON response block.
 UNKNOWN_ACTION_CHECK=$(sed -n "/Unknown action. Use/,/echo json_encode/p" src/api.php | head -n 30)
 if echo "$UNKNOWN_ACTION_CHECK" | grep -q "'retry_after'"; then
     echo "  ✓ UNKNOWN_ACTION includes retry_after field"
 else
-    echo "  ✗ UNKNOWN_ACTION is missing retry_after field (inconsistent with other validation errors)"
+    echo "  ✗ UNKNOWN_ACTION is missing retry_after field (inconsistent with other error responses)"
     exit 1
 fi
 

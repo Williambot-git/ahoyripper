@@ -2546,6 +2546,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in the MISSING_URL validation path (no URL means
+            // no platform detection, no yt-dlp run, no file to probe). Completes the
+            // "always present" invariant documented in the README: every API response
+            // includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2626,6 +2632,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // the info response (where video_url holds the resolved page URL).
             // Null here because the URL was invalid and no video was resolved.
             'video_url' => null,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in the INVALID_URL validation path (URL was rejected
+            // before platform detection or yt-dlp ran). Completes the "always present"
+            // invariant documented in the README: every API response includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2698,6 +2709,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+            // ffprobe is never reached in the URL_TOO_LONG validation path. Completes the
+            // "always present" invariant documented in the README: every API response
+            // includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
