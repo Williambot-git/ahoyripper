@@ -3105,6 +3105,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // field coverage across all API code paths.
         'server_time' => date('c'),
         'server_time_unix' => time(),
+        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above.
+        // ffprobe is never reached for METHOD_NOT_ALLOWED (HTTP method fires before
+        // any file processing). Completes the "always present" invariant documented
+        // in the README: every API response includes x_ffprobe_status in the JSON body.
+        'x_ffprobe_status' => 'skipped',
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
@@ -3202,6 +3207,11 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // expect consistent field coverage across all API code paths.
         'server_time' => date('c'),
         'server_time_unix' => time(),
+        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above.
+        // ffprobe is never reached for NOT_ACCEPTABLE (Accept-header validation fires
+        // before any file processing). Completes the "always present" invariant
+        // documented in the README: every API response includes x_ffprobe_status.
+        'x_ffprobe_status' => 'skipped',
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
