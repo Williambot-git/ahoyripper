@@ -6978,6 +6978,12 @@ switch ($action) {
                 // expect consistent field coverage across all API code paths.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
+                // (line 6943) — always 'skipped' on client-error since ffprobe only runs
+                // after a download. Present here to complete the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return;
         }
@@ -7867,6 +7873,12 @@ switch ($action) {
                 // expect consistent field coverage across all API code paths.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
+                // (line 7815) — always 'skipped' on csp-report since ffprobe only runs
+                // after a download. Present here to complete the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
