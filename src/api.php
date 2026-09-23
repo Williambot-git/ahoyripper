@@ -7599,6 +7599,13 @@ switch ($action) {
                         // missing fields when inspecting probe results).
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        // curl_cffi_version and curl_cffi_ok: mirrors the top-level health
+                        // response fields so probe sub-objects expose the same system status
+                        // as the parent response. This lets clients read curl_cffi status
+                        // directly from the probe sub-object without having to cross-reference
+                        // the top-level fields.
+                        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                         // upgrade_url: mirrors the health response body for consistency
                         // when clients read the probe sub-field directly.
                         'upgrade_url' => UPGRADE_URL,
@@ -7683,11 +7690,14 @@ switch ($action) {
                         'error_code' => $probe_classified['code'] ?? 'PROBE_FAILED',
                         'error_msg' => $probe_classified['msg'] ?? $probe_raw_err ?: 'Unknown error during yt-dlp health probe.',
                         'source_url' => HEALTH_PROBE_URL,
-                        // yt_dlp_version and api_version are included on all API responses;
-                        // add them here for consistency even though the probe failed,
-                        // so clients always have version info regardless of probe outcome.
+                        // yt_dlp_version, api_version, curl_cffi_version, and curl_cffi_ok are
+                        // included on all API responses; add them here for consistency even
+                        // though the probe failed, so clients always have version info
+                        // regardless of probe outcome.
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                         // upgrade_url: included on failed probe responses so clients can
                         // always surface the AhoyVPN upsell regardless of probe outcome.
                         'upgrade_url' => UPGRADE_URL,
