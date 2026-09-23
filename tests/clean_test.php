@@ -111,11 +111,14 @@ test('string with quotes passes through',
 test('string with apostrophe passes through',
     clean("It's a title") === "It's a title");
 
-test('internal newlines are NOT collapsed (PHP trim only strips edges)',
-    clean("Title\nWith\nNewlines") === "Title\nWith\nNewlines");
+// C0 control chars (U+0000–U+001F, U+007F) are stripped by clean(), including
+// internal newlines and tabs. This prevents corruption from yt-dlp metadata
+// that contains raw control characters in titles/descriptions.
+test('internal newlines are stripped (C0 control removal)',
+    clean("Title\nWith\nNewlines") === "TitleWithNewlines");
 
-test('internal tabs are NOT collapsed',
-    clean("Title\tWith\tTabs") === "Title\tWith\tTabs");
+test('internal tabs are stripped (C0 control removal)',
+    clean("Title\tWith\tTabs") === "TitleWithTabs");
 
 // ─── Boolean inputs ─────────────────────────────────────────────────────────────
 
