@@ -516,6 +516,13 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
         // ffprobe is never reached in the SERVICE_UNAVAILABLE path.
         'x_ffprobe_status' => 'skipped',
+        // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+        // (lines 439-440). Adding them to the body completes the "always present"
+        // invariant documented in the README: every API response body includes
+        // x_info_timeout and x_download_timeout. Consistent with the check, health,
+        // and info/download response bodies.
+        'x_info_timeout' => INFO_TIMEOUT,
+        'x_download_timeout' => DOWNLOAD_TIMEOUT,
         // server_time: ISO 8601 + Unix for client clock synchronization.
         // Present on all other API responses — SERVICE_UNAVAILABLE was missing
         // these fields, breaking generic response parsers that expect consistent
