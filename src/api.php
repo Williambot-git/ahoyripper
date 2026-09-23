@@ -3994,6 +3994,10 @@ switch ($action) {
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_status' => 'skipped',
                 // quota fields: quota was refunded before this response.
                 // Unlimited-key holders ($unlimited=true) were never incremented, so
                 // $post_refund_count is $daily_limit for them (no change from baseline).
@@ -6496,6 +6500,10 @@ switch ($action) {
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe was never reached (file was never presented for verification).
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -6583,6 +6591,10 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => date('c'),
                     'server_time_unix' => time(),
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe was never reached (client disconnected before file could be verified).
+                    // Completes the "always present" invariant documented in the README.
+                    'x_ffprobe_status' => 'skipped',
                     // quota fields: included for consistency with all other download error responses.
                     // Quota was not charged since no usable file was received.
                     'quota_remaining' => $unlimited ? -1 : $post_refund_count,
