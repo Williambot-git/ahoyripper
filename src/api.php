@@ -5792,6 +5792,12 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe was never reached (yt-dlp exited 0 but produced no file or an empty
+                // file, so there was nothing for ffprobe to verify). Completes the "always
+                // present" invariant documented in the README: every API response includes
+                // x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
                 'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
