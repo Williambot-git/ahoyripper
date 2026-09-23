@@ -1125,12 +1125,15 @@ if (in_array($action, $internal_actions, true)) {
         echo json_encode([
             'status' => 'ok',
             'retry_after' => 0,
-            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
-            // (line 1120) — always 'skipped' on check responses since ffprobe only
-            // runs after a download. Present here to complete the "always present"
-            // invariant documented in the README: every API response body includes
-            // x_ffprobe_status.
+            'api_version' => AHOYRIPPER_VERSION,
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
             'x_ffprobe_status' => 'skipped',
+            'upgrade_url' => UPGRADE_URL,
+            'quota_remaining' => -1,
+            'quota_limit' => getDailyQuotaLimit(),
+            'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+            'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
