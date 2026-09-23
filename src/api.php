@@ -6919,6 +6919,10 @@ switch ($action) {
             // complete API surface parity — clients can always find these headers.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Status: always 'skipped' on client-error responses since ffprobe only
+            // runs after a download completes. Adding it completes the "always present"
+            // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
+            header('X-FFProbe-Status: skipped');
             // X-Server-Time: wire-level clock metadata. Mirrors the same headers set
             // in the analytics 405 block and every other API response, giving API
             // consumers the same temporal reference in both HTTP headers and JSON payload.
@@ -7943,6 +7947,10 @@ switch ($action) {
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+            // X-FFProbe-Status: always 'skipped' on analytics responses since ffprobe only
+            // runs after a download completes. Adding it completes the "always present"
+            // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
+            header('X-FFProbe-Status: skipped');
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for analytics beacons.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
