@@ -819,7 +819,7 @@ window.addEventListener('appinstalled', function() {
     'FILE_READ_ERROR': 'The server could not read the downloaded file back for streaming. This is a temporary server issue — try again or pick a different format.',
     'PROC_OPEN_FAILED': 'The download could not be started. The server may be restarting or overloaded. Try again in a moment.',
     'FORMAT_UNAVAILABLE': 'That format is not available for this video. Select another from the list above.',
-    'ANALYTICS_ACTION': 'Internal analytics action — not usable directly. Use a supported action: info, download, check, health, progress, analytics, client-error, or csp-report.',
+
     'MISSING_FORMAT': 'Select a format from the list above first, then click it to download.',
     'INVALID_FORMAT_ID': 'That format ID was not recognized. Refresh to get a fresh format list, then pick a valid format from the list.',
     'PROBE_FAILED': 'Could not verify that yt-dlp is working. The server may be misconfigured or yt-dlp is not installed. Try again or contact support.',
