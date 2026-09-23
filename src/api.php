@@ -8013,8 +8013,14 @@ switch ($action) {
                 'server_time_unix' => time(),
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+                // (lines 7972-7973). Adding them to the body lets API consumers read
+                // these values without parsing HTTP headers — consistent with the check
+                // and health action pattern.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
-                // (line 7968) — always 'skipped' on analytics since ffprobe only runs
+                // (line 8005) — always 'skipped' on analytics since ffprobe only runs
                 // after a download. Present here to complete the "always present"
                 // invariant documented in the README: every API response body includes
                 // x_ffprobe_status.
@@ -8029,7 +8035,10 @@ switch ($action) {
                 // associated video URL. Consistent with the same null value in
                 // action=check, action=health, and action=client-error.
                 'video_url' => null,
-                // Analytics is an internal action — quota does not apply.
+                // Analytics is a read-only internal action — quota does not apply.
+                // Use -1 sentinels (unknown/not-applicable) for quota fields,
+                // consistent with how other internal actions (check, health) signal
+                // that quota tracking is not active for this endpoint.
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
                 'quota_reset' => -1,
