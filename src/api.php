@@ -5012,8 +5012,18 @@ switch ($action) {
         // Register shutdown handler to clean up any temp files on unexpected exit.
         // Catches: fatal errors, connection aborts, timeout before normal cleanup.
         // The glob pattern is captured by PHP's closure semantics.
+        // @ suppress glob() errors (permission denied, non-existent directory) — cleanup
+        // failures are non-critical; unlink errors are also suppressed to match.
         register_shutdown_function(function() use($tmp_dir, $out_base) {
-            foreach (glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+            foreach (@glob($tmp_dir . '/' . $out_base . '*') as $f) { @unlink($f); }
+            // Log the unexpected shutdown with partial filesize if available.
+            // $request_id is a global set at the top of api.php before any action routing.
+            // Call logRequest directly — PHP closures can invoke globally-defined
+            // functions by name without needing to capture them in use().
+            logRequest('download', 500, [
+                'reason' => 'unexpected_shutdown',
+                'filesize_bytes_partial' => (isset($filesize) ? $filesize : null),
+            ]);
         });
 
         // yt-dlp sends the URL itself as referer by default. Allow per-request override
