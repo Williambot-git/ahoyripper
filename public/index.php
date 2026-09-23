@@ -323,6 +323,23 @@ header_remove('X-Powered-By');
         }
       },
       {
+        "@type": "WebPage",
+        "@id": "<?= $BASE_URL ?>/#webpage",
+        "name": "AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site",
+        "description": "Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.",
+        "url": "<?= $BASE_URL ?>",
+        "inLanguage": "en",
+        "isPartOf": {
+          "@id": "<?= $BASE_URL ?>/#website"
+        },
+        "about": {
+          "@type": "SoftwareApplication",
+          "name": "AhoyRipper",
+          "applicationCategory": "MultimediaApplication",
+          "operatingSystem": "Web"
+        }
+      },
+      {
         "@type": "SoftwareApplication",
         "@id": "<?= $BASE_URL ?>/#softwareapplication",
         "name": "AhoyRipper",
