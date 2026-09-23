@@ -7145,8 +7145,6 @@ switch ($action) {
         echo json_encode([
             'ok' => true,
             'action' => $action,
-            'server_time' => date('c'),
-            'server_time_unix' => time(),
             'request_id' => $request_id,
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -7177,13 +7175,13 @@ switch ($action) {
             // action=csp-report (line 899), action=download 503 block (line 4527),
             // and action=client-error 405 block (line 6714).
             'x_ffprobe_status' => 'skipped',
-            // server_time: ISO 8601 + Unix for client clock synchronization.
-            // Present on all other API responses (health, check, info, download, analytics,
-            // csp-report, UNKNOWN_ACTION) — this block was missing these fields, breaking
-            // generic response parsers that expect consistent field coverage across all
-            // API code paths.
-            'server_time' => date('c'),
-            'server_time_unix' => time(),
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+            // (lines 7051-7052). Adding them to the body completes the "always present"
+            // invariant documented in the README: every API response body includes
+            // x_info_timeout and x_download_timeout. Consistent with the check, health,
+            // and info/download response bodies.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
