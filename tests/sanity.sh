@@ -1141,6 +1141,17 @@ else
     exit 1
 fi
 
+echo "==> Checking twitter:domain is dynamically generated (not hardcoded)... "
+# twitter:domain must be dynamic (derived from $BASE_URL via parse_url) so that
+# custom-domain deployments pass Twitter Card validation. A hardcoded value
+# (e.g. "ahoyripper.com") fails Twitter's validator on non-ahoyripper.com domains.
+if grep -q 'twitter:domain.*parse_url' public/index.php; then
+    echo "  ✓ twitter:domain uses dynamic parse_url(\$BASE_URL) — custom-domain safe"
+else
+    echo "  ✗ twitter:domain appears to be hardcoded — must use parse_url(\$BASE_URL, PHP_URL_HOST)"
+    exit 1
+fi
+
 echo "==> Checking twitter:image dimensions in public/index.php (Twitter Card rendering)..."
 # twitter:image:width and twitter:image:height (Open Graph spec) are required by
 # Twitter Card validator for accurate rendering. Without them the card may show a

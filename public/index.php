@@ -208,7 +208,7 @@ header_remove('X-Powered-By');
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="<?= $BASE_URL . ($default_url ? '?url=' . rawurlencode($default_url) : '') ?>">
-  <meta name="twitter:domain" content="ahoyripper.com">
+  <meta name="twitter:domain" content="<?= parse_url($BASE_URL, PHP_URL_HOST) ?>">
   <meta name="twitter:site" content="@ahoyvpn">
   <meta name="twitter:creator" content="@ahoyvpn">
   <meta name="twitter:title" content="AhoyRipper - Free Online Media Ripper | Rip Video & Audio from Any Site">
