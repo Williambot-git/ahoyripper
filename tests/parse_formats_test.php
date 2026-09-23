@@ -57,6 +57,22 @@ test('clean(true) returns null (not "1")',
 test('clean(false) returns null (not "")',
     clean(false) === null);
 
+echo "\n==> Testing clean() — C0 control character stripping\n";
+// Bell (U+0007), Backspace (U+0008), Form Feed (U+000C) should be stripped.
+// CR+LF stripped together leaves an empty string → 'Unknown'.
+test('clean("Normal text") preserves text',
+    clean("Normal text") === "Normal text");
+test('clean("Text\x07With\x08Bell") strips control chars',
+    clean("Text\x07With\x08Bell") === "TextWithBell");
+test('clean("Text\x7FDel") strips DEL (U+007F)',
+    clean("Text\x7FDel") === "TextDel");
+test('clean("\x00\x1F\x7F") strips all C0+DEL → empty → Unknown',
+    clean("\x00\x1F\x7F") === 'Unknown');
+test('clean("Valid UTF-8 中文 texto 😀") preserves multi-byte chars',
+    clean("Valid UTF-8 中文 texto 😀") === "Valid UTF-8 中文 texto 😀");
+test('clean("Trailing\x00Control") strips trailing control char',
+    clean("Trailing\x00Control") === "TrailingControl");
+
 function parseFormats($json_str, &$raw_error_out = null, $sort = 'height') {
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
     // with one JSON object per video. A single json_decode() on the full multi-line

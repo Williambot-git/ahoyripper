@@ -34,6 +34,16 @@ function clean($s) {
     // space-filled labels (e.g., "  kbps m4a") — trim before checking emptiness.
     if (is_string($s)) {
         $s = trim($s);
+        // Strip C0 control characters (U+0000–U+001F) and DEL (U+007F).
+        // yt-dlp metadata can contain raw control characters (e.g. from platform APIs)
+        // that corrupt Content-Disposition filenames, UI rendering, and log readability.
+        // preg_replace with /u (UTF-8 mode) safely handles multi-byte sequences:
+        // it matches only single-byte ASCII control characters (U+0000–U+007F range),
+        // leaving valid UTF-8 multi-byte characters untouched. C1 controls (U+0080–U+009F)
+        // are not stripped because they do not appear as standalone bytes in valid UTF-8
+        // (they are only lead bytes in multi-byte sequences). json_encode escapes all
+        // control characters per RFC 8259, providing a safety net for any that slip through.
+        $s = preg_replace('/[\x00-\x1F\x7F]/u', '', $s);
         if ($s === '') return 'Unknown';
     } elseif ($s === null) {
         return 'Unknown';
