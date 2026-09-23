@@ -6031,6 +6031,11 @@ switch ($action) {
                         'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                         'hint' => 'Download verification failed — the file may be corrupt or in an unsupported format. Try another format or try again.',
                         'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
+                        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                        // ffprobe ran to completion (exit 0) but found no video stream, so
+                        // verification could not be completed. Distinct from 'failed' where ffprobe
+                        // itself encountered an error, and from 'success' where a stream was found.
+                        'x_ffprobe_status' => 'skipped',
                     ], JSON_INVALID_UTF8_SUBSTITUTE);
                     exit;
                 }
@@ -6180,6 +6185,10 @@ switch ($action) {
                     // The no-stream path (ffprobe exit === 0 but vstream missing) sets
                     // $probe_err to a descriptive string directly (short by nature).
                     'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — 'failed'
+                    // here means ffprobe itself returned a non-zero exit (or timed out), distinct
+                    // from 'skipped' (ffprobe never reached) and 'success' (stream confirmed).
+                    'x_ffprobe_status' => 'failed',
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
