@@ -745,7 +745,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. | Try again in a few seconds. |
 | `NOT_ACCEPTABLE` | Request did not send an `Accept: application/json` header. The API only serves JSON. | Send `Accept: application/json` on your request. |
 | `METHOD_NOT_ALLOWED` | Request used an HTTP method other than GET. The API accepts GET only. | Use GET to call the API. |
-| `UNKNOWN_ACTION` | The requested API action is not recognized. | Use a valid action (`info`, `download`, `check`, `health`). |
+| `UNKNOWN_ACTION` | The requested API action is not recognized. | Use a valid action (`info`, `download`, `check`, `health`, `progress`, `analytics`, `client-error`, or `csp-report`). |
 
 ### Download a format
 ```
