@@ -47,6 +47,11 @@ if ($host_raw === '' || strlen($host_raw) > 253 || preg_match('/[\x00-\x1F\x7F<>
 $host = htmlspecialchars($host_raw, ENT_QUOTES, 'UTF-8');
 $BASE_URL = $scheme . '://' . $host;
 
+// Cache-Control: no-store — prevents bots and CDNs from caching this dynamic
+// response which varies by Host header. Each custom-domain deployment must
+// serve its own sitemap reflecting its own domain. Harmless for text/xml.
+header('Cache-Control: no-store');
+
 // Lastmod is today's date — sitemap should be re-fetched periodically by crawlers.
 // Using a stable weekly cadence rather than a fixed date ensures the lastmod
 // value doesn't go stale between deployments.
