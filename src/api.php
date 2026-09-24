@@ -686,6 +686,13 @@ if ($is_rate_limited) {
             // "always present" invariant documented in the README: every API response
             // includes x_ffprobe_status.
             'x_ffprobe_status' => 'skipped',
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+            // (lines 638-641). Adding them to the body completes the "always present"
+            // invariant documented in the README: every API response body includes
+            // x_info_timeout and x_download_timeout. Consistent with the check, health,
+            // SERVICE_UNAVAILABLE, MISSING_URL, and info/download response bodies.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
