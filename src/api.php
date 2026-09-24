@@ -5734,6 +5734,11 @@ switch ($action) {
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe only runs after a successful download, and yt-dlp exited non-zero
+                    // before producing a verifiable file. Completes the "always present" invariant
+                    // documented in README: every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
