@@ -24,6 +24,9 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-c
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 header('X-Robots-Tag: noindex, noai, noimage, noydir');
+// X-Download-Options: noopen — defense-in-depth for consistency with index.php.
+// Relevant if content type is ever misdetected as an attachment; harmless for text/plain.
+header('X-Download-Options: noopen');
 header_remove('X-Powered-By');
 $request_id = bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);

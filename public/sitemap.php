@@ -25,6 +25,9 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-c
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 header('X-Robots-Tag: index, follow');
+// X-Download-Options: noopen — defense-in-depth for consistency with index.php.
+// Relevant if content type is ever misdetected as an attachment; harmless for text/xml.
+header('X-Download-Options: noopen');
 header_remove('X-Powered-By');
 // Generate a request correlation ID for support tickets and log correlation.
 $request_id = bin2hex(random_bytes(8));

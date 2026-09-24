@@ -34,6 +34,9 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-c
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
 header('X-Robots-Tag: noindex, noai, noimage, noydir');
+// X-Download-Options: noopen — defense-in-depth for consistency with index.php.
+// Relevant if content type is ever misdetected as an attachment; harmless for XML.
+header('X-Download-Options: noopen');
 header_remove('X-Powered-By');
 // Generate a request correlation ID — mirrors the X-Request-ID added by api.php
 // so nginx access log, PHP error log, and client-side events can be correlated.
