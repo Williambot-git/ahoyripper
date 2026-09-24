@@ -7846,6 +7846,14 @@ switch ($action) {
                         // same temporal metadata as the parent response.
                         'server_time' => date('c'),
                         'server_time_unix' => time(),
+                        // ffprobe_ok: mirrors the field in action=check and action=health so
+                        // monitoring scripts can confirm ffprobe availability from any endpoint.
+                        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — always
+                        // 'skipped' on health since ffprobe only runs after a completed download.
+                        // Present here to complete the "always present" invariant documented in
+                        // the README: every API response body includes x_ffprobe_status.
+                        'x_ffprobe_status' => 'skipped',
                         // request_id: included for traceability — mirrors the top-level
                         // health response field so the probe sub-object can be correlated
                         // to the parent request in distributed tracing scenarios.
