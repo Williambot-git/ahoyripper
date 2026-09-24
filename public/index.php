@@ -252,6 +252,14 @@ header_remove('X-Powered-By');
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" crossorigin="anonymous">
+
+  <!-- Third-party thumbnail CDNs — preconnect cuts DNS+TCP+TLS round-trips
+       for YouTube, TikTok, and Twitter image CDNs before the browser discovers
+       them in yt-dlp metadata. CORS crossorigin="anonymous" matches how the
+       browser fetches these resources (no credentials sent to third-party CDNs). -->
+  <link rel="preconnect" href="https://i.ytimg.com" crossorigin="anonymous">
+  <link rel="preconnect" href="https://*.tiktokcdn.com" crossorigin="anonymous">
+  <link rel="preconnect" href="https://pbs.twimg.com" crossorigin="anonymous">
   <link rel="stylesheet" href="/src/style.css">
 
   <script type="application/ld+json">
