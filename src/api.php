@@ -400,6 +400,12 @@ if ($blocked) {
             // field coverage across all API code paths.
             'server_time' => date('c'),
             'server_time_unix' => time(),
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+            // Present on all other API responses (check, health, client-error, info,
+            // download) — FORBIDDEN_ORIGIN was missing these fields, breaking generic
+            // response parsers that expect consistent field coverage.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
             // ffprobe is never reached in the MISSING_REFERER validation path (CORS
             // validation fires before URL validation, so no platform is detected, no yt-dlp
