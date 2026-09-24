@@ -48,7 +48,8 @@ $host_raw = $_SERVER['HTTP_HOST'] ?? '';
 // Reject obviously malformed Host headers early — a nonsense value like "\x00<meta>"
 // would produce an invalid URL template and confuse browser OpenSearch auto-discovery.
 // Return a JSON error instead of falling through to XML output with a broken BASE_URL.
-if ($host_raw === '' || strlen($host_raw) > 253 || preg_match('/[\x00-\x1F\x7F<>"\']/', $host_raw)) {
+// Control chars (\x00-\x1F, \x7F) corrupt XML; \r\n enables CRLF injection into headers.
+if ($host_raw === '' || strlen($host_raw) > 253 || preg_match('/[\x00-\x1F\x7F<>"\']/', $host_raw) || strpos($host_raw, "\r") !== false || strpos($host_raw, "\n") !== false) {
     http_response_code(400);
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store');
