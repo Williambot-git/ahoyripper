@@ -66,14 +66,26 @@ $xml = <<<XML
     <priority>1.0</priority>
     <image:image>
       <image:loc>{$BASE_URL}/og-image.webp</image:loc>
-      <image:caption>Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms — free, no signup required.</image:caption>
       <image:title>AhoyRipper - Free Online Media Ripper</image:title>
+      <image:caption>Free browser-based tool for downloading video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms. No signup required.</image:caption>
     </image:image>
-    <image:image>
-      <image:loc>{$BASE_URL}/og-image.png</image:loc>
-      <image:caption>Download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms — free, no signup required.</image:caption>
-      <image:title>AhoyRipper - Free Online Media Ripper</image:title>
-    </image:image>
+    <video:video>
+      <video:title>AhoyRipper - Free Online Media Ripper | Rip Video &amp; Audio from Any Site</video:title>
+      <video:description>Free browser-based media ripper for YouTube, TikTok, X/Twitter, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms. No signup, no ads, no tracking.</video:description>
+      <video:thumbnail_loc>{$BASE_URL}/og-image.webp</video:thumbnail_loc>
+      <video:content_loc>{$BASE_URL}/</video:content_loc>
+      <video:duration>PT0M0S</video:duration>
+      <video:publication_date>{$lastmod}</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:platform relationship="no">web</video:platform>
+      <video:tag>video downloader</video:tag>
+      <video:tag>youtube downloader</video:tag>
+      <video:tag>tiktok downloader</video:tag>
+      <video:tag>mp3 converter</video:tag>
+      <video:tag>free media ripper</video:tag>
+      <video:tag>no signup</video:tag>
+      <video:tag>online converter</video:tag>
+    </video:video>
   </url>
 </urlset>
 XML;
