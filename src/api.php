@@ -2853,6 +2853,13 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with MISSING_FORMAT and all other
+                // error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
@@ -2960,6 +2967,13 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with MISSING_FORMAT and all other
+                // error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
@@ -3369,6 +3383,12 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with all other error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_SORT validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
@@ -4035,6 +4055,12 @@ switch ($action) {
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with all other error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
                 // Completes the "always present" invariant documented in the README.
@@ -5295,6 +5321,12 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with all other error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // quota fields: quota was refunded before this response.
                 // $post_refund_count is the post-refund daily count returned by
                 // refundQuota() — it IS the remaining quota, not an offset from the limit.
@@ -6573,6 +6605,16 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // server_time: ISO 8601 + Unix for client clock synchronization.
+                // Present on all other API responses — this block was missing these fields.
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout. Consistent with all other error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // quota fields: included for consistency with all other error responses.
                 // The file was downloaded by yt-dlp (quota was charged) but could not be
                 // read back for streaming — this is a server-side issue, not a quota problem.
@@ -6676,6 +6718,12 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => date('c'),
                     'server_time_unix' => time(),
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                    // Including them in the JSON body completes the "always present" invariant
+                    // documented in the README: every API response body includes x_info_timeout
+                    // and x_download_timeout. Consistent with all other error responses.
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                     // ffprobe was never reached (client disconnected before file could be verified).
                     // Completes the "always present" invariant documented in the README.
