@@ -8210,6 +8210,17 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // curl_cffi_ok: mirrors the field in action=check and action=health so
+                // monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the field in action=check and action=health so
+                // monitoring scripts can confirm ffprobe availability from any endpoint.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — always
+                // 'skipped' on analytics since ffprobe only runs after a download.
+                // Present here to complete the "always present" invariant documented in
+                // the README: every API response body includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
