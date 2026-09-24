@@ -5278,6 +5278,10 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
