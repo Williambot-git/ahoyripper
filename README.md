@@ -841,6 +841,8 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 |------|--------------|---------|
 | `401` | `INVALID_API_KEY` | The API key is invalid or malformed. Use a valid AhoyVPN unlimited key, or leave blank for the free tier. |
 | `403` | `FORBIDDEN_ORIGIN` | Request did not originate from ahoyripper.com or ahoyvpn.com. Requests must come from the AhoyRipper web page. |
+| `403` | `MISSING_REFERER` | No Referer header was provided. Include `-H "Referer: https://ahoyripper.com/"` in your request. |
+| `403` | `INVALID_ORIGIN` | Referer header is present but from an unauthorized origin. Referer must be from `ahoyripper.com` or `ahoyvpn.com`. |
 | `400` | `MISSING_URL` | No URL was provided on the download request. The response also includes `"source_url_missing": true` so clients can distinguish this from `INVALID_URL` (a URL was given but malformed). |
 | `400` | `MISSING_FORMAT` | No format was selected on the download request. The response also includes `"format_id_missing": true` so clients can distinguish this from `INVALID_FORMAT_ID` (a format ID was given but malformed — `format_id_missing` is `false` in that case). |
 | `400` | `INVALID_FORMAT_ID` | The format ID was rejected as invalid — refresh to get a fresh format list, then pick a valid format from the list. The response includes `"format_id_missing": false`. |
