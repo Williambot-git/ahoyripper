@@ -1438,10 +1438,10 @@ echo "==> Checking COOP/CORP headers in nginx-docker.conf..."
 # set these headers, so nginx must provide them at that specific location.
 COOP_COUNT=$(grep -c "Cross-Origin-Opener-Policy" deploy/nginx-docker.conf || true)
 CORP_COUNT=$(grep -c "Cross-Origin-Resource-Policy" deploy/nginx-docker.conf || true)
-if [ "$COOP_COUNT" -eq 19 ] && [ "$CORP_COUNT" -eq 19 ]; then
+if [ "$COOP_COUNT" -eq 18 ] && [ "$CORP_COUNT" -eq 18 ]; then
     echo "  ✓ COOP appears $COOP_COUNT times and CORP appears $CORP_COUNT times (server + /csp-report + location = / + /manifest.json + /opensearch.xml + /.well-known/ + /.well-known/security.txt + /sitemap.xml + /sitemap.php + /robots.txt + /robots.php + /og-image.webp + /og-image.png + /404.html + /50x.html + /src/api.php + catch-all location / + location ~ \.php$)"
 else
-    echo "  ✗ COOP appears $COOP_COUNT times (expected 19), CORP appears $CORP_COUNT times (expected 19)"
+    echo "  ✗ COOP appears $COOP_COUNT times (expected 18), CORP appears $CORP_COUNT times (expected 18)"
     exit 1
 fi
 
