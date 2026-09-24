@@ -4511,6 +4511,9 @@ switch ($action) {
         if ($api_key !== null && strlen($api_key) > API_KEY_LEN) {
             logRequest('download', 401, ['reason' => 'invalid_api_key_length']);
             http_response_code(401);
+            header('Content-Type: application/json; charset=utf-8');
+            header('Cache-Control: no-store');
+            header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
             header('X-Frame-Options: SAMEORIGIN');
             header('Referrer-Policy: strict-origin-when-cross-origin');
