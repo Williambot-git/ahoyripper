@@ -7468,6 +7468,11 @@ switch ($action) {
             // values without parsing HTTP headers — consistent with the check action pattern.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // health_probe_timeout: the configured timeout for the yt-dlp health probe
+            // (action=health&probe=1). Mirrors x_info_timeout and x_download_timeout
+            // for consistency — clients can always read this value from any response
+            // without null-checking or needing probe=1 to be enabled.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             // x_ffprobe_status: always 'skipped' on health since ffprobe only runs after
             // a completed download. Mirrors the same field in the check action body.
             // ffprobe_status in the JSON body mirrors the X-FFProbe-Status header so
@@ -7839,6 +7844,10 @@ switch ($action) {
         // health action, but surfacing the timeout maintains complete HTTP header coverage
         // and lets clients programmatically determine the ffprobe timeout value.
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-HealthProbe-Timeout: mirrors health_probe_timeout in the JSON body.
+        // Consistent with X-Info-Timeout and X-Download-Timeout — all three are always
+        // present on every API response so clients can read them without null-checking.
+        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
         // Retry-After: 0 — health is a read-only probe with no server-side backoff;
         // the client should retry immediately. Mirrors the same pattern in the 'check'
         // action (which also uses Retry-After: 0 alongside X-*-Limit: -1 sentinels).
