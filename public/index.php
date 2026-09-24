@@ -111,6 +111,9 @@ header_remove('X-Powered-By');
        paired with media="" attributes), this tag is respected by Safari on iOS. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- apple-mobile-web-app-title sets the PWA name on Android Chrome and some iOS
+       browsers' add-to-homesheet banners. Value should match manifest.short_name. -->
+  <meta name="apple-mobile-web-app-title" content="AhoyRipper">
   <link rel="manifest" href="/manifest.json">
   <!-- iOS home screen icon — use PNG for sharp, correctly-cropped display.
        iOS crops square icons to a rounded shape; SVG source produces blurry
