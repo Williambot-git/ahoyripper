@@ -5889,11 +5889,20 @@ switch ($action) {
                 'source_url_missing' => false,
                 'format_id' => $format_id,
                 'format_id_missing' => false,
+                // 'video_url' mirrors source_url in error responses for consistency with
+                // the info response (where video_url holds the resolved page URL).
+                'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Including them in the JSON body completes the "always present" invariant
+                // documented in the README: every API response body includes x_info_timeout
+                // and x_download_timeout.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe was never reached (yt-dlp exited 0 but produced no file or an empty
                 // file, so there was nothing for ffprobe to verify). Completes the "always
