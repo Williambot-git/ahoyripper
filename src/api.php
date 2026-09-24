@@ -7989,11 +7989,18 @@ switch ($action) {
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
-                // (line 7815) — always 'skipped' on csp-report since ffprobe only runs
+                // (line 7998) — always 'skipped' on csp-report since ffprobe only runs
                 // after a download. Present here to complete the "always present"
                 // invariant documented in the README: every API response body includes
                 // x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+                // (lines 7932-7933). Adding them to the body completes the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_info_timeout and x_download_timeout. Consistent with the analytics 405
+                // handler (lines 8113-8114) which includes the same fields.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
