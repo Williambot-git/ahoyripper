@@ -3748,6 +3748,13 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: mirrors X-FFProbe-Status header — skipped since
+                    // ffprobe only runs after a download completes. Completes the "always
+                    // present" invariant documented in README: every API response body
+                    // includes x_ffprobe_status, x_info_timeout, and x_download_timeout.
+                    'x_ffprobe_status' => 'skipped',
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -4972,6 +4979,13 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: mirrors X-FFProbe-Status header — skipped since
+                    // ffprobe only runs after a download completes. Completes the "always
+                    // present" invariant documented in README: every API response body
+                    // includes x_ffprobe_status, x_info_timeout, and x_download_timeout.
+                    'x_ffprobe_status' => 'skipped',
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
