@@ -8595,6 +8595,13 @@ switch ($action) {
             // opportunity. Consistent with the same field in MISSING_URL and other
             // validation errors that bypass normal action processing.
             'upgrade_url' => UPGRADE_URL,
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+            // (lines 8528-8529). Adding them to the body completes the "always present"
+            // invariant documented in the README: every API response body includes
+            // x_info_timeout and x_download_timeout. Consistent with MISSING_URL,
+            // INVALID_URL, and all other error response bodies.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
