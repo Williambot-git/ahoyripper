@@ -7081,8 +7081,6 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
-            // Cache-Control: no-store — prevents browsers from caching this error response.
-            header('Cache-Control: no-store');
             // X-Server-Time: wire-level clock metadata for clients that need to
             // synchronize without parsing the JSON body. Mirrors the same headers
             // set in the health action and every other API response, giving API
@@ -7123,19 +7121,14 @@ switch ($action) {
             // complete API surface parity — clients can always find these headers.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Timeout: ffprobe is never reached for client-error (no file on disk)
+            // but the header is included for complete API surface parity — clients can always
+            // find it alongside X-FFProbe-Status: skipped in all code paths for this action.
+            header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // X-FFProbe-Status: always 'skipped' on client-error responses since ffprobe only
             // runs after a download completes. Adding it completes the "always present"
             // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
             header('X-FFProbe-Status: skipped');
-            // X-Server-Time: wire-level clock metadata. Mirrors the same headers set
-            // in the analytics 405 block and every other API response, giving API
-            // consumers the same temporal reference in both HTTP headers and JSON payload.
-            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-            header('X-Server-Time-Unix: ' . time());
-            // Reporting-Endpoints + Report-To: enables CSP violation reporting for
-            // this endpoint. Mirrors the headers set in the csp-report and analytics 405 blocks.
-            header('Reporting-Endpoints: csp-report="/csp-report"');
-            header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo json_encode([
                 'error' => 'Method not allowed. Use POST for action=client-error.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
