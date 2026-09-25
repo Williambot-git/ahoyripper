@@ -25,6 +25,7 @@ Zero-padded fields only where they appear in yt-dlp conventions (e.g. `2026.03.1
   of just "quality or file size".
 
 ### Fixed
+- **`deploy/nginx.conf` duplicate CSP header for `location = /`** — A server-level `add_header Content-Security-Policy` appeared after the `location = /` block. In nginx, `add_header` in a location block does NOT inherit server-level headers — it replaces them. That server-level directive was unreachable for `/` (the location already sets its own CSP) and only fired for non-matching request types that don't exist in this server block. Removed the dead 13-line server-level block to prevent potential double-CSP responses and eliminate dead code.
 - **`README.md` `X-FFProbe-Timeout` documentation stale** — Two tables (Info Response Headers and Download Response Headers) said the header was "Present on `download` responses where ffprobe was attempted." After the 260918-1226 commit that added `X-FFProbe-Timeout` to ALL API responses (check, health, analytics, default/UNKNOWN_ACTION), the README still described it as download-only. Updated both tables to document that the header is present on every API response, with an explanation of why probe/read-only actions always show `FFPROBE_TIMEOUT` (ffprobe only runs post-download).
 - **`.dockerignore` missing `public/.well-known/`** — `public/.well-known/security.txt`
   (RFC 9116 security contact policy) was excluded from the Docker image by the
