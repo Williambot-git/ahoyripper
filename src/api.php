@@ -942,7 +942,15 @@ if (in_array($action, $internal_actions, true)) {
             // block is bypassed by fastcgi_finish_request(). The non-FPM fallback below
             // also sets this so both paths are equivalent.
             header('Cache-Control: no-store');
-            echo json_encode(['status' => 'ok', 'x_ffprobe_status' => 'skipped', 'x_info_timeout' => INFO_TIMEOUT, 'x_download_timeout' => DOWNLOAD_TIMEOUT], JSON_INVALID_UTF8_SUBSTITUTE);
+            echo json_encode([
+                'status' => 'ok',
+                'server_time' => date('c'),
+                'server_time_unix' => time(),
+                'upgrade_url' => UPGRADE_URL,
+                'x_ffprobe_status' => 'skipped',
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
         }
@@ -989,7 +997,15 @@ if (in_array($action, $internal_actions, true)) {
         // Matches the FPM-path header set at line 641.
         header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-        echo json_encode(['status' => 'ok', 'x_ffprobe_status' => 'skipped', 'x_info_timeout' => INFO_TIMEOUT, 'x_download_timeout' => DOWNLOAD_TIMEOUT], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode([
+            'status' => 'ok',
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
+            'upgrade_url' => UPGRADE_URL,
+            'x_ffprobe_status' => 'skipped',
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
+        ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
