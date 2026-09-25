@@ -498,8 +498,9 @@ header_remove('X-Powered-By');
       </div>
     </div>
 
-    <!-- Results -->
-    <div class="rip-results" id="resultsBox">
+    <!-- Results — role=status+aria-live=polite so screen readers announce
+         new content when the results box is shown (matches errorBox/progressBox). -->
+    <div class="rip-results" id="resultsBox" role="status" aria-live="polite" aria-atomic="true">
       <div class="results-meta" id="resultsMeta">
         <img class="results-thumb" id="resultsThumb" src="" alt="Media thumbnail" loading="lazy" hidden onerror="this.style.display='none'">
         <div class="results-info">

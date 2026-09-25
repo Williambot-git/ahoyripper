@@ -538,6 +538,20 @@ else
 fi
 
 echo ""
+echo "==> Checking results box has role=status aria-live=polite (screen reader support)... "
+# The results box (#resultsBox) must have role="status" aria-live="polite" so screen
+# readers announce new content when it appears — matching the pattern of errorBox
+# (role=alert) and progressBox (role=status). Without this, screen readers may not
+# reliably announce the video title/thumbnail/format grid when results appear.
+if grep -qE 'id="resultsBox"[^>]*role="status"' public/index.php && \
+   grep -qE 'id="resultsBox"[^>]*aria-live="polite"' public/index.php; then
+    echo "  ✓ resultsBox has role=\"status\" aria-live=\"polite\" (results announcements accessible)"
+else
+    echo "  ✗ resultsBox missing role=\"status\" aria-live=\"polite\" — screen readers may not announce results"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking og:alt (not og:image:alt) is NOT present in index.php (duplicate)... "
 # og:alt is NOT a valid Open Graph property — og:image:alt is the correct one.
 # A bare og:alt on the page (not scoped to og:image) is redundant and should be
