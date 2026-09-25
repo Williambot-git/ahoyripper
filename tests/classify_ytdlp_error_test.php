@@ -413,11 +413,11 @@ test('exit code 130 (SIGINT/Ctrl+C) returns SOURCE_TIMEOUT',
 test('exit code 124 (SIGALRM/timeout) returns SOURCE_TIMEOUT',
     classifyYtdlpError('download interrupted', 124)['code'] === 'SOURCE_TIMEOUT');
 
-test('exit code 0 returns null',
-    classifyYtdlpError('all good here', 0) === null);
+test('exit code 0 with no recognized pattern returns YTDLP_ERROR',
+    classifyYtdlpError('all good here', 0)['code'] === 'YTDLP_ERROR');
 
-test('exit code null without text match returns null',
-    classifyYtdlpError('some unclassifiable error', null) === null);
+test('exit code null with no recognized pattern returns YTDLP_ERROR',
+    classifyYtdlpError('some unclassifiable error', null)['code'] === 'YTDLP_ERROR');
 
 // ─── PRIORITY / PRECEDENCE ───────────────────────────────────────────────────
 
@@ -468,14 +468,14 @@ test('AGE_RESTRICTED is not shadowed by CONFIG_ERROR',
 
 echo "\n==> Testing unclassified input\n";
 
-test('returns null for empty string',
-    classifyYtdlpError('') === null);
+test('returns YTDLP_ERROR for empty string',
+    classifyYtdlpError('')['code'] === 'YTDLP_ERROR');
 
-test('returns null for "error" without known pattern',
-    classifyYtdlpError('ERROR: something completely unexpected happened here') === null);
+test('returns YTDLP_ERROR for "error" without known pattern',
+    classifyYtdlpError('ERROR: something completely unexpected happened here')['code'] === 'YTDLP_ERROR');
 
-test('returns null when no exit code and no text match',
-    classifyYtdlpError('just some text', null) === null);
+test('returns YTDLP_ERROR when no exit code and no text match',
+    classifyYtdlpError('just some text', null)['code'] === 'YTDLP_ERROR');
 
 // ─── Summary ─────────────────────────────────────────────────────────────────
 

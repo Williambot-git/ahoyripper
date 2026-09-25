@@ -239,7 +239,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
         return null;
     }
-    return null;
+    // Unclassified/unrecognised yt-dlp error — surface a generic error so the client
+    // knows something went wrong without being able to infer the specific cause.
+    // This is the fallback for classifyYtdlpError() returning null above.
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422];
 }
 
 /**
