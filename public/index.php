@@ -876,6 +876,7 @@ window.addEventListener('appinstalled', function() {
     '503': 'Service temporarily unavailable. Please try again shortly.',
     '500': 'The server encountered an error. Please try again in a moment.',
     '422': 'The server could not process this request. The video may not be supported or the site may be temporarily unavailable.',
+    '408': 'The request timed out waiting for the server to respond. Check your network connection and try again, or use AhoyVPN for a different exit IP.',
   };
 
   const form = document.getElementById('ripForm');
