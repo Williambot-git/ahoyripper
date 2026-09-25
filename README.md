@@ -1037,6 +1037,9 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
   "yt_dlp_probe_cache_expires_at": "2026-05-21T16:05:00+00:00",
   "yt_dlp_probe_cache_ttl_seconds": 300,
   "server_uptime_seconds": 86400,
+  "x_info_timeout": 45,
+  "x_download_timeout": 300,
+  "health_probe_timeout": 15,
   "yt_dlp_probe": {
     "ok": false,
     "action": "health",
