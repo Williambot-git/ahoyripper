@@ -4753,6 +4753,10 @@ switch ($action) {
                     'quota_remaining' => -1,
                     'quota_limit' => getDailyQuotaLimit(),
                     'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+                    // quota_reset_unix: Unix timestamp (integer) — mirrors quota_reset ISO string
+                    // as a numeric Unix timestamp for clients that prefer numeric comparison.
+                    // Both fields carry the same reset time so clients can use either
+                    // without special-casing.
                     'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
