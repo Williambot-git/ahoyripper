@@ -96,9 +96,9 @@ echo "  ✓ Error suppression present in api.php, public/index.php, public/404.h
 # error messages (GEOBLOCKED, AGE_RESTRICTED, etc.) to stderr, and
 # classifyYtdlpError() reads $proc_stderr to classify failures. Suppressing
 # warnings via --no-warnings would empty stderr and cause all info-action
-# errors to fall through as unclassified YTDLP_ERROR. --no-warnings must NOT
-# appear in the info action's yt-dlp command (it is correctly absent from
-# the download action, where classifyYtdlpError also reads stderr).
+# --no-warnings must NOT appear in the info action's yt-dlp command
+# (it is also absent from the download action, where classifyYtdlpError also
+# reads stderr for error classification).
 echo ""
 echo "==> Checking --no-warnings is NOT used in the info action..."
 INFO_YTDLP_BLOCK=$(sed -n "/case 'info':/,/case '/p" src/api.php | head -n -1)

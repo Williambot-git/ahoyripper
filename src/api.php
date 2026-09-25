@@ -5234,11 +5234,6 @@ switch ($action) {
             // --no-progress is the correct modern flag (consistent with info action
             // at line 3929 and health probe at line 7668).
             '--no-progress',
-            // --no-warnings: suppress yt-dlp warning messages to stderr during download.
-            // yt-dlp may emit extractor warnings (e.g. "Downloading uncompressed
-            // audio chunk...") that should not appear in the proc stderr before the
-            // ffprobe codec-verification step. Consistent with info action at line 3930.
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
