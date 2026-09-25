@@ -865,7 +865,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
-| `400` | `UNKNOWN_ACTION` | The requested API action is not recognized. Use a valid action (`info`, `download`, `check`, `health`). |
+| `400` | `UNKNOWN_ACTION` | The requested API action is not recognized. Use a valid action (`info`, `download`, `check`, `health`, `progress`, `analytics`, `client-error`, `csp-report`). |
 | `400` | `MISSING_URL` | No URL was provided on the request. Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `400` | `MISSING_FORMAT` | No format was selected on a download request. Select a format from the list above first. |
 | `400` | `INVALID_SORT` | Sort parameter value is invalid or unrecognized. Pass `&sort=` with one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality`. |
