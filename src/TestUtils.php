@@ -17,6 +17,15 @@
 // Mirrors MAX_FILENAME_LEN from src/api.php.
 define('MAX_FILENAME_LEN', 80);
 
+// UPGRADE_URL fallback: defined here so TestUtils.php is self-contained.
+// Production api.php defines its own (typically https://ahoyvpn.com/service).
+// If TestUtils.php is included standalone (e.g., in tests) before api.php,
+// this fallback ensures classifyYtdlpError() returns valid upgrade_url values
+// instead of undefined-constant warnings that could corrupt error responses.
+if (!defined('UPGRADE_URL')) {
+    define('UPGRADE_URL', 'https://ahoyvpn.com');
+}
+
 /**
  * Sanitize a value for JSON output.
  * @param mixed $s
