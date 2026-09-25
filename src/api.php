@@ -7679,6 +7679,11 @@ switch ($action) {
                     '--progress-template', json_encode(''),
                     // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
                     // --no-check-certificates; SSL errors now trigger extractor retry logic).
+                    // --max-filesize: prevent unexpectedly large content from being selected.
+                    // Mirrors the info action (line ~3954) and download action (line ~5201).
+                    // The limit is intentionally very high (50 GB) to only fire on genuine
+                    // oversized-content edge cases (e.g. extremely high-bitrate 8K streams).
+                    '--max-filesize', '50G',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
