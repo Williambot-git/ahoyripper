@@ -1199,6 +1199,12 @@ if (in_array($action, $internal_actions, true)) {
         'api_version' => AHOYRIPPER_VERSION,
         'server_time' => date('c'),
         'server_time_unix' => time(),
+        'x_ffprobe_status' => 'skipped',
+        'upgrade_url' => UPGRADE_URL,
+        'quota_remaining' => -1,
+        'quota_limit' => getDailyQuotaLimit(),
+        'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+        'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
