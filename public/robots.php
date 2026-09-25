@@ -23,7 +23,6 @@ header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'
 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
 header('Cross-Origin-Opener-Policy: same-origin');
 header('Cross-Origin-Resource-Policy: same-origin');
-header('X-Robots-Tag: noindex, noai, noimage, noydir');
 // X-Download-Options: noopen — defense-in-depth for consistency with index.php.
 // Relevant if content type is ever misdetected as an attachment; harmless for text/plain.
 header('X-Download-Options: noopen');
