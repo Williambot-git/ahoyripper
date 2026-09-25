@@ -1408,7 +1408,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `--socket-timeout <seconds>` | Per-connection timeout passed to yt-dlp. Set to `DOWNLOAD_TIMEOUT - 15s` (info: `INFO_TIMEOUT - 5s`) so PHP's outer timeout always fires first and classifies errors correctly. |
 | `--retries 3` | Generic retry count for transient network failures. |
 | `--extractor-retries 3` | Separate retry budget for extractor-specific errors (rate limits, 5xx, etc.). Recoveries don't consume the generic retry budget. |
-| `--no-update` | Disables yt-dlp's home-server update checks and telemetry pings (yt-dlp 2023.11+; older versions used `--no-call-home`). |
+| `--progress-template ""` | (info/health only) Suppresses all progress output and the 90-day self-update warning from stderr. `--no-update` (removed in yt-dlp 2024.x) was its predecessor. |
 | `--max-filesize 50G` | Prevents accidentally downloading 4K/8K content that would exhaust server disk. yt-dlp exits with `FilesizeExceeded` (→ `FILE_TOO_LARGE`) when the format exceeds this limit. |
 | `--ffmpeg-location <path>` | Points yt-dlp at the configured ffmpeg binary. Required when ffmpeg is not in the system PATH. |
 | `--restrict-filenames` | Converts filenames to ASCII-safe equivalents, preventing filesystem issues with unicode titles. |
