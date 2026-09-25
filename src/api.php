@@ -3900,10 +3900,12 @@ switch ($action) {
             // the generic retry budget. Default is 3 when omitted; set explicitly
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
-            // --no-update: disable all outbound calls to yt-dlp's home server.
-            // A health probe should not generate unexpected outbound traffic.
-            // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
-            '--no-update',
+            // --progress-template "": suppress all progress output and the 90-day
+            // self-update warning from stderr. Without this, yt-dlp's progress
+            // template noise prepends garbage to stderr and corrupts json_decode
+            // on stdout. Note: --no-update was removed in yt-dlp 2024.x;
+            // --progress-template "" is its equivalent replacement.
+            '--progress-template', json_encode(''),
             // --max-filesize: prevent unexpectedly large downloads. yt-dlp's format
             // selection (e.g. bestvideo) can resolve to a very high bitrate when a
             // video has many resolution/codec variants, and a user browsing info could
@@ -5141,12 +5143,12 @@ switch ($action) {
             // post-processing (merging streams, transcoding, etc.) so this flag
             // ensures reliable operation in non-standard deployments.
             '--ffmpeg-location', FFMPEG_PATH,
-            // --no-update: disable all outbound calls to yt-dlp's home server
-            // (update checks, extractor telemetry pings). A server-side media ripper
-            // should never make unexpected outbound connections — --version is read
-            // directly via proc_open, so yt-dlp's home calls are unnecessary.
-            // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
-            '--no-update',
+            // --progress-template "": suppress all progress output and the 90-day
+            // self-update warning from stderr. Without this, yt-dlp's progress
+            // template noise prepends garbage to stderr and corrupts downstream
+            // parsing in PHP. Note: --no-update was removed in yt-dlp 2024.x;
+            // --progress-template "" is its equivalent replacement.
+            '--progress-template', json_encode(''),
             // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
             // --no-check-certificates; SSL errors now trigger extractor retry logic).
             // --max-filesize: prevent unexpectedly large downloads. yt-dlp's format
@@ -7630,10 +7632,12 @@ switch ($action) {
                     // 5xx) separately from generic --retries. Mirrors the info and download
                     // action pattern so the health probe accurately reflects real ripping behavior.
                     '--extractor-retries', '3',
-                    // --no-update: disable all outbound calls to yt-dlp's home server.
-                    // A health probe should not generate unexpected outbound traffic.
-                    // Note: --no-call-home was the old flag; yt-dlp 2023.11+ uses --no-update.
-                    '--no-update',
+                    // --progress-template "": suppress all progress output and the 90-day
+                    // self-update warning from stderr. Without this, yt-dlp's progress
+                    // template noise prepends garbage to stderr and corrupts json_decode
+                    // on stdout. Note: --no-update was removed in yt-dlp 2024.x;
+                    // --progress-template "" is its equivalent replacement.
+                    '--progress-template', json_encode(''),
                     // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
                     // --no-check-certificates; SSL errors now trigger extractor retry logic).
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
