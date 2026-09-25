@@ -1542,9 +1542,10 @@ if ($GLOBALS['__curl_cffi_version'] === null) {
  * Sanitize a value from yt-dlp metadata for safe JSON output.
  *
  * @param mixed $s  Any value from yt-dlp JSON output.
- * @return string|null  'Unknown' for null/empty/whitespace-only strings;
- *   (string)$s for scalar values (int, float, non-empty string);
- *   null for booleans, arrays, and objects (prevents "1"/""/"Array" corruption).
+ * @return string|null  Returns 'Unknown' (string) for null, empty, or
+ *   whitespace-only string input. Returns null for booleans, arrays, and
+ *   objects (prevents "1"/""/"Array" label corruption). Returns (string)$s
+ *   for all other scalar values (int, float, non-empty string).
  * @throws InvalidArgumentException  Never thrown; reserved for future validation use.
  */
 function clean($s) {
