@@ -2603,6 +2603,13 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // "always present" invariant documented in the README: every API response
             // includes x_ffprobe_status.
             'x_ffprobe_status' => 'skipped',
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+            // Adding them to the body completes the "always present" invariant documented
+            // in the README: every API response body includes x_info_timeout and x_download_timeout.
+            // Consistent with INVALID_URL, MISSING_REFERER, check, health, client-error,
+            // and info/download response bodies.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2772,6 +2779,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // "always present" invariant documented in the README: every API response
             // includes x_ffprobe_status.
             'x_ffprobe_status' => 'skipped',
+            // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+            // Adding them to the body completes the "always present" invariant documented
+            // in the README: every API response body includes x_info_timeout and x_download_timeout.
+            // Consistent with MISSING_URL, INVALID_URL, MISSING_REFERER, and other error responses.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
