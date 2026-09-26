@@ -1498,24 +1498,33 @@ if (!$GLOBALS['__ffmpeg_version']) {
     // pipe — consistent with the shell-escaping approach used throughout the rest
     // of this file. The pipe (| head -1) is unnecessary since ffprobe's version
     // string is always on the first line of stdout; we read exactly one line.
+    // Only probe when the binary exists — skip if ffprobe is absent so the
+    // cache is populated with the 'not installed' sentinel immediately rather
+    // than spawning a proc that immediately fails and populates the cache on the
+    // next request (when the cache expires). This matches the yt-dlp version probe
+    // pattern (lines 1418-1436) which checks the binary result rather than
+    // catching a false proc_open, and the download action ffprobe probe (line 6027)
+    // which checks is_file(ffprobe_bin) before calling proc_open.
     $ffprobe_ver_pipes = null;
-    $ffprobe_ver_cmd = [FFPROBE_PATH, '-version'];
-    $ffprobe_ver_proc = proc_open($ffprobe_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ffprobe_ver_pipes, null, [], ['bypass_shell' => true]);
     $ffmpeg_ver = '';
-    if ($ffprobe_ver_proc) {
-        // Close stdin immediately — we never write to it. Leaving it open causes
-        // the child to hold an unused pipe fd; proc_close waits for all pipe
-        // writers (stdin writer in the parent) to close before returning.
-        fclose($ffprobe_ver_pipes[0]);
-        unset($ffprobe_ver_pipes[0]);
-        // Read only the first line (version string is always line 1).
-        $first_line = fgets($ffprobe_ver_pipes[1]);
-        if ($first_line !== false) {
-            $ffmpeg_ver = trim($first_line);
+    if (is_file(FFPROBE_PATH)) {
+        $ffprobe_ver_cmd = [FFPROBE_PATH, '-version'];
+        $ffprobe_ver_proc = proc_open($ffprobe_ver_cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $ffprobe_ver_pipes, null, [], ['bypass_shell' => true]);
+        if ($ffprobe_ver_proc) {
+            // Close stdin immediately — we never write to it. Leaving it open causes
+            // the child to hold an unused pipe fd; proc_close waits for all pipe
+            // writers (stdin writer in the parent) to close before returning.
+            fclose($ffprobe_ver_pipes[0]);
+            unset($ffprobe_ver_pipes[0]);
+            // Read only the first line (version string is always line 1).
+            $first_line = fgets($ffprobe_ver_pipes[1]);
+            if ($first_line !== false) {
+                $ffmpeg_ver = trim($first_line);
+            }
+            fclose($ffprobe_ver_pipes[1]);
+            fclose($ffprobe_ver_pipes[2]);
+            proc_close($ffprobe_ver_proc);
         }
-        fclose($ffprobe_ver_pipes[1]);
-        fclose($ffprobe_ver_pipes[2]);
-        proc_close($ffprobe_ver_proc);
     }
     $GLOBALS['__ffmpeg_version'] = $ffmpeg_ver ?: 'not installed';
     if ($ffmpeg_cache_file) {
