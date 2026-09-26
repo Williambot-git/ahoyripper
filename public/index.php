@@ -226,12 +226,13 @@ header_remove('X-Powered-By');
        served through a reverse proxy, CDN, or alternative deployment that might
        strip or not propagate the HTTP header. img-src must stay in sync with the
        HTTP header's img-src directive — specifically include https://fonts.googleapis.com
-       (needed for OG image and font preloads) and https://v16.tiktokcdn.com https://v26.tiktokcdn.com (TikTok CDN hosts for TikTok video thumbnails). upgrade-insecure-requests instructs the browser to
+       (needed for OG image and font preloads) and https://*.tikcdn.com https://*.tiktokcdn.com
+       (TikTok CDN hosts for TikTok video thumbnails). upgrade-insecure-requests instructs the browser to
        upgrade all HTTP requests to HTTPS, preventing mixed-content attacks where an
        active network attacker could intercept and modify HTTP resources. This is the
        modern replacement for the obsolete block-all-mixed-content directive (which
        was never part of any CSP spec and is silently ignored by all browsers). -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tiktokcdn.com https://*.tikcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report; report-uri /csp-report;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; upgrade-insecure-requests; frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; report-to csp-report;">
   <!-- worker-src 'self' is also set in the nginx HTTP header (deploy/nginx.conf).
        The meta tag above serves as a fallback when the HTTP header is stripped
        or not propagated (e.g. reverse proxy, CDN). Nginx's header is authoritative;
