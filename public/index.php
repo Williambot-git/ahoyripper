@@ -319,13 +319,6 @@ header_remove('X-Powered-By');
             "name": "AhoyVPN"
           }
         },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.6",
-          "ratingCount": "2847",
-          "bestRating": "5",
-          "worstRating": "1"
-        },
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
@@ -369,13 +362,6 @@ header_remove('X-Powered-By');
           "@type": "Organization",
           "name": "AhoyVPN",
           "url": "https://ahoyvpn.com"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.6",
-          "ratingCount": "2847",
-          "bestRating": "5",
-          "worstRating": "1"
         },
         "offers": {
           "@type": "Offer",
