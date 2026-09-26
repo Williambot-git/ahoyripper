@@ -732,7 +732,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
 | `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
 | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
-| `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again |
+| `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again. `report_url` included in response (file an issue if the error persists). |
 | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. This is a rare server-side issue. Try again or pick a different format. |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
 | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
@@ -892,7 +892,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `422` | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted. |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video. Choose another from the list. |
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation. |
-| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field). Try another format from the list, or wait and try again. |
+| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field). Try another format from the list, or wait and try again. `report_url` included (file an issue if the error persists). |
 | `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation. |
 | `500` | `PROC_OPEN_FAILED` | The info or download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing. |
 | `500` | `FILE_READ_ERROR` | The downloaded file could not be read even though it exists. Try again or pick a different format. |
@@ -1464,7 +1464,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `SERVICE_UNAVAILABLE` | Rate-limit or quota file could not be opened or locked | The server's quota system is temporarily unavailable — retry after 5 seconds (`retry_after` field in response). If persistent, the server may be overloaded or the quota storage may be inaccessible. |
 | `PROBE_FAILED` | The yt-dlp health probe failed — yt-dlp could not fetch the test video | Check `yt_dlp_version` and `ffmpeg_version` in the health response. Update yt-dlp (`pip install -U yt-dlp`) and ensure `curl_cffi` is installed. If the issue persists, the server's network route to YouTube may be blocked or degraded. |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
-| `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly |
+| `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly. `report_url` included in response (file an issue if the error persists). |
 | `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
 | `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video. `upgrade_url` included in response. |
 | `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly. `upgrade_url` included in response. |
