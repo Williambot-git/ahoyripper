@@ -8289,6 +8289,9 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                // request_id: present on all API responses for correlation/debugging.
+                // Mirrors the X-Request-ID HTTP header set above (line 7207).
+                'request_id' => $request_id,
                 // curl_cffi_ok: mirrors the field in action=check and action=health so
                 // monitoring scripts can confirm curl_cffi availability from any endpoint.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
