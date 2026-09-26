@@ -1778,6 +1778,17 @@ $health_response = [
     // source_url: null for probe endpoints (no associated video URL).
     'source_url' => null,
     'source_url_missing' => true,
+    // x_info_timeout / x_download_timeout: present on all API response bodies
+    // x_info_timeout / x_download_timeout / x_ffprobe_status — present on all
+    // API response bodies per the "always present" invariant documented in the README.
+    // Test values use the defaults (45s / 300s) since no env overrides are available
+    // in the test context (constants are defined in api.php, not TestUtils.php).
+    'x_info_timeout' => 45,
+    'x_download_timeout' => 300,
+    // x_ffprobe_status: always 'skipped' on health since ffprobe only runs after
+    // a completed download. Present to complete the "always present" invariant
+    // documented in the README: every API response body includes x_ffprobe_status.
+    'x_ffprobe_status' => 'skipped',
 ];
 test('health endpoint response includes api_version key',
     array_key_exists('api_version', $health_response));
@@ -1819,6 +1830,21 @@ test('health endpoint response includes quota_limit key',
     array_key_exists('quota_limit', $health_response));
 test('health endpoint quota_limit is -1 sentinel',
     ($health_response['quota_limit'] ?? -2) === -1);
+
+// x_info_timeout / x_download_timeout / x_ffprobe_status — present on all
+// API response bodies per the "always present" invariant documented in the README.
+test('health endpoint response includes x_info_timeout key',
+    array_key_exists('x_info_timeout', $health_response));
+test('health endpoint x_info_timeout is positive integer (INFO_TIMEOUT)',
+    is_int($health_response['x_info_timeout'] ?? null) && $health_response['x_info_timeout'] > 0);
+test('health endpoint response includes x_download_timeout key',
+    array_key_exists('x_download_timeout', $health_response));
+test('health endpoint x_download_timeout is positive integer (DOWNLOAD_TIMEOUT)',
+    is_int($health_response['x_download_timeout'] ?? null) && $health_response['x_download_timeout'] > 0);
+test('health endpoint response includes x_ffprobe_status key',
+    array_key_exists('x_ffprobe_status', $health_response));
+test('health endpoint x_ffprobe_status is "skipped" (ffprobe only runs after download)',
+    ($health_response['x_ffprobe_status'] ?? '') === 'skipped');
 
 // The default: case in api.php also includes api_version (line 3373).
 // Verify the unknown-action error response includes api_version.
