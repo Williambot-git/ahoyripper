@@ -476,7 +476,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-RateLimit-Limit: -1');
     header('X-RateLimit-Remaining: -1');
     header('X-RateLimit-Reset: -1');
-    header('X-RateLimit-Window: unavailable');
+    // X-RateLimit-Window: 5 — matches Retry-After: 5 delta-seconds. Clients
+    // following Retry-After: 5 should retry within the same 5-second window.
+    // X-DailyLimit-Window uses "unavailable" since the rate-limit subsystem
+    // failure makes the daily-limit window unknown.
+    header('X-RateLimit-Window: 5');
     header('X-DailyLimit-Limit: -1');
     header('X-DailyLimit-Remaining: -1');
     header('X-DailyLimit-Reset: -1');
