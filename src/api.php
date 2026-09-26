@@ -118,6 +118,10 @@ if (!is_dir(QUOTA_DIR)) {
 // their own product page, Patreon, Ko-fi, or any preferred destination.
 // Must be an absolute URL with scheme (https:// preferred).
 define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/'));
+// GitHub issues base URL — users are directed here when they encounter persistent
+// unclassified errors. The request_id is appended as a URL parameter so maintainers
+// can correlate the report with server-side logs.
+define('ISSUE_BASE_URL', 'https://github.com/Williambot-git/ahoyripper/issues/new');
 
 // Plausible analytics host — '' (empty, default) routes events through the
 // /src/api.php?action=analytics proxy so no third-party requests leave the browser.
@@ -1856,7 +1860,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         // rather than a generic opaque string. $raw_err is already sanitized by the caller
         // (strip_tags, whitespace normalized, truncated to 200 chars).
         if ($exit_code >= 2) {
-            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422];
+            global $request_id;
+            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id];
         }
         // Unrecognised error with no specific classification — return null so callers
         // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
@@ -1865,7 +1870,8 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // Unclassified/unrecognised yt-dlp error — surface a generic error so the client
     // knows something went wrong without being able to infer the specific cause.
     // This is the fallback for classifyYtdlpError() returning null above.
-    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422];
+    global $request_id;
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id];
 }
 
 /**
@@ -4502,6 +4508,8 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                'hint' => 'An unexpected error occurred while parsing formats. If the problem persists, please report it with your request_id.',
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
             ];
             // Surface the raw yt-dlp output so the client can show diagnostic info
             if ($raw_err) {
@@ -5810,6 +5818,7 @@ switch ($action) {
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
                     'hint' => 'The source returned an unrecognised error. Try another format, or wait a moment and try again. If persistent, the source platform may be temporarily unavailable.',
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'source_url_missing' => false,
