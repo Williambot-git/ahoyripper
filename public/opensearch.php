@@ -18,6 +18,13 @@
  * spec and is ignored by all browsers — it has been removed.
  */
 
+// Production hardening — explicitly disable error display at runtime so that
+// even if php.ini has display_errors=On (a misconfigured production setup),
+// no PHP warnings/notices can leak into the OpenSearch XML response.
+// log_errors=On is preserved so errors are still written to error_log.
+error_reporting(0);
+ini_set('display_errors', '0');
+
 // ─── Security headers ────────────────────────────────────────────────────────
 // Hardens the OpenSearch XML endpoint against the same class of attacks
 // as api.php. Defense-in-depth: nginx sets most of these globally, but
