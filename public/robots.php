@@ -12,9 +12,6 @@
  * - PHP derives the canonical base URL from the incoming Host header
  */
 
-error_reporting(0);
-ini_set('display_errors', '0');
-
 // ─── Security headers ────────────────────────────────────────────────────────
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');

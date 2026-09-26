@@ -18,9 +18,6 @@
  * spec and is ignored by all browsers — it has been removed.
  */
 
-error_reporting(0);
-ini_set('display_errors', '0');
-
 // ─── Security headers ────────────────────────────────────────────────────────
 // Hardens the OpenSearch XML endpoint against the same class of attacks
 // as api.php. Defense-in-depth: nginx sets most of these globally, but
