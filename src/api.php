@@ -1121,7 +1121,7 @@ if (in_array($action, $internal_actions, true)) {
                 'x_ffprobe_status' => 'skipped',
                 'upgrade_url' => UPGRADE_URL,
                 'quota_remaining' => -1,
-                'quota_limit' => getDailyQuotaLimit(),
+                'quota_limit' => -1,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                 'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
             ], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -1179,7 +1179,7 @@ if (in_array($action, $internal_actions, true)) {
             'x_ffprobe_status' => 'skipped',
             'upgrade_url' => UPGRADE_URL,
             'quota_remaining' => -1,
-            'quota_limit' => getDailyQuotaLimit(),
+            'quota_limit' => -1,
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
         ], JSON_INVALID_UTF8_SUBSTITUTE);
