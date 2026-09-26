@@ -264,15 +264,22 @@ body {
   opacity: 0.45;
   cursor: default;
 }
+/* quota-warn: gentle pulse using box-shadow (compositor-only, no layout recalc).
+   box-shadow animates on the compositor thread without triggering layout or paint
+   of the affected element's layout box — unlike transform: scale() which forces
+   layout recalculation on every frame. color is still animated normally.
+   Using rgba shadow on the parent element (.rip-hint) so it expands outward. */
 @keyframes quota-warn {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50% { box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.35); }
 }
 /* Sharper, faster pulse for the fully-exhausted state to signal
-   that immediate action (upgrade or wait) is required. */
+   that immediate action (upgrade or wait) is required.
+   Uses box-shadow (compositor-only) instead of transform:scale()
+   to avoid triggering layout recalculation on every animation frame. */
 @keyframes quota-exhausted {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(1.08); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+  50% { box-shadow: 0 0 14px 5px rgba(185, 28, 28, 0.45); }
 }
 .quota-upgrade-link {
   font-weight: 500;
