@@ -8553,6 +8553,11 @@ switch ($action) {
         // runs after a download completes. Adding it here completes the "always present"
         // invariant for all API responses — clients can always find this header.
         header('X-FFProbe-Status: skipped');
+        // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+        // the 'health' (line ~7381) and 'check' (line ~6292) action blocks, giving
+        // API consumers the same temporal reference in both HTTP headers and JSON payload.
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         // Retry-After: 0 — unknown-action is a validation error (the action name is
         // not recognized), not a server-side backoff situation. The client should
         // retry immediately with a corrected action name. Consistent with MISSING_URL,
