@@ -7838,6 +7838,19 @@ switch ($action) {
                         // health response field so the probe sub-object can be correlated
                         // to the parent request in distributed tracing scenarios.
                         'request_id' => $request_id,
+                        // ffprobe_ok: mirrors the field in action=check and action=health so
+                        // monitoring scripts can confirm ffprobe availability from any endpoint.
+                        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                        // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — always
+                        // 'skipped' on health since ffprobe only runs after a completed download.
+                        // Present here to complete the "always present" invariant documented in
+                        // the README: every API response body includes x_ffprobe_status.
+                        'x_ffprobe_status' => 'skipped',
+                        // platform: null for health probe (no associated video URL).
+                        // Mirrors the 'platform' field in action=check and action=health.
+                        // Consistent field presence across all responses allows API consumers
+                        // to always expect this field without null-checking.
+                        'platform' => null,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
