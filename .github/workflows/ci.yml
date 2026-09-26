@@ -13,10 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: PHP syntax check
+      - name: PHP syntax check (all source files)
         run: |
-          php -l src/api.php
-          php -l public/index.php
+          # Check all 9 PHP source files — not just api.php and index.php.
+          # scripts/generate-sw-version.php, opensearch.php, robots.php,
+          # sitemap.php and src/TestUtils.php are production code too and
+          # deserve the same protection against typos and parse errors.
+          for f in src/api.php src/TestUtils.php src/version.php \
+                   public/index.php public/opensearch.php public/robots.php \
+                   public/sitemap.php scripts/generate-sw-version.php; do
+            php -l "$f"
+          done
 
       - name: Run PHP unit tests
         run: |
