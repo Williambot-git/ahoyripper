@@ -3936,12 +3936,6 @@ switch ($action) {
             // so the behavior is intentional and documented.
             '--extractor-retries', '3',
             // --progress-template "": suppress all progress output and the 90-day
-            // self-update warning from stderr. Without this, yt-dlp's progress
-            // template noise prepends garbage to stderr and corrupts json_decode
-            // on stdout. Note: --no-update was removed in yt-dlp 2024.x;
-            // --progress-template "" is its equivalent replacement.
-            '--no-progress',
-            // --progress-template "": suppress all progress output and the 90-day
             // self-update warning from stderr. yt-dlp emits progress template noise
             // even during --skip-download which would prepend garbage to stderr and
             // corrupt json_decode on stdout. Note: --no-update was removed in yt-dlp 2024.x;
