@@ -5237,6 +5237,11 @@ switch ($action) {
             // oversized-content edge cases, not ordinary downloads.
             '--max-filesize', '50G',
             '--restrict-filenames',
+            // --consecutive-title: yt-dlp 2024.12+ strips path traversal sequences (.., /, \)
+            // from video titles when constructing output filenames, preventing accidental or
+            // malicious file writes outside the intended directory. Defense-in-depth alongside
+            // sanitize_filename() and --restrict-filenames — all three layers are independent.
+            '--consecutive-title',
             // --no-mtime: do not set the downloaded file's modification time to the
             // source video's upload date. AhoyRipper streams files to the client rather
             // than storing them on disk long-term, so the source mtime is meaningless
