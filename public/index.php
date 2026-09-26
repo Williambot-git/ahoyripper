@@ -702,6 +702,13 @@ window.addEventListener('appinstalled', function() {
 
   const API = '/src/api.php';
 
+  // Module-level state — hoisted above updateQuotaFromHeaders() so the function
+  // can reference _lastAnnouncedQuota correctly on the very first API response.
+  var isFetching = false; // guard against duplicate concurrent fetches (e.g. paste + Enter/Go)
+  var _lastAnnouncedQuota = null; // sentinel: last quota value that triggered a screen-reader announcement
+  var _fetchController = null; // AbortController for cancelling in-flight info fetches
+  var _fetchId = 0; // monotonic counter; each fetch gets a unique ID to detect stale responses
+
   // Shared quota update function — reads X-DailyLimit-* response headers and updates
   // the DOM. Extracted from fetchInfo() and placed at module scope so it is defined
   // once rather than re-created on every fetchInfo() call. Uses no closure state from
@@ -1558,11 +1565,6 @@ window.addEventListener('appinstalled', function() {
       }
     });
   }
-
-  var isFetching = false; // guard against duplicate concurrent fetches (e.g. paste + Enter/Go)
-  var _lastAnnouncedQuota = null; // sentinel: last quota value that triggered a screen-reader announcement
-  var _fetchController = null; // AbortController for cancelling in-flight info fetches
-  var _fetchId = 0; // monotonic counter; each fetch gets a unique ID to detect stale responses
 
   async function fetchInfo() {
     const url = input.value.trim();
