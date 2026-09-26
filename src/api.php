@@ -8610,6 +8610,10 @@ switch ($action) {
             'format_id' => null,
             // platform: null — unknown actions have no associated source platform.
             'platform' => null,
+            // video_url: null — unknown actions have no associated video URL.
+            // Consistent with the same null value in MISSING_URL, INVALID_URL,
+            // URL_TOO_LONG, and other pre-validation error responses.
+            'video_url' => null,
             // quota_remaining: -1 signals that quota tracking is not available for
             // unknown actions (they fire before the quota gate). API consumers should
             // treat -1 as "unknown remaining quota".
