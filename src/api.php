@@ -5229,6 +5229,11 @@ switch ($action) {
             // (e.g. title/artist visible in file explorers, media players, and portable devices).
             // Does not conflict with --embed-thumbnail; both can be used together.
             '--embed-metadata',
+            // --consecutive-title: yt-dlp 2024.12+ prevents path traversal via video titles
+            // containing "../" sequences. Defense-in-depth alongside sanitize_filename() and
+            // --restrict-filenames — this catches titles yt-dlp itself retrieves.
+            // Mirrors the info action (line ~4001) and health probe (line ~7707).
+            '--consecutive-title',
         ];
         // resolvePlaylistFlag() returns ['--yes-playlist'] or ['--no-playlist'].
         // --no-playlist is the safe default (single video); --yes-playlist is
