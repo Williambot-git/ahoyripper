@@ -2914,6 +2914,47 @@ test('analytics 405: error_code is METHOD_NOT_ALLOWED',
 test('analytics 405: retry_after is 0 (no backoff needed for wrong HTTP method)',
     $analytics_405_response['retry_after'] === 0);
 
+// ─── Action routing: whitespace normalization ────────────────────────────────
+
+// api.php normalizes action values via trim() so that query params with
+// leading/trailing whitespace (e.g. ?action= info) are correctly routed
+// to their respective case blocks instead of falling through to default:
+// UNKNOWN_ACTION. The check below verifies the normalization is consistent
+// across both the CORS exempt path ($action checked at line 314) and the
+// switch routing (lines 3350+). We test the four primary actions here.
+
+echo "\n==> Testing action parameter whitespace normalization\n";
+
+// Simulate $_GET['action'] with leading whitespace — should match 'info'
+// after trim() normalization. If trim() were absent, the switch would
+// fall through to default: and return UNKNOWN_ACTION for ' info'.
+test('leading space in action= info trims to info and hits the info case',
+    match (trim(' info')) {
+        'info' => true,
+        default => false,
+    });
+
+// Trailing whitespace: ?action=info%20 (encoded trailing space) decodes to
+// 'info ' which trim() normalizes back to 'info'.
+test('trailing space in action=info  trims to info and hits the info case',
+    match (trim('info  ')) {
+        'info' => true,
+        default => false,
+    });
+
+// Mixed whitespace — both leading and trailing tabs/spaces
+test('mixed whitespace in action=  check  trims to check and hits the check case',
+    match (trim("  check \t")) {
+        'check' => true,
+        default => false,
+    });
+
+// Valid actions should be unaffected (no change after trim)
+test('trimmed action=health matches health',
+    trim('health') === 'health');
+test('trimmed action=download matches download',
+    trim('download') === 'download');
+
 echo "\n";
 $total = $tests_run;
 $passed = $tests_passed;

@@ -261,7 +261,12 @@ header('Cache-Control: no-store');
 // ─── Early action routing ───────────────────────────────────────────────
 // Declare $action before the referer gate so the exempt check can reference it.
 // Also used by the rate-limit gate below.
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+// Trim the action value: query params with leading/trailing whitespace (e.g.
+// ?action= info or ?action=info%20) would otherwise not match the case labels
+// in the action switch and fall through to default: UNKNOWN_ACTION.
+// This mirrors the trim() call in validateRefererParam() (line ~1890) which
+// applies the same normalization to the referer param.
+$action = trim($_GET['action'] ?? $_POST['action'] ?? '');
 
 // Anti-hotlinking: validate origin for API requests.
 // All legitimate traffic arrives as a browser navigation to the AhoyRipper page
