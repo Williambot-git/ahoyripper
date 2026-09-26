@@ -7317,6 +7317,8 @@ switch ($action) {
             'ok' => true,
             'action' => $action,
             'request_id' => $request_id,
+            'server_time' => date('c'),
+            'server_time_unix' => time(),
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
