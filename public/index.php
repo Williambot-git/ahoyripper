@@ -226,8 +226,7 @@ header_remove('X-Powered-By');
        served through a reverse proxy, CDN, or alternative deployment that might
        strip or not propagate the HTTP header. img-src must stay in sync with the
        HTTP header's img-src directive — specifically include https://fonts.googleapis.com
-       (needed for OG image and font preloads) and https://*.tiktokcdn.com (CDN for
-       TikTok video thumbnails). upgrade-insecure-requests instructs the browser to
+       (needed for OG image and font preloads) and https://v16.tiktokcdn.com https://v26.tiktokcdn.com (TikTok CDN hosts for TikTok video thumbnails). upgrade-insecure-requests instructs the browser to
        upgrade all HTTP requests to HTTPS, preventing mixed-content attacks where an
        active network attacker could intercept and modify HTTP resources. This is the
        modern replacement for the obsolete block-all-mixed-content directive (which
@@ -261,7 +260,8 @@ header_remove('X-Powered-By');
        them in yt-dlp metadata. CORS crossorigin="anonymous" matches how the
        browser fetches these resources (no credentials sent to third-party CDNs). -->
   <link rel="preconnect" href="https://i.ytimg.com" crossorigin="anonymous">
-  <link rel="preconnect" href="https://*.tiktokcdn.com" crossorigin="anonymous">
+  <link rel="preconnect" href="https://v16.tiktokcdn.com" crossorigin="anonymous">
+  <link rel="preconnect" href="https://v26.tiktokcdn.com" crossorigin="anonymous">
   <link rel="preconnect" href="https://pbs.twimg.com" crossorigin="anonymous">
   <link rel="stylesheet" href="/src/style.css">
 
