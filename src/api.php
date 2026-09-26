@@ -3219,6 +3219,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // any file processing). Completes the "always present" invariant documented
         // in the README: every API response includes x_ffprobe_status in the JSON body.
         'x_ffprobe_status' => 'skipped',
+        // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+        // Adding them to the body completes the "always present" invariant documented
+        // in the README: every API response body includes x_info_timeout and
+        // x_download_timeout. Consistent with MISSING_URL, NOT_ACCEPTABLE, UNKNOWN_ACTION,
+        // and all other error and success responses.
+        'x_info_timeout' => INFO_TIMEOUT,
+        'x_download_timeout' => DOWNLOAD_TIMEOUT,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
