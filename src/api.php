@@ -403,6 +403,10 @@ if ($blocked) {
             // The false values signal "validation has not run" rather than "value is invalid".
             'source_url_missing' => false,
             'format_id_missing' => false,
+            // platform: null — CORS validation fires before platform detection.
+            // Consistent with the same null value in MISSING_URL, INVALID_URL,
+            // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
+            'platform' => null,
             'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
