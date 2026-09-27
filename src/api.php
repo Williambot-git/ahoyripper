@@ -7064,6 +7064,13 @@ switch ($action) {
             // HTTP headers, consistent with how x_info_timeout and x_download_timeout
             // are already exposed in the check body.
             'x_ffprobe_status' => 'skipped',
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+            // (line 6909). Adding it to the body completes the "always present" invariant
+            // documented in the README: every API response body includes x_ffprobe_timeout.
+            // Consistent with the check, health, and client-error actions which all expose
+            // all three timeout fields (x_info_timeout, x_download_timeout, x_ffprobe_timeout)
+            // in both HTTP headers and JSON body.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             // ffprobe_ok: true when ffprobe binary is installed and callable.
             // Mirrors the field in action=health so monitoring scripts that use
             // the lightweight check endpoint can determine ffprobe availability
