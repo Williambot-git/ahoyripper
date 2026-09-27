@@ -1766,7 +1766,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
-        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false];
     }
     if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted|deleted))|video (has been )?removed|video (is )?unavailable|video (is )?deleted/i', $err_lower)) {
         return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'upgrade_url' => UPGRADE_URL, 'status' => 410];
@@ -1796,7 +1796,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
     // (502) which implies a network or DNS issue on our end.
     if (preg_match('/process timed out|read at byte [1-9][0-9]* timeout/i', $err_lower)) {
-        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
+        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false];
     }
 
     // CONNECTION_FAILED: broad class of connection-level failures where data transfer
@@ -1811,7 +1811,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // by "connection " it falls through to CONNECTION_TIMEOUT (504) below.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|(?<!connection )(?<!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502, 'source_url_missing' => false];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
@@ -1823,7 +1823,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // a SOURCE_TIMEOUT (504). A second (?!\\s+after) guards against the specific "after"
     // form as belt-and-suspenders. CONNECTION_FAILED catches everything else.
     if (preg_match('#\\bconnection timed out\\b(?!\\s)(?!\\s+after)|read at byte 0 timeout#i', $err_lower)) {
-        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
         return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413];
@@ -1854,22 +1854,22 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
-            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false];
         }
         if ($code === 401 || $code === 407) {
             return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'upgrade_url' => UPGRADE_URL, 'status' => 401];
         }
         if ($code === 404) {
-            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404];
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false];
         }
         if ($code === 429) {
-            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
+            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false];
         }
         // Other HTTP errors — surface the status but give a generic message.
-        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code];
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN for a different exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false];
     }
     // yt-dlp exit codes carry semantic meaning that supplements text classification.
     // Exit code 1 is the most common error code — it means "there was a problem" but often
@@ -1884,7 +1884,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         // Signal-induced exits: SIGTERM=143 (from proc_terminate), SIGKILL=137, SIGINT=130, SIGALRM=124 (timeout)
         // Classify as SOURCE_TIMEOUT (504) — same UX as "process timed out"
         if (in_array($exit_code, [143, 137, 130, 124], true)) {
-            return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
+            return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false];
         }
         // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
         // Surface the actual yt-dlp error text so callers get a meaningful diagnostic message
