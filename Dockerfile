@@ -131,6 +131,14 @@ RUN groupadd --gid 1000 www-data && \
     useradd --uid 1000 --gid www-data --shell /usr/sbin/nologin \
         --comment "AhoyRipper web service user" www-data
 
+# Quota / rate-limit state directory (QUOTA_DIR).
+# The quota subsystem writes per-IP state files to QUOTA_DIR (defaults to /tmp in
+# api.php). In Docker: mount a tmpfs at /tmp/quota (see docker-compose.yml) so
+# container restarts wipe quota state (preventing quota bypass via restart). For
+# stateful deployments, set the QUOTA_DIR env var to a persistent path and mount
+# a named volume there. The directory must be writable by www-data (uid 1000).
+# See QUOTA_DIR in the Environment Variables section of README.md for details.
+
 # Ensure /app and all files are readable by www-data and writable for logs/uploads.
 RUN mkdir -p /app && chown -R www-data:www-data /app
 
