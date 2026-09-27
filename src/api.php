@@ -7253,13 +7253,14 @@ switch ($action) {
                 // invariant documented in the README: every API response body includes
                 // x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
-                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
-                // (lines 7126-7127). Adding them to the body completes the "always present"
-                // invariant documented in the README: every API response body includes
-                // x_info_timeout and x_download_timeout. Consistent with the csp-report
-                // 405 handler (lines 8095-8096) and all other API response bodies.
+                // x_info_timeout / x_download_timeout / x_ffprobe_timeout: mirror the HTTP
+                // headers set above (lines 7212-7214). Adding them to the body completes
+                // the "always present" invariant documented in the README: every API
+                // response body includes all three timeout fields. Consistent with the
+                // csp-report 405 handler and all other API response bodies.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return;
         }
@@ -7410,12 +7411,19 @@ switch ($action) {
             // and action=client-error 405 block (line 6714).
             'x_ffprobe_status' => 'skipped',
             // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
-            // (lines 7051-7052). Adding them to the body completes the "always present"
+            // (lines 7283-7284). Adding them to the body completes the "always present"
             // invariant documented in the README: every API response body includes
             // x_info_timeout and x_download_timeout. Consistent with the check, health,
             // and info/download response bodies.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+            // (line 7290). Adding it to the body completes the "always present"
+            // invariant documented in the README: every API response body includes
+            // x_ffprobe_timeout. Consistent with the check, health, and client-error 405
+            // actions which all expose all three timeout fields (x_info_timeout,
+            // x_download_timeout, x_ffprobe_timeout) in both HTTP headers and JSON body.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
@@ -8210,6 +8218,12 @@ switch ($action) {
                 // handler (lines 8113-8114) which includes the same fields.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+                // (line 8145). Adding it to the body completes the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_ffprobe_timeout. Consistent with the check, health, and client-error
+                // actions which all expose all three timeout fields in both headers and body.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
