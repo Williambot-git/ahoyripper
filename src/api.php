@@ -7008,6 +7008,12 @@ switch ($action) {
             // consumers can read them without parsing HTTP headers.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+            // (line ~6909). Adding it to the body completes the "always present" invariant
+            // documented in the README: every API response body includes x_ffprobe_timeout.
+            // Consistent with action=health which exposes all three timeout fields in both
+            // HTTP headers and JSON body.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             // yt_dlp_ok: true when yt-dlp binary is installed and callable.
             // Mirrors the field in action=health so monitoring scripts that hit
