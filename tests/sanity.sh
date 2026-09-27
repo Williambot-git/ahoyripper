@@ -210,7 +210,11 @@ echo "==> Checking yt-dlp deprecated/removed flags are NOT present..."
 # certificates correctly by default, and some extractors (TED, Vimeo) that previously
 # needed it have fixed their SSL configuration. Using it produces a stderr warning that
 # can corrupt JSON output in the info action and cause unclassified YTDLP_ERROR responses.
-BAD_FLAGS="concurrent-fragments no-check-certificates"
+# --consecutive-title: NOT a real yt-dlp flag. Attempted to add in yt-dlp 2024.12 but
+# never shipped. Would cause "no such option" error and break all info, download, and
+# health probe commands. yt-dlp handles path traversal via --restrict-filenames and
+# PHP's sanitize_filename() — both already present as defense-in-depth.
+BAD_FLAGS="concurrent-fragments no-check-certificates consecutive-title"
 # --no-warning (singular): yt-dlp uses --no-warnings (plural).
 # \b word boundary after 'g' means `--no-warning\b` matches `--no-warning ` or
 # `--no-warning\n` (end of line) but NOT `--no-warnings` (boundary after 'g' is
@@ -233,7 +237,7 @@ for flag in $BAD_FLAGS; do
         exit 1
     fi
 done
-echo "  ✓ No deprecated yt-dlp flags (--no-warning singular, --concurrent-fragments, --no-check-certificates)"
+echo "  ✓ No deprecated yt-dlp flags (--no-warning singular, --concurrent-fragments, --no-check-certificates, --consecutive-title)"
 
 echo ""
 echo "==> Checking old YouTube URL-rewrite age-bypass is NOT present..."
