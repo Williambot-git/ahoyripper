@@ -30,6 +30,10 @@ header('Cross-Origin-Resource-Policy: same-origin');
 // X-Download-Options: noopen — defense-in-depth for consistency with index.php.
 // Relevant if content type is ever misdetected as an attachment; harmless for text/plain.
 header('X-Download-Options: noopen');
+// X-Robots-Tag: block AI training crawlers from indexing the robots.txt file itself.
+// The file contains directives specific to this deployment and is not useful as
+// general web content. Mirrors the header set by opensearch.php.
+header('X-Robots-Tag: noindex, noai, noimage, noydir');
 header_remove('X-Powered-By');
 $request_id = bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $request_id);
