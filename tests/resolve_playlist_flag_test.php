@@ -64,7 +64,7 @@ test('resolvePlaylistFlag(false) returns --no-playlist',
 
 echo "\n==> Testing integer input\n";
 
-test('resolvePlaylistFlag(1) returns --yes-playlist (integer 1 is truthy)',
+test('resolvePlaylistFlag(1) returns --yes-playlist (integer 1 is an exact int match)',
     assert_resolve(1, '--yes-playlist'));
 
 test('resolvePlaylistFlag(0) returns --no-playlist (integer 0 is falsy)',
