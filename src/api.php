@@ -8452,6 +8452,12 @@ switch ($action) {
             // runs after a download completes. Adding it for consistent header coverage
             // so clients can always find this header on all API responses.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // X-FFProbe-Status: always 'skipped' on analytics responses since ffprobe
+            // never runs on the analytics endpoint. Adding it here completes the "always
+            // present" invariant for all API responses — clients can always find this header.
+            // NOTE: The JSON body 405 handler and the 204 success/empty-body blocks all
+            // include this header; this invalid-payload block was the only one missing it.
+            header('X-FFProbe-Status: skipped');
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
