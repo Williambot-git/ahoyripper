@@ -428,6 +428,12 @@ if ($blocked) {
             // response parsers that expect consistent field coverage.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — ffprobe
+            // is never reached in the MISSING_REFERER validation path (CORS validation
+            // fires before URL validation, so no platform is detected, no yt-dlp runs,
+            // no file to probe). Completes the "always present" invariant documented in
+            // the README: every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
             // ffprobe is never reached in the MISSING_REFERER validation path (CORS
             // validation fires before URL validation, so no platform is detected, no yt-dlp
@@ -555,6 +561,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // and info/download response bodies.
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
+        // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — ffprobe
+        // is never reached in the SERVICE_UNAVAILABLE path. Completes the "always
+        // present" invariant documented in the README: every API response body
+        // includes x_ffprobe_timeout.
+        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         // server_time: ISO 8601 + Unix for client clock synchronization.
         // Present on all other API responses — SERVICE_UNAVAILABLE was missing
         // these fields, breaking generic response parsers that expect consistent
@@ -725,10 +736,14 @@ if ($is_rate_limited) {
             // SERVICE_UNAVAILABLE, MISSING_URL, and info/download response bodies.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
-            exit;
-        }
-        $data['c']++;
+        return;
+    }
+    $data['c']++;
     } else {
         $data = ['t' => time(), 'c' => 0]; // Fresh window — current request will be counted after the write
     }
@@ -978,6 +993,10 @@ if (in_array($action, $internal_actions, true)) {
                 'x_ffprobe_status' => 'skipped',
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+                // (line 976). Completes the "always present" invariant documented in the
+                // README: every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -1035,6 +1054,10 @@ if (in_array($action, $internal_actions, true)) {
             'x_ffprobe_status' => 'skipped',
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+            // (line 1025). Completes the "always present" invariant documented in the
+            // README: every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -2671,6 +2694,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // and info/download response bodies.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2763,6 +2790,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // and info/download response bodies.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2846,6 +2877,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Consistent with MISSING_URL, INVALID_URL, MISSING_REFERER, and other error responses.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -2941,6 +2976,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
@@ -3055,6 +3094,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // quota_remaining: -1 signals that quota tracking is not available at this
                 // early validation stage (before the quota file is opened). Matches the
                 // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
@@ -3263,12 +3306,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // and all other error and success responses.
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
-    ], JSON_INVALID_UTF8_SUBSTITUTE);
+        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+    ],
+    JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
-// Verify the Accept header expects JSON — reject non-JSON requests
-// to prevent the API from returning HTML/error pages to API clients.
+// Verify the Accept header expects JSON
 // Allow */* (browsers/clients that accept anything) and application/json variants.
 // Accept absent (empty string) is also accepted — curl, bots, and many API clients
 // do not send an Accept header; in that case we assume JSON and proceed.
@@ -3372,12 +3416,13 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // other error and success responses.
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
-    ], JSON_INVALID_UTF8_SUBSTITUTE);
+        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+    ],
+    JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
-// ─── Daily quota gate ─────────────────────────────────────────────────
-// ─── Daily download quota (free tier limit, skip if unlimited key) ───
+// ─── Daily quota gate
 switch ($action) {
     case 'info': {
         // Set Content-Type before any output so error responses (INVALID_SORT,
@@ -3477,6 +3522,7 @@ switch ($action) {
                 // and x_download_timeout. Consistent with all other error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_SORT validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
@@ -3876,6 +3922,7 @@ switch ($action) {
                     'x_ffprobe_status' => 'skipped',
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -4141,16 +4188,13 @@ switch ($action) {
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
-                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
-                // Including them in the JSON body completes the "always present" invariant
-                // documented in the README: every API response body includes x_info_timeout
-                // and x_download_timeout. Consistent with all other error responses.
-                'x_info_timeout' => INFO_TIMEOUT,
-                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
                 // Completes the "always present" invariant documented in the README.
                 'x_ffprobe_status' => 'skipped',
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // quota fields: quota was refunded before this response.
                 // Unlimited-key holders ($unlimited=true) were never incremented, so
                 // $post_refund_count is $daily_limit for them (no change from baseline).
@@ -4303,6 +4347,11 @@ switch ($action) {
                 // x_download_timeout. Consistent with all other info and error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — ffprobe
+                // never runs in the YTDLP_ERROR path (yt-dlp fetch failed before any file
+                // was produced). Adding it completes the "always present" invariant in
+                // the README: every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             ];
             if ($raw_err) {
                 $resp['raw_error'] = $raw_err;
@@ -5128,6 +5177,11 @@ switch ($action) {
                     'x_ffprobe_status' => 'skipped',
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors X-FFProbe-Timeout header — skipped since
+                    // ffprobe only runs after a download completes. Completes the "always
+                    // present" invariant documented in README: every API response body
+                    // includes x_ffprobe_timeout.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5426,6 +5480,11 @@ switch ($action) {
                 // and x_download_timeout. Consistent with all other error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                // since ffprobe only runs after a download completes. Including it
+                // completes the "always present" invariant documented in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // quota fields: quota was refunded before this response.
                 // $post_refund_count is the post-refund daily count returned by
                 // refundQuota() — it IS the remaining quota, not an offset from the limit.
@@ -6003,6 +6062,11 @@ switch ($action) {
                 // and x_download_timeout.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                // since ffprobe only runs after a download completes. Including it
+                // completes the "always present" invariant documented in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe was never reached (yt-dlp exited 0 but produced no file or an empty
                 // file, so there was nothing for ffprobe to verify). Completes the "always
@@ -6727,6 +6791,11 @@ switch ($action) {
                 // and x_download_timeout. Consistent with all other error responses.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                // since ffprobe only runs after a download completes. Including it
+                // completes the "always present" invariant documented in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // quota fields: included for consistency with all other error responses.
                 // The file was downloaded by yt-dlp (quota was charged) but could not be
                 // read back for streaming — this is a server-side issue, not a quota problem.
@@ -6832,6 +6901,11 @@ switch ($action) {
                     // and x_download_timeout. Consistent with all other error responses.
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                    // since ffprobe only runs after a download completes. Including it
+                    // completes the "always present" invariant documented in the README:
+                    // every API response body includes x_ffprobe_timeout.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                     // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                     // ffprobe was never reached (client disconnected before file could be verified).
                     // Completes the "always present" invariant documented in the README.
@@ -7700,6 +7774,10 @@ switch ($action) {
             // values without parsing HTTP headers — consistent with the check action pattern.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             // health_probe_timeout: the configured timeout for the yt-dlp health probe
             // (action=health&probe=1). Mirrors x_info_timeout and x_download_timeout
             // for consistency — clients can always read this value from any response
@@ -8739,6 +8817,11 @@ switch ($action) {
             // INVALID_URL, and all other error response bodies.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
+            // ffprobe never runs for unknown actions (no file on disk). Adding it
+            // completes the "always present" invariant documented in the README:
+            // every API response body includes x_ffprobe_timeout.
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
