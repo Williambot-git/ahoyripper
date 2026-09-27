@@ -2225,6 +2225,7 @@ $health_response = [
     'action' => 'health',
     'source_url' => null,
     'source_url_missing' => true,
+    'health_probe_timeout' => 15, // mirrors HEALTH_PROBE_TIMEOUT default
 ];
 test('action=health: source_url_missing key exists',
     array_key_exists('source_url_missing', $health_response));
@@ -2232,6 +2233,10 @@ test('action=health: source_url_missing is boolean true (no URL provided)',
     ($health_response['source_url_missing'] ?? null) === true);
 test('action=health: source_url is null (probe endpoint)',
     ($health_response['source_url'] ?? null) === null);
+test('action=health: health_probe_timeout key exists',
+    array_key_exists('health_probe_timeout', $health_response));
+test('action=health: health_probe_timeout is positive integer (default 15)',
+    ($health_response['health_probe_timeout'] ?? 0) >= 1);
 
 // ─── INVALID_API_KEY response source_url_missing ─────────────────────────────────
 // INVALID_API_KEY error responses (info and download actions) include source_url
