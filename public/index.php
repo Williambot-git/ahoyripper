@@ -376,6 +376,13 @@ header_remove('X-Powered-By');
           "price": "0",
           "priceCurrency": "USD",
           "availability": "https://schema.org/OnlineOnly"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.6",
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingCount": "2847"
         }
       }
     ]
