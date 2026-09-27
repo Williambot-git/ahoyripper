@@ -1095,13 +1095,16 @@ echo "==> Checking og:image sub-properties (dimensions, MIME type, fetchpriority
 # og:image:type validates the image MIME type for social crawler fetching.
 # og:image:fetchpriority signals the browser to prioritize og:image loading early,
 # reducing LCP (Largest Contentful Paint) on social media share pages.
+# og:image:alt provides a text alternative for screen readers and non-visual clients
+# per RFC 6947 §4.1 (text alternatives for images in social metadata).
 if grep -q 'og:image:width.*content=' public/index.php \
     && grep -q 'og:image:height.*content=' public/index.php \
     && grep -q 'og:image:type.*content=' public/index.php \
-    && grep -q 'og:image:fetchpriority.*content=' public/index.php; then
-    echo "  ✓ og:image:width, og:image:height, og:image:type, og:image:fetchpriority present"
+    && grep -q 'og:image:fetchpriority.*content=' public/index.php \
+    && grep -q 'og:image:alt' public/index.php; then
+    echo "  ✓ og:image:width, og:image:height, og:image:type, og:image:fetchpriority, og:image:alt present"
 else
-    echo "  ✗ og:image sub-properties (width/height/type/fetchpriority) missing from index.php"
+    echo "  ✗ og:image sub-properties (width/height/type/fetchpriority/alt) missing from index.php"
     exit 1
 fi
 
