@@ -7078,6 +7078,11 @@ switch ($action) {
             // Consistent with action=health which exposes all three timeout fields in both
             // HTTP headers and JSON body.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
+            // (line ~6905). Adding it to the body completes the "always present" invariant
+            // documented in the README: every API response body includes x_ffprobe_status.
+            // ffprobe never runs on the check endpoint (no file on disk) so value is 'skipped'.
+            'x_ffprobe_status' => 'skipped',
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             // yt_dlp_ok: true when yt-dlp binary is installed and callable.
             // Mirrors the field in action=health so monitoring scripts that hit

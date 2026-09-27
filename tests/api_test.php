@@ -1733,9 +1733,29 @@ $check_response = [
     'app_version' => AHOYRIPPER_VERSION,
     'php_version' => PHP_VERSION,
     'api_version' => AHOYRIPPER_VERSION,
+    'x_info_timeout' => 45,
+    'x_download_timeout' => 300,
+    'x_ffprobe_timeout' => 10,
+    'x_ffprobe_status' => 'skipped',
     // curl_cffi_ok: mirrors health endpoint for consistency across probe endpoints.
     'curl_cffi_ok' => true,
 ];
+test('check endpoint response includes x_info_timeout key',
+    array_key_exists('x_info_timeout', $check_response));
+test('check endpoint x_info_timeout is positive integer (INFO_TIMEOUT)',
+    is_int($check_response['x_info_timeout'] ?? null) && $check_response['x_info_timeout'] > 0);
+test('check endpoint response includes x_download_timeout key',
+    array_key_exists('x_download_timeout', $check_response));
+test('check endpoint x_download_timeout is positive integer (DOWNLOAD_TIMEOUT)',
+    is_int($check_response['x_download_timeout'] ?? null) && $check_response['x_download_timeout'] > 0);
+test('check endpoint response includes x_ffprobe_timeout key',
+    array_key_exists('x_ffprobe_timeout', $check_response));
+test('check endpoint x_ffprobe_timeout is positive integer (FFPROBE_TIMEOUT)',
+    is_int($check_response['x_ffprobe_timeout'] ?? null) && $check_response['x_ffprobe_timeout'] > 0);
+test('check endpoint response includes x_ffprobe_status key',
+    array_key_exists('x_ffprobe_status', $check_response));
+test('check endpoint x_ffprobe_status is "skipped" (ffprobe only runs after download)',
+    ($check_response['x_ffprobe_status'] ?? '') === 'skipped');
 test('check endpoint response includes api_version key',
     array_key_exists('api_version', $check_response));
 test('check endpoint api_version matches AHOYRIPPER_VERSION',
