@@ -4004,6 +4004,11 @@ switch ($action) {
             // The limit is intentionally very high (50 GB) to only fire on genuine
             // oversized-content cases, not ordinary downloads.
             '--max-filesize', '50G',
+            // --consecutive-title: yt-dlp 2024.12+ strips path traversal sequences (.., /, \)
+            // from video titles when constructing output filenames, preventing accidental or
+            // malicious file writes outside the intended directory. Defense-in-depth alongside
+            // sanitize_filename() and --restrict-filenames — all three layers are independent.
+            '--consecutive-title',
             // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
             // Mirrors the download action at line ~4997 and health probe at ~7363.
             // While --skip-download means ffmpeg is not invoked during info extraction,
@@ -7746,6 +7751,11 @@ switch ($action) {
                     // The limit is intentionally very high (50 GB) to only fire on genuine
                     // oversized-content edge cases (e.g. extremely high-bitrate 8K streams).
                     '--max-filesize', '50G',
+                    // --consecutive-title: yt-dlp 2024.12+ strips path traversal sequences (.., /, \)
+                    // from video titles when constructing output filenames, preventing accidental or
+                    // malicious file writes outside the intended directory. Mirrors the download
+                    // action at line ~5258 and info action at line ~4006 for consistency.
+                    '--consecutive-title',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
                     '--referer', 'https://ahoyripper.com/',
                     '--user-agent', AHOY_USER_AGENT,
