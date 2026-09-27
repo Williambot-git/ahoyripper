@@ -1420,6 +1420,59 @@ else
 fi
 
 echo ""
+echo "==> Checking robots.txt and robots.php AI crawler block consistency..."
+# Verify both files block the same set of AI training crawlers. Divergence creates
+# an SEO gap: if a new AI bot is added to one file but not the other, it either
+# gets unblocked (if added to robots.php but not robots.txt) or the static file
+# silently blocks a bot the PHP generator allows.
+# Use while-read to handle bot names that may appear on multi-bot-per-line entries.
+MISSING_IN_ROBOTS_PHP=""
+while IFS= read -r line; do
+    bot_name=$(echo "$line" | sed 's/^User-agent: //')
+    if [ -n "$bot_name" ] && [ "$bot_name" != "*" ] && [ "$bot_name" != "AhoyBot" ]; then
+        if ! grep -q "^User-agent: $bot_name$" public/robots.php; then
+            MISSING_IN_ROBOTS_PHP="${MISSING_IN_ROBOTS_PHP} ${bot_name}"
+        fi
+    fi
+done < <(grep '^User-agent:' public/robots.txt)
+if [ -n "$MISSING_IN_ROBOTS_PHP" ]; then
+    echo "  ✗ AI bots in robots.txt but missing from robots.php:${MISSING_IN_ROBOTS_PHP}"
+    exit 1
+fi
+AI_BOT_COUNT=$(grep '^User-agent:' public/robots.txt | grep -v '^\*$' | grep -v 'AhoyBot' | wc -l)
+echo "  ✓ All ${AI_BOT_COUNT} AI training crawler blocks in robots.txt are also in robots.php"
+
+# Verify robots.php AI bots are also in robots.txt (no extra bots in PHP generator)
+MISSING_IN_ROBOTS_TXT=""
+while IFS= read -r line; do
+    bot_name=$(echo "$line" | sed 's/^User-agent: //')
+    if [ -n "$bot_name" ] && [ "$bot_name" != "*" ] && [ "$bot_name" != "AhoyBot" ]; then
+        if ! grep -q "^User-agent: $bot_name$" public/robots.txt; then
+            MISSING_IN_ROBOTS_TXT="${MISSING_IN_ROBOTS_TXT} ${bot_name}"
+        fi
+    fi
+done < <(grep '^User-agent:' public/robots.php)
+if [ -n "$MISSING_IN_ROBOTS_TXT" ]; then
+    echo "  ✗ AI bots in robots.php but missing from robots.txt:${MISSING_IN_ROBOTS_TXT}"
+    exit 1
+fi
+echo "  ✓ All AI training crawler blocks in robots.php are also in robots.txt (no extras in PHP generator)"
+
+# Verify Disallow:/Allow: ordering in User-agent: * block is correct in both files.
+# crawlers use first-matching-rule precedence: Disallow MUST come before Allow.
+# If Allow: / appears before Disallow: /src/, AI training bots get allowed.
+for file in public/robots.txt public/robots.php; do
+    USER_STAR_BLOCK=$(awk '/^User-agent: \*$/,/^User-agent:|^$/' "$file" | grep -v '^#' | grep -v '^$')
+    FIRST_ALLOW=$(echo "$USER_STAR_BLOCK" | grep -n '^Allow:' | head -1 | cut -d: -f1)
+    FIRST_DISALLOW=$(echo "$USER_STAR_BLOCK" | grep -n '^Disallow:' | head -1 | cut -d: -f1)
+    if [ -n "$FIRST_ALLOW" ] && [ -n "$FIRST_DISALLOW" ] && [ "$FIRST_ALLOW" -lt "$FIRST_DISALLOW" ]; then
+        echo "  ✗ ${file}: Allow: / before Disallow: /src/ — AI training bots would be allowed"
+        exit 1
+    fi
+done
+echo "  ✓ robots.txt and robots.php Disallow before Allow ordering correct (first-matching-rule precedence)"
+
+echo ""
 echo "==> Checking nginx-docker.conf server-level security headers include X-Robots-Tag..."
 if grep -q 'X-Robots-Tag "noindex, noai, noimage, noydir"' deploy/nginx-docker.conf; then
     echo "  ✓ nginx-docker.conf has X-Robots-Tag at server level"

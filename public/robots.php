@@ -92,6 +92,8 @@ User-agent: YouBot
 # prevent AhoyRipper from appearing in Apple Spotlight search results and would
 # break rich link previews when AhoyRipper URLs are shared on Facebook/Meta.
 # Allow them to crawl the public-facing HTML pages (they respect the /src/ disallow).
+User-agent: Applebot
+User-agent: FacebookBot
 # AhoyBot is our own crawler — allow it to crawl the site normally so our
 # own SEO and indexing pipelines work correctly.
 User-agent: AhoyBot
