@@ -782,6 +782,16 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `X-FFProbe-Status` | Post-download verification result: `success` (ffprobe confirmed codec/resolution), `failed` (ffprobe ran but could not verify — quota is refunded), or `skipped` (ffprobe was not reached — e.g. audio-only, yt-dlp error, or missing file). Always present on every API response (including `info` and `download`) for consistent header coverage. On `info` responses this is always `skipped` since ffprobe only runs after a download. |
 | `X-FFProbe-Timeout` | Server-side ffprobe verification timeout in seconds (integer). The maximum time ffprobe is allowed to run before the verification is aborted and treated as a timeout failure. Present on every API response for consistent client retry logic — on probe/read-only actions (check, health, analytics, default) this is always `FFPROBE_TIMEOUT` since ffprobe only runs after a download; on download responses it reflects the actual ffprobe timeout (default: 10 seconds, configurable via `FFPROBE_TIMEOUT` env var). |
 
+**Download response body fields** — every download response includes these fields in the JSON body alongside the format data. These fields are always present regardless of whether the download succeeded, failed, or was blocked before yt-dlp ran:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `x_ffprobe_status` | `string` | Post-download verification status: `success` (ffprobe confirmed codec/resolution), `failed` (ffprobe ran but could not verify — quota is refunded), or `skipped` (ffprobe was not reached — e.g. audio-only format, yt-dlp error, or missing file). Always present on every download response for consistent field coverage. |
+| `x_info_timeout` | `integer` | Server-side info timeout in seconds. Matches `INFO_TIMEOUT` (default 45s). |
+| `x_download_timeout` | `integer` | Server-side download timeout in seconds. Matches `DOWNLOAD_TIMEOUT` (default 300s). |
+| `curl_cffi_ok` | `boolean` | Whether the `curl_cffi` Python library is installed and callable — required for yt-dlp `--impersonate` browser TLS fingerprint spoofing. When `false`, yt-dlp falls back to its default TLS fingerprint and bot-detection failures will increase. |
+| `ffprobe_ok` | `boolean` | Whether ffprobe is installed and callable. When `false`, post-download codec verification is skipped and `x_ffprobe_status` will always be `skipped`. |
+
 **Download error response (422 with classified error):**
 ```json
 {
