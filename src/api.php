@@ -4530,6 +4530,11 @@ switch ($action) {
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => date('c'),
                 'server_time_unix' => time(),
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe never runs in the parseFormats error path (yt-dlp itself returned
+                // the error during extraction). Completes the "always present" invariant
+                // documented in the README: every API response body includes x_ffprobe_status.
+                'x_ffprobe_status' => 'skipped',
                 // quota fields: consistent with success and other error responses.
                 // Quota was incremented then refunded (refundQuota reverts it on error).
                 // post-refund count = pre-increment baseline (refund decremented the file),
