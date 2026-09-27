@@ -281,7 +281,16 @@ $action = trim($_GET['action'] ?? $_POST['action'] ?? '');
 // browsers on same-site fetch requests and CORS preflight requests.
 //
 // Allowed origins for browser-based API calls (SPA fetches land here with proper referer).
-$allowed_origins = ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
+// Configurable via ALLOWED_ORIGINS env var (comma-separated list, no trailing slashes) so
+// self-hosted deployments with custom domains can add their own origin without patching source.
+// Example: ALLOWED_ORIGINS='https://rip.mysite.com,https://www.rip.mysite.com'
+// Default covers the canonical ahoyripper.com, www variant, and the AhoyVPN brand domain.
+// Use the same strict origin comparison (scheme://host, no path) as Referer validation.
+$_raw_origins = getenv('ALLOWED_ORIGINS');
+$allowed_origins = ($_raw_origins !== false && $_raw_origins !== '')
+    ? array_values(array_filter(array_map('trim', explode(',', $_raw_origins))))
+    : ['https://ahoyripper.com', 'https://www.ahoyripper.com', 'https://ahoyvpn.com', 'https://www.ahoyvpn.com'];
+unset($_raw_origins);
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
 // Fallback: read referer from query param for direct browser navigation downloads
 // (e.g. window.location.href carrying &referer=https://ahoyripper.com/). This is
