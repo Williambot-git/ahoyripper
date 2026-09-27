@@ -8328,6 +8328,12 @@ switch ($action) {
                 // and health action pattern.
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
+                // (line 8003). Adding it to the body completes the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_ffprobe_timeout. Consistent with action=check and action=health
+                // which both expose all three timeout fields in both headers and body.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
                 // (line 8005) — always 'skipped' on analytics since ffprobe only runs
                 // after a download. Present here to complete the "always present"
