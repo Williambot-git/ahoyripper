@@ -94,11 +94,16 @@ if (strpos($content, $placeholder) !== false) {
     // No placeholder found — CACHE_VERSION already has a real hash value.
     // Check if it needs updating (different from current version).
     $newContent = $content; // default: no change
-    if (preg_match('/^const CACHE_VERSION = \'([a-z0-9_-]+)\'/m', $content, $m)) {
+    // The ternary result is the : 'hash' branch, not the comparison 'hash'.
+    // The comparison value ('ca4e0f6' in 'ca4e0f6' === 'PLACEHOLDER') is the
+    // same only because the deploy script updates both branches simultaneously.
+    // The : 'hash' branch is the semantically correct one to match — it is
+    // the actual active CACHE_VERSION value that PWA cache invalidation uses.
+    if (preg_match('/^\s+: \'([a-z0-9_-]+)\'/m', $content, $m)) {
         $current = $m[1];
         if ($current !== $version) {
             // Version mismatch — update all occurrences of the old hash in the
-            // CACHE_VERSION line(s) to the new version.
+            // CACHE_VERSION block to the new version.
             $lines = explode("\n", $content);
             $in_block = false;
             foreach ($lines as $i => $line) {
