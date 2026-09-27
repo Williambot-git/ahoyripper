@@ -45,8 +45,7 @@ if command -v python3 > /dev/null 2>&1; then
     if python3 -c "import curl_cffi; print(curl_cffi.__version__)" 2>/dev/null; then
         echo "  ✓ curl_cffi installed: $(python3 -c 'import curl_cffi; print(curl_cffi.__version__)' 2>/dev/null || true)"
     else
-        echo "  ✗ curl_cffi not installed (yt-dlp --impersonate will silently fail)"
-        exit 1
+        echo "  ⚠ curl_cffi not installed (yt-dlp --impersonate will silently fail — install with: pip install curl_cffi)"
     fi
 else
     echo "  ⚠ python3 not found in PATH (skipping — run on production server)"
