@@ -7133,12 +7133,6 @@ switch ($action) {
             // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
             // upsell opportunity. Mirrors the same field in the health response.
             'upgrade_url' => UPGRADE_URL,
-            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — present
-            // as a header on all API responses (including check). Adding it to the body
-            // lets API consumers read the ffprobe status from the JSON without parsing
-            // HTTP headers, consistent with how x_info_timeout and x_download_timeout
-            // are already exposed in the check body.
-            'x_ffprobe_status' => 'skipped',
             // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
             // (line 6909). Adding it to the body completes the "always present" invariant
             // documented in the README: every API response body includes x_ffprobe_timeout.
