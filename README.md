@@ -927,15 +927,22 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
 {
   "status": "ok",
   "action": "check",
+  "api_ok": true,
   "server_time": "2026-09-18T00:00:00+00:00",
   "server_time_unix": 1789689600,
   "request_id": "a3f1b2c9d4e5f678",
   "app_version": "1.0.0",
   "php_version": "8.2.0",
   "api_version": "1.0.0",
+  "os": "Linux",
+  "x_info_timeout": 45,
+  "x_download_timeout": 300,
   "yt_dlp_version": "2026.03.17",
+  "yt_dlp_ok": true,
   "ffmpeg_version": "ffmpeg version 6.x",
+  "ffprobe_version": "ffmpeg version 6.x",
   "ffmpeg_ok": true,
+  "ffprobe_ok": true,
   "curl_cffi_version": "0.8.0",
   "curl_cffi_ok": true,
   "quota_remaining": -1,
@@ -943,12 +950,12 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "quota_reset": "2026-09-19T00:00:00+00:00",
   "quota_reset_unix": 1789776000,
   "source_url": null,
+  "source_url_missing": true,
+  "format_id_missing": false,
   "platform": null,
-  "x_ffprobe_status": "skipped",
-  "ffprobe_ok": true,
-  "yt_dlp_ok": true,
   "video_url": null,
-  "source_url_missing": true
+  "upgrade_url": "https://ahoyvpn.com",
+  "x_ffprobe_status": "skipped"
 }
 ```
 
