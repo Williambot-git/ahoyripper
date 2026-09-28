@@ -6841,10 +6841,11 @@ switch ($action) {
                 header('X-RateLimit-Limit: -1');
                 header('X-RateLimit-Remaining: -1');
                 header('X-RateLimit-Reset: -1');
-                header('X-RateLimit-Window: unavailable');
-                // Download-specific rate limit: client aborted before the file was fully
-                // sent — the quota was charged when yt-dlp completed the download, so
-                // the actual post-consumption values apply here (same as FILE_READ_ERROR).
+                header('X-RateLimit-Window: ' . $rate_window);
+                // X-DL-RateLimit-*: download-specific rate limit.
+                // Client aborted before the file was fully sent — the quota was charged
+                // when yt-dlp completed the download, so the actual post-consumption
+                // values apply here (same as FILE_READ_ERROR).
                 if ($unlimited) {
                     header('X-DL-RateLimit-Limit: -1');
                     header('X-DL-RateLimit-Remaining: -1');
