@@ -388,6 +388,7 @@ if ($blocked) {
                 ? 'The Referer header must be from ahoyripper.com or ahoyvpn.com.'
                 : 'API requests require a Referer header (e.g. -H "Referer: https://ahoyripper.com/").',
             'error_code' => strtoupper($block_reason), // MISSING_REFERER or INVALID_ORIGIN
+            'hint' => 'Include a Referer header from ahoyripper.com or ahoyvpn.com. For curl, add: -H "Referer: https://ahoyripper.com/"',
             'action' => $action ?: null,
             // retry_after: 0 — CORS validation failure is a client configuration issue
             // with no server-side backoff needed. The client just needs to use a
