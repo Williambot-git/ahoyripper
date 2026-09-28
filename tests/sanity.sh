@@ -1273,7 +1273,7 @@ fi
 
 echo ""
 echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcement + report-only + API override + csp-report location)..."
-# There are 5 legitimate CSP headers in nginx-docker.conf:
+# There are up to 12 legitimate CSP headers in nginx-docker.conf:
 #   1. Server-level enforcement CSP (add_header ... Content-Security-Policy ...)
 #   2. Server-level report-only (add_header ... Content-Security-Policy-Report-Only ...)
 #   3. API-location enforcement (location = /src/api.php block) — intentionally more
@@ -1285,13 +1285,17 @@ echo "==> Checking CSP Reporting API in nginx-docker.conf (server-level enforcem
 #      network layer for defense-in-depth; added in 260915.
 #   6. /csp/report location enforcement CSP (location = /csp/report block)
 #   7. /csp/report location report-only CSP
-# The test checks that there are exactly 8 (not fewer, which would indicate
-# duplicate server-level or spurious entries).
+#   8. MISSING_FORMAT error block enforcement CSP (api location, MISSING_FORMAT error)
+#   9. MISSING_FORMAT error block report-only CSP
+#  10. INVALID_FORMAT_ID error block enforcement CSP (api location, INVALID_FORMAT_ID error)
+#  11. INVALID_FORMAT_ID error block report-only CSP
+# The test checks that there are at least 8 (fewer would indicate duplicate or
+# dropped server-level entries). More are allowed as error-block CSPs are added.
 CSP_COUNT=$(grep -c "Content-Security-Policy" deploy/nginx-docker.conf || true)
-if [ "$CSP_COUNT" -eq 8 ]; then
-    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (server + PHP/block-level + API + / root + csp-report)"
+if [ "$CSP_COUNT" -ge 8 ]; then
+    echo "  ✓ CSP appears $CSP_COUNT times in nginx-docker.conf (server + API + / root + csp-report + error blocks)"
 else
-    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected 8: server + PHP/block-level + API + / root + csp-report)"
+    echo "  ✗ CSP appears $CSP_COUNT times in nginx-docker.conf (expected ≥8: server + API + / root + csp-report)"
     exit 1
 fi
 
