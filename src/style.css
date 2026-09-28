@@ -11,6 +11,12 @@
   --color-accent-sub: rgba(59, 130, 246, 0.1);
   --color-success: #22c55e;
   --color-error: #ef4444;
+  /* PWA banners — uses accent blue for consistency with the rest of the app */
+  --color-banner-bg: #1a1a2e;
+  --color-banner-border: #2d2d44;
+  --color-banner-btn: #7c3aed;
+  --color-banner-btn-hover: #6d28d9;
+  --color-banner-btn-active: #5b21b6;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -46,6 +52,12 @@
     --color-success: #16a34a;
     --color-error: #dc2626;
     color-scheme: light;
+    /* PWA banners — slightly lighter variants for light mode */
+    --color-banner-bg: #e8eaf6;
+    --color-banner-border: #c5cae9;
+    --color-banner-btn: #5b21b6;
+    --color-banner-btn-hover: #4c1d95;
+    --color-banner-btn-active: #3b0764;
   }
 }
 
@@ -799,9 +811,9 @@ footer a { color: var(--color-text-sec); text-decoration: none; }
 footer a:hover { color: var(--color-accent); }
 
 /* Responsive */
-/* ─── PWA Update Banner ─────────────────────────────────────────────────────── */
+/* PWA Update Banner */
 .update-banner {
-  background: #1a1a2e;
+  background: var(--color-banner-bg);
   color: #e2e8f0;
   padding: 0.75rem 1rem;
   display: flex;
@@ -809,11 +821,11 @@ footer a:hover { color: var(--color-accent); }
   justify-content: center;
   gap: 1rem;
   font-size: 0.9rem;
-  border-bottom: 1px solid #2d2d44;
+  border-bottom: 1px solid var(--color-banner-border);
 }
 .update-banner span { flex: 1; }
 .update-banner .refresh-btn {
-  background: #7c3aed;
+  background: var(--color-banner-btn);
   color: #fff;
   border: none;
   padding: 0.4rem 1rem;
@@ -823,9 +835,9 @@ footer a:hover { color: var(--color-accent); }
   font-weight: 600;
   transition: background 0.15s;
 }
-.update-banner .refresh-btn:hover { background: #6d28d9; }
-.update-banner .refresh-btn:active { background: #5b21b6; }
-#install-dismiss-btn:hover { background: #4b5563 !important; }
+.update-banner .refresh-btn:hover { background: var(--color-banner-btn-hover); }
+.update-banner .refresh-btn:active { background: var(--color-banner-btn-active); }
+#install-dismiss-btn:hover { background: var(--color-banner-border) !important; }
 #install-dismiss-btn:active { background: #374151 !important; }
 
 @media (max-width: 600px) {
