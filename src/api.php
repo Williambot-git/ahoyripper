@@ -5825,6 +5825,21 @@ switch ($action) {
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe was never reached in the classified-error path (yt-dlp exited
+                    // non-zero before ffprobe was called). Completes the "always present"
+                    // invariant documented in the README: every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                    // Including them in the JSON body completes the "always present" invariant
+                    // documented in the README: every API response body includes x_info_timeout
+                    // and x_download_timeout. Consistent with all other error responses.
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                    // since ffprobe only runs after a download completes. Including it
+                    // completes the "always present" invariant documented in the README.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
