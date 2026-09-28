@@ -5803,6 +5803,7 @@ switch ($action) {
                     'action' => 'download',
                     'upgrade_url' => $err_classified['upgrade_url'] ?? UPGRADE_URL,
                     'hint' => 'The download failed with a source error. Check the error message for details, try another format, or try again shortly.',
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'request_id' => $request_id,
                     'source_url' => $url,
                     'source_url_missing' => false,
