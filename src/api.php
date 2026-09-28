@@ -421,7 +421,7 @@ if ($blocked) {
             // Present on all other API responses — FORBIDDEN_ORIGIN was missing
             // these fields, breaking generic response parsers that expect consistent
             // field coverage across all API code paths.
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
             // Present on all other API responses (check, health, client-error, info,
@@ -571,7 +571,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // Present on all other API responses — SERVICE_UNAVAILABLE was missing
         // these fields, breaking generic response parsers that expect consistent
         // field coverage across all API code paths.
-        'server_time' => date('c'),
+        'server_time' => gmdate('c'),
         'server_time_unix' => time(),
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
@@ -722,7 +722,7 @@ if ($is_rate_limited) {
                 'quota_reset_unix' => $rate_quota_reset,
             // server_time: ISO 8601 + Unix for client clock synchronization.
             // Present on all other API responses; rate-limit block was missing these.
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
             // ffprobe is never reached in the RATE_LIMIT_EXCEEDED path (rate limiting
@@ -988,7 +988,7 @@ if (in_array($action, $internal_actions, true)) {
                 'status' => 'ok',
                 'action' => $action,
                 'request_id' => $request_id,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 'upgrade_url' => UPGRADE_URL,
                 'x_ffprobe_status' => 'skipped',
@@ -1049,7 +1049,7 @@ if (in_array($action, $internal_actions, true)) {
             'status' => 'ok',
             'action' => $action,
             'request_id' => $request_id,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
             'x_ffprobe_status' => 'skipped',
@@ -1168,7 +1168,7 @@ if (in_array($action, $internal_actions, true)) {
                 'request_id' => $request_id,
                 'retry_after' => 0,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 'x_ffprobe_status' => 'skipped',
                 'upgrade_url' => UPGRADE_URL,
@@ -1230,7 +1230,7 @@ if (in_array($action, $internal_actions, true)) {
             'request_id' => $request_id,
             'retry_after' => 0,
             'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'x_ffprobe_status' => 'skipped',
             'upgrade_url' => UPGRADE_URL,
@@ -1281,7 +1281,7 @@ if (in_array($action, $internal_actions, true)) {
         'status' => 'ok',
         'retry_after' => 0,
         'api_version' => AHOYRIPPER_VERSION,
-        'server_time' => date('c'),
+        'server_time' => gmdate('c'),
         'server_time_unix' => time(),
         'x_ffprobe_status' => 'skipped',
         'upgrade_url' => UPGRADE_URL,
@@ -2510,7 +2510,7 @@ function logRequest($action, $status, $extra = []) {
     // sets PAGE_REQUEST_ID on each page load and sends it as the X-Request-ID
     // request header (available in PHP as HTTP_X_REQUEST_ID).
     $entry = [
-        'ts' => date('c'),
+        'ts' => gmdate('c'),
         'req_id' => $GLOBALS['__request_id'] ?? '',
         'client_req_id' => $_SERVER['HTTP_X_REQUEST_ID'] ?? '',
         'action' => $action,
@@ -2681,7 +2681,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
             // quota_remaining: -1 signals that quota tracking is not available at this
@@ -2774,7 +2774,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
             // quota_remaining: -1 signals that quota tracking is not available at this
@@ -2866,7 +2866,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
             // quota_remaining: -1 signals that quota tracking is not available at this
@@ -2978,7 +2978,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -3096,7 +3096,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'upgrade_url' => UPGRADE_URL,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -3317,7 +3317,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // download, health, check) — this METHOD_NOT_ALLOWED block was missing
         // these fields, breaking generic response parsers that expect consistent
         // field coverage across all API code paths.
-        'server_time' => date('c'),
+        'server_time' => gmdate('c'),
         'server_time_unix' => time(),
         // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above.
         // ffprobe is never reached for METHOD_NOT_ALLOWED (HTTP method fires before
@@ -3427,7 +3427,7 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // client-error, info, download, health, check) — this NOT_ACCEPTABLE
         // block was missing these fields, breaking generic response parsers that
         // expect consistent field coverage across all API code paths.
-        'server_time' => date('c'),
+        'server_time' => gmdate('c'),
         'server_time_unix' => time(),
         // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above.
         // ffprobe is never reached for NOT_ACCEPTABLE (Accept-header validation fires
@@ -3539,7 +3539,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -3658,7 +3658,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_API_KEY validation path (yt-dlp
@@ -3769,7 +3769,7 @@ switch ($action) {
                     // Present on all other API responses — this 503 block was missing
                     // these fields, breaking generic response parsers that expect
                     // consistent field coverage across all API code paths.
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -3835,7 +3835,7 @@ switch ($action) {
                     // Present on all other API responses — this 503 block was missing
                     // these fields, breaking generic response parsers that expect
                     // consistent field coverage across all API code paths.
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -3935,7 +3935,7 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => $quota_reset_iso,
                     'quota_reset_unix' => (int)$reset_timestamp,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -4212,7 +4212,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 // server_time: ISO 8601 + Unix for client clock synchronization.
                 // Present on all other API responses — this block was missing these fields.
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
@@ -4354,7 +4354,7 @@ switch ($action) {
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
@@ -4622,7 +4622,7 @@ switch ($action) {
                 'retry_after' => max(0, $retry_delta),
                 // server_time: ISO 8601 + Unix for client clock synchronization.
                 // Present on all other API responses — this block was missing these fields.
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe never runs in the parseFormats error path (yt-dlp itself returned
@@ -4688,7 +4688,7 @@ switch ($action) {
         $parsed['quota_reset_unix'] = $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
         // server_time: ISO 8601 timestamp for client clock synchronization.
         // Consistent with check, health, and download success responses.
-        $parsed['server_time'] = date('c');
+        $parsed['server_time'] = gmdate('c');
         $parsed['server_time_unix'] = time();
         // X-Info-Timeout: server-side info timeout in seconds. Clients should set their
         // fetch timeout to at least this value so the client deadline never exceeds the
@@ -4811,7 +4811,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // quota fields: invalid key means no quota tracking applies — consistent
                 // with the -1 sent for unlimited-key responses.
@@ -4919,7 +4919,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     // quota fields: set to configured limit and tomorrow's midnight UTC reset.
                     // Consistent with the info action's RATE_LIMIT_EXCEEDED block which
@@ -5050,7 +5050,7 @@ switch ($action) {
                     // download, health, check, analytics) — this 503 block was missing
                     // these fields, breaking generic response parsers that expect
                     // consistent field coverage across all API code paths.
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -5120,7 +5120,7 @@ switch ($action) {
                     // download, health, check, analytics) — this 503 block was missing
                     // these fields, breaking generic response parsers that expect
                     // consistent field coverage across all API code paths.
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -5204,7 +5204,7 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => $quota_reset_iso,
                     'quota_reset_unix' => (int)$reset_timestamp,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -5512,7 +5512,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -5675,7 +5675,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
@@ -5859,7 +5859,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : $post_refund_count,
@@ -5987,7 +5987,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'retry_after' => max(0, $retry_delta),
                     'quota_remaining' => $unlimited ? -1 : $uncl_post_refund_count,
@@ -6120,7 +6120,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -6357,7 +6357,7 @@ switch ($action) {
                         'platform' => null,
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
-                        'server_time' => date('c'),
+                        'server_time' => gmdate('c'),
                         'server_time_unix' => time(),
                         'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
                         'quota_limit' => $unlimited ? -1 : $daily_limit,
@@ -6505,7 +6505,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
                     // quota was refunded above. Unlimited-key holders ($unlimited=true) were never
@@ -6849,7 +6849,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 // server_time: ISO 8601 + Unix for client clock synchronization.
                 // Present on all other API responses — this block was missing these fields.
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
@@ -6960,7 +6960,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
-                    'server_time' => date('c'),
+                    'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                     // Including them in the JSON body completes the "always present" invariant
@@ -7127,7 +7127,7 @@ switch ($action) {
         echo json_encode([
             'status' => 'ok',
             'action' => 'check',
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
@@ -7385,7 +7385,7 @@ switch ($action) {
                 // METHOD_NOT_ALLOWED, info, download, health, check) — this 405 block
                 // was missing these fields, breaking generic response parsers that
                 // expect consistent field coverage across all API code paths.
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
                 // (line 6943) — always 'skipped' on client-error since ffprobe only runs
@@ -7490,7 +7490,7 @@ switch ($action) {
         // 'filename'] — the blocklist targets video URLs and API keys in log
         // entries; the page URL where a JS error occurred is safe to log.
         $entry = [
-            'ts' => date('c'),
+            'ts' => gmdate('c'),
             'req_id' => $request_id,
             'page_req_id' => is_string($data['page_request_id'] ?? null)
                 ? substr($data['page_request_id'], 0, 32) : null,
@@ -7519,7 +7519,7 @@ switch ($action) {
             'ok' => true,
             'action' => $action,
             'request_id' => $request_id,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -7764,7 +7764,7 @@ switch ($action) {
             'status' => $api_ok ? 'ok' : 'degraded',
             'action' => $action,
             'api_ok' => $api_ok,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'request_id' => $request_id,
             'app_version' => AHOYRIPPER_VERSION,
@@ -8028,7 +8028,7 @@ switch ($action) {
                         // server_time: ISO 8601 + Unix for clock synchronization — mirrors
                         // the top-level health response fields so probe sub-objects have the
                         // same temporal metadata as the parent response.
-                        'server_time' => date('c'),
+                        'server_time' => gmdate('c'),
                         'server_time_unix' => time(),
                         // request_id: included for traceability — mirrors the top-level
                         // health response field so the probe sub-object can be correlated
@@ -8141,7 +8141,7 @@ switch ($action) {
                         // server_time: ISO 8601 + Unix for clock synchronization — mirrors
                         // the top-level health response fields so probe sub-objects have the
                         // same temporal metadata as the parent response.
-                        'server_time' => date('c'),
+                        'server_time' => gmdate('c'),
                         'server_time_unix' => time(),
                         // ffprobe_ok: mirrors the field in action=check and action=health so
                         // monitoring scripts can confirm ffprobe availability from any endpoint.
@@ -8364,7 +8364,7 @@ switch ($action) {
                 // UNKNOWN_ACTION, info, download, health, check) — this 405 block
                 // was missing these fields, breaking generic response parsers that
                 // expect consistent field coverage across all API code paths.
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
                 // (line 7998) — always 'skipped' on csp-report since ffprobe only runs
@@ -8403,7 +8403,7 @@ switch ($action) {
         // to prevent log injection via CSP violation reports.
         $sanitized = preg_replace('/[\x00-\x1F\x7F]/', '', json_encode($report));
         $log_line = json_encode([
-            'ts' => date('c'),
+            'ts' => gmdate('c'),
             'request_id' => $request_id,
             'csp_report' => json_decode($sanitized, true),
         ]);
@@ -8494,7 +8494,7 @@ switch ($action) {
                 'retry_after' => 0,
                 'hint' => 'Submit analytics beacons via POST from a page on ahoyripper.com.',
                 'request_id' => $request_id,
-                'server_time' => date('c'),
+                'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -8845,7 +8845,7 @@ switch ($action) {
             'action' => $action,
             'retry_after' => 0,
             'request_id' => $request_id,
-            'server_time' => date('c'),
+            'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
