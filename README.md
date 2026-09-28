@@ -741,7 +741,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Your daily quota was not charged. |
 | `CONFIG_ERROR` | Browser impersonation is not available on the server. The `curl_cffi` Python library may be missing. | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable impersonation, or contact the server operator. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). The file may be too large or the source is slow. Try audio-only or a smaller format. |
-| `PROC_OPEN_FAILED` | The info or download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). Applies to both `info` and `download` actions. The server may be restarting or overloaded — try again shortly. |
+| `PROC_OPEN_FAILED` | The info or download process could not be started. Distinct from `YTDLP_ERROR`: this fires when the OS-level `proc_open()` call fails (binary missing, permission denied, or resource exhaustion). Applies to both `info` and `download` actions. The server may be restarting or overloaded — try again shortly. `report_url` included in response (file an issue if the error persists). |
 | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. |
 | `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. | Try again in a few seconds. |
 | `NOT_ACCEPTABLE` | Request did not send an `Accept: application/json` header. The API only serves JSON. | Send `Accept: application/json` on your request. |
@@ -905,7 +905,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `422` | `DISALLOWED_CONTENT` | Content not available due to a terms of service violation. |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field). Try another format from the list, or wait and try again. `report_url` included (file an issue if the error persists). |
 | `451` | `DISALLOWED_CONTENT` | Content is not available due to a terms of service violation. |
-| `500` | `PROC_OPEN_FAILED` | The info or download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing. |
+| `500` | `PROC_OPEN_FAILED` | The info or download process could not be started — `proc_open()` failed. Either the server is temporarily overloaded (try again shortly), or yt-dlp is not installed, the path is wrong, or permissions are missing. `report_url` included (file an issue if the error persists). |
 | `500` | `FILE_READ_ERROR` | The downloaded file could not be read even though it exists. Try again or pick a different format. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data. Try another format or wait and retry. Your quota was not charged. |
 | `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found it corrupt or unreadable. Try another format. |
@@ -1477,7 +1477,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `FORBIDDEN_ORIGIN` | Direct embedding or cross-origin access blocked | Use the AhoyRipper web interface at https://ahoyripper.com |
 | `METHOD_NOT_ALLOWED` | HTTP method not allowed for this endpoint | Use GET for info/download/health; POST for CSP report submission |
 | `NOT_ACCEPTABLE` | Client requested an unsupported response format | API only returns application/json — ensure Accept: application/json header is sent |
-| `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly |
+| `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly. `report_url` included in response (file an issue if the error persists). |
 | `SERVICE_UNAVAILABLE` | Rate-limit or quota file could not be opened or locked | The server's quota system is temporarily unavailable — retry after 5 seconds (`retry_after` field in response). If persistent, the server may be overloaded or the quota storage may be inaccessible. |
 | `PROBE_FAILED` | The yt-dlp health probe failed — yt-dlp could not fetch the test video | Check `yt_dlp_version` and `ffmpeg_version` in the health response. Update yt-dlp (`pip install -U yt-dlp`) and ensure `curl_cffi` is installed. If the issue persists, the server's network route to YouTube may be blocked or degraded. |
 | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
