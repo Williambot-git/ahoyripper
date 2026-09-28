@@ -3156,7 +3156,21 @@ unset($_raw_impersonate);
 // (age-restricted YouTube, Spotify, etc.). Set via COOKIES_PATH env var or
 // docker-compose. When absent or empty, no --cookies flag is passed to yt-dlp.
 // See README.md "Passing cookies to yt-dlp" for setup instructions.
-define('COOKIES_PATH', getenv('COOKIES_PATH') ?: '');
+//
+// If COOKIES_PATH is set to a path that is not a readable file (e.g. the
+// container volume was unmounted, or the path is wrong), reset it to ''.
+// This prevents yt-dlp from receiving an invalid --cookies path and emitting
+// a confusing "unsupported URL" error instead of a clear config error.
+// An operator can still detect the misconfiguration by checking that
+// is_readable(COOKIES_PATH) === false when COOKIES_PATH !== ''.
+$_raw_cookies = getenv('COOKIES_PATH');
+$_cookies_val = ($_raw_cookies !== false && $_raw_cookies !== '') ? $_raw_cookies : '';
+if ($_cookies_val !== '' && !is_readable($_cookies_val)) {
+    error_log("AhoyRipper WARNING: COOKIES_PATH is set to '{$_cookies_val}' but the file is not readable — skipping cookies. Fix the path or mount the file to enable cookie-based authentication.");
+    $_cookies_val = '';
+}
+define('COOKIES_PATH', $_cookies_val);
+unset($_raw_cookies, $_cookies_val);
 
 // Shared constant: maximum URL length in characters.
 // Both info and download actions enforce this same limit so clients get
