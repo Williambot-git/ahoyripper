@@ -4454,6 +4454,17 @@ switch ($action) {
                 // parseFormats returned null). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Adding them to the body completes the "always present" invariant documented
+                // in the README: every API response body includes x_info_timeout and
+                // x_download_timeout. Consistent with all other info and error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — ffprobe
+                // never runs in the PARSE_ERROR path (yt-dlp ran but parseFormats returned
+                // null). Adding it completes the "always present" invariant in the README:
+                // every API response body includes x_ffprobe_timeout.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
