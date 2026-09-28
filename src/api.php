@@ -7913,6 +7913,12 @@ switch ($action) {
                 // to avoid probe failures caused by locale-specific content restrictions.
                 $probe_cmd[] = '--add-header';
                 $probe_cmd[] = 'Accept-Language: en-US';
+                // --consecutive-title: yt-dlp 2024.12+ strips path traversal sequences (.., /, \)
+                // from video titles when constructing output filenames, preventing accidental or
+                // malicious file writes outside the intended directory. Defense-in-depth alongside
+                // sanitize_filename() and --restrict-filenames — all three layers are independent.
+                // Mirrors the info action (line ~4094) and download action (line ~5385).
+                $probe_cmd[] = '--consecutive-title';
                 $probe_cmd[] = '--';
                 $probe_cmd[] = HEALTH_PROBE_URL;
                 $probe_desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
