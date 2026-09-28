@@ -4325,6 +4325,8 @@ switch ($action) {
                 'format_id' => null,
                 'platform' => null,
                 'upgrade_url' => UPGRADE_URL,
+                'hint' => 'Could not fetch video metadata. The site may be blocking requests or may not be supported. Try another video or format.',
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => date('c'),
