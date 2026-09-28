@@ -1143,6 +1143,12 @@ if (in_array($action, $internal_actions, true)) {
             header('X-DailyLimit-Remaining: -1');
             header('X-DailyLimit-Reset: -1');
             header('X-DailyLimit-Window: unlimited');
+            // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+            // every other API response (health, check, info, download, analytics, progress).
+            // Set explicitly here because fastcgi_finish_request() flushes the output buffer
+            // before the top-of-script headers are processed in FPM mode.
+            header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+            header('X-Server-Time-Unix: ' . time());
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
@@ -1206,6 +1212,10 @@ if (in_array($action, $internal_actions, true)) {
         header('X-DailyLimit-Remaining: -1');
         header('X-DailyLimit-Reset: -1');
         header('X-DailyLimit-Window: unlimited');
+        // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
+        // every other API response (health, check, info, download, analytics, progress).
+        header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('X-Server-Time-Unix: ' . time());
         // X-Info-Timeout: mirrors the header set in the FPM fast-path block above.
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
