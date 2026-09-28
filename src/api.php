@@ -7980,6 +7980,10 @@ switch ($action) {
                         // upgrade_url: mirrors the health response body for consistency
                         // when clients read the probe sub-field directly.
                         'upgrade_url' => UPGRADE_URL,
+                        // report_url: included on successful probe results for consistency — mirrors
+                        // every other API response which includes report_url. On success the value
+                        // is the base issue URL (no error context to append yet).
+                        'report_url' => ISSUE_BASE_URL,
                         // server_time: ISO 8601 + Unix for clock synchronization — mirrors
                         // the top-level health response fields so probe sub-objects have the
                         // same temporal metadata as the parent response.
@@ -8034,6 +8038,7 @@ switch ($action) {
                             'code' => 'PROC_OPEN_FAILED',
                             'msg' => 'yt-dlp binary could not be started. Check that it is installed and the path is correct.',
                             'upgrade_url' => UPGRADE_URL,
+                            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                         ];
                         $probe_http_status = 500;
                     } elseif ($probe_exit === -1 && strpos($probe_err, 'timed out') !== false) {
@@ -8047,6 +8052,7 @@ switch ($action) {
                             'code' => 'SOURCE_TIMEOUT',
                             'msg' => 'The source site took too long to respond during the health probe. Try again when the site is less busy.',
                             'upgrade_url' => UPGRADE_URL,
+                            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                         ];
                         $probe_http_status = 504;
                     } else {
@@ -8055,7 +8061,7 @@ switch ($action) {
                         // Null coalescing (? ?? ) ensures the raw error text is surfaced rather
                         // than silently replaced with a generic message.
                         $probe_classified = classifyYtdlpError($probe_raw_err, $probe_exit)
-                            ?? ['code' => 'PROBE_FAILED', 'msg' => $probe_raw_err ?: 'Unknown error during yt-dlp health probe.'];
+                            ?? ['code' => 'PROBE_FAILED', 'msg' => $probe_raw_err ?: 'Unknown error during yt-dlp health probe.', 'upgrade_url' => UPGRADE_URL, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id];
                         // Map known error codes to HTTP status for health-check alerting.
                         if (in_array($probe_classified['code'] ?? '', ['SOURCE_TIMEOUT', 'CONNECTION_TIMEOUT'], true)) {
                             $probe_http_status = 504;
@@ -8086,6 +8092,10 @@ switch ($action) {
                         // upgrade_url: included on failed probe responses so clients can
                         // always surface the AhoyVPN upsell regardless of probe outcome.
                         'upgrade_url' => UPGRADE_URL,
+                        // report_url: included on failed probe responses so clients can
+                        // link directly to the GitHub issue tracker — mirrors every other
+                        // API error response (info/download) which includes report_url.
+                        'report_url' => $probe_classified['report_url'] ?? (ISSUE_BASE_URL . '?request_id=' . $request_id),
                         // server_time: ISO 8601 + Unix for clock synchronization — mirrors
                         // the top-level health response fields so probe sub-objects have the
                         // same temporal metadata as the parent response.
