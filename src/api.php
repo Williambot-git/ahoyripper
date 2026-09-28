@@ -8167,6 +8167,11 @@ switch ($action) {
             // (no cache file existed yet or cache was expired/stale).
             $probe_result['probe_cached_at'] = $probe_cached_at;
             $out['yt_dlp_probe'] = $probe_result;
+            // Mirror probe_age_seconds and probe_cached_at to the top level so monitoring
+            // clients can read cache staleness without digging into the nested sub-object —
+            // matching the documentation in README.md line 243.
+            $out['probe_age_seconds'] = $probe_result['probe_age_seconds'] ?? null;
+            $out['probe_cached_at'] = $probe_cached_at;
         }
         // When the yt-dlp probe has failed, set the HTTP status code to match the
         // classified error so monitoring systems using HTTP-level alerting
