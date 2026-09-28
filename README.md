@@ -1487,7 +1487,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly. `upgrade_url` included in response. |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
-| `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. |
+| `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. `upgrade_url` included in response. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
 | `INVALID_SORT` | Sort parameter value is not recognised | Use one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality` |
