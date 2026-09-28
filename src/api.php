@@ -409,10 +409,6 @@ if ($blocked) {
             // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
             'platform' => null,
             'upgrade_url' => UPGRADE_URL,
-            // action: CORS validation fires before action routing — $action is set
-            // from the query string but no action handler has run yet. Consistent
-            // with MISSING_URL and INVALID_URL which also use $action ?: null.
-            'action' => $action ?: null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             // quota fields: -1 signals that quota tracking is not available at this
