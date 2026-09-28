@@ -10,6 +10,10 @@
 // log_errors=On is preserved so errors are still written to error_log.
 error_reporting(0);
 ini_set('display_errors', '0');
+// Remove the X-Powered-By header to avoid exposing PHP version details.
+// This is already done in opensearch.php and sitemap.php for API-adjacent pages;
+// doing it here for the main SPA keeps the hardening consistent across all routes.
+header_remove('X-Powered-By');
 
 // Detect if JS is available (passed via cookie or param)
 $jsEnabled = isset($_COOKIE['js']) || isset($_GET['js']);
