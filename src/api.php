@@ -5968,6 +5968,16 @@ switch ($action) {
                     // before producing a verifiable file. Completes the "always present" invariant
                     // documented in README: every API response includes x_ffprobe_status.
                     'x_ffprobe_status' => 'skipped',
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                    // Including them in the JSON body completes the "always present" invariant
+                    // documented in README: every API response body includes x_info_timeout
+                    // and x_download_timeout. Consistent with the classified error block above.
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                    // since ffprobe only runs after a successful download. Including it
+                    // completes the "always present" invariant documented in README.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
