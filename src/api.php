@@ -4146,27 +4146,34 @@ switch ($action) {
             '--referer', validateRefererParam($_GET['referer'] ?? ''),
             '--user-agent', AHOY_USER_AGENT,
         ]);
-        // Add --impersonate to spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
-        // Dramatically reduces 403/422 bot-detection errors on protected sites.
+        // Build the final flag block before the URL separator (--).
+        // All flags must appear BEFORE the URL (--); yt-dlp rejects flags placed
+        // after the URL separator. Consolidating --impersonate, --cookies, and
+        // --add-header into a single array_merge ensures correct flag ordering
+        // (mirrors the download action pattern at line ~5481).
+        $final_flags = [
+            // --impersonate: spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
+            // Dramatically reduces 403/422 bot-detection errors on protected sites.
+            // --cookies: pass authenticated cookies if COOKIES_PATH is configured
+            // (enables authenticated ripping for age-restricted YouTube, Spotify, etc.).
+            // See README.md cookie instructions.
+            // --add-header: hardcode Accept-Language so yt-dlp requests consistent
+            // English-language metadata regardless of the browser's actual locale.
+        ];
         if (AHOY_IMPERSONATE !== '') {
-            $ytdlp_cmd[] = '--impersonate';
-            $ytdlp_cmd[] = AHOY_IMPERSONATE;
+            $final_flags[] = '--impersonate';
+            $final_flags[] = AHOY_IMPERSONATE;
         }
-        // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
-        // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
-            $ytdlp_cmd[] = '--cookies';
-            $ytdlp_cmd[] = COOKIES_PATH;
+            $final_flags[] = '--cookies';
+            $final_flags[] = COOKIES_PATH;
         }
-        $ytdlp_cmd = array_merge($ytdlp_cmd, [
-            // Hardcode en-US: yt-dlp uses this as the Accept-Language header when
-            // requesting metadata from source platforms. Consistent English-language
-            // metadata ensures reliable parsing and display regardless of the browser's
-            // actual locale (which is forwarded separately via the Referer header).
+        $final_flags = array_merge($final_flags, [
             '--add-header', 'Accept-Language: en-US',
             '--',
             $url,
         ]);
+        $ytdlp_cmd = array_merge($ytdlp_cmd, $final_flags);
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
         $pipes = null;
         $proc = proc_open($ytdlp_cmd, $desc, $pipes, '/tmp', [], ['bypass_shell' => true]);
