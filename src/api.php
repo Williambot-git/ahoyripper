@@ -7422,6 +7422,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'upgrade_url' => UPGRADE_URL,
+                'report_url' => ISSUE_BASE_URL,
                 'retry_after' => 0,
                 'source_url' => null,
                 'source_url_missing' => false,
@@ -7431,6 +7432,9 @@ switch ($action) {
                 // Consistent with the same null value in MISSING_URL, INVALID_URL,
                 // NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
                 'platform' => null,
+                // video_url: null — METHOD_NOT_ALLOWED fires before any video URL is processed.
+                // Consistent with the same null value in the client-error 200 block.
+                'video_url' => null,
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
                 'quota_reset' => -1,
@@ -7583,6 +7587,7 @@ switch ($action) {
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
+            'report_url' => ISSUE_BASE_URL,
             'retry_after' => 0,
             'source_url' => null,
             'source_url_missing' => false,
