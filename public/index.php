@@ -1093,6 +1093,7 @@ window.addEventListener('appinstalled', function() {
 
   function setLoading(on, label) {
     btn.disabled = on;
+    input.disabled = on;
     if (on) {
       btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + (label || 'Ripping...');
     } else {
@@ -1871,6 +1872,7 @@ window.addEventListener('appinstalled', function() {
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    if (isFetching) return;
     fetchInfo();
   });
 
