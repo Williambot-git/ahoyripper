@@ -1267,13 +1267,25 @@ if (in_array($action, $internal_actions, true)) {
             'quota_limit' => -1,
             'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
             'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+            // x_info_timeout / x_download_timeout / x_ffprobe_timeout: complete the
+            // "always present" invariant documented in the README: every API response
+            // body includes all three timeout fields. Consistent with the FPM fast-path
+            // block above and all other probe endpoints.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // hint: no actionable guidance for client-error — the endpoint is a passive
+            // JS error log with no user-facing remediation. Consistent with the null hint
+            // in the client-error FPM block and the 405 handler.
+            'hint' => null,
+            // platform: null — client-error is a passive endpoint with no associated
+            // video URL. Consistent with action=check, action=health, and action=csp-report.
+            'platform' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
 
-    // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers.
-    // NOTE: exit is REQUIRED here — without it, the script falls through to the
-    // check/health handler below (line 913) and returns a spurious status:ok from
+    // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers. and returns a spurious status:ok from
     // the wrong handler, confusing API clients that expect no body from client-error.
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
