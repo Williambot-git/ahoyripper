@@ -799,7 +799,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `x_ffprobe_status` | `string` | Post-download verification status: `success` (ffprobe confirmed codec/resolution), `failed` (ffprobe ran but could not verify — quota is refunded), or `skipped` (ffprobe was not reached — e.g. audio-only format, yt-dlp error, or missing file). Always present on every API response (info, download, health, check, analytics, client-error, csp-report, and unknown actions) for consistent field coverage. |
 | `x_info_timeout` | `integer` | Server-side info timeout in seconds. Matches `INFO_TIMEOUT` (default 45s). Present on every API response for consistent field coverage. |
 | `x_download_timeout` | `integer` | Server-side download timeout in seconds. Matches `DOWNLOAD_TIMEOUT` (default 300s). Present on every API response for consistent field coverage. |
-| `x_ffprobe_timeout` | `integer` | Server-side ffprobe timeout in seconds. Matches `FFPROBE_TIMEOUT` (default 30s). Present on every API response for consistent field coverage. |
+| `x_ffprobe_timeout` | `integer` | Server-side ffprobe timeout in seconds. Matches `FFPROBE_TIMEOUT` (default 10s). Present on every API response for consistent field coverage. |
 | `curl_cffi_ok` | `boolean` | Whether the `curl_cffi` Python library is installed and callable — required for yt-dlp `--impersonate` browser TLS fingerprint spoofing. When `false`, yt-dlp falls back to its default TLS fingerprint and bot-detection failures will increase. |
 | `ffprobe_ok` | `boolean` | Whether ffprobe is installed and callable. When `false`, post-download codec verification is skipped and `x_ffprobe_status` will always be `skipped`. |
 
