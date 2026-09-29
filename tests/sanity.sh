@@ -1368,9 +1368,10 @@ fi
 echo ""
 echo "==> Checking enforcement CSP in nginx-docker.conf uses report-to (not report-uri)... "
 # Enforcement CSP must use 'report-to csp-report' (via Reporting-Endpoints) for the
-# modern Reporting API. 'report-uri' in enforcement CSPs is deprecated/non-standard —
-# it belongs only in CSP-Report-Only headers. Safari and older Firefox (<79) are covered
-# by the report-uri in the CSP-Report-Only header (tested separately below).
+# modern Reporting API AND 'report-uri /csp-report' for Safari and older Firefox (<79)
+# which don't support the Reporting API. Both directives are needed together — report-to
+# handles modern browsers (Chromium 94+, Firefox 79+) while report-uri handles Safari
+# and older Firefox. The Report-Only CSP (tested separately) also needs report-uri.
 CSP_ENF=$(grep "add_header Content-Security-Policy\ " deploy/nginx-docker.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
 if echo "$CSP_ENF" | grep -q "report-to csp-report;"; then
     echo "  ✓ Enforcement CSP includes report-to csp-report"
@@ -1379,10 +1380,10 @@ else
     exit 1
 fi
 if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
-    echo "  ✗ Enforcement CSP incorrectly includes report-uri — it belongs in Report-Only only"
-    exit 1
+    echo "  ✓ Enforcement CSP includes report-uri /csp-report (Safari/old Firefox coverage)"
 else
-    echo "  ✓ Enforcement CSP correctly omits report-uri (belongs in Report-Only only)"
+    echo "  ✗ Enforcement CSP missing report-uri — Safari and older Firefox (<79) won't report violations"
+    exit 1
 fi
 
 echo ""
@@ -1409,9 +1410,10 @@ fi
 echo ""
 echo "==> Checking enforcement CSP in nginx.conf uses report-to (not report-uri)... "
 # Enforcement CSP must use 'report-to csp-report' (via Reporting-Endpoints) for the
-# modern Reporting API. 'report-uri' in enforcement CSPs is deprecated/non-standard —
-# it belongs only in CSP-Report-Only headers. Safari and older Firefox (<79) are covered
-# by the report-uri in the CSP-Report-Only header (tested separately below).
+# modern Reporting API AND 'report-uri /csp-report' for Safari and older Firefox (<79)
+# which don't support the Reporting API. Both directives are needed together — report-to
+# handles modern browsers (Chromium 94+, Firefox 79+) while report-uri handles Safari
+# and older Firefox. The Report-Only CSP (tested separately) also needs report-uri.
 CSP_ENF=$(grep "add_header Content-Security-Policy\ " deploy/nginx.conf | grep -v "Report-Only" | sed "s/.*add_header Content-Security-Policy[ ]*//;s/[ ]*always.*//")
 if echo "$CSP_ENF" | grep -q "report-to csp-report;"; then
     echo "  ✓ Enforcement CSP includes report-to csp-report"
@@ -1420,10 +1422,10 @@ else
     exit 1
 fi
 if echo "$CSP_ENF" | grep -q "report-uri /csp-report;"; then
-    echo "  ✗ Enforcement CSP incorrectly includes report-uri — it belongs in Report-Only only"
-    exit 1
+    echo "  ✓ Enforcement CSP includes report-uri /csp-report (Safari/old Firefox coverage)"
 else
-    echo "  ✓ Enforcement CSP correctly omits report-uri (belongs in Report-Only only)"
+    echo "  ✗ Enforcement CSP missing report-uri — Safari and older Firefox (<79) won't report violations"
+    exit 1
 fi
 
 echo ""
