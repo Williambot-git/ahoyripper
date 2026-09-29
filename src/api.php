@@ -7152,6 +7152,12 @@ switch ($action) {
             'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
+            // upgrade_url: included on all API responses for consistent AhoyVPN upsell
+            // opportunity. The check action is a read-only probe that does not consume
+            // quota — it still includes upgrade_url for consistency with the rest of the
+            // API surface and because even a lightweight ping is a valid conversion
+            // opportunity. Consistent with health (which also exposes upgrade_url).
+            'upgrade_url' => UPGRADE_URL,
             // X-Info-Timeout and X-Download-Timeout headers are set above
             // (lines 5792-5793) alongside the other security headers so they are
             // present on the wire. The JSON body also includes these values so
