@@ -6282,8 +6282,8 @@ switch ($action) {
                     $actual_height = isset($vstream['height']) ? (int)$vstream['height'] : null;
                     // Surface ffprobe verification outcome in response headers for client
                     // diagnostics. 'success' means ffprobe confirmed a video stream was
-                    // present in the file. The failure case sets 'failed' in the early-exit
-                    // block at line 4335.
+                    // present in the file. The failure case sets 'failed' in the ffprobe
+                    // failure handler at line ~6463.
                     header('X-FFProbe-Status: success');
                 } else {
                     // ffprobe succeeded (exit 0, valid JSON) but found no video stream —
@@ -6295,7 +6295,7 @@ switch ($action) {
                     // ffprobe exited 0 but found no streams — ffprobe itself did not "fail"
                     // per se, but verification could not be completed. Use 'skipped' to
                     // distinguish from a genuine ffprobe execution error (which sets
-                    // 'failed' at line 4630).
+                    // 'failed' at line ~6463).
                     // Initialize $probe_err_truncated so the ?? cascade in the JSON response
                     // (line ~5162) always has a defined fallback, regardless of which
                     // verification failure path was taken.
@@ -6371,10 +6371,23 @@ switch ($action) {
                         'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
                         'hint' => 'Download verification failed — the file may be corrupt or in an unsupported format. Try another format or try again.',
                         'verification_error' => $probe_err_truncated ?? $probe_err ?? null,
+                        // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                        // Including them in the JSON body completes the "always present" invariant
+                        // documented in the README: every API response body includes x_info_timeout
+                        // and x_download_timeout.
+                        'x_info_timeout' => INFO_TIMEOUT,
+                        'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                        // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
+                        // ffprobe ran (exit 0) but found no video stream, so include the timeout
+                        // value for complete diagnostic parity with all other error responses.
+                        // Completes the "always present" invariant: every API response body includes
+                        // x_ffprobe_timeout.
+                        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                         // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                         // ffprobe ran to completion (exit 0) but found no video stream, so
                         // verification could not be completed. Distinct from 'failed' where ffprobe
-                        // itself encountered an error, and from 'success' where a stream was found.
+                        // itself encountered an error (set at line ~6463), and from 'success'
+                        // where a stream was confirmed.
                         'x_ffprobe_status' => 'skipped',
                     ], JSON_INVALID_UTF8_SUBSTITUTE);
                     exit;
