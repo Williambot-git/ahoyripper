@@ -457,6 +457,7 @@ INDEX_REQUIRED_HEADERS=(
     "X-Frame-Options"
     "X-Download-Options"
     "X-Robots-Tag"
+    "Referrer-Policy"
     "Permissions-Policy"
 )
 for header in "${INDEX_REQUIRED_HEADERS[@]}"; do
