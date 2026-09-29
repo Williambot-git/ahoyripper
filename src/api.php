@@ -4700,9 +4700,15 @@ switch ($action) {
         // X-FFProbe-Status: always 'skipped' on info responses since ffprobe only runs
         // after a download. Present on all info responses for consistent header coverage —
         // clients parsing a unified response path see this header on every action type.
+        // X-FFProbe-Timeout: mirrors the X-FFProbe-Timeout HTTP header. ffprobe was never
+        // reached in the info action, but the timeout value is included for full header
+        // coverage — clients parsing a unified header path for all responses can always
+        // read it. Mirrors the same header in all other API response types (check, health,
+        // download, analytics, client-error, csp-report) and the info error path (line 2643).
         header('X-Info-Timeout: ' . INFO_TIMEOUT);
         header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
         header('X-FFProbe-Status: skipped');
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('Cache-Control: no-store');
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($parsed, JSON_INVALID_UTF8_SUBSTITUTE);
