@@ -55,7 +55,7 @@ The file streams directly to your browser — nothing is stored on the server. E
 
 > **Tip:** Append `?url=https://...` to the page URL to pre-load a video link — useful for sharing direct rip links.
 >
-> **Persistent quota storage:** By default, quota state lives in `/tmp/quota` (wiped on container restart — prevents quota bypass via restart). Docker deployments use a tmpfs mount at `/tmp/quota` so the quota state is stored in memory and wiped on restart. For stateful deployments, set `QUOTA_DIR` to a persistent path (e.g. `/var/run/ahoyripper/quota`) so the daily quota survives restarts. See `QUOTA_DIR` in the [Environment Variables](#environment-variables) section.
+> **Persistent quota storage:** By default, quota state lives in `/tmp` (wiped on container restart — prevents quota bypass via restart). Docker deployments use a tmpfs mount at `/tmp/quota` so quota state is stored in memory and wiped on restart. For stateful deployments, set `QUOTA_DIR` to a persistent path (e.g. `/var/run/ahoyripper/quota`) so the daily quota survives restarts. See `QUOTA_DIR` in the [Environment Variables](#environment-variables) section.
 >
 > **Add to search bar:** OpenSearch is enabled — your browser may already suggest adding AhoyRipper as a search engine. Once added, type your video URL directly in the URL bar and press Tab or Enter to rip instantly.
 
