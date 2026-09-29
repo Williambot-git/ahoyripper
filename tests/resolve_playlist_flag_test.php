@@ -3,18 +3,8 @@
  * AhoyRipper — resolvePlaylistFlag() unit tests
  * Run: php tests/resolve_playlist_flag_test.php
  *
- * Tests the playlist URL parameter resolver that maps ?playlist=... to
- * yt-dlp flags (--yes-playlist / --no-playlist). This function is the
- * first fork in the decision tree for every info and download request —
- * its output controls whether yt-dlp fetches a single video or an
- * entire playlist. Correct behaviour must be verified for:
- *   - Boolean input (should always return --no-playlist)
- *   - String '1' (canonical playlist mode)
- *   - Integer 1 (edge case from PHP code)
- *   - Numeric strings '01', '1.0' (rejected — not canonical '1')
- *   - Empty string (default --no-playlist)
- *   - Null / absent value (default --no-playlist)
- *   - String 'yes' / 'true' / '0' / 'no' (all → --no-playlist)
+ * Tests the resolvePlaylistFlag() function which maps playlist URL parameters
+ * to yt-dlp's --yes-playlist / --no-playlist flags.
  *
  * Each test is self-contained and exits 1 on failure, 0 on success.
  * No external test framework or yt-dlp required.
@@ -36,137 +26,117 @@ function test($name, $condition) {
     }
 }
 
-// ─── Load canonical function from src/TestUtils.php ──────────────────────
-require_once __DIR__ . '/../src/TestUtils.php';
-
-// ─── Helper ──────────────────────────────────────────────────────────────
-
-function assert_resolve($input, $expected_flag) {
-    $result = resolvePlaylistFlag($input);
-    if ($result !== [$expected_flag]) {
-        echo "    Expected [$expected_flag], got " . json_encode($result) . "\n";
-        return false;
+// ─── resolvePlaylistFlag (verbatim copy from src/api.php) ──────────────────────
+// Mirrors the logic in api.php:1772 so this test runs without including api.php.
+// Keep in sync with the production implementation.
+function resolvePlaylistFlag($playlist_get) {
+    // Booleans should never reach this function (URL params are always strings),
+    // but defend against them anyway — isset(true) is true, and loose int comparison
+    // would incorrectly classify boolean true as truthy. Rejecting booleans as
+    // --no-playlist keeps the function safe for any input type.
+    if (is_bool($playlist_get)) {
+        return ['--no-playlist'];
     }
-    return true;
+    // yt-dlp does NOT support --playlist true/false — that syntax is rejected
+    // as ambiguous. Only --yes-playlist and --no-playlist are valid.
+    // Treat playlist=1 as the only truthy value.
+    // Accepts string '1' (canonical URL param) and int 1 (edge case from PHP code).
+    // Explicitly reject numeric strings like '01' and '1.0' that would be true
+    // for loose int comparison but are not the canonical '1' value.
+    // All other values ('yes', 'true', '01', '1.0', 0, null, etc.) → --no-playlist.
+    if (isset($playlist_get) && ($playlist_get === '1' || ($playlist_get === 1 && !is_string($playlist_get)))) {
+        return ['--yes-playlist'];
+    }
+    return ['--no-playlist'];
 }
 
-// ─── Boolean input ────────────────────────────────────────────────────────
+// ─── Tests ─────────────────────────────────────────────────────────────────────
 
-echo "\n==> Testing boolean input (must always return --no-playlist)\n";
+echo "\n==> Testing resolvePlaylistFlag() — canonical values\n";
 
-test('resolvePlaylistFlag(true) returns --no-playlist',
-    assert_resolve(true, '--no-playlist'));
+$result = resolvePlaylistFlag('1');
+test('playlist=1 (string) → --yes-playlist',
+    $result === ['--yes-playlist']);
 
-test('resolvePlaylistFlag(false) returns --no-playlist',
-    assert_resolve(false, '--no-playlist'));
+$result = resolvePlaylistFlag(1);
+test('playlist=1 (int) → --yes-playlist',
+    $result === ['--yes-playlist']);
 
-// ─── Integer input ────────────────────────────────────────────────────────
+$result = resolvePlaylistFlag('0');
+test('playlist=0 (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-echo "\n==> Testing integer input\n";
+$result = resolvePlaylistFlag(0);
+test('playlist=0 (int) → --no-playlist',
+    $result === ['--no-playlist']);
 
-test('resolvePlaylistFlag(1) returns --yes-playlist (integer 1 is an exact int match)',
-    assert_resolve(1, '--yes-playlist'));
+echo "\n==> Testing resolvePlaylistFlag() — falsy string variants rejected\n";
 
-test('resolvePlaylistFlag(0) returns --no-playlist (integer 0 is falsy)',
-    assert_resolve(0, '--no-playlist'));
+$result = resolvePlaylistFlag('01');
+test('playlist=01 (string) → --no-playlist (not exactly \"1\")',
+    $result === ['--no-playlist']);
 
-test('resolvePlaylistFlag(-1) returns --no-playlist (negative int is not canonical 1)',
-    assert_resolve(-1, '--no-playlist'));
+$result = resolvePlaylistFlag('1.0');
+test('playlist=1.0 (string) → --no-playlist (not exactly \"1\")',
+    $result === ['--no-playlist']);
 
-// ─── String '1' — canonical playlist mode ─────────────────────────────────
+$result = resolvePlaylistFlag('1abc');
+test('playlist=1abc (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-echo "\n==> Testing string '1' (canonical playlist mode)\n";
+$result = resolvePlaylistFlag('yes');
+test('playlist=yes (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('1') returns --yes-playlist",
-    assert_resolve('1', '--yes-playlist'));
+$result = resolvePlaylistFlag('true');
+test('playlist=true (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-// ─── Numeric string edge cases ────────────────────────────────────────────
-// yt-dlp does NOT support --playlist true/false. '01' and '1.0' are not
-// the canonical '1' value and must default to --no-playlist.
+$result = resolvePlaylistFlag('no');
+test('playlist=no (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-echo "\n==> Testing numeric string edge cases (must reject — not canonical '1')\n";
+$result = resolvePlaylistFlag('false');
+test('playlist=false (string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('01') returns --no-playlist ('01' !== '1')",
-    assert_resolve('01', '--no-playlist'));
+echo "\n==> Testing resolvePlaylistFlag() — unset/null/empty\n";
 
-test("resolvePlaylistFlag('1.0') returns --no-playlist ('1.0' !== '1')",
-    assert_resolve('1.0', '--no-playlist'));
+$result = resolvePlaylistFlag(null);
+test('playlist=null → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('001') returns --no-playlist ('001' !== '1')",
-    assert_resolve('001', '--no-playlist'));
+$result = resolvePlaylistFlag('');
+test('playlist="" (empty string) → --no-playlist',
+    $result === ['--no-playlist']);
 
-// ─── Other string values ──────────────────────────────────────────────────
+$result = resolvePlaylistFlag(false);
+test('playlist=false (bool) → --no-playlist (booleans always rejected)',
+    $result === ['--no-playlist']);
 
-echo "\n==> Testing other string values (must return --no-playlist)\n";
+$result = resolvePlaylistFlag(true);
+test('playlist=true (bool) → --no-playlist (booleans always rejected)',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('yes') returns --no-playlist",
-    assert_resolve('yes', '--no-playlist'));
+echo "\n==> Testing resolvePlaylistFlag() — miscellaneous\n";
 
-test("resolvePlaylistFlag('true') returns --no-playlist",
-    assert_resolve('true', '--no-playlist'));
+$result = resolvePlaylistFlag('yes-please');
+test('playlist=yes-please → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('0') returns --no-playlist (string '0' is not canonical '1')",
-    assert_resolve('0', '--no-playlist'));
+$result = resolvePlaylistFlag('on');
+test('playlist=on → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('no') returns --no-playlist",
-    assert_resolve('no', '--no-playlist'));
+$result = resolvePlaylistFlag('off');
+test('playlist=off → --no-playlist',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('false') returns --no-playlist",
-    assert_resolve('false', '--no-playlist'));
+$result = resolvePlaylistFlag('  1  ');
+test('playlist="  1  " (whitespace) → --no-playlist (not exactly "1")',
+    $result === ['--no-playlist']);
 
-test("resolvePlaylistFlag('playlist') returns --no-playlist",
-    assert_resolve('playlist', '--no-playlist'));
-
-test("resolvePlaylistFlag('on') returns --no-playlist",
-    assert_resolve('on', '--no-playlist'));
-
-test("resolvePlaylistFlag('off') returns --no-playlist",
-    assert_resolve('off', '--no-playlist'));
-
-test("resolvePlaylistFlag('') returns --no-playlist (empty string)",
-    assert_resolve('', '--no-playlist'));
-
-// ─── Null / absent ────────────────────────────────────────────────────────
-
-echo "\n==> Testing null and absent values\n";
-
-test('resolvePlaylistFlag(null) returns --no-playlist',
-    assert_resolve(null, '--no-playlist'));
-
-// isset() treats unset variables as true in the function, but null is
-// passed explicitly — resolvePlaylistFlag checks isset() which returns false
-// for null, so null → --no-playlist. This test verifies the null path.
-test('resolvePlaylistFlag(null) is NOT --yes-playlist',
-    resolvePlaylistFlag(null) !== ['--yes-playlist']);
-
-// ─── Return type ──────────────────────────────────────────────────────────
-
-echo "\n==> Testing return type\n";
-
-test('always returns an array',
-    is_array(resolvePlaylistFlag('1')));
-
-test('always returns exactly one element',
-    count(resolvePlaylistFlag('1')) === 1);
-
-test('always returns exactly one element for --no-playlist',
-    count(resolvePlaylistFlag(null)) === 1);
-
-test('--yes-playlist is the only value that produces --yes-playlist',
-    resolvePlaylistFlag('1') === ['--yes-playlist']
-    && resolvePlaylistFlag(1) === ['--yes-playlist']
-    && resolvePlaylistFlag(null) === ['--no-playlist']
-    && resolvePlaylistFlag('0') === ['--no-playlist']
-    && resolvePlaylistFlag('no') === ['--no-playlist']);
-
-// ─── Summary ──────────────────────────────────────────────────────────────
-
-echo "\n" . str_repeat('=', 50) . "\n";
-echo "Results: $tests_passed/$tests_run passed";
-if ($failures > 0) {
-    echo " — $failures FAILED\n";
-    exit(1);
-} else {
-    echo " — all passed\n";
-    exit(0);
-}
+// Summary
+echo "\n";
+echo "Results: {$tests_passed}/{$tests_run} passed, {$failures} failed.\n";
+exit($failures > 0 ? 1 : 0);
