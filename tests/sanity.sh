@@ -1730,6 +1730,27 @@ else
 fi
 
 echo ""
+echo "==> Checking check and health actions include hint field (always-present invariant)..."
+# Every API response body must include 'hint' per the "always present" invariant
+# documented in the README. The check and health actions are passive endpoints that
+# return null hints (no user-facing remediation guidance to offer), but the field
+# must still be present so generic API parsers can always read it without null-checks.
+CHECK_CASE=$(sed -n "/case 'check':/,/case '/p" src/api.php | head -n -1)
+if echo "$CHECK_CASE" | grep -q "'hint'"; then
+    echo "  ✓ check action includes hint field"
+else
+    echo "  ✗ check action missing hint field (always-present invariant violated)"
+    exit 1
+fi
+HEALTH_CASE=$(sed -n "/case 'health':/,/case '/p" src/api.php | head -n -1)
+if echo "$HEALTH_CASE" | grep -q "'hint'"; then
+    echo "  ✓ health action includes hint field"
+else
+    echo "  ✗ health action missing hint field (always-present invariant violated)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking JS does not hard-code gap=0 on formatGrid (regression)..."
 # The JS inline style was previously setting formatGrid.style.gap = '0' which
 # overrode the CSS gap value. The CSS .format-grid { gap: 0.75rem; } should

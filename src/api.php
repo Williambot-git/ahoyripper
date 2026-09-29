@@ -7307,9 +7307,14 @@ switch ($action) {
             // the lightweight check endpoint can determine ffprobe availability
             // without calling the heavier health endpoint.
             'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // hint: null — check is a read-only probe with no user-facing guidance
+            // to offer. Consistent with the same null value in action=health,
+            // action=analytics, action=csp-report, and other passive endpoints.
+            'hint' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
+
     // Returns server system metrics: uptime (seconds), load avg (1-min avg from
     // /proc/loadavg), memory available (%), disk free GB. Each field is null on
     // failure so the health endpoint degrades gracefully on restricted containers.
@@ -7966,6 +7971,10 @@ switch ($action) {
             // consumption. Clients may call again immediately without backoff.
             // Mirrors the same 0 value used by the check and client-error actions.
             'retry_after' => 0,
+            // hint: null — health is a read-only probe with no user-facing guidance
+            // to offer. Consistent with the same null value in action=check,
+            // action=analytics, action=csp-report, and other passive endpoints.
+            'hint' => null,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
