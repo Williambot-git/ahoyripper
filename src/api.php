@@ -8448,13 +8448,6 @@ switch ($action) {
                 // x_ffprobe_timeout. Consistent with the check, health, and client-error
                 // actions which all expose all three timeout fields in both headers and body.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
-                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
-                // (line 8005) — always 'skipped' on csp-report since ffprobe only runs
-                // after a download. Adding it completes the "always present" invariant
-                // documented in the README: every API response body includes x_ffprobe_status.
-                // Consistent with the analytics 405 handler (line 8176) which includes
-                // the same field, and with client-error and check 405 handlers.
-                'x_ffprobe_status' => 'skipped',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
