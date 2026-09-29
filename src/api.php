@@ -998,6 +998,14 @@ if (in_array($action, $internal_actions, true)) {
                 // (line 976). Completes the "always present" invariant documented in the
                 // README: every API response body includes x_ffprobe_timeout.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // hint: no actionable guidance for csp-report endpoint — it's a passive
+                // violation log with no user-facing remediation steps. Consistent with the
+                // null hint in the non-FPM fallback below.
+                'hint' => null,
+                // platform: null — csp-report is a passive endpoint with no associated
+                // video URL. Consistent with the same null value in action=health and
+                // action=check.
+                'platform' => null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -1059,6 +1067,13 @@ if (in_array($action, $internal_actions, true)) {
             // (line 1025). Completes the "always present" invariant documented in the
             // README: every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // hint: no actionable guidance for csp-report endpoint — it's a passive
+            // violation log with no user-facing remediation steps.
+            'hint' => null,
+            // platform: null — csp-report is a passive endpoint with no associated
+            // video URL. Consistent with the same null value in action=health and
+            // action=check.
+            'platform' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -1176,6 +1191,20 @@ if (in_array($action, $internal_actions, true)) {
                 'quota_limit' => -1,
                 'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                 'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                // x_info_timeout / x_download_timeout / x_ffprobe_timeout: complete the
+                // "always present" invariant documented in the README: every API response
+                // body includes all three timeout fields. Consistent with the check action
+                // and all other probe endpoints.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // hint: no actionable guidance for client-error 200 — the endpoint is a
+                // passive JS error log with no user-facing remediation. Consistent with
+                // the null hint in the client-error 405 block.
+                'hint' => null,
+                // platform: null — client-error is a passive endpoint with no associated
+                // video URL. Consistent with action=check and action=health.
+                'platform' => null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -7415,6 +7444,10 @@ switch ($action) {
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // hint: no actionable guidance for METHOD_NOT_ALLOWED — client must fix
+                // the request method. Consistent with the null hint in the client-error
+                // 200 block and csp-report endpoint.
+                'hint' => null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return;
         }
@@ -7578,6 +7611,10 @@ switch ($action) {
             // actions which all expose all three timeout fields (x_info_timeout,
             // x_download_timeout, x_ffprobe_timeout) in both HTTP headers and JSON body.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // hint: no actionable guidance for client-error 200 — the endpoint is a
+            // passive JS error log with no user-facing remediation. Consistent with
+            // the null hint in the client-error 405 block and csp-report endpoint.
+            'hint' => null,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
