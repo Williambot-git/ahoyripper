@@ -702,7 +702,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
 | `406` | Not acceptable — JSON requested (`NOT_ACCEPTABLE`) |
 | `422` | URL could not be fetched, parsed, or is unsupported — also returned for geo-blocked, private, copyrighted, or login-required content. See the `error_code` field for detail. |
-| `429` | Rate limit exceeded — see `Retry-After` header, `upgrade_url`, and `retry_after` (Unix timestamp) in the response body. See classified error codes below. |
+| `429` | Rate limit exceeded — see `Retry-After` header, `upgrade_url`, and `retry_after` (delta-seconds, integer — seconds to wait before retrying) in the response body. See classified error codes below. |
 | `502` | Bad gateway — source site or proxy failed (`CONNECTION_FAILED`, `SSL_ERROR`) |
 | `503` | Service temporarily unavailable |
 | `504` | Gateway timeout — source site did not respond in time (`SOURCE_TIMEOUT`) |
