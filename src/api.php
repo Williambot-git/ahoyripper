@@ -3796,6 +3796,11 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
+                    // file. Since this error fires before yt-dlp is even invoked (quota file
+                    // could not be opened), ffprobe was never reached. Clients can check this
+                    // field to confirm that ffprobe did not run, rather than just failing.
+                    'x_ffprobe_status' => 'skipped',
                     // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
                     // source_url_missing: false — no URL was found to be missing.
                     // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
@@ -3880,6 +3885,11 @@ switch ($action) {
                     // consistent field coverage across all API code paths.
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe is never reached in the SERVICE_UNAVAILABLE path (quota file could
+                    // not be locked). Completes the "always present" invariant documented in
+                    // the README: every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -4970,6 +4980,11 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe is never reached when the download rate limit fires (before yt-dlp).
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
                     // quota fields: set to configured limit and tomorrow's midnight UTC reset.
                     // Consistent with the info action's RATE_LIMIT_EXCEEDED block which
                     // also reports quota from getDailyQuotaLimit() when the rate limit fires
@@ -5087,6 +5102,11 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
+                    // file. Since this error fires before yt-dlp is even invoked (quota file
+                    // could not be opened), ffprobe was never reached. Clients can check this
+                    // field to confirm that ffprobe did not run, rather than just failing.
+                    'x_ffprobe_status' => 'skipped',
                     // quota fields: unavailable — the quota file could not be opened.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
@@ -5150,6 +5170,11 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
+                    // file. Since this error fires before yt-dlp is even invoked (quota file
+                    // could not be locked), ffprobe was never reached. Clients can check this
+                    // field to confirm that ffprobe did not run, rather than just failing.
+                    'x_ffprobe_status' => 'skipped',
                     // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
                     // source_url_missing: false — no URL was found to be missing.
                     // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
@@ -5726,6 +5751,12 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe is never reached in the DOWNLOAD_TIMEOUT path (yt-dlp timed out
+                    // before producing any output file, so no file exists for ffprobe to verify).
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
