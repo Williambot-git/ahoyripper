@@ -7424,7 +7424,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'upgrade_url' => UPGRADE_URL,
-                'report_url' => ISSUE_BASE_URL,
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'retry_after' => 0,
                 'source_url' => null,
                 'source_url_missing' => false,
@@ -7589,7 +7589,7 @@ switch ($action) {
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'upgrade_url' => UPGRADE_URL,
-            'report_url' => ISSUE_BASE_URL,
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
             'retry_after' => 0,
             'source_url' => null,
             'source_url_missing' => false,
@@ -8094,7 +8094,7 @@ switch ($action) {
                         // report_url: included on successful probe results for consistency — mirrors
                         // every other API response which includes report_url. On success the value
                         // is the base issue URL (no error context to append yet).
-                        'report_url' => ISSUE_BASE_URL,
+                        'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                         // server_time: ISO 8601 + Unix for clock synchronization — mirrors
                         // the top-level health response fields so probe sub-objects have the
                         // same temporal metadata as the parent response.
