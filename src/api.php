@@ -7158,10 +7158,9 @@ switch ($action) {
             // API surface and because even a lightweight ping is a valid conversion
             // opportunity. Consistent with health (which also exposes upgrade_url).
             'upgrade_url' => UPGRADE_URL,
-            // X-Info-Timeout and X-Download-Timeout headers are set above
-            // (lines 5792-5793) alongside the other security headers so they are
-            // present on the wire. The JSON body also includes these values so
-            // consumers can read them without parsing HTTP headers.
+            // x_info_timeout and x_download_timeout are included in the response body
+            // here (lines ~7165-7166) — not as HTTP headers — for API surface consistency
+            // with info/download responses where the same fields appear in both locations.
             'x_info_timeout' => INFO_TIMEOUT,
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
             // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
@@ -7222,16 +7221,6 @@ switch ($action) {
             // in the README: every API response includes format_id_missing, letting API
             // consumers always read this field without null-checking.
             'format_id_missing' => false,
-            // upgrade_url: AhoyVPN upsell URL on all API responses for consistent
-            // upsell opportunity. Mirrors the same field in the health response.
-            'upgrade_url' => UPGRADE_URL,
-            // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above
-            // (line 6909). Adding it to the body completes the "always present" invariant
-            // documented in the README: every API response body includes x_ffprobe_timeout.
-            // Consistent with the check, health, and client-error actions which all expose
-            // all three timeout fields (x_info_timeout, x_download_timeout, x_ffprobe_timeout)
-            // in both HTTP headers and JSON body.
-            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             // ffprobe_ok: true when ffprobe binary is installed and callable.
             // Mirrors the field in action=health so monitoring scripts that use
             // the lightweight check endpoint can determine ffprobe availability
