@@ -2172,7 +2172,7 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             }
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'raw_error' => $err_msg, 'formats' => [], 'platform' => $first_valid['extractor_key'] ?? null];
+            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'upgrade_url' => UPGRADE_URL, 'raw_error' => $err_msg, 'formats' => [], 'platform' => $first_valid['extractor_key'] ?? null];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
