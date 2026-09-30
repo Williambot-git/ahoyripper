@@ -531,6 +531,10 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'request_id' => $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // hint: guides the client when the rate-limit subsystem itself is unavailable.
+        // The rate-limit store (flock file) could not be opened or locked, so the
+        // server cannot enforce per-IP rate limits. Retry after the Retry-After delay.
+        'hint' => 'Rate-limit subsystem unavailable. Retry after ' . 5 . ' seconds.',
         // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
         // source_url_missing: false — no URL was found to be missing.
         // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
@@ -3334,6 +3338,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // hint: METHOD_NOT_ALLOWED is a pre-dispatch HTTP-method validation failure.
+        // Clients should use GET for all AhoyRipper API endpoints.
+        'hint' => 'Use GET for this endpoint.',
         // source_url: null — METHOD_NOT_ALLOWED fires before URL processing.
         // source_url_missing: false — METHOD_NOT_ALLOWED fires before URL processing
         // (it is a HTTP-method validation failure, not a URL validation failure).
@@ -3807,6 +3814,10 @@ switch ($action) {
                     'source_url' => null,
                     'source_url_missing' => false,
                     'format_id_missing' => false,
+                    // platform: null — SERVICE_UNAVAILABLE fires before platform detection.
+                    'platform' => null,
+                    // video_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+                    'video_url' => null,
                     // quota fields: unavailable — the quota file could not be opened.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
@@ -3819,6 +3830,15 @@ switch ($action) {
                     // consistent field coverage across all API code paths.
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // x_info_timeout / x_download_timeout / x_ffprobe_timeout: complete the
+                    // "always present" invariant — every API response body includes these fields.
+                    // The X-Info-Timeout and X-Download-Timeout headers are set above (lines 3788-3789).
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // hint: guides the client when the quota file itself is unavailable.
+                    // Retry after the Retry-After delay to see if the issue resolves.
+                    'hint' => 'Quota subsystem unavailable. Retry after ' . 5 . ' seconds.',
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -3873,6 +3893,15 @@ switch ($action) {
                     'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                    // ffprobe is never reached in the SERVICE_UNAVAILABLE path (quota file could
+                    // not be locked). Completes the "always present" invariant documented in
+                    // the README: every API response includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
+                    // platform: null — SERVICE_UNAVAILABLE fires before platform detection.
+                    'platform' => null,
+                    // video_url: null — SERVICE_UNAVAILABLE fires before URL validation.
+                    'video_url' => null,
                     // quota fields: unavailable — the quota file could not be locked.
                     // Use -1 sentinels so clients can distinguish this from a known limit.
                     'quota_remaining' => -1,
@@ -3885,11 +3914,16 @@ switch ($action) {
                     // consistent field coverage across all API code paths.
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
-                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
-                    // ffprobe is never reached in the SERVICE_UNAVAILABLE path (quota file could
-                    // not be locked). Completes the "always present" invariant documented in
-                    // the README: every API response includes x_ffprobe_status.
-                    'x_ffprobe_status' => 'skipped',
+                    // x_ffprobe_status already set to 'skipped' above.
+                    // x_info_timeout / x_download_timeout / x_ffprobe_timeout: complete the
+                    // "always present" invariant — every API response body includes these fields.
+                    // The X-Info-Timeout and X-Download-Timeout headers are set above (lines 3883-3884).
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // hint: guides the client when the quota file lock is unavailable.
+                    // Retry after the Retry-After delay to see if the issue resolves.
+                    'hint' => 'Quota subsystem lock unavailable. Retry after ' . 5 . ' seconds.',
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
