@@ -6609,6 +6609,9 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                        'x_info_timeout' => INFO_TIMEOUT,
+                        'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                     // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
                     // quota was refunded above. Unlimited-key holders ($unlimited=true) were never
                     // incremented, so quota fields use -1 sentinel values.
