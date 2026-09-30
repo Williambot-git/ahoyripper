@@ -884,6 +884,22 @@ test('SOURCE_RATE_LIMITED status is 429',
 $result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
 test('SOURCE_RATE_LIMITED status is 429 (HTTP error variant)',
     ($result['status'] ?? null) === 429);
+test('SOURCE_RATE_LIMITED upgrade_url is present for too-many-requests text',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: HTTP Error 429: Too Many Requests');
+test('SOURCE_RATE_LIMITED upgrade_url is present for HTTP 429',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: Connection failed');
+test('CONNECTION_FAILED upgrade_url is present',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
+test('CONNECTION_FAILED upgrade_url is present (text variant)',
+    (classifyYtdlpError('ERROR: Unable to connect')['upgrade_url'] ?? '') === UPGRADE_URL);
+
+$result = classifyYtdlpError('ERROR: Connection timed out');
+test('CONNECTION_TIMEOUT upgrade_url is present',
+    ($result['upgrade_url'] ?? '') === UPGRADE_URL);
 
 $result = classifyYtdlpError('ERROR: Video is age restricted');
 test('AGE_RESTRICTED status is 403',
