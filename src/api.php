@@ -8201,6 +8201,7 @@ switch ($action) {
                         // Present here to complete the "always present" invariant documented in
                         // the README: every API response body includes x_ffprobe_status.
                         // Mirrors the same field in the failed probe result (line 8111).
+                        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                         'x_ffprobe_status' => 'skipped',
                         // platform: null for health probe (no associated video URL).
                         // Mirrors the 'platform' field in action=check and action=health.
@@ -8313,6 +8314,7 @@ switch ($action) {
                         // 'skipped' on health since ffprobe only runs after a completed download.
                         // Present here to complete the "always present" invariant documented in
                         // the README: every API response body includes x_ffprobe_status.
+                        'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                         'x_ffprobe_status' => 'skipped',
                         // request_id: included for traceability — mirrors the top-level
                         // health response field so the probe sub-object can be correlated

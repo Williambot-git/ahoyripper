@@ -1089,6 +1089,7 @@ A failed probe (when yt-dlp cannot fetch the test video) returns `ok: false` wit
     "yt_dlp_version": "2026.03.17",
     "api_version": "1.0.0",
     "upgrade_url": "https://ahoyvpn.com",
+    "x_ffprobe_timeout": 10,
     "probe_age_seconds": 45,
     "probe_cached_at": "2026-05-21T16:00:00+00:00"
   },
