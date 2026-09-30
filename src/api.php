@@ -3305,7 +3305,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     // reference in HTTP headers alongside the JSON body server_time field.
     header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
     header('X-Server-Time-Unix: ' . time());
-    header('Cache-Control: no-store');
     // X-Info-Timeout and X-Download-Timeout: present on all API responses
     // (check, health, client-error) for generic header-parsing consistency.
     // GET-gate 405 was missing these — add them now to mirror POST-gate 405 blocks.
