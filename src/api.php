@@ -8165,6 +8165,10 @@ switch ($action) {
                         // Consistent field presence across all responses allows API consumers
                         // to always expect this field without null-checking.
                         'platform' => null,
+                        // hint: null on successful probe — no user-facing remediation guidance
+                        // applies when the probe succeeds. Completes the "always present" invariant
+                        // documented in the README: every API response body includes hint.
+                        'hint' => null,
                     ];
                 } else {
                     // Probe failed — surface a structured error_code and error_msg.
