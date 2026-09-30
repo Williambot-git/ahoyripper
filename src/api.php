@@ -5518,8 +5518,6 @@ switch ($action) {
             $ytdlp_cmd[] = '--impersonate';
             $ytdlp_cmd[] = AHOY_IMPERSONATE;
         }
-        // Add --cookies if COOKIES_PATH is configured (enables authenticated ripping
-        // for age-restricted YouTube, Spotify, etc.). See README.md cookie instructions.
         if (COOKIES_PATH !== '') {
             $ytdlp_cmd[] = '--cookies';
             $ytdlp_cmd[] = COOKIES_PATH;
@@ -8090,6 +8088,7 @@ switch ($action) {
                 // Mirrors the cookie handling in the info and download actions so the
                 // health probe accurately reflects real ripping capability (including
                 // cookie-gated platforms like age-restricted YouTube).
+                // Must appear BEFORE -- to be recognised by yt-dlp as a global option.
                 if (COOKIES_PATH !== '') {
                     $probe_cmd[] = '--cookies';
                     $probe_cmd[] = COOKIES_PATH;
