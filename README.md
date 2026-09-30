@@ -161,18 +161,28 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 #   "php_version": "8.2.0",
 #   "api_version": "...",
 #   "os": "Linux",
+#   "upgrade_url": "https://ahoyvpn.com",
+#   "x_info_timeout": 15,
+#   "x_download_timeout": 3600,
+#   "x_ffprobe_timeout": 30,
+#   "x_ffprobe_status": "skipped",
 #   "yt_dlp_version": "2026.03.17",
 #   "yt_dlp_ok": true,
 #   "ffprobe_version": "6.1-1ubuntu3",
 #   "ffmpeg_ok": true,
+#   "ffprobe_ok": true,
 #   "curl_cffi_version": "0.8.0",
 #   "curl_cffi_ok": true,
-#   "upgrade_url": "https://ahoyvpn.com",
 #   "quota_remaining": -1,
 #   "quota_limit": 5,
 #   "quota_reset": "2026-09-19T00:00:00+00:00",
 #   "quota_reset_unix": 1789776000,
-#   "source_url": null
+#   "platform": null,
+#   "video_url": null,
+#   "source_url": null,
+#   "source_url_missing": true,
+#   "format_id_missing": false,
+#   "hint": null
 # }
 ```
 
