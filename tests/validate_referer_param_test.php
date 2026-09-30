@@ -24,15 +24,15 @@ function validateRefererParam(string $referer): string {
     global $allowed_origins;
     $referer = trim($referer);
     if ($referer === '') {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     $parts = @parse_url($referer);
     if (!is_array($parts)) {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     $origin = ($parts['scheme'] ?? '') . '://' . ($parts['host'] ?? '');
     if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     // Return only the origin (scheme + host) — no path.
     // yt-dlp uses this as the Referer header when contacting destination platforms.
@@ -67,8 +67,8 @@ function test($name, $condition) {
 
 echo "\n==> Testing empty input (returns safe fallback)\n";
 
-test('empty string returns fallback https://ahoyripper.com/',
-    validateRefererParam('') === 'https://ahoyripper.com/');
+test('empty string returns fallback https://ahoyripper.com',
+    validateRefererParam('') === 'https://ahoyripper.com');
 
 test('null is not accepted by type-hint (string) — test skipped (type safety handled at call site)',
     true); // type hint prevents non-string from reaching this function
@@ -97,7 +97,7 @@ test('HTTPS in uppercase is accepted and normalized to lowercase origin',
     validateRefererParam('HTTPS://AHoyRIPPER.COM/') === 'https://ahoyripper.com');
 
 test('http (not https) is rejected with fallback',
-    validateRefererParam('http://ahoyripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('http://ahoyripper.com/') === 'https://ahoyripper.com');
 
 // ─── Allowed origin referer: only the origin is returned (no path, query, or fragment) ───
 
@@ -120,56 +120,56 @@ test('https://www.ahoyvpn.com/landing?ref=ahoyripper — query string stripped (
 echo "\n==> Testing rejected origins (returns safe fallback)\n";
 
 test('completely unrelated origin returns fallback',
-    validateRefererParam('https://example.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://example.com/') === 'https://ahoyripper.com');
 
 test('typosquatting domain returns fallback',
-    validateRefererParam('https://ahoyripper.com.example.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://ahoyripper.com.example.com/') === 'https://ahoyripper.com');
 
 test('missing subdomain variant returns fallback',
-    validateRefererParam('https://api.ahoyripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://api.ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('http variant of allowed origin is rejected',
-    validateRefererParam('http://ahoyripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('http://ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('http variant of ahoyvpn returns fallback',
-    validateRefererParam('http://ahoyvpn.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('http://ahoyvpn.com/') === 'https://ahoyripper.com');
 
 test('http variant of www returns fallback',
-    validateRefererParam('http://www.ahoyripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('http://www.ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('different TLD is rejected',
-    validateRefererParam('https://ahoyripper.net/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://ahoyripper.net/') === 'https://ahoyripper.com');
 
 test('similar domain with hyphen is rejected',
-    validateRefererParam('https://ahoy-ripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://ahoy-ripper.com/') === 'https://ahoyripper.com');
 
 test('IP address origin is rejected',
-    validateRefererParam('https://1.2.3.4/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://1.2.3.4/') === 'https://ahoyripper.com');
 
 test('localhost origin is rejected',
-    validateRefererParam('https://localhost/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://localhost/') === 'https://ahoyripper.com');
 
 test('data: URL is rejected',
-    validateRefererParam('data:text/html,<script>alert(1)</script>') === 'https://ahoyripper.com/');
+    validateRefererParam('data:text/html,<script>alert(1)</script>') === 'https://ahoyripper.com');
 
 test('javascript: URL is rejected',
-    validateRefererParam('javascript:alert(1)') === 'https://ahoyripper.com/');
+    validateRefererParam('javascript:alert(1)') === 'https://ahoyripper.com');
 
 test('empty string in practice maps to empty string check → fallback',
-    validateRefererParam('') === 'https://ahoyripper.com/');
+    validateRefererParam('') === 'https://ahoyripper.com');
 
 // ─── parse_url edge cases ───────────────────────────────────────────────────
 
 echo "\n==> Testing parse_url edge cases\n";
 
 test('bare domain with no scheme returns fallback',
-    validateRefererParam('ahoyripper.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('scheme with no host (invalid URL) returns fallback',
-    validateRefererParam('https:///path') === 'https://ahoyripper.com/');
+    validateRefererParam('https:///path') === 'https://ahoyripper.com');
 
 test('URL with only path and query (no host) returns fallback',
-    validateRefererParam('/api?ref=ahoyripper') === 'https://ahoyripper.com/');
+    validateRefererParam('/api?ref=ahoyripper') === 'https://ahoyripper.com');
 
 // ─── Type safety ─────────────────────────────────────────────────────────────
 
@@ -192,13 +192,13 @@ test('trailing whitespace is trimmed — https://ahoyripper.com/ returns origin 
     validateRefererParam('https://ahoyripper.com/  ') === 'https://ahoyripper.com');
 
 test('whitespace-only string returns fallback (trimmed to empty)',
-    validateRefererParam('   ') === 'https://ahoyripper.com/');
+    validateRefererParam('   ') === 'https://ahoyripper.com');
 
 test('mixed leading/trailing whitespace on allowed origin returns origin only',
     validateRefererParam("  \t\n  https://ahoyvpn.com/path  \r\n") === 'https://ahoyvpn.com');
 
 test('whitespace on rejected origin still rejected after trim',
-    validateRefererParam('  https://evil.com/  ') === 'https://ahoyripper.com/');
+    validateRefererParam('  https://evil.com/  ') === 'https://ahoyripper.com');
 
 // ─── Security invariants ─────────────────────────────────────────────────────
 
@@ -211,7 +211,7 @@ test('allowed origin referer is returned as origin only (no path appended)',
     validateRefererParam('https://ahoyripper.com/') === 'https://ahoyripper.com');
 
 test('fallback always returns the primary origin, not the user-supplied value',
-    validateRefererParam('https://attacker.com/') === 'https://ahoyripper.com/');
+    validateRefererParam('https://attacker.com/') === 'https://ahoyripper.com');
 
 // ─── Summary ────────────────────────────────────────────────────────────────
 

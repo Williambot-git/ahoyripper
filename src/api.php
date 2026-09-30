@@ -2002,15 +2002,15 @@ function validateRefererParam(string $referer): string {
     global $allowed_origins;
     $referer = trim($referer);
     if ($referer === '') {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     $parts = @parse_url($referer);
     if (!is_array($parts)) {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     $origin = ($parts['scheme'] ?? '') . '://' . ($parts['host'] ?? '');
     if (!in_array(strtolower($origin), array_map('strtolower', $allowed_origins), true)) {
-        return 'https://ahoyripper.com/';
+        return 'https://ahoyripper.com';
     }
     // Return only the origin (scheme + host) — no path.
     // yt-dlp uses this as the Referer header when contacting destination platforms.
@@ -8071,7 +8071,7 @@ switch ($action) {
                     // oversized-content edge cases (e.g. extremely high-bitrate 8K streams).
                     '--max-filesize', '50G',
                     '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
-                    '--referer', 'https://ahoyripper.com/',
+                    '--referer', 'https://ahoyripper.com',
                     '--user-agent', AHOY_USER_AGENT,
                     // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
                     // Mirrors the download action at line ~4898. A health probe that passes
