@@ -7308,6 +7308,11 @@ switch ($action) {
             // Mirrors the field in action=health so monitoring can confirm ffprobe
             // availability without parsing the version string.
             'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // ffprobe_ok: mirrors the field in action=health for consistency across
+            // all probe endpoints. ffprobe is the actual binary used for post-download
+            // verification while ffmpeg_ok reflects the ffmpeg suite presence.
+            // Having both fields lets monitoring scripts confirm ffprobe specifically.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // curl_cffi_version: version string for the curl_cffi Python library
             // (required for yt-dlp --impersonate support). Mirrors the field in
             // action=health for consistency across all probe endpoints.
@@ -7342,11 +7347,6 @@ switch ($action) {
             // in the README: every API response includes format_id_missing, letting API
             // consumers always read this field without null-checking.
             'format_id_missing' => false,
-            // ffprobe_ok: true when ffprobe binary is installed and callable.
-            // Mirrors the field in action=health so monitoring scripts that use
-            // the lightweight check endpoint can determine ffprobe availability
-            // without calling the heavier health endpoint.
-            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // hint: null — check is a read-only probe with no user-facing guidance
             // to offer. Consistent with the same null value in action=health,
             // action=analytics, action=csp-report, and other passive endpoints.
