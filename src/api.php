@@ -2066,6 +2066,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'formats' => [],
             // platform: null — $first_valid is null in this path since no JSON was parsed.
             'platform' => $first_valid['extractor_key'] ?? null,
+            'upgrade_url' => UPGRADE_URL,
+            // hint: null — PARSE_ERROR is an infrastructure failure with no user-facing
+            // remediation guidance beyond retrying or trying a different URL.
+            'hint' => null,
         ];
     }
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
@@ -2202,6 +2206,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'raw_error' => $parse_fail_msg,
             'formats' => [],
             'platform' => $first_valid['extractor_key'] ?? null,
+            'upgrade_url' => UPGRADE_URL,
+            'hint' => null,
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         ];
     }
 
@@ -2226,6 +2233,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // access response.formats without checking if the key exists first.
             'formats' => [],
             'platform' => $first_valid['extractor_key'] ?? null,
+            'upgrade_url' => UPGRADE_URL,
+            // hint: null — PARSE_ERROR is an infrastructure failure with no user-facing
+            // remediation guidance beyond retrying or trying a different URL.
+            'hint' => null,
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         ];
     }
 

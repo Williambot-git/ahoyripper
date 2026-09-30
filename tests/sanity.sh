@@ -2298,4 +2298,32 @@ else
 fi
 
 echo ""
+echo "==> Checking PARSE_ERROR responses include required fields..."
+# Both PARSE_ERROR return blocks (type-mismatch at ~2062 and no-formats at ~2219)
+# must include upgrade_url, hint, and report_url (for error correlation).
+# Check each block separately using unique surrounding context.
+if grep -A 5 "'error_code' => 'PARSE_ERROR'" src/api.php | grep -q "'upgrade_url' => UPGRADE_URL"; then
+    echo "  ✓ PARSE_ERROR responses include upgrade_url"
+else
+    echo "  ✗ PARSE_ERROR responses missing upgrade_url"
+    exit 1
+fi
+if grep -A 5 "'error_code' => 'PARSE_ERROR'" src/api.php | grep -q "'hint' => null"; then
+    echo "  ✓ PARSE_ERROR responses include hint"
+else
+    echo "  ✗ PARSE_ERROR responses missing hint"
+    exit 1
+fi
+# report_url: only the no-formats PARSE_ERROR path has report_url (it has a
+# $request_id in scope). Check by looking for the no-formats-specific pattern.
+if grep -B 2 -A 8 "'error_code' => 'PARSE_ERROR'" src/api.php | grep -q "no_formats_msg"; then
+    if grep -B 2 -A 8 "'error_code' => 'PARSE_ERROR'" src/api.php | grep -q "'report_url' =>"; then
+        echo "  ✓ PARSE_ERROR (no-formats path) includes report_url"
+    else
+        echo "  ✗ PARSE_ERROR (no-formats path) missing report_url"
+        exit 1
+    fi
+fi
+
+echo ""
 echo "All sanity checks passed."
