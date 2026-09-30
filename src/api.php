@@ -4512,6 +4512,8 @@ switch ($action) {
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'upgrade_url' => UPGRADE_URL,
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                'hint' => 'This can happen with live streams, premiere events, or newly-added platforms. Try a different URL or retry later.',
                 'retry_after' => max(0, $retry_delta),
                 // quota fields: consistent with success and classified-error responses.
                 // Quota was incremented before this error path; the refund above reversed it.
