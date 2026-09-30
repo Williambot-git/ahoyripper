@@ -9006,6 +9006,7 @@ switch ($action) {
             'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
             'error_code' => 'UNKNOWN_ACTION',
             'action' => $action,
+            'hint' => 'Use a known action: info, download, check, health, progress, analytics, client-error, or csp-report.',
             'retry_after' => 0,
             'request_id' => $request_id,
             'server_time' => gmdate('c'),

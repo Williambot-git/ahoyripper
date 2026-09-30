@@ -2286,4 +2286,16 @@ fi
 echo "  ✓ analytics.js SRI hash is correct (sha384-$ACTUAL_HASH)"
 
 echo ""
+echo "==> Checking UNKNOWN_ACTION JSON response includes hint field..."
+# All early-exit error responses (METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, MISSING_URL,
+# INVALID_URL, etc.) include a hint field. UNKNOWN_ACTION was missing hint.
+# The grep -A0 -a0 finds the error block in api.php and confirms hint is present.
+if grep -A 2 "'error_code' => 'UNKNOWN_ACTION'" src/api.php | grep -q "'hint' =>"; then
+    echo "  ✓ UNKNOWN_ACTION response includes hint field"
+else
+    echo "  ✗ UNKNOWN_ACTION response missing hint field"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."
