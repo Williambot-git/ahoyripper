@@ -695,6 +695,7 @@ if ($is_rate_limited) {
                 'action' => $action,
                 'upgrade_url' => UPGRADE_URL,
                 'retry_after' => max(0, (int)($reset_timestamp - time())),
+                'hint' => 'Wait ' . (int)(max(1, ($reset_timestamp - time()))) . ' seconds before making another request. Pass an AhoyVPN unlimited API key for unlimited access.',
                 'request_id' => $request_id,
                 'source_url' => null,
                 // video_url: null — rate-limit gate fires before URL validation,

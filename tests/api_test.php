@@ -2174,6 +2174,7 @@ $rate_limit_exceeded_response = [
     'error_code' => 'RATE_LIMIT_EXCEEDED',
     'action' => 'info',
     'upgrade_url' => UPGRADE_URL,
+    'hint' => 'Wait 60 seconds before making another request. Pass an AhoyVPN unlimited API key for unlimited access.',
     'retry_after' => 60,
     'request_id' => 'abc123',
     'source_url' => null,
@@ -2211,6 +2212,8 @@ test('RATE_LIMIT_EXCEEDED: retry_after is non-negative integer',
     is_int($rate_limit_exceeded_response['retry_after'] ?? null) && $rate_limit_exceeded_response['retry_after'] >= 0);
 test('RATE_LIMIT_EXCEEDED: upgrade_url is present',
     array_key_exists('upgrade_url', $rate_limit_exceeded_response));
+test('RATE_LIMIT_EXCEEDED: hint is present (always-present invariant)',
+    array_key_exists('hint', $rate_limit_exceeded_response));
 test('RATE_LIMIT_EXCEEDED: quota_remaining is -1 (unknown at rate-limit gate)',
     ($rate_limit_exceeded_response['quota_remaining'] ?? null) === -1);
 test('RATE_LIMIT_EXCEEDED: quota_limit is positive integer',
