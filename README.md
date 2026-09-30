@@ -681,7 +681,7 @@ Every `action=info` response — success and error — includes these HTTP heade
 | `X-RateLimit-Remaining` | Requests left in the current window |
 | `X-RateLimit-Reset` | Unix timestamp when the rate limit window resets |
 | `X-RateLimit-Window` | Window size in seconds (`60`) |
-| `X-DL-RateLimit-Limit` | Max concurrent downloads allowed (default 10, configurable via `DL_RATE_LIMIT` env var). Sent as `-1` (unavailable) on info-action responses since the info action does not consume download rate slots. |
+| `X-DL-RateLimit-Limit` | Max download requests per IP per minute (default 10, configurable via `DL_RATE_LIMIT` env var). This is a rate limit (10 req/min sliding window), not a concurrency limit — multiple simultaneous downloads are allowed up to the rate ceiling. Sent as `-1` (unavailable) on info-action responses since the info action does not consume download rate slots. |
 | `X-DL-RateLimit-Remaining` | Download slots left in the current window. Sent as `-1` (unavailable) on info-action responses. |
 | `X-DL-RateLimit-Reset` | Unix timestamp when the download rate-limit window resets. Sent as `-1` on info-action responses. |
 | `X-DL-RateLimit-Window` | Window size in seconds for the download rate limit (`60`). Set to `60` when the download rate limit is active or has been consumed. Sent as `unavailable` on info-action responses (the download rate limit does not apply to the info action) and on download action responses that exit before the rate limit is computed (e.g. invalid API key, daily quota exceeded). Sent as `unlimited` for unlimited-key holders. |
