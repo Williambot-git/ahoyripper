@@ -9068,6 +9068,10 @@ switch ($action) {
             // the UNKNOWN_ACTION action. Mirrors the same fields in check and health.
             'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
             'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // ffprobe_ok: mirrors the field in action=check and action=health for consistency
+            // across all API response surfaces. API consumers can confirm ffprobe availability
+            // from any endpoint without special-casing the UNKNOWN_ACTION response.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // source_url is null here because an unknown action has no associated video URL.
             // This matches the pattern used by MISSING_URL (source_url: null) and ensures
             // all API error responses have a consistent top-level shape.
