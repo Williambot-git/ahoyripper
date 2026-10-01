@@ -2784,6 +2784,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'quota_limit' => $daily_limit,
             'quota_reset' => $quota_reset_iso,
             'quota_reset_unix' => $quota_reset_ts,
+            // ffprobe_ok: mirrors the field in action=check and action=health so
+            // generic consumers can always read it without special-casing MISSING_URL.
+            // ffprobe is never invoked in the MISSING_URL path (no URL means no platform
+            // detection, no yt-dlp run, no file to probe). Completes the "always present"
+            // invariant documented in the README: every API response body includes ffprobe_ok.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
             // ffprobe is never reached in the MISSING_URL validation path (no URL means
             // no platform detection, no yt-dlp run, no file to probe). Completes the
@@ -4606,6 +4612,10 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'server_time' => gmdate('c'),
+                'server_time_unix' => time(),
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'hint' => 'This can happen with live streams, premiere events, or newly-added platforms. Try a different URL or retry later.',
@@ -4616,6 +4626,12 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // ffprobe_ok: mirrors the field in action=check and action=health so
+                // generic consumers can always read it without special-casing PARSE_ERROR.
+                // ffprobe is never invoked in the PARSE_ERROR path (yt-dlp ran but
+                // parseFormats returned null). Completes the "always present" invariant
+                // documented in the README: every API response body includes ffprobe_ok.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the PARSE_ERROR path (yt-dlp ran but
                 // parseFormats returned null). Completes the "always present" invariant
