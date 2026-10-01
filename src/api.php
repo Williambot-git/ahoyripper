@@ -1210,6 +1210,13 @@ if (in_array($action, $internal_actions, true)) {
                 // platform: null — client-error is a passive endpoint with no associated
                 // video URL. Consistent with action=check and action=health.
                 'platform' => null,
+                // curl_cffi_version: mirrors the field in action=check and action=health
+                // so generic API consumers can always read it without special-casing
+                // the client-error action.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                // curl_cffi_ok: true when curl_cffi is installed and callable.
+                // Mirrors the same field in action=check and action=health.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
