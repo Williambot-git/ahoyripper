@@ -1818,18 +1818,20 @@ function resolvePlaylistFlag($playlist_get) {
  */
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
+    global $request_id;
+    $_report_url = ISSUE_BASE_URL . '?request_id=' . $request_id;
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // Standalone "geo restricted" (no characters after "geo") — the single-word
     // form yt-dlp sometimes emits. Separate from the geo.?restricted pattern above
     // (which requires characters after "restricted" and uses (?!.) to prevent
     // "geo restriction" from matching here, since that pattern fires first).
     if (preg_match('/\bgeo restricted\b/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
-        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
@@ -1837,35 +1839,35 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // "sign in to confirm" is yt-dlp's bot-confirm message (Google/YouTube): the user
     // must sign in to their browser (passing cookies via --cookies) to proceed.
     if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
-        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'upgrade_url' => UPGRADE_URL, 'status' => 401, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'upgrade_url' => UPGRADE_URL, 'status' => 401, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
-        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
-        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/copyright|\binfringe\b|removed.*by|content.*strike/i', $err_lower)) {
-        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
-        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted|deleted))|video (has been )?removed|video (is )?unavailable|video (is )?deleted/i', $err_lower)) {
-        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'upgrade_url' => UPGRADE_URL, 'status' => 410, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'upgrade_url' => UPGRADE_URL, 'status' => 410, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/age.*restriction|under age|video is age.*restricted|age restricted/i', $err_lower)) {
-        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
-        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
     // Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
     // Classify this as a CONFIG_ERROR so operators know it's a deployment/dependency
     // issue, not a video or format problem — users should not see FORMAT_UNAVAILABLE.
     if (preg_match('/impersonate.*not available|is not available.*impersonate/i', $err_lower)) {
-        return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'upgrade_url' => UPGRADE_URL, 'status' => 503, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'upgrade_url' => UPGRADE_URL, 'status' => 503, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
 
     // "process timed out" is produced by the PHP-side timeout in the inline
@@ -1879,7 +1881,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // the allowed window. Return 504 so the client distinguishes it from CONNECTION_FAILED
     // (502) which implies a network or DNS issue on our end.
     if (preg_match('/process timed out|read at byte [1-9][0-9]* timeout/i', $err_lower)) {
-        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
 
     // CONNECTION_FAILED: broad class of connection-level failures where data transfer
@@ -1894,7 +1896,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // by "connection " it falls through to CONNECTION_TIMEOUT (504) below.
     // \bi?/o timeout\b — IO timeout as a standalone word (handles "i/o timeout").
     if (preg_match('#connection.*fail|dns.*fail|could not connect|\bi?/o timeout\b|(?<!connection )(?<!process )timed out\b|connection reset|broken pipe|unable to connect|connection refused|getaddrinfo failed|name or service not known|network is unreachable|no route to host#i', $err_lower)) {
-        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'CONNECTION_FAILED', 'msg' => 'Could not connect to the source. Check your network and try again, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // CONNECTION_TIMEOUT: TCP-level connection timeout — the TCP handshake stalled
     // before any data was transferred (distinct from SOURCE_TIMEOUT where data was
@@ -1906,13 +1908,13 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // a SOURCE_TIMEOUT (504). A second (?!\\s+after) guards against the specific "after"
     // form as belt-and-suspenders. CONNECTION_FAILED catches everything else.
     if (preg_match('#\\bconnection timed out\b(?!\s)(?!\s+after)|read at byte 0 timeout#i', $err_lower)) {
-        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
-        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
-        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // yt-dlp emits "content is not allowed" (with status 451 from some extractors) when
     // the source blocks content on legal/TOS grounds — distinct from HTTP 403 which
@@ -1927,7 +1929,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // (?<!\bdisallowed\s) prevents "content" preceded by "disallowed " from matching
     // (same intent as the negative lookahead above, belt-and-suspenders).
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
     // yt-dlp emits these when the source returns a non-2xx status. The numeric
@@ -1937,22 +1939,22 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
         $code = (int)$m[1];
         if ($code === 403) {
-            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'SOURCE_FORBIDDEN', 'msg' => 'The source site blocked this request (HTTP 403). Try a different format or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 403, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         if ($code === 401 || $code === 407) {
-            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'upgrade_url' => UPGRADE_URL, 'status' => 401, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This content requires authentication. Sign in to the platform in your browser, or pass cookies to yt-dlp (see README).', 'upgrade_url' => UPGRADE_URL, 'status' => 401, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         if ($code === 404) {
-            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'SOURCE_NOT_FOUND', 'msg' => 'The source returned HTTP 404 — the content may have been moved or deleted.', 'upgrade_url' => UPGRADE_URL, 'status' => 404, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         if ($code === 429) {
-            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         if ($code === 500 || $code === 502 || $code === 503) {
-            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN to change your exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code and is having issues. Try again shortly, or use AhoyVPN to change your exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         // Other HTTP errors — surface the status but give a generic message.
-        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN to change your exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false, 'format_id_missing' => false];
+        return ['code' => 'SOURCE_HTTP_ERROR', 'msg' => "The source site returned HTTP $code. Try again shortly, or use AhoyVPN to change your exit IP.", 'upgrade_url' => UPGRADE_URL, 'status' => $code, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // yt-dlp exit codes carry semantic meaning that supplements text classification.
     // Exit code 1 is the most common error code — it means "there was a problem" but often
@@ -1962,12 +1964,12 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // exit code 1 still returns GEOBLOCKED (451), not FORMAT_UNAVAILABLE (422).
     if ($exit_code !== null && $exit_code !== 0) {
         if ($exit_code === 1) {
-            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         // Signal-induced exits: SIGTERM=143 (from proc_terminate), SIGKILL=137, SIGINT=130, SIGALRM=124 (timeout)
         // Classify as SOURCE_TIMEOUT (504) — same UX as "process timed out"
         if (in_array($exit_code, [143, 137, 130, 124], true)) {
-            return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'SOURCE_TIMEOUT', 'msg' => 'The source site took too long to respond. Try a smaller format (audio-only is fastest) or try again when the site is less busy.', 'upgrade_url' => UPGRADE_URL, 'status' => 504, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
         // Surface the actual yt-dlp error text so callers get a meaningful diagnostic message
@@ -1975,7 +1977,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         // (strip_tags, whitespace normalized, truncated to 200 chars).
         if ($exit_code >= 2) {
             global $request_id;
-            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false];
+            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         // Unrecognised error with no specific classification — return null so callers
         // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
@@ -1985,7 +1987,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // knows something went wrong without being able to infer the specific cause.
     // This is the fallback for classifyYtdlpError() returning null above.
     global $request_id;
-    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false];
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
 }
 
 /**
