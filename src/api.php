@@ -411,6 +411,11 @@ if ($blocked) {
             'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the FORBIDDEN_ORIGIN action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             // quota fields: -1 signals that quota tracking is not available at this
             // early pre-action validation stage (before any action is dispatched).
             'quota_remaining' => -1,
@@ -3362,6 +3367,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // curl_cffi_version and curl_cffi_ok: included on all API responses so
+        // generic consumers can always read these fields without special-casing
+        // the METHOD_NOT_ALLOWED action. Mirrors the same fields in check and health.
+        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
         // hint: METHOD_NOT_ALLOWED is a pre-dispatch HTTP-method validation failure.
         // Clients should use GET for all AhoyRipper API endpoints.
         'hint' => 'Use GET for this endpoint.',
@@ -3471,6 +3481,11 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // curl_cffi_version and curl_cffi_ok: included on all API responses so
+        // generic consumers can always read these fields without special-casing
+        // the NOT_ACCEPTABLE action. Mirrors the same fields in check and health.
+        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
         // source_url_missing: false — NOT_ACCEPTABLE fires before URL processing
         // (it is an Accept-header validation failure, not a URL validation failure).
         'source_url_missing' => false,
@@ -9038,6 +9053,11 @@ switch ($action) {
             'server_time_unix' => time(),
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the UNKNOWN_ACTION action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             // source_url is null here because an unknown action has no associated video URL.
             // This matches the pattern used by MISSING_URL (source_url: null) and ensures
             // all API error responses have a consistent top-level shape.
