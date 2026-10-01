@@ -4850,6 +4850,11 @@ switch ($action) {
         // API surface parity so clients can always read format_id_missing from any response.
         $parsed['format_id_missing'] = false;
         $parsed['yt_dlp_version'] = $GLOBALS['__ytdlp_version'] ?? null;
+        // ffprobe_version: version string for the ffprobe binary (part of ffmpeg suite).
+        // Mirrors the field in action=check and action=health for consistent API surface
+        // parity — all probe/info endpoints expose ffprobe_version. ffprobe_version is
+        // the same as ffmpeg_version (ffprobe is part of the ffmpeg suite).
+        $parsed['ffprobe_version'] = $GLOBALS['__ffmpeg_version'] ?? null;
         // api_version was previously missing from the info response but present on
         // check and health endpoints — add it for consistent API surface metadata.
         $parsed['api_version'] = AHOYRIPPER_VERSION;
