@@ -1977,7 +1977,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         // (strip_tags, whitespace normalized, truncated to 200 chars).
         if ($exit_code >= 2) {
             global $request_id;
-            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
+            return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
         }
         // Unrecognised error with no specific classification — return null so callers
         // can fall back to a generic YTDLP_ERROR rather than a misclassified status code.
@@ -1987,7 +1987,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // knows something went wrong without being able to infer the specific cause.
     // This is the fallback for classifyYtdlpError() returning null above.
     global $request_id;
-    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
 }
 
 /**
