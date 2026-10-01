@@ -2084,6 +2084,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // hint: null — PARSE_ERROR is an infrastructure failure with no user-facing
             // remediation guidance beyond retrying or trying a different URL.
             'hint' => null,
+            // server_time: ISO 8601 + Unix for client clock synchronization.
+            // Present on all other API responses — this block was missing these fields.
+            'server_time' => gmdate('c'),
+            'server_time_unix' => time(),
         ];
     }
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
@@ -2223,6 +2227,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'upgrade_url' => UPGRADE_URL,
             'hint' => null,
             'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+            // server_time: ISO 8601 + Unix for client clock synchronization.
+            // Present on all other API responses — this block was missing these fields.
+            'server_time' => gmdate('c'),
+            'server_time_unix' => time(),
         ];
     }
 
@@ -2252,6 +2260,10 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // remediation guidance beyond retrying or trying a different URL.
             'hint' => null,
             'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+            // server_time: ISO 8601 + Unix for client clock synchronization.
+            // Present on all other API responses — this block was missing these fields.
+            'server_time' => gmdate('c'),
+            'server_time_unix' => time(),
         ];
     }
 
