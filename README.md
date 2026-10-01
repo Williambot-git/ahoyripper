@@ -544,7 +544,7 @@ GET /src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sor
 
 The `quality` field in each format is a numeric tier that enables cross-format comparisons:
 - **Video formats** (combined or video-only): `quality` equals the pixel height (e.g. `720` = 720p, `1080` = 1080p). This is identical to the `height` field for video formats.
-- **Audio-only formats**: `quality` equals the bitrate tier (kbps mapped to tier: `320` ≥ 320kbps, `256` ≥ 256kbps, `192` ≥ 192kbps, `128` ≥ 128kbps, `96` ≥ 96kbps, `64` ≥ 64kbps, `48` < 64kbps). `null` when bitrate is unknown.
+- **Audio-only formats**: `quality` equals the bitrate tier (kbps mapped to tier: 320kbps or above, 256kbps or above, 192kbps or above, 128kbps or above, 96kbps or above, 64kbps or above, below 64kbps). `null` when bitrate is unknown.
 - Because video heights (1080, 720, 480) and audio tier values (320, 256, 128) use different scales, the `quality` field is only meaningful for comparing formats of the same type — use it within `type_group` segments, not across them.
 
 The `sort_applied` field (e.g. `"height"`) confirms which sort was applied — useful because the sort is computed server-side and the client renders from the sorted list. The `type_group` field groups formats as the primary sort dimension: `0` = combined (video+audio), `1` = video-only, `2` = audio-only. Formats are always grouped by type first (combined → video-only → audio-only), then sorted within each group by the chosen sort key. For example, with `sort=height` (default): all combined formats appear first sorted by height descending, then all video-only formats sorted by height descending, then all audio-only formats sorted by bitrate descending. The `format_type` field distinguishes `"combined"`, `"video"`, and `"audio"` for display purposes. The `platform` field surfaces yt-dlp's extractor name (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`) so API consumers can confirm which platform the URL was routed to.
@@ -564,7 +564,7 @@ The `label` field is a compact shorthand (e.g. `"720p60 mp4"`). The `description
 | `filesize_mb` | `float\|null` | Estimated file size in MB. `null` when yt-dlp does not provide filesize metadata. |
 | `height` | `int\|null` | Video vertical resolution in pixels (e.g. `1080`, `720`, `480`). `null` on audio-only formats. |
 | `fps` | `int\|null` | Frames per second (e.g. `30`, `60`). `null` on audio-only formats. |
-| `quality` | `int\|null` | Numeric quality tier for sorting. Equals `height` for video formats; for audio formats equals the bitrate tier (320 ≥ 320kbps, 256 ≥ 256kbps, etc.). `null` when quality cannot be determined. |
+| `quality` | `int\|null` | Numeric quality tier for sorting. Equals `height` for video formats; for audio formats equals the bitrate tier (320kbps or above, 256kbps or above, etc.). `null` when quality cannot be determined. |
 | `tbr` | `float\|null` | Total bitrate in kbps (video + audio combined). Available on most formats; `null` when not reported by yt-dlp. |
 | `abr` | `float\|null` | Audio bitrate in kbps. Present on audio-only and combined formats; `null` on video-only formats. |
 | `vcodec` | `string` | Video codec (`"avc1.64001F"`, `"vp9"`, `"av1"`, `"none"`). `"none"` on audio-only formats. |
