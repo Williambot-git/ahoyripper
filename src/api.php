@@ -808,11 +808,17 @@ foreach (glob(QUOTA_DIR . '/ahoyrip_daily_*') as $f) {
 // Uses glob patterns for ffprobe caches since the filename includes an MD5 hash
 // of FFPROBE_PATH — this also cleans up stale caches from a previous FFPROBE_PATH
 // value after a path change (which the old hardcoded filename never handled).
+// Cache files are written to QUOTA_DIR (not /tmp) so they are subject to the
+// same tmpfs/volumes mount as the quota subsystem. Docker mounts tmpfs at
+// QUOTA_DIR=/tmp/quota for stateless operation; all cache files live there
+// and are wiped on container restart alongside the quota files.
+// Note: the ffprobe cache filename includes md5(FFPROBE_PATH) as the key so
+// switching binary paths invalidates old caches — glob cleans them all up.
 foreach (array_merge(
-    glob('/tmp/ahoyrip_ytdlp_*.cache') ?: [],
-    glob('/tmp/ahoyrip_ffprobe_*.cache') ?: [],
-    is_file('/tmp/ahoyrip_ytdlp_probe.cache') ? ['/tmp/ahoyrip_ytdlp_probe.cache'] : [],
-    is_file('/tmp/ahoyrip_curl_cffi_ver.cache') ? ['/tmp/ahoyrip_curl_cffi_ver.cache'] : []
+    glob(QUOTA_DIR . '/ahoyrip_ytdlp_*.cache') ?: [],
+    glob(QUOTA_DIR . '/ahoyrip_ffprobe_*.cache') ?: [],
+    is_file(QUOTA_DIR . '/ahoyrip_ytdlp_probe.cache') ? [QUOTA_DIR . '/ahoyrip_ytdlp_probe.cache'] : [],
+    is_file(QUOTA_DIR . '/ahoyrip_curl_cffi_ver.cache') ? [QUOTA_DIR . '/ahoyrip_curl_cffi_ver.cache'] : []
 ) as $cache) {
     $d = @json_decode(@file_get_contents($cache), true);
     if (!$d || !is_array($d) || ($d['exp'] ?? 0) < time()) {
@@ -1502,7 +1508,7 @@ function isValidUrl($url) {
 // Stores: ['ver' => string, 'hash' => string, 'exp' => int]
 // 'hash' is MD5 of the binary — if the binary is replaced (new yt-dlp installed),
 // the hash changes and the cached version is invalidated so we re-fetch the new version.
-$version_cache_file = '/tmp/ahoyrip_ytdlp_ver.cache';
+$version_cache_file = QUOTA_DIR . '/ahoyrip_ytdlp_ver.cache';
 $GLOBALS['__ytdlp_version'] = null;
 $GLOBALS['__ytdlp_probe'] = null;
 if ($version_cache_file && is_readable($version_cache_file)) {
@@ -1586,7 +1592,8 @@ if (!$GLOBALS['__ytdlp_version']) {
 // checked since ffprobe is shipped alongside ffmpeg in virtually all deployments.
 // If ffprobe is present but ffmpeg is not, AhoyRipper's download flow would fail
 // at the yt-dlp merge stage anyway — so checking ffprobe's presence is sufficient.
-$ffmpeg_cache_file = '/tmp/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
+// Cache is stored in QUOTA_DIR so it is wiped alongside quota files on container restart.
+$ffmpeg_cache_file = QUOTA_DIR . '/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
 $GLOBALS['__ffmpeg_version'] = null;
 if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
     $cached = @json_decode(@file_get_contents($ffmpeg_cache_file), true);
@@ -1663,8 +1670,8 @@ if (!$GLOBALS['__ffmpeg_version']) {
 // A failed import (module not installed, wrong Python version) returns empty.
 // Cache with the same TTL as yt-dlp/ffprobe versions since the library
 // rarely changes and probing via python3 on every request adds measurable
-// overhead under load.
-$CURL_CFFI_CACHE_FILE = '/tmp/ahoyrip_curl_cffi_ver.cache';
+// overhead under load. Stored in QUOTA_DIR so it is wiped on container restart.
+$CURL_CFFI_CACHE_FILE = QUOTA_DIR . '/ahoyrip_curl_cffi_ver.cache';
 $GLOBALS['__curl_cffi_version'] = null;
 if ($CURL_CFFI_CACHE_FILE && is_readable($CURL_CFFI_CACHE_FILE)) {
     $cached = @json_decode(@file_get_contents($CURL_CFFI_CACHE_FILE), true);
@@ -7927,7 +7934,8 @@ switch ($action) {
         // ffprobe block below) so the cache-read is adjacent to the ffprobe block for clarity.
         // The actual probe execution lives deeper in the case block where it has
         // access to the full $out response array.
-        $probe_cache_file = '/tmp/ahoyrip_ytdlp_probe.cache';
+        // Stored in QUOTA_DIR so it is wiped on container restart alongside other caches.
+        $probe_cache_file = QUOTA_DIR . '/ahoyrip_ytdlp_probe.cache';
         $do_probe = isset($_GET['probe']) && $_GET['probe'] === '1';
         if ($do_probe && is_readable($probe_cache_file)) {
             $cached = @json_decode(@file_get_contents($probe_cache_file), true);
@@ -7977,7 +7985,8 @@ switch ($action) {
         // cache above. The cache file path uses md5(FFPROBE_PATH) so it automatically
         // diverges if the binary path changes. Read it here so the TTL and expiry
         // can be surfaced in the health response (lines 3632-3633).
-        $ffmpeg_cache_file = '/tmp/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
+        // Stored in QUOTA_DIR so it is wiped on container restart alongside other caches.
+        $ffmpeg_cache_file = QUOTA_DIR . '/ahoyrip_ffprobe_' . md5(FFPROBE_PATH) . '.cache';
         $ffmpeg_cache_ttl = null;
         $ffmpeg_cache_expires_at = null;
         if ($ffmpeg_cache_file && is_readable($ffmpeg_cache_file)) {
