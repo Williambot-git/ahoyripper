@@ -57,18 +57,15 @@ $version = $hash;
 $placeholder = '{{CACHE_VERSION}}';
 $content = file_get_contents($swFile);
 
-// If the placeholder token is still present, do a targeted replacement
-// across all variants of the CACHE_VERSION declaration (single-line and multiline).
-// Handles:
-//   - Multiline ternary (current, recommended):
-//       const CACHE_VERSION = '{{CACHE_VERSION}}' === 'PLACEHOLDER'
-//           ? 'unversioned'
-//           : '{{CACHE_VERSION}}';
-//   - Old single-line ternary (broken):
-//       const CACHE_VERSION = '{{CACHE_VERSION}}' !== 'PLACEHOLDER' ? '{{CACHE_VERSION}}' : 'unversioned';
-//   - Legacy single-line (pre-ternary):
-//       const CACHE_VERSION = '{{CACHE_VERSION}}';
-if (strpos($content, $placeholder) !== false) {
+// If the const CACHE_VERSION declaration line itself still contains the
+// unreplaced {{CACHE_VERSION}} placeholder token, do a targeted replacement.
+// This check uses preg_match on the declaration line only — NOT strpos on the
+// whole file — so that the {{CACHE_VERSION}} token appearing in comments
+// (e.g. explaining the ternary logic) does not trigger the replacement branch
+// when sw.js is already correct (hash in place, placeholder absent from code).
+// Handles all declaration variants (multiline ternary, single-line ternary,
+// and legacy single-line placeholder).
+if (preg_match('/^const CACHE_VERSION =[^;]*\'' . preg_quote($placeholder, '/') . '\'/', $content)) {
     // Split into lines, process every line that is part of the CACHE_VERSION
     // declaration block (starts with "const CACHE_VERSION"), and reassemble.
     // This handles both single-line and multi-line declarations correctly.
