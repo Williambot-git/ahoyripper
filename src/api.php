@@ -1999,7 +1999,7 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // knows something went wrong without being able to infer the specific cause.
     // This is the fallback for classifyYtdlpError() returning null above.
     global $request_id;
-    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
+    return ['code' => 'YTDLP_ERROR', 'msg' => "yt-dlp error: {$raw_err}", 'upgrade_url' => UPGRADE_URL, 'status' => 422, 'formats' => [], 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url, 'server_time' => gmdate('c'), 'server_time_unix' => time()];
 }
 
 /**
