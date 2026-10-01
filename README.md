@@ -936,6 +936,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `502` | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx. Try again shortly. |
 | `503` | `SERVICE_UNAVAILABLE` | Server-side lock or rate-limit file could not be opened. The server may be overloaded or starting up. Try again in a few seconds. |
 | `503` | `CONFIG_ERROR` | Browser impersonation is not available — the `curl_cffi` Python library may be missing. Set `AHOY_IMPERSONATE=` (empty) to disable impersonation, or update yt-dlp and install `pip install curl_cffi`. |
+| `503` | `PROBE_FAILED` | The yt-dlp health probe failed to fetch the test video. The server's yt-dlp installation may be broken, or the source site (YouTube) may be blocking the server. Check `yt_dlp_version` and `ffmpeg_version` in the health response. `report_url` included in response. |
 | `504` | `SOURCE_TIMEOUT` | The source site took too long to respond. Distinct from `CONNECTION_TIMEOUT` which fires when the TCP handshake stalls before any data is transferred. Try a smaller format or try again. |
 | `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes). The file may be too large or the source is slow. Try audio-only or a smaller format. |
 | `504` | `VERIFICATION_TIMEOUT` | ffprobe verification timed out — the file may be valid but could not be confirmed within the server's time limit. Try a smaller format or try again. |
