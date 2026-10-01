@@ -745,14 +745,14 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `SOURCE_FORBIDDEN` | The source site blocked this request (HTTP 403) | Try a different format or use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
 | `SOURCE_NOT_FOUND` | The source returned HTTP 404 — the content may have been moved or deleted | Try another video or check the URL. `upgrade_url` included in response. |
 | `SOURCE_HTTP_ERROR` | The source site returned HTTP 4xx/5xx and is having issues | Try again shortly. If it persists, use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
-| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded |
+| `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded. `upgrade_url` included in response. |
 | `SOURCE_TIMEOUT` | The source site took too long to respond — some data was transferred but the source stalled (distinct from `CONNECTION_TIMEOUT` which fires when the TCP handshake stalls before any data is transferred) | Try a smaller format (audio-only is fastest) or try again when the site is less busy. `upgrade_url` included in response. |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
 | `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
 | `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If the issue persists, the server's network route to the source may be degraded. `upgrade_url` included in response. |
-| `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution |
-| `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list |
-| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed |
+| `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution. `upgrade_url` included in response. |
+| `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list. `upgrade_url` included in response. |
+| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed. `upgrade_url` included in response. |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again. `report_url` included in response (file an issue if the error persists). |
 | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. This is a rare server-side issue. Try again or pick a different format. |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
