@@ -2756,6 +2756,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the MISSING_URL action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
@@ -2849,6 +2854,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the INVALID_URL action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
