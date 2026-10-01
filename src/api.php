@@ -8634,6 +8634,12 @@ switch ($action) {
                 // x_ffprobe_timeout. Consistent with the check, health, and client-error
                 // actions which all expose all three timeout fields in both headers and body.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // curl_cffi_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
