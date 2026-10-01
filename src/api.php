@@ -4187,11 +4187,6 @@ switch ($action) {
             // to stderr and corrupt json_decode on stdout. --no-progress is the
             // correct modern flag (consistent with the health probe at line 5942).
             '--no-progress',
-            // --no-warnings: suppress stderr warnings (deprecation notices, extractor
-            // warnings, etc.) that could prepend garbage to stdout and corrupt
-            // json_decode on the JSON output. Layered with --no-progress and
-            // --progress-template "" for comprehensive stderr silence.
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
             // --extractor-retries: yt-dlp retries known extractor errors (rate limits,
@@ -5559,11 +5554,6 @@ switch ($action) {
             // --no-progress is the correct modern flag (consistent with info action
             // at line 3929 and health probe at line 7668).
             '--no-progress',
-            // --no-warnings: suppress stderr warnings (deprecation notices, extractor
-            // warnings, etc.) that could prepend garbage to stdout and corrupt
-            // json_decode on the JSON output. Layered with --no-progress and
-            // --progress-template "" for comprehensive stderr silence.
-            '--no-warnings',
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
@@ -8110,11 +8100,6 @@ switch ($action) {
                     // template noise even during --skip-download which would prepend garbage
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
-                    // --no-warnings: suppress stderr warnings (deprecation notices, extractor
-                    // warnings, etc.) that could prepend garbage to stdout and corrupt
-                    // json_decode on the JSON output. Layered with --no-progress and
-                    // --progress-template "" for comprehensive stderr silence.
-                    '--no-warnings',
                     '--retries', '3',
                     // --extractor-retries: retry known extractor errors (rate limits, temporary
                     // 5xx) separately from generic --retries. Mirrors the info and download
