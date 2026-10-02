@@ -3112,6 +3112,14 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // curl_cffi_version: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                // MISSING_FORMAT fires before yt-dlp runs, so curl_cffi availability is
+                // determined by the PHP installation, not by any download attempt.
+                'curl_cffi_version' =>$GLOBALS['__curl_cffi_version'] ?? null,
+                // curl_cffi_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) &&$GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
@@ -3231,6 +3239,14 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // curl_cffi_version: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                // INVALID_FORMAT_ID fires before yt-dlp runs, so curl_cffi availability is
+                // determined by the PHP installation, not by any download attempt.
+                'curl_cffi_version' =>$GLOBALS['__curl_cffi_version'] ?? null,
+                // curl_cffi_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) &&$GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
