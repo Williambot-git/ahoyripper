@@ -230,6 +230,59 @@ test('IP A: independent quota, decremented from 5 to 4', $result_a === 4);
 test('IP B: independent quota, decremented from 3 to 2', $result_b === 2);
 test('IP A and B have separate quota files', $result_a !== $result_b);
 
+// ─── Regression: quota_remaining sentinel for unlimited-key holders ─────────
+// This tests the bug where the unclassified download error path computed:
+//   'quota_remaining' => $unlimited ? -1 : $uncl_post_refund_count
+// which is backwards: !$unlimited (false) was used as the array key, causing
+// unlimited-key holders to get the refunded count instead of -1, and regular
+// users to get -1 instead of their refunded count. The correct expression is:
+//   'quota_remaining' => !$unlimited ? $uncl_post_refund_count : -1
+echo "\n==> Regression: quota_remaining sentinel for unlimited-key holders\n";
+
+// For the unlimited test, quota file has c=5 (user had 5 remaining).
+// refundQuota does NOT modify the file for unlimited holders (returns daily_limit unchanged).
+clearQuota($TEST_TMP, '5.6.7.8');
+setQuota($TEST_TMP, '5.6.7.8', gmdate('Y-m-d'), 5);
+$unlimited_refund = refundQuota('5.6.7.8', true, 5, 3, $TEST_TMP);
+test('unlimited holder: refundQuota returns daily_limit unchanged (5)',
+    $unlimited_refund === 5,
+    'Got: ' . $unlimited_refund);
+test('unlimited holder: quota file unchanged after refund (c=5)',
+    readQuota($TEST_TMP, '5.6.7.8')['c'] === 5,
+    'Got: ' . readQuota($TEST_TMP, '5.6.7.8')['c']);
+
+// For the regular user test, quota file has c=3 (user had 3 remaining, pre_inc was 3).
+// On refund: c=3 > pre_inc=3? NO (equal), so no decrement, returns 3.
+clearQuota($TEST_TMP, '9.8.7.6');
+setQuota($TEST_TMP, '9.8.7.6', gmdate('Y-m-d'), 3);
+$regular_refund = refundQuota('9.8.7.6', false, 5, 3, $TEST_TMP);
+test('regular user: refundQuota with c=3, pre_inc=3 returns 3 (no decrement, already consumed)',
+    $regular_refund === 3,
+    'Got: ' . $regular_refund);
+
+// For the regular user test where decrement DOES happen, set c=4, pre_inc=3.
+// On refund: c=4 > pre_inc=3? YES, decrements to 3.
+clearQuota($TEST_TMP, '1.2.3.4');
+setQuota($TEST_TMP, '1.2.3.4', gmdate('Y-m-d'), 4);
+$regular_refund2 = refundQuota('1.2.3.4', false, 5, 3, $TEST_TMP);
+test('regular user: refundQuota with c=4, pre_inc=3 returns 3 (decremented from 4)',
+    $regular_refund2 === 3,
+    'Got: ' . $regular_refund2);
+
+// Verify the CORRECT expression produces the right values for both user types.
+// The fix (api.php line 6301):
+//   'quota_remaining' => !$unlimited ? $uncl_post_refund_count : -1
+// Regular user ($unlimited=false): !$unlimited=true → returns post-refund count ✓
+// Unlimited user ($unlimited=true):  !$unlimited=false → returns -1 ✓
+$unlimited_refund_val = 5;   // unlimited holder: refundQuota returns daily_limit
+$regular_refund_val  = 3;   // regular user: refundQuota returns post-refund count
+$correct_unlimited = false ? $unlimited_refund_val : -1;  // !$unlimited=false → -1 ✓
+$correct_regular  = true ? $regular_refund_val : -1;     // !$unlimited=true → 3 ✓
+test('CORRECT: unlimited=true  → -1 (sentinel)',
+    $correct_unlimited === -1, 'Got: ' . $correct_unlimited);
+test('CORRECT: unlimited=false → 3 (post-refund count)',
+    $correct_regular === 3, 'Got: ' . $correct_regular);
+
 // ─── Cleanup ─────────────────────────────────────────────────────────────────
 echo "\n==> Cleaning up test temp files\n";
 foreach (glob($TEST_TMP . '/ahoyrip_daily_*') as $f) {

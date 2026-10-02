@@ -6298,7 +6298,7 @@ switch ($action) {
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'retry_after' => max(0, $retry_delta),
-                    'quota_remaining' => $unlimited ? -1 : $uncl_post_refund_count,
+                    'quota_remaining' => !$unlimited ? $uncl_post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                     'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
