@@ -4450,6 +4450,10 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // clients can always read these fields without branching on error code.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // server_time: ISO 8601 + Unix for client clock synchronization.
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => gmdate('c'),
