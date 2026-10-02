@@ -812,6 +812,14 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `x_ffprobe_timeout` | `integer` | Server-side ffprobe timeout in seconds. Matches `FFPROBE_TIMEOUT` (default 10s). Present on every API response for consistent field coverage. |
 | `curl_cffi_ok` | `boolean` | Whether the `curl_cffi` Python library is installed and callable — required for yt-dlp `--impersonate` browser TLS fingerprint spoofing. When `false`, yt-dlp falls back to its default TLS fingerprint and bot-detection failures will increase. |
 | `ffprobe_ok` | `boolean` | Whether ffprobe is installed and callable. When `false`, post-download codec verification is skipped and `x_ffprobe_status` will always be `skipped`. |
+| `yt_dlp_ok` | `boolean` | Whether yt-dlp is installed and callable. When `false`, the rip system is degraded and info/download actions will fail. |
+| `platform` | `string\|null` | yt-dlp extractor name for the source platform (e.g. `"YouTube"`, `"Twitter"`, `"TikTok"`). `null` on probe/read-only endpoints (health, check, analytics) where no video URL is associated, or when the platform could not be identified on error. |
+| `hint` | `string\|null` | User-facing remediation guidance string, or `null` when no guidance applies (e.g. on success, or on probe endpoints with no associated video URL). Present on every response so clients can always read it without null-checking. |
+| `upgrade_url` | `string` | AhoyVPN upsell URL. Present on every response so clients can always surface the upsell opportunity regardless of which endpoint was called. |
+| `report_url` | `string` | GitHub issue tracker URL with `request_id` pre-filled (e.g. `https://github.com/Williambot-git/ahoyripper/issues/new?request_id=...`). Present on every response so users can always file an issue without constructing the URL manually. |
+| `source_url` | `string\|null` | The exact URL that was submitted for ripping. `null` on probe/read-only endpoints (health, check, analytics) where no video URL is associated. |
+| `source_url_missing` | `boolean` | `true` when no `url` param was provided in the request; `false` when a URL was supplied. Present on every response so clients can always determine whether a URL was expected without null-checking. |
+| `format_id_missing` | `boolean` | `true` when no `format_id` was provided (only applies to `action=download`); `false` otherwise. Present on every response for consistent field coverage. |
 
 **Download error response (422 with classified error):**
 ```json
