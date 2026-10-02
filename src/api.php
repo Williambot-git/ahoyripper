@@ -551,6 +551,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'request_id' => $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
+        // curl_cffi_version and curl_cffi_ok: included on all API responses so
+        // generic consumers can always read these fields without special-casing
+        // the SERVICE_UNAVAILABLE action. Mirrors the same fields in check and health.
+        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
         // hint: guides the client when the rate-limit subsystem itself is unavailable.
         // The rate-limit store (flock file) could not be opened or locked, so the
         // server cannot enforce per-IP rate limits. Retry after the Retry-After delay.
