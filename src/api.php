@@ -2203,6 +2203,9 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                     'formats' => [],
                     'upgrade_url' => $classified['upgrade_url'] ?? UPGRADE_URL,
                     'platform' => $first_valid['extractor_key'] ?? null,
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                    'server_time' => gmdate('c'),
+                    'server_time_unix' => time(),
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
@@ -2215,7 +2218,17 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             }
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.
-            return ['error' => 'yt-dlp error: ' . $err_msg, 'error_code' => 'YTDLP_ERROR', 'upgrade_url' => UPGRADE_URL, 'raw_error' => $err_msg, 'formats' => [], 'platform' => $first_valid['extractor_key'] ?? null];
+            return [
+                'error' => 'yt-dlp error: ' . $err_msg,
+                'error_code' => 'YTDLP_ERROR',
+                'upgrade_url' => UPGRADE_URL,
+                'raw_error' => $err_msg,
+                'formats' => [],
+                'platform' => $first_valid['extractor_key'] ?? null,
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                'server_time' => gmdate('c'),
+                'server_time_unix' => time(),
+            ];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
         // frontend's error hint ('PARSE_ERROR' → "Could not parse...") fires.
