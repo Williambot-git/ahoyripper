@@ -906,6 +906,16 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `504` | `SOURCE_TIMEOUT` | The source site timed out — try a smaller format or audio-only |
 | `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
+| `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video — choose another from the list |
+| `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) — try another format or wait and retry. `report_url` included in response. |
+| `500` | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. Try again or pick a different format. |
+| `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Quota was not charged. |
+| `500` | `VERIFICATION_FAILED` | The downloaded file could not be verified — ffprobe found the file corrupt or unreadable. Try another format. |
+| `504` | `VERIFICATION_TIMEOUT` | Verification timed out — the file may be valid but could not be confirmed within the server's time limit. Try a smaller format. |
+| `499` | `DOWNLOAD_CANCELLED` | Download was cancelled — tab closed or connection lost mid-transfer. Quota was not charged. |
+| `503` | `CONFIG_ERROR` | Browser impersonation is not available on the server. Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable impersonation, or contact the server operator. |
+| `504` | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable via `YTDLP_DOWNLOAD_TIMEOUT`). Try audio-only or a smaller format. |
+| `500` | `PROC_OPEN_FAILED` | The info or download process could not be started — binary missing, permission denied, or resource exhaustion. Try again shortly. `report_url` included in response. |
 
 ### Health check / progress
 ```
