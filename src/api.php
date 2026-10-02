@@ -3564,6 +3564,9 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'received_accept' => $accept,
         'hint' => 'Send Accept: */* or Accept: application/json',
         'upgrade_url' => UPGRADE_URL,
+        // report_url: included on all error responses so clients can always
+        // link directly to the GitHub issue tracker with request_id pre-filled.
+        'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
         // curl_cffi_version and curl_cffi_ok: included on all API responses so
@@ -3705,6 +3708,9 @@ switch ($action) {
                 'retry_after' => 0,
                 'hint' => "Pass &sort= with one of: height, filesize, filesize_asc, tbr, quality, audio_quality. Default is height.",
                 'request_id' => $request_id,
+                // report_url: included on all error responses so clients can always
+                // link directly to the GitHub issue tracker with request_id pre-filled.
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'source_url' => $url ?: null,
                 'video_url' => $url ?: null,
                 'source_url_missing' => $url === '',
@@ -3820,6 +3826,9 @@ switch ($action) {
                 'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter or the Authorization: Bearer *** header. Generate a key at https://ahoyvpn.com.',
                 'retry_after' => 0,
                 'request_id' => $request_id,
+                // report_url: included on all error responses so clients can always
+                // link directly to the GitHub issue tracker with request_id pre-filled.
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
                 // 'video_url' mirrors source_url: yt-dlp had not yet run when this
@@ -3923,6 +3932,9 @@ switch ($action) {
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => $action ?: 'info',
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'retry_after' => 5,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -4139,6 +4151,9 @@ switch ($action) {
                     // error was raised (daily-quota gate fires before the yt-dlp probe).
                     'video_url' => $url,
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'platform' => null,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . $quota_reset_iso . ' UTC.',
@@ -5162,6 +5177,9 @@ switch ($action) {
                     'video_url' => $url,
                     'format_id_missing' => false,
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'platform' => null,
                     'retry_after' => max(0, (int)($dl_reset_ts - time())),
                     'hint' => 'Wait ' . (int)(max(1, ($dl_reset_ts - time()))) . ' seconds before making another download request. Pass an AhoyVPN unlimited API key for unlimited downloads.',
@@ -5284,6 +5302,9 @@ switch ($action) {
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'retry_after' => 5,
                     'request_id' => $request_id,
                     'source_url' => $url ?? null,
@@ -5461,6 +5482,9 @@ switch ($action) {
                     // error was raised (daily-quota gate fires before the yt-dlp probe).
                     'video_url' => $url,
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'platform' => null,
                     'retry_after' => max(0, (int)($reset_timestamp - time())),
                     'hint' => 'Get an AhoyVPN unlimited API key to bypass the daily limit, or wait until ' . $quota_reset_iso . ' UTC.',
@@ -8671,6 +8695,9 @@ switch ($action) {
                 'hint' => 'Submit CSP violations via POST from a page on ahoyripper.com or ahoyvpn.com.',
                 'request_id' => $request_id,
                 'upgrade_url' => UPGRADE_URL,
+                // report_url: included on all error responses so clients can always
+                // link directly to the GitHub issue tracker with request_id pre-filled.
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 // Internal reporting endpoint — no video URL or quota applies.
