@@ -6052,6 +6052,12 @@ switch ($action) {
                     // Completes the "always present" invariant documented in the README:
                     // every API response includes x_ffprobe_status.
                     'x_ffprobe_status' => 'skipped',
+                    // x_info_timeout and x_download_timeout: complete the "always present"
+                    // invariant documented in the README: every API response body includes
+                    // x_info_timeout and x_download_timeout. Consistent with all other download
+                    // error responses (YTDLP_ERROR, PROC_OPEN_FAILED, DOWNLOAD_CANCELLED, etc.).
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
