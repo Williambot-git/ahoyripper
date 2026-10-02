@@ -1022,6 +1022,9 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
   "quota_reset_unix": 1789776000,
   "source_url": null,
   "source_url_missing": true,
+  "x_info_timeout": 45,
+  "x_download_timeout": 300,
+  "health_probe_timeout": 15,
   "x_ffprobe_status": "skipped"
 }
 ```
