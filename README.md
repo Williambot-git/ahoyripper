@@ -893,6 +893,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `403` | `PRIVATE_VIDEO` | Video is private and cannot be downloaded |
 | `401` | `LOGIN_REQUIRED` | Video requires login or subscription |
 | `451` | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim |
+| `451` | `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation |
 | `404` | `UNSUPPORTED_SITE` | The site is not supported by yt-dlp |
 | `404` | `PLAYLIST_MISSING` | Playlist not found or no longer exists |
 | `410` | `VIDEO_UNAVAILABLE` | Video has been removed, delisted, or is no longer available |
