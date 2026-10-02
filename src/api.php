@@ -3524,6 +3524,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
         'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+        // ffprobe_ok: mirrors the field in action=check and action=health for consistency
+        // across all API response surfaces. API consumers can confirm ffprobe availability
+        // from any endpoint without special-casing the METHOD_NOT_ALLOWED response.
+        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
     ],
     JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
@@ -3642,6 +3646,10 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
         'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+        // ffprobe_ok: mirrors the field in action=check and action=health for consistency
+        // across all API response surfaces. API consumers can confirm ffprobe availability
+        // from any endpoint without special-casing the NOT_ACCEPTABLE response.
+        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
     ],
     JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
