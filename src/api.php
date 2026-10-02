@@ -7718,6 +7718,12 @@ switch ($action) {
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // curl_cffi_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // hint: no actionable guidance for METHOD_NOT_ALLOWED — client must fix
                 // the request method. Consistent with the null hint in the client-error
                 // 200 block and csp-report endpoint.
@@ -7886,6 +7892,12 @@ switch ($action) {
             // actions which all expose all three timeout fields (x_info_timeout,
             // x_download_timeout, x_ffprobe_timeout) in both HTTP headers and JSON body.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // curl_cffi_ok: mirrors the same field present on all other API responses
+            // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // ffprobe_ok: mirrors the same field present on all other API responses
+            // so monitoring scripts can confirm ffprobe availability from any endpoint.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // hint: no actionable guidance for client-error 200 — the endpoint is a
             // passive JS error log with no user-facing remediation. Consistent with
             // the null hint in the client-error 405 block and csp-report endpoint.
