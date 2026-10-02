@@ -897,6 +897,11 @@ $dl_limit = DL_RATE_LIMIT;
 $dl_window = 60;
 $dl_remaining = -1;
 $dl_reset = -1;
+// X-DL-RateLimit-Window uses a string label (matching the pattern of all other
+// X-DL-RateLimit-Window occurrences throughout this file) rather than a raw number.
+// Numeric 60 would be inconsistent with the string labels ('unavailable', 'unlimited')
+// used everywhere else. Initialise to 'unavailable' (no download rate limit applies
+// for non-download actions); updated to '60' when the download action reads the file.
 $dl_window_label = 'unavailable';
 if (($action ?? '') !== 'download') {
     // For non-download actions, $dl_remaining is set to -1 above (no download
@@ -921,11 +926,17 @@ if (($action ?? '') === 'download') {
         }
         fclose($dl_fp2);
     }
+    // Update the window label to '60' now that the download action has been
+    // identified and the file read attempt has been made. This makes the label
+    // available for the header below even when the file could not be opened
+    // (in which case $dl_remaining stays -1 but the label is still '60', matching
+    // the download action's 60-second rate-limit window regardless of read success).
+    $dl_window_label = '60';
 }
 header('X-DL-RateLimit-Limit: ' . $dl_limit);
 header('X-DL-RateLimit-Remaining: ' . $dl_remaining);
 header('X-DL-RateLimit-Reset: ' . $dl_reset);
-header('X-DL-RateLimit-Window: ' . $dl_window);
+header('X-DL-RateLimit-Window: ' . $dl_window_label);
 
 // ─── Lightweight internal check (no auth, no rate-limit, no referer check) ───
 // Dedicated endpoint for Docker healthchecks and load-balancer probes.
