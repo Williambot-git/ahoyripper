@@ -3922,6 +3922,12 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic JSON parsers can rely on these fields being present everywhere.
+                // yt-dlp has not run yet in the INVALID_API_KEY path, so curl_cffi was
+                // never invoked — null/false correctly reflects the unavailability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_API_KEY validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
@@ -5160,6 +5166,12 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic JSON parsers can rely on these fields being present everywhere.
+                // yt-dlp has not run yet in the INVALID_API_KEY path, so curl_cffi was
+                // never invoked — null/false correctly reflects the unavailability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // quota fields: invalid key means no quota tracking applies — consistent
                 // with the -1 sent for unlimited-key responses.
                 'quota_remaining' => -1,
