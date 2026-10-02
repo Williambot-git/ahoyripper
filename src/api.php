@@ -8416,6 +8416,14 @@ switch ($action) {
                         'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                         'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                         'x_ffprobe_status' => 'skipped',
+                        // platform: null for health probe (no associated video URL).
+                        // Completes the "always present" invariant documented in the README:
+                        // every API response body includes platform.
+                        'platform' => null,
+                        // hint: null on failed probe — no user-facing remediation guidance
+                        // applies when the probe fails. Completes the "always present"
+                        // invariant documented in the README: every API response body includes hint.
+                        'hint' => null,
                         // request_id: included for traceability — mirrors the top-level
                         // health response field so the probe sub-object can be correlated
                         // to the parent request in distributed tracing scenarios.
