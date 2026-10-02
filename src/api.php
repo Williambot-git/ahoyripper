@@ -8114,6 +8114,11 @@ switch ($action) {
             // to offer. Consistent with the same null value in action=check,
             // action=analytics, action=csp-report, and other passive endpoints.
             'hint' => null,
+            // report_url: GitHub issue tracker URL with request_id pre-filled.
+            // Present on every response so users can always file an issue without
+            // constructing the URL manually — mirrors the same pattern used by
+            // the check action and all classified error responses.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         ];
 
         // yt-dlp live probe — disabled by default (add ?probe=1 to enable).
