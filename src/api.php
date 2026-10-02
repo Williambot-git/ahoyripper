@@ -3152,6 +3152,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the MISSING_FORMAT validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
@@ -3279,6 +3280,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_FORMAT_ID validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
