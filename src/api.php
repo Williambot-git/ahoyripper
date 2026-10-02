@@ -408,6 +408,9 @@ if ($blocked) {
             // Consistent with the same null value in MISSING_URL, INVALID_URL,
             // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
             'platform' => null,
+            // report_url: GitHub issue tracker URL with request_id pre-filled.
+            // Consistent with all other pre-validation error responses.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
             'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
@@ -551,6 +554,9 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // Consistent with the same null value in MISSING_URL, INVALID_URL,
         // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
         'platform' => null,
+        // report_url: GitHub issue tracker URL with request_id pre-filled.
+        // Consistent with all other pre-validation error responses.
+        'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         // video_url: null — SERVICE_UNAVAILABLE fires before URL validation.
         // Consistent with the same null value in all other pre-validation error
         // responses (MISSING_URL, INVALID_URL, METHOD_NOT_ALLOWED, UNKNOWN_ACTION).
@@ -8800,6 +8806,7 @@ switch ($action) {
                 // invariant documented in the README: every API response body includes
                 // x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'upgrade_url' => UPGRADE_URL,
                 'source_url' => null,
                 'source_url_missing' => false,
@@ -9177,6 +9184,9 @@ switch ($action) {
             // completes the "always present" invariant documented in the README: every
             // API response includes x_ffprobe_status in the JSON body.
             'x_ffprobe_status' => 'skipped',
+            // report_url: GitHub issue tracker URL with request_id pre-filled.
+            // Consistent with all other error responses including pre-validation errors.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
             // upgrade_url: included on all API responses for consistent AhoyVPN upsell
             // opportunity. The UNKNOWN_ACTION response is the last-resort fallback for
             // unrecognized action names — even an invalid action is a valid conversion
