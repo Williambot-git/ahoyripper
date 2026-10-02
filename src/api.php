@@ -346,13 +346,16 @@ if ($blocked) {
         // path in the API (sendServiceUnavailable503, csp-report 405, client-error 405, etc.).
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        // CORS origin validation happens before any action is dispatched, so
-        // quota tracking has not started. Use -1 sentinels consistent with
-        // other pre-quota-gate errors (MISSING_URL, INVALID_URL, etc.).
+        // X-RateLimit-Reset: -1 — rate-limit state is unavailable before the
+        // rate-limit gate runs, so reset timestamp is unknown. Consistent with
+        // the "unknown/unavailable" sentinel pattern used by X-*-Reset headers
+        // throughout the codebase for pre-gate errors.
+        // X-RateLimit-Window: 5 — matches Retry-After: 5 delta-seconds. Clients
+        // following Retry-After: 5 should retry within the same 5-second window.
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unavailable');
+        header('X-RateLimit-Window: 5');
         header('X-DL-RateLimit-Limit: -1');
         header('X-DL-RateLimit-Remaining: -1');
         header('X-DL-RateLimit-Reset: -1');
