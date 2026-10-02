@@ -875,6 +875,8 @@ window.addEventListener('appinstalled', function() {
     'INVALID_URL': 'That URL is not supported or could not be fetched. Check the link and try again.',
     'INVALID_SORT': 'Unknown sort value. Use height, filesize, filesize_asc, tbr, quality, or audio_quality. Default is height.',
     'MISSING_URL': 'No URL was provided. Paste a public link from YouTube, Twitter/X, TikTok, SoundCloud, Instagram, Facebook, or Reddit.',
+    'MISSING_SORT': 'No sort value provided. Use height, filesize, filesize_asc, tbr, quality, or audio_quality. Default is height.',
+    'MISSING_FORMAT': 'No format selected. Select a format from the list before downloading.',
     'URL_TOO_LONG': 'That URL is too long. Try shortening it — remove unnecessary query parameters or use a direct video link.',
     'SERVICE_UNAVAILABLE': 'Server-side lock or quota file could not be opened. Please try again in a few seconds.',
     'CONFIG_ERROR': 'The server is misconfigured — browser impersonation is not available. Contact the server operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.',

@@ -706,7 +706,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 
 | Code | Meaning |
 |------|---------|
-| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`, `URL_TOO_LONG`), missing format on download (`MISSING_FORMAT`), or invalid format ID (`INVALID_FORMAT_ID`) |
+| `400` | Malformed request — missing or invalid URL (`MISSING_URL`, `INVALID_URL`, `URL_TOO_LONG`), missing format on download (`MISSING_FORMAT`), missing sort value (`MISSING_SORT`), or invalid format ID (`INVALID_FORMAT_ID`) |
 | `401` | Invalid API key (`INVALID_API_KEY`) |
 | `403` | Request blocked — must originate from ahoyripper.com or ahoyvpn.com (`FORBIDDEN_ORIGIN`) |
 | `405` | Method not allowed — API accepts GET only (`METHOD_NOT_ALLOWED`) |
@@ -723,6 +723,7 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 |------------|---------|-------------|
 | `MISSING_URL` | No URL was provided on the request | Paste a valid link from YouTube, Twitter, TikTok, SoundCloud, Instagram, etc. |
 | `MISSING_FORMAT` | No format was selected on a download request | Select a format from the list above first |
+| `MISSING_SORT` | No sort value was provided | Pass `&sort=` with one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality`. Default is `height`. |
 | `INVALID_SORT` | Sort parameter value is invalid or unrecognized | Pass `&sort=` with one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality`. Default is `height`. |
 | `INVALID_URL` | URL is malformed, uses an unsupported scheme, or exceeds the 2048-character limit | Paste a valid public video URL (YouTube, TikTok, X, SoundCloud, Instagram, etc.) |
 | `INVALID_FORMAT_ID` | The format ID was rejected as invalid | Refresh to get a fresh format list, then pick a valid format from the list |
@@ -1489,6 +1490,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. `upgrade_url` included in response. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
+| `MISSING_SORT` | No sort value provided | Use one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality` |
 | `INVALID_SORT` | Sort parameter value is not recognised | Use one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality` |
 | `INVALID_API_KEY` | API key is invalid or malformed | Use a valid AhoyVPN unlimited key, or leave blank for the free tier |
 | `PLAYLIST_MISSING` | Playlist not found or no longer exists | Verify the playlist is public and still available |
