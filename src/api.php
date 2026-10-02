@@ -121,7 +121,9 @@ define('UPGRADE_URL', rtrim(getenv('UPGRADE_URL') ?: 'https://ahoyvpn.com', '/')
 // GitHub issues base URL — users are directed here when they encounter persistent
 // unclassified errors. The request_id is appended as a URL parameter so maintainers
 // can correlate the report with server-side logs.
-define('ISSUE_BASE_URL', 'https://github.com/Williambot-git/ahoyripper/issues/new');
+// Override via ISSUE_BASE_URL env var so self-hosted deployments can point to their
+// own support page (GitHub fork, GitLab, contact form, or custom issue tracker).
+define('ISSUE_BASE_URL', rtrim(getenv('ISSUE_BASE_URL') ?: 'https://github.com/Williambot-git/ahoyripper/issues/new', '/'));
 
 // Plausible analytics host — '' (empty, default) routes events through the
 // /src/api.php?action=analytics proxy so no third-party requests leave the browser.
