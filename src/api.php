@@ -451,6 +451,13 @@ if ($blocked) {
             // runs, no file to probe). Completes the "always present" invariant documented
             // in the README: every API response includes x_ffprobe_status.
             'x_ffprobe_status' => 'skipped',
+            // ffprobe_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
+            // ffprobe is never invoked in the FORBIDDEN_ORIGIN path (CORS validation fires
+            // before URL validation, so no platform is detected, no yt-dlp runs, no file to probe).
+            // Completes the "always present" invariant documented in the README: every API
+            // response body includes ffprobe_ok.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
