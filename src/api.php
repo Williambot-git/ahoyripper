@@ -9499,6 +9499,12 @@ switch ($action) {
         // runs after a download completes. Adding it here completes the "always present"
         // invariant for all API responses — clients can always find this header.
         header('X-FFProbe-Status: skipped');
+        // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+        // probe. Mirrors health_probe_timeout in the JSON body. Set unconditionally
+        // on all default: (unknown-action) responses for structural consistency with
+        // every other API response — clients can always find this header without
+        // null-checking, even when the action is not recognised.
+        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
         // the 'health' (line ~7381) and 'check' (line ~6292) action blocks, giving
         // API consumers the same temporal reference in both HTTP headers and JSON payload.
