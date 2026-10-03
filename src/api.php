@@ -779,6 +779,7 @@ if ($is_rate_limited) {
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            'ffprobe_ok' => false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
     }
@@ -4597,6 +4598,7 @@ switch ($action) {
                 // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
                 // Completes the "always present" invariant documented in the README.
                 'x_ffprobe_status' => 'skipped',
+                'ffprobe_ok' => false,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
@@ -5360,6 +5362,7 @@ switch ($action) {
                     // Both fields carry the same reset time so clients can use either
                     // without special-casing.
                     'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    'ffprobe_ok' => false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5484,6 +5487,7 @@ switch ($action) {
                     // consistent field coverage across all API code paths.
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    'ffprobe_ok' => false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5967,6 +5971,7 @@ switch ($action) {
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout. Consistent with all other error responses.
+                'ffprobe_ok' => false,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
@@ -6136,6 +6141,7 @@ switch ($action) {
                     // invariant documented in the README: every API response body includes
                     // x_info_timeout and x_download_timeout. Consistent with all other download
                     // error responses (YTDLP_ERROR, PROC_OPEN_FAILED, DOWNLOAD_CANCELLED, etc.).
+                'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
@@ -6342,6 +6348,7 @@ switch ($action) {
                     // since ffprobe only runs after a download completes. Including it
                     // completes the "always present" invariant documented in the README.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -6587,6 +6594,7 @@ switch ($action) {
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout.
+                'ffprobe_ok' => false,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
@@ -6831,6 +6839,7 @@ switch ($action) {
                         // Including them in the JSON body completes the "always present" invariant
                         // documented in the README: every API response body includes x_info_timeout
                         // and x_download_timeout.
+                'ffprobe_ok' => false,
                         'x_info_timeout' => INFO_TIMEOUT,
                         'x_download_timeout' => DOWNLOAD_TIMEOUT,
                         // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
@@ -6982,6 +6991,7 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
@@ -7334,6 +7344,7 @@ switch ($action) {
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout. Consistent with all other error responses.
+                'ffprobe_ok' => false,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
@@ -7446,6 +7457,7 @@ switch ($action) {
                     // Including them in the JSON body completes the "always present" invariant
                     // documented in the README: every API response body includes x_info_timeout
                     // and x_download_timeout. Consistent with all other error responses.
+                'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
