@@ -6014,6 +6014,10 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // clients can always read these fields without branching on error code.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
                 // Including them in the JSON body completes the "always present" invariant
                 // documented in the README: every API response body includes x_info_timeout
