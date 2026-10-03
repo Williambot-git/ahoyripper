@@ -3773,6 +3773,11 @@ switch ($action) {
                 // MISSING_SORT fires before yt-dlp runs, so ffprobe is never invoked.
                 // Completes the "always present" invariant documented in the README.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // yt_dlp_ok and ffmpeg_ok: included on all API responses so generic consumers
+                // can always read these fields without special-casing the MISSING_SORT action.
+                // MISSING_SORT fires before yt-dlp runs, so yt_dlp_ok reflects installation status only.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3876,6 +3881,11 @@ switch ($action) {
                 // INVALID_SORT fires before yt-dlp runs, so ffprobe is never invoked.
                 // Completes the "always present" invariant documented in the README.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // yt_dlp_ok and ffmpeg_ok: included on all API responses so generic consumers
+                // can always read these fields without special-casing the INVALID_SORT action.
+                // INVALID_SORT fires before yt-dlp runs, so yt_dlp_ok reflects installation status only.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
