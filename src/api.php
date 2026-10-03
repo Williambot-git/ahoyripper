@@ -153,6 +153,13 @@ $_raw = getenv('DL_RATE_LIMIT');
 define('DL_RATE_LIMIT', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 10));
 unset($_raw);
 
+// Retry delay (seconds) for SERVICE_UNAVAILABLE responses (rate-limit subsystem failure).
+// Used in the Retry-After HTTP header, the JSON body's retry_after field, and the
+// hint message in sendServiceUnavailable503(). Keeping it as a constant ensures all
+// three uses stay in sync if the delay ever needs tuning.
+// Override via SERVICE_UNAVAILABLE_RETRY env var if needed (e.g. during load testing).
+define('SERVICE_UNAVAILABLE_RETRY', 5);
+
 // Timeout (seconds) for the info action (metadata fetch). yt-dlp should finish
 // in under 30s for most videos; 45s is generous for slow/unstable sources.
 // An explicit 0 (or any non-positive integer) is passed through as-is;
@@ -490,7 +497,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
-    header('Retry-After: 5');
+    header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
     header('X-Info-Timeout: ' . INFO_TIMEOUT);
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
     // X-FFProbe-Status: skipped — ffprobe never runs in the SERVICE_UNAVAILABLE path
@@ -547,7 +554,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'error_code' => 'SERVICE_UNAVAILABLE',
         'action' => $action,
         'upgrade_url' => UPGRADE_URL,
-        'retry_after' => 5,
+        'retry_after' => SERVICE_UNAVAILABLE_RETRY,
         'request_id' => $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
@@ -559,7 +566,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // hint: guides the client when the rate-limit subsystem itself is unavailable.
         // The rate-limit store (flock file) could not be opened or locked, so the
         // server cannot enforce per-IP rate limits. Retry after the Retry-After delay.
-        'hint' => 'Rate-limit subsystem unavailable. Retry after ' . 5 . ' seconds.',
+        'hint' => 'Rate-limit subsystem unavailable. Retry after ' . SERVICE_UNAVAILABLE_RETRY . ' seconds.',
         // source_url: null — SERVICE_UNAVAILABLE fires before URL validation.
         // source_url_missing: false — no URL was found to be missing.
         // format_id_missing: false — SERVICE_UNAVAILABLE fires before format validation.
@@ -4101,7 +4108,7 @@ switch ($action) {
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-                header('Retry-After: 5');
+                header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
@@ -4112,7 +4119,7 @@ switch ($action) {
                     // report_url: included on all error responses so clients can always
                     // link directly to the GitHub issue tracker with request_id pre-filled.
                     'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
-                    'retry_after' => 5,
+                    'retry_after' => SERVICE_UNAVAILABLE_RETRY,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
@@ -4193,7 +4200,7 @@ switch ($action) {
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
-                header('Retry-After: 5');
+                header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
                 echo json_encode([
@@ -4201,7 +4208,7 @@ switch ($action) {
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => $action ?: 'info',
                     'upgrade_url' => UPGRADE_URL,
-                    'retry_after' => 5,
+                    'retry_after' => SERVICE_UNAVAILABLE_RETRY,
                     'request_id' => $request_id,
                     'source_url' => $url ?? null,
                     'source_url_missing' => ($url ?? '') === '',
@@ -5515,7 +5522,7 @@ switch ($action) {
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
-                header('Retry-After: 5');
+                header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (daily quota file open failed, no download is possible). Use -1 sentinel.
                 header('X-DL-RateLimit-Limit: -1');
@@ -5542,7 +5549,7 @@ switch ($action) {
                     // report_url: included on all error responses so clients can always
                     // link directly to the GitHub issue tracker with request_id pre-filled.
                     'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
-                    'retry_after' => 5,
+                    'retry_after' => SERVICE_UNAVAILABLE_RETRY,
                     'request_id' => $request_id,
                     'source_url' => $url ?? null,
                     'source_url_missing' => ($url ?? '') === '',
@@ -5591,7 +5598,7 @@ switch ($action) {
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
-                header('Retry-After: 5');
+                header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (could not acquire daily quota lock, no download is possible). Use -1 sentinel.
                 header('X-DL-RateLimit-Limit: -1');
@@ -5615,7 +5622,7 @@ switch ($action) {
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
-                    'retry_after' => 5,
+                    'retry_after' => SERVICE_UNAVAILABLE_RETRY,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
