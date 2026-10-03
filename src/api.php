@@ -8321,6 +8321,16 @@ switch ($action) {
             // is presented or processed in the health action. API surface parity so clients
             // can always read format_id_missing from any response without null-checking.
             'format_id_missing' => false,
+            // format_id: null — health is a read-only probe with no associated download
+            // format. Consistent with action=check and action=analytics which also return
+            // null for format_id. Having this field present completes the "always present"
+            // invariant documented in the README: every API response includes format_id.
+            'format_id' => null,
+            // video_url: null — health is a read-only probe with no associated video URL.
+            // Consistent with action=check (line 7653), action=analytics, and other probe
+            // endpoints that return null for video_url. Having this field present completes
+            // the "always present" invariant: every API response includes video_url.
+            'video_url' => null,
             // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
             // (lines 6965-6966). Adding them to the body lets API consumers read these
             // values without parsing HTTP headers — consistent with the check action pattern.
