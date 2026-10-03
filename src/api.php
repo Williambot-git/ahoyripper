@@ -5173,6 +5173,16 @@ switch ($action) {
         }
         [$url, $format_id] = $validation_result;
 
+        // Disable PHP's max_execution_time for the download action.
+        // Downloads can run for up to DOWNLOAD_TIMEOUT (default 300s), far exceeding
+        // PHP-FPM's default max_execution_time of 30s. The actual timeout is enforced
+        // by the PHP-side time-tracking loop (which calls fastcgi_finish_request() or
+        // exits with a classified error) and yt-dlp's --socket-timeout flag. Without
+        // this, a misconfigured PHP-FPM installation (max_execution_time < DOWNLOAD_TIMEOUT)
+        // would kill the request mid-stream with a fatal timeout error instead of a clean
+        // classified DOWNLOAD_TIMEOUT response.
+        set_time_limit(0);
+
 // ─── Check for unlimited API key ───
         // Prefer Authorization: Bearer *** (keeps key out of URLs and server logs).
         // Fall back to GET/POST query param only for legacy clients that can't send headers.
