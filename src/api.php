@@ -3057,6 +3057,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+            // ffprobe only runs post-download to verify the output file.
+            // URL_TOO_LONG validation fires before yt-dlp/ffprobe are reached, so
+            // ffprobe was never invoked. Set to false to indicate verification was not reached.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -4183,6 +4188,12 @@ switch ($action) {
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // ffprobe only runs post-download to verify the output file.
+                    // Since SERVICE_UNAVAILABLE fires before yt-dlp is invoked (quota file
+                    // could not be locked), ffprobe was never reached. Set to false to
+                    // indicate the verification step was not reached.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                     // hint: guides the client when the quota file lock is unavailable.
                     // Retry after the Retry-After delay to see if the issue resolves.
                     'hint' => 'Quota subsystem lock unavailable. Retry after ' . 5 . ' seconds.',
@@ -4300,6 +4311,11 @@ switch ($action) {
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // DAILY_LIMIT fires before yt-dlp/ffprobe are reached, so the
+                    // verification step was not reached. Included to complete the
+                    // "always present" invariant — every API response body includes ffprobe_ok.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5543,6 +5559,12 @@ switch ($action) {
                     // consistent field coverage across all API code paths.
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // ffprobe only runs post-download to verify the output file.
+                    // Since SERVICE_UNAVAILABLE fires before yt-dlp is invoked (quota file
+                    // could not be locked), ffprobe was never reached. Set to false to
+                    // indicate the verification step was not reached.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5645,6 +5667,11 @@ switch ($action) {
                     // present" invariant documented in README: every API response body
                     // includes x_ffprobe_timeout.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // DAILY_LIMIT fires before yt-dlp/ffprobe are reached, so the
+                    // verification step was not reached. Included to complete the
+                    // "always present" invariant — every API response body includes ffprobe_ok.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
