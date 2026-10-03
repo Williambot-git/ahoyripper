@@ -605,6 +605,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         // field coverage across all API code paths.
         'server_time' => gmdate('c'),
         'server_time_unix' => time(),
+        'ffprobe_ok' => false,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
@@ -2971,6 +2972,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            'ffprobe_ok' => false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -3986,6 +3988,7 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
+                'ffprobe_ok' => false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -4107,6 +4110,7 @@ switch ($action) {
                     // hint: guides the client when the quota file itself is unavailable.
                     // Retry after the Retry-After delay to see if the issue resolves.
                     'hint' => 'Quota subsystem unavailable. Retry after ' . 5 . ' seconds.',
+                    'ffprobe_ok' => false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -5243,6 +5247,7 @@ switch ($action) {
                 // "always present" invariant documented in the README: every API response
                 // includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                'ffprobe_ok' => false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
