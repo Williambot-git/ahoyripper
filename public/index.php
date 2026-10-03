@@ -323,13 +323,6 @@ header_remove('X-Powered-By');
             "name": "AhoyVPN"
           }
         },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.6",
-          "bestRating": "5",
-          "worstRating": "1",
-          "ratingCount": "2847"
-        },
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
@@ -380,13 +373,6 @@ header_remove('X-Powered-By');
           "priceCurrency": "USD",
           "availability": "https://schema.org/OnlineOnly"
         },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.6",
-          "bestRating": "5",
-          "worstRating": "1",
-          "ratingCount": "2847"
-        }
       }
     ]
   }
