@@ -5110,6 +5110,28 @@ switch ($action) {
         // Consistent with check, health, and download success responses.
         $parsed['server_time'] = gmdate('c');
         $parsed['server_time_unix'] = time();
+        // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+        // Mirrors the field in action=check and action=health for consistent API surface
+        // metadata across all probe and rip endpoints.
+        $parsed['yt_dlp_ok'] = !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false;
+        // ffprobe_version: version string for the ffprobe binary (part of ffmpeg suite).
+        // Mirrors the field in action=check and action=health for consistent API surface
+        // metadata across all probe and rip endpoints.
+        $parsed['ffprobe_version'] = $GLOBALS['__ffmpeg_version'] ?? null;
+        // ffmpeg_ok: true when ffprobe/ffmpeg binaries are installed and callable.
+        // Mirrors the field in action=check and action=health so monitoring scripts can
+        // confirm ffprobe availability without parsing the version string.
+        $parsed['ffmpeg_ok'] = !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false;
+        // ffprobe_ok: mirrors the field in action=check and action=health for consistency
+        // across all API response surfaces. API consumers can confirm ffprobe availability
+        // from any endpoint without special-casing the info response.
+        $parsed['ffprobe_ok'] = !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false;
+        // curl_cffi_version: version string for the curl_cffi Python library
+        // (required for yt-dlp --impersonate support). Mirrors the field in
+        // action=check and action=health for consistency across all probe endpoints.
+        $parsed['curl_cffi_version'] = $GLOBALS['__curl_cffi_version'] ?? null;
+        // curl_cffi_ok: true when curl_cffi is installed and callable.
+        $parsed['curl_cffi_ok'] = !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed';
         // X-Info-Timeout: server-side info timeout in seconds. Clients should set their
         // fetch timeout to at least this value so the client deadline never exceeds the
         // server deadline. Present on every info response — success and error — so clients
