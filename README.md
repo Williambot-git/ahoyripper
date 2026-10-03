@@ -164,7 +164,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
 #   "upgrade_url": "https://ahoyvpn.com",
 #   "x_info_timeout": 15,
 #   "x_download_timeout": 3600,
-#   "x_ffprobe_timeout": 30,
+#   "x_ffprobe_timeout": 10,
 #   "x_ffprobe_status": "skipped",
 #   "yt_dlp_version": "2026.03.17",
 #   "yt_dlp_ok": true,
