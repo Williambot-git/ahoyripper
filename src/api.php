@@ -3784,6 +3784,11 @@ switch ($action) {
                 // action=health and action=check. MISSING_SORT fires before yt-dlp/ffmpeg
                 // runs, so the version reflects installation status only.
                 'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can always read this field
+                // without special-casing the MISSING_SORT response. Mirrors the same field in
+                // check, health, and all other API responses.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3898,6 +3903,11 @@ switch ($action) {
                 // action=health and action=check. INVALID_SORT fires before yt-dlp/ffmpeg
                 // runs, so the version reflects installation status only.
                 'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can always read this field
+                // without special-casing the INVALID_SORT response. Mirrors the same field in
+                // check, health, and all other API responses.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
