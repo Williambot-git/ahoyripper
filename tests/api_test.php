@@ -1786,7 +1786,11 @@ test('check endpoint curl_cffi_ok is boolean',
 // The health endpoint response is constructed inline in the case block.
 // Verify api_version is included in the health-style response structure.
 $health_response = [
+    // Fields that mirror the production health endpoint response (src/api.php ~8423-8540).
+    // Updated in caretaker run 261003-2140 to sync with the expanded health response body
+    // which now includes cache TTL fields, ffprobe_version, curl_cffi fields, and more.
     'status' => 'ok',
+    'action' => 'health',
     'api_ok' => true,
     'server_time' => date('c'),
     'server_time_unix' => time(),
@@ -1797,34 +1801,55 @@ $health_response = [
     'os' => PHP_OS,
     'yt_dlp_version' => '2026.03.17',
     'ffmpeg_version' => 'ffmpeg version 6.x',
+    'ffprobe_version' => 'ffmpeg version 6.x',       // mirrors ffmpeg_version (ffprobe is part of ffmpeg suite)
+    'curl_cffi_version' => null,                       // null when curl-cffi is not available in test context
     'yt_dlp_ok' => true,
     'ffmpeg_ok' => true,
+    'ffprobe_ok' => true,                              // mirrors ffmpeg_ok (ffprobe is part of ffmpeg suite)
+    'curl_cffi_ok' => false,                           // false when curl-cffi is not available in test context
+    // Cache TTL fields — null in test context (no actual cache files on disk)
+    'yt_dlp_cache_expires_at' => null,
+    'yt_dlp_cache_ttl_seconds' => 300,                // default VERSION_CACHE_TTL in test context
+    'ffmpeg_cache_expires_at' => null,
+    'ffmpeg_cache_ttl_seconds' => 300,                // default VERSION_CACHE_TTL in test context
+    'yt_dlp_probe_cache_expires_at' => null,
+    'yt_dlp_probe_cache_ttl_seconds' => 300,          // default PROBE_CACHE_TTL in test context
+    // System metrics — test doubles, same values used in existing tests
     'server_uptime_seconds' => 86400,
     'load_avg' => 0.15,
     'memory_available_pct' => 72.4,
+    'disk_total_gb' => 100.0,
     'disk_free_gb' => 48.2,
+    'disk_free_pct' => 48.2,
     'platform' => null,
-    // quota fields: -1 sentinel (unlimited/unknown) for read-only probe endpoint.
+    // quota fields: quota_remaining is -1 (unlimited sentinel) for read-only probe endpoint.
+    // quota_limit is the configured daily limit (not -1, matching production behavior).
+    // quota_reset uses tomorrow midnight UTC (matching production).
     'quota_remaining' => -1,
-    'quota_limit' => -1,
-    'quota_reset' => -1,
-    'quota_reset_unix' => -1,
+    'quota_limit' => 5,                               // default daily quota; getDailyQuotaLimit() not available in test
+    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
     // upgrade_url: AhoyVPN upsell on all API responses.
     'upgrade_url' => UPGRADE_URL,
     // source_url: null for probe endpoints (no associated video URL).
     'source_url' => null,
     'source_url_missing' => true,
-    // x_info_timeout / x_download_timeout: present on all API response bodies
-    // x_info_timeout / x_download_timeout / x_ffprobe_status — present on all
-    // API response bodies per the "always present" invariant documented in the README.
-    // Test values use the defaults (45s / 300s) since no env overrides are available
-    // in the test context (constants are defined in api.php, not TestUtils.php).
-    'x_info_timeout' => 45,
-    'x_download_timeout' => 300,
+    'format_id_missing' => false,                     // health is a read-only probe; no format selector presented
+    'format_id' => null,                              // no format selected on probe endpoints
+    'video_url' => null,                              // no video URL on probe endpoints
+    // Timeout mirrors — defaults since no env overrides in test context
+    'x_info_timeout' => 45,                           // INFO_TIMEOUT default
+    'x_download_timeout' => 300,                      // DOWNLOAD_TIMEOUT default
+    'x_ffprobe_timeout' => 10,                        // FFPROBE_TIMEOUT default
+    'health_probe_timeout' => 15,                     // HEALTH_PROBE_TIMEOUT default
     // x_ffprobe_status: always 'skipped' on health since ffprobe only runs after
     // a completed download. Present to complete the "always present" invariant
     // documented in the README: every API response body includes x_ffprobe_status.
     'x_ffprobe_status' => 'skipped',
+    'retry_after' => 0,                               // read-only probe; no backoff needed
+    'hint' => null,                                   // health is a read-only probe; no actionable guidance
+    // report_url: not included in test health_response — ISSUE_BASE_URL is defined
+    // in api.php (line 126) and not available in the standalone test file scope.
 ];
 test('health endpoint response includes api_version key',
     array_key_exists('api_version', $health_response));
@@ -1864,8 +1889,12 @@ test('health endpoint quota_remaining is -1 sentinel',
     ($health_response['quota_remaining'] ?? -2) === -1);
 test('health endpoint response includes quota_limit key',
     array_key_exists('quota_limit', $health_response));
-test('health endpoint quota_limit is -1 sentinel',
-    ($health_response['quota_limit'] ?? -2) === -1);
+// quota_limit: health is a read-only probe (does not consume quota), but returns
+// the configured daily limit for consistency with other probe endpoints (check, etc.).
+// In production, $daily_limit = getDailyQuotaLimit() (defaults to 5).
+// In test context the default 5 is used directly.
+test('health endpoint quota_limit is the configured daily limit (not -1)',
+    ($health_response['quota_limit'] ?? -2) === 5);
 
 // x_info_timeout / x_download_timeout / x_ffprobe_status — present on all
 // API response bodies per the "always present" invariant documented in the README.
