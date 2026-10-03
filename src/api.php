@@ -3778,6 +3778,12 @@ switch ($action) {
                 // MISSING_SORT fires before yt-dlp runs, so yt_dlp_ok reflects installation status only.
                 'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version without
+                // special-casing the MISSING_SORT response. Mirrors the same field in
+                // action=health and action=check. MISSING_SORT fires before yt-dlp/ffmpeg
+                // runs, so the version reflects installation status only.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3886,6 +3892,12 @@ switch ($action) {
                 // INVALID_SORT fires before yt-dlp runs, so yt_dlp_ok reflects installation status only.
                 'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version without
+                // special-casing the INVALID_SORT response. Mirrors the same field in
+                // action=health and action=check. INVALID_SORT fires before yt-dlp/ffmpeg
+                // runs, so the version reflects installation status only.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
