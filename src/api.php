@@ -3755,6 +3755,11 @@ switch ($action) {
                 // MISSING_FORMAT, INVALID_FORMAT_ID, and all other API responses.
                 'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                // MISSING_SORT fires before yt-dlp runs, so ffprobe is never invoked.
+                // Completes the "always present" invariant documented in the README.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3848,6 +3853,11 @@ switch ($action) {
                 // MISSING_FORMAT, INVALID_FORMAT_ID, and all other API responses.
                 'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                // INVALID_SORT fires before yt-dlp runs, so ffprobe is never invoked.
+                // Completes the "always present" invariant documented in the README.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
