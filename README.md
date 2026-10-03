@@ -811,6 +811,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `x_info_timeout` | `integer` | Server-side info timeout in seconds. Matches `INFO_TIMEOUT` (default 45s). Present on every API response for consistent field coverage. |
 | `x_download_timeout` | `integer` | Server-side download timeout in seconds. Matches `DOWNLOAD_TIMEOUT` (default 300s). Present on every API response for consistent field coverage. |
 | `x_ffprobe_timeout` | `integer` | Server-side ffprobe timeout in seconds. Matches `FFPROBE_TIMEOUT` (default 10s). Present on every API response for consistent field coverage. |
+| `health_probe_timeout` | `integer` | Server-side health probe timeout in seconds. Matches `HEALTH_PROBE_TIMEOUT` (default 15s). Present on every API response for consistent field coverage. The health probe is independent of the info/download timeout (`x_info_timeout`/`x_download_timeout`). |
 | `curl_cffi_ok` | `boolean` | Whether the `curl_cffi` Python library is installed and callable — required for yt-dlp `--impersonate` browser TLS fingerprint spoofing. When `false`, yt-dlp falls back to its default TLS fingerprint and bot-detection failures will increase. |
 | `ffprobe_ok` | `boolean` | Whether ffprobe is installed and callable. When `false`, post-download codec verification is skipped and `x_ffprobe_status` will always be `skipped`. |
 | `yt_dlp_ok` | `boolean` | Whether yt-dlp is installed and callable. When `false`, the rip system is degraded and info/download actions will fail. |
