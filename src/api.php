@@ -7095,7 +7095,13 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
-                'ffprobe_ok' => false,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the VERIFICATION_FAILED / VERIFICATION_TIMEOUT action. Mirrors the
+                    // same fields in the no-stream exit path and all other API responses.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                    'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,

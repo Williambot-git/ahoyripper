@@ -1783,8 +1783,11 @@ echo "  ✓ JS does not hard-code gap=0 on formatGrid"
 
 echo ""
 echo "==> Checking 503 responses include Retry-After header (rate limit gate)..."
-if grep -q "header('Retry-After: 5')" src/api.php; then
-    echo "  ✓ Retry-After: 5 present on rate-limit 503 responses"
+# Retry-After is set via SERVICE_UNAVAILABLE_RETRY constant, not hardcoded 5.
+# Accept either form: the constant reference or any Retry-After header pattern.
+# The . ' concatenation separates the value from the header call, so use .* to match it.
+if grep -qE "header\('Retry-After:.*(5|SERVICE_UNAVAILABLE_RETRY)" src/api.php; then
+    echo "  ✓ Retry-After header present on rate-limit 503 responses"
 else
     echo "  ✗ Retry-After header missing on 503 rate-limit responses"
     exit 1
