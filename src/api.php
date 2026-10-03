@@ -3749,6 +3749,12 @@ switch ($action) {
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic consumers can always read these fields without special-casing
+                // the MISSING_SORT action. Mirrors the same fields in check, health,
+                // MISSING_FORMAT, INVALID_FORMAT_ID, and all other API responses.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -3836,6 +3842,12 @@ switch ($action) {
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic consumers can always read these fields without special-casing
+                // the INVALID_SORT action. Mirrors the same fields in check, health,
+                // MISSING_FORMAT, INVALID_FORMAT_ID, and all other API responses.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
