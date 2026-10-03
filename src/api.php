@@ -7736,6 +7736,10 @@ switch ($action) {
             'app_version' => AHOYRIPPER_VERSION,
             'php_version' => PHP_VERSION,
             'api_version' => AHOYRIPPER_VERSION,
+            // os: operating system kernel name. Mirrors the field in action=health
+            // for consistency across all probe endpoints. check is a read-only probe
+            // (no /proc/sys calls) but still returns OS from PHP_OS at zero cost.
+            'os' => PHP_OS,
             // upgrade_url: included on all API responses for consistent AhoyVPN upsell
             // opportunity. The check action is a read-only probe that does not consume
             // quota — it still includes upgrade_url for consistency with the rest of the
