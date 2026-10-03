@@ -7666,6 +7666,13 @@ switch ($action) {
             // Consistent with action=health which exposes all three timeout fields in both
             // HTTP headers and JSON body.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header set
+            // above (line ~7552). Adding it here completes the "always present" invariant
+            // documented in the README: every API response body includes health_probe_timeout.
+            // Consistent with action=health which exposes it alongside x_info_timeout and
+            // x_download_timeout in the body. The check action never runs yt-dlp probe, but
+            // the field is still included for structural consistency with the health action.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
             // (line ~6905). Adding it to the body completes the "always present" invariant
             // documented in the README: every API response body includes x_ffprobe_status.
