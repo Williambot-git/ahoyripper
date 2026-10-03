@@ -1751,6 +1751,22 @@ else
 fi
 
 echo ""
+echo "==> Checking check action includes X-HealthProbe-Timeout header (always-present invariant)..."
+# X-HealthProbe-Timeout is documented in the README health response headers table as
+# present on every API response. The check action (case 'check':) is a read-only probe
+# that never runs yt-dlp, so the probe timeout is structurally absent — but the header
+# is still included unconditionally for consistent header coverage across all endpoints.
+# This mirrors the same pattern already implemented in case 'health': (line ~8130).
+# Added in caretaker run 261003-0800.
+CHECK_CASE=$(sed -n "/case 'check':/,/case '/p" src/api.php | head -n -1)
+if echo "$CHECK_CASE" | grep -q "X-HealthProbe-Timeout"; then
+    echo "  ✓ check action includes X-HealthProbe-Timeout header"
+else
+    echo "  ✗ check action missing X-HealthProbe-Timeout header (always-present invariant violated)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking JS does not hard-code gap=0 on formatGrid (regression)..."
 # The JS inline style was previously setting formatGrid.style.gap = '0' which
 # overrode the CSS gap value. The CSS .format-grid { gap: 0.75rem; } should

@@ -7548,6 +7548,15 @@ switch ($action) {
         // X-FFProbe-Status: ffprobe never runs on the check endpoint (no file on disk).
         // Adding it completes the "always present" invariant alongside X-FFProbe-Timeout.
         header('X-FFProbe-Status: skipped');
+        // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity probe.
+        // Mirrors health_probe_timeout in the JSON body. Set unconditionally on all check
+        // responses so the header is present even when probe=1 is absent — making it
+        // consistent with X-Info-Timeout and X-Download-Timeout which are always set
+        // regardless of whether any timeout actually fires. Absent on check by design
+        // (check never runs yt-dlp), but the header is still included for structural
+        // consistency with every other API response so generic header-parsing clients
+        // never encounter a missing header.
+        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata for clients that need to
         // synchronize without parsing the JSON body. Mirrors the same ISO 8601
         // timestamp and Unix value that appear in the JSON response body
