@@ -6907,7 +6907,11 @@ switch ($action) {
                         'source_url' => $url,
                         'source_url_missing' => false,
                         'format_id' => $format_id,
-                        'platform' => null,
+                        // platform: derived from URL host — yt-dlp's extractor_key is not
+                        // available at this verification point, so derive from URL instead.
+                        'platform' => preg_match('/^https?:\/\/(?:www\.)?([^\/]+)/', $url, $pm)
+                            ? clean(str_ireplace(['www.', '.com', '.tv', '.org', '.net', '.io', '.co', '.gg'], '', $pm[1]))
+                            : null,
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
                         'server_time' => gmdate('c'),
@@ -7069,7 +7073,11 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => $format_id,
                     'format_id_missing' => ($format_id === '' || $format_id === null),
-                    'platform' => null,
+                    // platform: derived from URL host — yt-dlp's extractor_key is not
+                    // available at this verification point, so derive from URL instead.
+                    'platform' => preg_match('/^https?:\/\/(?:www\.)?([^\/]+)/', $url, $pm)
+                        ? clean(str_ireplace(['www.', '.com', '.tv', '.org', '.net', '.io', '.co', '.gg'], '', $pm[1]))
+                        : null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
