@@ -4631,6 +4631,7 @@ switch ($action) {
                 'format_id_missing' => false,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // clients can always read these fields without branching on error code.
@@ -4645,6 +4646,8 @@ switch ($action) {
                 // Completes the "always present" invariant documented in the README.
                 'x_ffprobe_status' => 'skipped',
                 'ffprobe_ok' => false,
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
@@ -6043,6 +6046,7 @@ switch ($action) {
                 'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -6055,6 +6059,8 @@ switch ($action) {
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout. Consistent with all other error responses.
                 'ffprobe_ok' => false,
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
