@@ -9492,7 +9492,20 @@ switch ($action) {
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+            // Completes the "always present" invariant: every API response includes
+            // yt_dlp_ok alongside yt_dlp_version, giving consumers a boolean availability
+            // signal without needing to parse the version string.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
             'api_version' => AHOYRIPPER_VERSION,
+            // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+            // API responses so monitoring scripts can track the binary version without
+            // special-casing the UNKNOWN_ACTION response. Mirrors the same field in
+            // action=health and action=check.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffmpeg_ok: true when ffmpeg/ffprobe binary is installed and callable.
+            // Completes the "always present" invariant alongside yt_dlp_ok and ffprobe_ok.
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
             // the UNKNOWN_ACTION action. Mirrors the same fields in check and health.
