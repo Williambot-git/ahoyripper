@@ -9626,6 +9626,12 @@ switch ($action) {
             // completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: timeout for action=health&probe=1 yt-dlp connectivity
+            // probe. Included for consistency with all other API response bodies which
+            // always include this field. On UNKNOWN_ACTION (unknown action name), the
+            // health probe is never reached but the field is included to complete the
+            // "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
