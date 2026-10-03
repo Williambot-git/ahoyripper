@@ -3744,6 +3744,11 @@ switch ($action) {
                 'format_id_missing' => false,
                 'format_id' => null,
                 'platform' => null,
+                // sort_applied: null — no sort was applied since the request was rejected
+                // before format parsing. Completes the "always present" invariant documented
+                // in the README alongside formats, platform, and other response fields.
+                'sort_applied' => null,
+                'formats' => [],
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
@@ -3834,6 +3839,11 @@ switch ($action) {
                 'format_id_missing' => false,
                 'format_id' => null,
                 'platform' => null,
+                // sort_applied: null — no sort was applied since the request was rejected
+                // before format parsing. Completes the "always present" invariant documented
+                // in the README alongside formats, platform, and other response fields.
+                'sort_applied' => null,
+                'formats' => [],
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
