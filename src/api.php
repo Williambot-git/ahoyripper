@@ -4697,15 +4697,7 @@ switch ($action) {
         // after the URL separator. Consolidating --impersonate, --cookies, and
         // --add-header into a single array_merge ensures correct flag ordering
         // (mirrors the download action pattern at line ~5481).
-        $final_flags = [
-            // --impersonate: spoof browser TLS/ALPN fingerprints (yt-dlp 2024.09+).
-            // Dramatically reduces 403/422 bot-detection errors on protected sites.
-            // --cookies: pass authenticated cookies if COOKIES_PATH is configured
-            // (enables authenticated ripping for age-restricted YouTube, Spotify, etc.).
-            // See README.md cookie instructions.
-            // --add-header: hardcode Accept-Language so yt-dlp requests consistent
-            // English-language metadata regardless of the browser's actual locale.
-        ];
+        $final_flags = [];
         if (AHOY_IMPERSONATE !== '') {
             $final_flags[] = '--impersonate';
             $final_flags[] = AHOY_IMPERSONATE;
