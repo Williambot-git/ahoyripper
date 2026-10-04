@@ -5068,6 +5068,16 @@ switch ($action) {
                 // null). Adding it completes the "always present" invariant in the README:
                 // every API response body includes x_ffprobe_timeout.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version without
+                // special-casing the PARSE_ERROR response. Mirrors the same field in
+                // action=health, check, MISSING_SORT, and INVALID_SORT.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can always read this field
+                // without special-casing the PARSE_ERROR response. Mirrors the same field in
+                // action=health, check, MISSING_SORT, and INVALID_SORT.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
