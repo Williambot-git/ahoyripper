@@ -2816,7 +2816,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unavailable');
+        header('X-RateLimit-Window: ' . $rate_window);
         // X-DL-RateLimit-* mirrors the X-RateLimit-* sentinels for download-specific
         // monitoring. Both sets use -1 (unavailable) since MISSING_URL occurs before
         // the download action's rate-limit gate and no download is involved.
@@ -2935,7 +2935,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unavailable');
+        header('X-RateLimit-Window: ' . $rate_window);
         // X-DL-RateLimit-* mirrors the X-RateLimit-* sentinels for download-specific
         // monitoring. Both sets use -1 (unavailable) since INVALID_URL occurs before
         // the download action's rate-limit gate and no download is involved.
@@ -3041,7 +3041,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
         header('X-RateLimit-Limit: -1');
         header('X-RateLimit-Remaining: -1');
         header('X-RateLimit-Reset: -1');
-        header('X-RateLimit-Window: unavailable');
+        header('X-RateLimit-Window: ' . $rate_window);
         header('X-DL-RateLimit-Limit: -1');
         header('X-DL-RateLimit-Remaining: -1');
         header('X-DL-RateLimit-Reset: -1');
@@ -3138,7 +3138,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: mirrors X-RateLimit-* for download-specific monitoring.
             // MISSING_FORMAT occurs before the download rate-limit gate; no download is involved.
             header('X-DL-RateLimit-Limit: -1');
@@ -3270,7 +3270,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -3759,7 +3759,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -3861,7 +3861,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-DL-RateLimit-*: mirrors X-RateLimit-* for download-specific monitoring.
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
@@ -5325,7 +5325,7 @@ switch ($action) {
             header('X-RateLimit-Limit: -1');
             header('X-RateLimit-Remaining: -1');
             header('X-RateLimit-Reset: -1');
-            header('X-RateLimit-Window: unavailable');
+            header('X-RateLimit-Window: ' . $rate_window);
             // X-Info-Timeout: mirrors the header set on all other info-action responses.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             // X-Download-Timeout: mirrors the header set on all other download-action responses.
