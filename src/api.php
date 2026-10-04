@@ -4207,7 +4207,7 @@ switch ($action) {
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                     // hint: guides the client when the quota file itself is unavailable.
                     // Retry after the Retry-After delay to see if the issue resolves.
-                    'hint' => 'Quota subsystem unavailable. Retry after ' . 5 . ' seconds.',
+                    'hint' => 'Quota subsystem unavailable. Retry after ' . SERVICE_UNAVAILABLE_RETRY . ' seconds.',
                     'ffprobe_ok' => false,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
@@ -4299,7 +4299,7 @@ switch ($action) {
                     'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                     // hint: guides the client when the quota file lock is unavailable.
                     // Retry after the Retry-After delay to see if the issue resolves.
-                    'hint' => 'Quota subsystem lock unavailable. Retry after ' . 5 . ' seconds.',
+                    'hint' => 'Quota subsystem lock unavailable. Retry after ' . SERVICE_UNAVAILABLE_RETRY . ' seconds.',
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
