@@ -9111,6 +9111,12 @@ switch ($action) {
                 // x_ffprobe_timeout. Consistent with the check, health, and client-error
                 // actions which all expose all three timeout fields in both headers and body.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe). Included here to
+                // complete the "always present" invariant: every API response body includes
+                // health_probe_timeout. Consistent with x_info_timeout, x_download_timeout,
+                // and x_ffprobe_timeout which are also included in this block.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // curl_cffi_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm curl_cffi availability from any endpoint.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
