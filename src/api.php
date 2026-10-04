@@ -9215,6 +9215,12 @@ switch ($action) {
                 // x_ffprobe_timeout. Consistent with action=check and action=health
                 // which both expose all three timeout fields in both headers and body.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe). Included here to
+                // complete the "always present" invariant: every API response body includes
+                // health_probe_timeout. Consistent with x_info_timeout and x_download_timeout
+                // which are also included in this block.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header set above
                 // (line 8005) — always 'skipped' on analytics since ffprobe only runs
                 // after a download. Present here to complete the "always present"
