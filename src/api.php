@@ -7503,15 +7503,30 @@ switch ($action) {
                 'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                // Completes the "always present" invariant: every API response includes
+                // yt_dlp_ok alongside yt_dlp_version, giving consumers a boolean availability
+                // signal without needing to parse the version string.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version for API consumers that track it
+                // separately from ffmpeg_version.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic consumers can always read these fields without special-casing.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // server_time: ISO 8601 + Unix for client clock synchronization.
                 // Present on all other API responses — this block was missing these fields.
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
-                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
-                // Including them in the JSON body completes the "always present" invariant
-                // documented in the README: every API response body includes x_info_timeout
-                // and x_download_timeout. Consistent with all other error responses.
+                // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
+                // ffprobe was never reached (file was never presented for verification).
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_status' => 'skipped',
                 'ffprobe_ok' => false,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
@@ -7520,6 +7535,12 @@ switch ($action) {
                 // completes the "always present" invariant documented in the README:
                 // every API response body includes x_ffprobe_timeout.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // health_probe_timeout: timeout for action=health&probe=1 yt-dlp connectivity
+                // probe. Included for consistency with all other API response bodies which
+                // always include this field. FILE_READ_ERROR fires after download completes
+                // (file downloaded but unreadable) — the health probe is never relevant but
+                // the field is included to complete the "always present" invariant.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // quota fields: included for consistency with all other error responses.
                 // The file was downloaded by yt-dlp (quota was charged) but could not be
                 // read back for streaming — this is a server-side issue, not a quota problem.
