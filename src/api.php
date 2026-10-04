@@ -3230,6 +3230,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes health_probe_timeout.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
@@ -3358,6 +3362,10 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes health_probe_timeout.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             return false;
         }
