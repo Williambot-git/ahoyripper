@@ -3309,6 +3309,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can always read this field
+                // without special-casing the MISSING_FORMAT response. Mirrors the same field in
+                // check, health, MISSING_SORT, INVALID_SORT, and all other API responses.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the MISSING_FORMAT validation path (yt-dlp
@@ -3441,6 +3446,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
                 'quota_limit' => $daily_limit,
                 'quota_reset' => $quota_reset_iso,
                 'quota_reset_unix' => $quota_reset_ts,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can always read this field
+                // without special-casing the INVALID_FORMAT_ID response. Mirrors the same field in
+                // check, health, MISSING_SORT, INVALID_SORT, and all other API responses.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_FORMAT_ID validation path (yt-dlp
