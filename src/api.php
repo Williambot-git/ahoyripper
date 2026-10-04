@@ -9106,6 +9106,10 @@ switch ($action) {
             // CSP-report 405 block was missing these — add for consistency with check/health.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+            // X-FFProbe-Status: always 'skipped' on csp-report responses since ffprobe
+            // only runs after a download completes. Adding it completes the "always present"
+            // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
+            header('X-FFProbe-Status: skipped');
             // X-FFProbe-Timeout: always 'skipped' on csp-report responses since ffprobe
             // only runs after a download completes. Adding it for consistent header coverage.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
