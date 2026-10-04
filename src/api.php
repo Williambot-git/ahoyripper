@@ -8053,6 +8053,12 @@ switch ($action) {
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe). Included here to
+                // complete the "always present" invariant: every API response body includes
+                // health_probe_timeout. Consistent with the analytics 405 handler which
+                // already includes it alongside x_info_timeout and x_download_timeout.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // curl_cffi_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm curl_cffi availability from any endpoint.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
