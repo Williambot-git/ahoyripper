@@ -4476,6 +4476,11 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the DAILY_LIMIT action.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     // x_ffprobe_status: mirrors X-FFProbe-Status header — skipped since
                     // ffprobe only runs after a download completes. Completes the "always
                     // present" invariant documented in README: every API response body
@@ -6563,6 +6568,11 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the classified error path.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'retry_after' => max(0, $retry_delta),
@@ -6714,6 +6724,11 @@ switch ($action) {
                     // since ffprobe only runs after a successful download. Including it
                     // completes the "always present" invariant documented in README.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // ffprobe only runs after a successful download; this block represents an
+                    // unclassified yt-dlp error, so ffprobe was never reached. Included to
+                    // complete the "always present" invariant — every API response includes ffprobe_ok.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
@@ -6825,6 +6840,11 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic consumers can always read these fields without special-casing
+                // the DOWNLOAD_EMPTY action.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
@@ -7068,6 +7088,11 @@ switch ($action) {
                             : null,
                         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                         'api_version' => AHOYRIPPER_VERSION,
+                        // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                        // generic consumers can always read these fields without special-casing
+                        // the VERIFICATION_FAILED no-stream path.
+                        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                         'server_time' => gmdate('c'),
                         'server_time_unix' => time(),
                         'quota_remaining' => $unlimited ? -1 : $ffprobe_post_refund_count,
