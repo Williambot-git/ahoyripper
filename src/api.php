@@ -5567,6 +5567,12 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the SERVICE_UNAVAILABLE action. yt-dlp has not run yet in the fopen
+                    // failure path, so curl_cffi was never invoked — null/false is correct.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
                     // file. Since this error fires before yt-dlp is even invoked (quota file
                     // could not be opened), ffprobe was never reached. Clients can check this
@@ -5636,6 +5642,12 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the SERVICE_UNAVAILABLE action. yt-dlp has not run yet in the flock
+                    // failure path, so curl_cffi was never invoked — null/false is correct.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
                     // file. Since this error fires before yt-dlp is even invoked (quota file
                     // could not be locked), ffprobe was never reached. Clients can check this
