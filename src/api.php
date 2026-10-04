@@ -9192,8 +9192,10 @@ switch ($action) {
                 // health_probe_timeout. Consistent with x_info_timeout, x_download_timeout,
                 // and x_ffprobe_timeout which are also included in this block.
                 'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
-                // curl_cffi_ok: mirrors the same field present on all other API responses
-                // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // monitoring scripts can always read these fields without special-casing.
+                // Mirrors the same fields in the analytics 405 handler (lines 8094-8095).
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // ffprobe_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm ffprobe availability from any endpoint.
