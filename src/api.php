@@ -8246,9 +8246,16 @@ switch ($action) {
                 'request_id' => $request_id,
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // yt_dlp_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm yt-dlp availability from any endpoint.
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'retry_after' => 0,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so generic consumers can always read this field without
+                // special-casing the client-error 405 response.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
@@ -8293,6 +8300,9 @@ switch ($action) {
                 'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // curl_cffi_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                // curl_cffi_version: version of curl_cffi. Included on all API responses so
+                // generic consumers can always read this field without special-casing.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // ffprobe_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm ffprobe availability from any endpoint.
@@ -8423,8 +8433,15 @@ switch ($action) {
             'server_time_unix' => time(),
             'api_version' => AHOYRIPPER_VERSION,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: mirrors the same field present on all other API responses
+            // so monitoring scripts can confirm yt-dlp availability from any endpoint.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
             'upgrade_url' => UPGRADE_URL,
             'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+            // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+            // API responses so generic consumers can always read this field without
+            // special-casing the client-error 200 response.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             'retry_after' => 0,
             'source_url' => null,
             'source_url_missing' => false,
@@ -8450,6 +8467,12 @@ switch ($action) {
             // Matches the same 'skipped' value returned by action=health (line 899),
             // action=csp-report (line 899), action=download 503 block (line 4527),
             // and action=client-error 405 block (line 6714).
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+            // action=health&probe=1 yt-dlp connectivity probe). Included here to
+            // complete the "always present" invariant: every API response body includes
+            // health_probe_timeout. Consistent with x_info_timeout and x_download_timeout
+            // which are also included in this block.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             'x_ffprobe_status' => 'skipped',
             // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
             // (lines 7283-7284). Adding them to the body completes the "always present"
