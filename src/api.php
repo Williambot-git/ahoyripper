@@ -1138,6 +1138,15 @@ if (in_array($action, $internal_actions, true)) {
             // video URL. Consistent with the same null value in action=health and
             // action=check.
             'platform' => null,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the csp-report action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // ffprobe_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read it without special-casing csp-report.
+            // ffprobe is never invoked for csp-report (no file involved) so value is false.
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -1276,6 +1285,10 @@ if (in_array($action, $internal_actions, true)) {
                 // curl_cffi_ok: true when curl_cffi is installed and callable.
                 // Mirrors the same field in action=check and action=health.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses so
+                // generic consumers can always read it without special-casing the client-error
+                // action. ffprobe is never invoked for client-error (no file involved).
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -1352,6 +1365,15 @@ if (in_array($action, $internal_actions, true)) {
             // platform: null — client-error is a passive endpoint with no associated
             // video URL. Consistent with action=check, action=health, and action=csp-report.
             'platform' => null,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the client-error action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // ffprobe_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read it without special-casing client-error.
+            // ffprobe is never invoked for client-error (no file involved).
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
@@ -1404,6 +1426,20 @@ if (in_array($action, $internal_actions, true)) {
         'quota_limit' => getDailyQuotaLimit(),
         'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
         'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+        // curl_cffi_version and curl_cffi_ok: included on all API responses so
+        // generic consumers can always read these fields without special-casing
+        // the METHOD_NOT_ALLOWED client-error action.
+        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+        // ffprobe_ok: mirrors the same field present on all other API responses so
+        // generic consumers can always read it without special-casing this action.
+        // ffprobe is never invoked for client-error (no file involved).
+        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+        // hint: no actionable guidance for METHOD_NOT_ALLOWED client-error — the endpoint
+        // is a passive JS error log with no user-facing remediation.
+        'hint' => null,
+        // platform: null — client-error is a passive endpoint with no associated video URL.
+        'platform' => null,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
