@@ -468,6 +468,18 @@ if ($blocked) {
             // Completes the "always present" invariant documented in the README: every API
             // response body includes ffprobe_ok.
             'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // yt_dlp_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
+            // yt-dlp is never invoked in the FORBIDDEN_ORIGIN path (CORS validation fires
+            // before URL validation, so no platform is detected, no yt-dlp runs).
+            // Completes the "always present" invariant documented in the README: every API
+            // response body includes yt_dlp_ok.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1. Included here so API consumers can always read
+            // this value from any response without null-checking, completing the
+            // "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
