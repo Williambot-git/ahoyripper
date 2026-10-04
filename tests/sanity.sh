@@ -2350,4 +2350,28 @@ if grep -B 2 -A 8 "'error_code' => 'PARSE_ERROR'" src/api.php | grep -q "no_form
 fi
 
 echo ""
+echo "==> Checking INVALID_API_KEY response includes health_probe_timeout (always-present invariant)..."
+# The INVALID_API_KEY error response fires before any yt-dlp run. The health_probe_timeout
+# field was added to all other API responses but was missing from both INVALID_API_KEY blocks
+# (info action at line ~4043 and download action at ~5340). Adding it completes the "always
+# present" invariant across ALL API response bodies including pre-yt-dlp validation errors.
+#
+# Anchor on 'Bearer' in the hint field — unique to INVALID_API_KEY (no other error code uses it).
+# The info action INVALID_API_KEY has hint containing 'Bearer' and is the first such occurrence.
+# The download action INVALID_API_KEY has the same hint (also contains 'Bearer').
+# We only need to verify at least one exists with health_probe_timeout — use the first match.
+ANCHOR_LINE=$(grep -n "Bearer.*header.*Generate" src/api.php | head -1 | cut -d: -f1)
+# From the anchor, search backward 50 lines to reach the start of the json_encode block
+# (the 'echo json_encode([' line), then search forward 60 lines to the closing ']);'
+BLOCK_START=$(( ANCHOR_LINE > 50 ? ANCHOR_LINE - 50 : 1 ))
+BLOCK_END=$(( ANCHOR_LINE + 60 ))
+INVALID_API_KEY_BLOCK=$(sed -n "${BLOCK_START},${BLOCK_END}p" src/api.php)
+if echo "$INVALID_API_KEY_BLOCK" | grep -q "health_probe_timeout"; then
+    echo "  ✓ INVALID_API_KEY response includes health_probe_timeout"
+else
+    echo "  ✗ INVALID_API_KEY response missing health_probe_timeout (always-present invariant violated)"
+    exit 1
+fi
+
+echo ""
 echo "All sanity checks passed."

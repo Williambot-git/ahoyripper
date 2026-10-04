@@ -4038,6 +4038,11 @@ switch ($action) {
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
                 'ffprobe_ok' => false,
+                // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes health_probe_timeout.
+                // Consistent with MISSING_URL, INVALID_URL, and other pre-yt-dlp validation errors.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -5332,6 +5337,11 @@ switch ($action) {
                 // includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
                 'ffprobe_ok' => false,
+                // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                // Completes the "always present" invariant documented in the README:
+                // every API response body includes health_probe_timeout.
+                // Consistent with the info action INVALID_API_KEY block and other pre-yt-dlp validation errors.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
