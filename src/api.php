@@ -8429,8 +8429,10 @@ switch ($action) {
             // actions which all expose all three timeout fields (x_info_timeout,
             // x_download_timeout, x_ffprobe_timeout) in both HTTP headers and JSON body.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
-            // curl_cffi_ok: mirrors the same field present on all other API responses
-            // so monitoring scripts can confirm curl_cffi availability from any endpoint.
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the client-error action. Mirrors the same fields in check and health.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
             'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             // ffprobe_ok: mirrors the same field present on all other API responses
             // so monitoring scripts can confirm ffprobe availability from any endpoint.
