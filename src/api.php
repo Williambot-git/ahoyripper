@@ -6912,6 +6912,11 @@ switch ($action) {
                 'video_url' => $url,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                // Completes the "always present" invariant: every API response includes
+                // yt_dlp_ok alongside yt_dlp_version, giving consumers a boolean availability
+                // signal without needing to parse the version string.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // generic consumers can always read these fields without special-casing
@@ -6925,6 +6930,23 @@ switch ($action) {
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout.
                 'ffprobe_ok' => false,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version without
+                // special-casing the DOWNLOAD_EMPTY response. Mirrors the same field in
+                // FILE_READ_ERROR and VERIFICATION_FAILED for consistency.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so generic consumers can always read this field
+                // without special-casing the DOWNLOAD_EMPTY response.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // report_url: included on all error responses so clients can always
+                // link directly to the GitHub issue tracker with request_id pre-filled.
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1. Included here so API consumers can always read
+                // this value from any response without null-checking, completing the
+                // "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 'x_info_timeout' => INFO_TIMEOUT,
                 'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
