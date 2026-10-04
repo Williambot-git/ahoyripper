@@ -9926,6 +9926,11 @@ switch ($action) {
             // ffmpeg_ok: true when ffmpeg/ffprobe binary is installed and callable.
             // Completes the "always present" invariant alongside yt_dlp_ok and ffprobe_ok.
             'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+            // Included on all API responses so monitoring scripts can track ffprobe binary
+            // version without special-casing the UNKNOWN_ACTION response. Mirrors the same
+            // field in action=health and action=check.
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
             // the UNKNOWN_ACTION action. Mirrors the same fields in check and health.
