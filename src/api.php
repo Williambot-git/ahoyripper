@@ -7674,8 +7674,7 @@ switch ($action) {
         // Mirrors health_probe_timeout in the JSON body. Set unconditionally on all check
         // responses so the header is present even when probe=1 is absent — making it
         // consistent with X-Info-Timeout and X-Download-Timeout which are always set
-        // regardless of whether any timeout actually fires. Absent on check by design
-        // (check never runs yt-dlp), but the header is still included for structural
+        // regardless of whether any timeout actually fires. Included here for structural
         // consistency with every other API response so generic header-parsing clients
         // never encounter a missing header.
         header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
