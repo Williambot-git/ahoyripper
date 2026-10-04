@@ -7916,6 +7916,11 @@ switch ($action) {
             // to offer. Consistent with the same null value in action=health,
             // action=analytics, action=csp-report, and other passive endpoints.
             'hint' => null,
+            // report_url: included on all error responses so clients can always
+            // link directly to the GitHub issue tracker with request_id pre-filled.
+            // Completes the "always present" invariant documented in the README:
+            // every API response body includes report_url.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         break;
     }
@@ -9127,7 +9132,18 @@ switch ($action) {
                 // link directly to the GitHub issue tracker with request_id pre-filled.
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm yt-dlp availability from any endpoint.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
+                'app_version' => AHOYRIPPER_VERSION,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so generic consumers can always read this field without
+                // special-casing the csp-report 405 response.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // Internal reporting endpoint — no video URL or quota applies.
                 'source_url' => null,
                 'source_url_missing' => false,
@@ -9140,6 +9156,8 @@ switch ($action) {
                 'video_url' => null,
                 'quota_remaining' => -1,
                 'quota_limit' => -1,
+                // quota_reset: -1 signals this endpoint does not track quota.
+                // Mirrors the same -1 sentinel used by the analytics 405 handler.
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
                 // server_time: ISO 8601 + Unix for client clock synchronization.
