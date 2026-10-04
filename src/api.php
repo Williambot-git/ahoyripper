@@ -2984,6 +2984,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1. Included here so API consumers can always read
+            // this value from any response without null-checking, completing the
+            // "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
     }
@@ -3085,6 +3090,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1. Included here so API consumers can always read
+            // this value from any response without null-checking, completing the
+            // "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             'ffprobe_ok' => false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return false;
@@ -3173,6 +3183,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1. Included here so API consumers can always read
+            // this value from any response without null-checking, completing the
+            // "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             // ffprobe_ok: mirrors whether ffprobe is installed and callable.
             // ffprobe only runs post-download to verify the output file.
             // URL_TOO_LONG validation fires before yt-dlp/ffprobe are reached, so
@@ -4793,6 +4808,11 @@ switch ($action) {
                 'quota_limit' => !$unlimited ? $daily_limit : -1,
                 'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1. Included here so API consumers can always read
+                // this value from any response without null-checking, completing the
+                // "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         } else {
@@ -6230,6 +6250,11 @@ switch ($action) {
                 // ffprobe was never reached (proc_open itself failed before yt-dlp could start).
                 // Completes the "always present" invariant documented in the README.
                 'x_ffprobe_status' => 'skipped',
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1. Included here so API consumers can always read
+                // this value from any response without null-checking, completing the
+                // "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -7773,6 +7798,11 @@ switch ($action) {
                     'quota_limit' => $unlimited ? -1 : $daily_limit,
                     'quota_reset' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
                     'quota_reset_unix' => $unlimited ? -1 : (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+                    // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                    // action=health&probe=1. Included here so API consumers can always read
+                    // this value from any response without null-checking, completing the
+                    // "always present" invariant documented in the README.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -8766,6 +8796,12 @@ switch ($action) {
                     // template noise even during --skip-download which would prepend garbage
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
+                    // -q 1: yt-dlp verbosity — suppresses all stderr output EXCEPT errors.
+                    // Unlike --quiet which also suppresses errors (making diagnosis impossible),
+                    // -q 1 keeps error messages visible while eliminating the self-update check
+                    // and other boilerplate that pollutes stderr during health probes.
+                    // Mirrors the ffprobe -v quiet pattern used in the download action.
+                    '-q', '1',
                     '--retries', '3',
                     // --extractor-retries: retry known extractor errors (rate limits, temporary
                     // 5xx) separately from generic --retries. Mirrors the info and download
