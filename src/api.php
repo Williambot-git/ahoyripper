@@ -6306,6 +6306,11 @@ switch ($action) {
                 'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
+                    // ffprobe was never reached (yt-dlp timed out before producing any output file).
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes x_ffprobe_timeout.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
