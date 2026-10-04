@@ -1062,6 +1062,12 @@ if (in_array($action, $internal_actions, true)) {
                 // (line 976). Completes the "always present" invariant documented in the
                 // README: every API response body includes x_ffprobe_timeout.
                 'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe). Included here to
+                // complete the "always present" invariant: every API response body includes
+                // health_probe_timeout. Consistent with x_info_timeout, x_download_timeout,
+                // and x_ffprobe_timeout which are also included in this block.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 // hint: no actionable guidance for csp-report endpoint — it's a passive
                 // violation log with no user-facing remediation steps. Consistent with the
                 // null hint in the non-FPM fallback below.
@@ -1070,6 +1076,35 @@ if (in_array($action, $internal_actions, true)) {
                 // video URL. Consistent with the same null value in action=health and
                 // action=check.
                 'platform' => null,
+                // yt_dlp_version: included on all API responses so monitoring scripts
+                // can always read it without special-casing csp-report.
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm yt-dlp availability from any endpoint.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                'api_version' => AHOYRIPPER_VERSION,
+                'app_version' => AHOYRIPPER_VERSION,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so monitoring scripts can track the binary version without
+                // special-casing the csp-report action.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // report_url: included on all error responses so clients can always link
+                // directly to the GitHub issue tracker with request_id pre-filled.
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                // source_url: null — csp-report is an internal endpoint with no associated
+                // video URL. Consistent with the same null value in action=health and check.
+                'source_url' => null,
+                'source_url_missing' => false,
+                'format_id_missing' => false,
+                // quota fields: -1 signals that quota tracking is not applicable to the
+                // csp-report endpoint (fire-and-forget passive logging).
+                'quota_remaining' => -1,
+                'quota_limit' => -1,
+                'quota_reset' => -1,
+                'quota_reset_unix' => -1,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -1131,6 +1166,12 @@ if (in_array($action, $internal_actions, true)) {
             // (line 1025). Completes the "always present" invariant documented in the
             // README: every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT (the timeout for
+            // action=health&probe=1 yt-dlp connectivity probe). Included here to
+            // complete the "always present" invariant: every API response body includes
+            // health_probe_timeout. Consistent with x_info_timeout, x_download_timeout,
+            // and x_ffprobe_timeout which are also included in this block.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             // hint: no actionable guidance for csp-report endpoint — it's a passive
             // violation log with no user-facing remediation steps.
             'hint' => null,
@@ -1138,6 +1179,21 @@ if (in_array($action, $internal_actions, true)) {
             // video URL. Consistent with the same null value in action=health and
             // action=check.
             'platform' => null,
+            // yt_dlp_version: included on all API responses so monitoring scripts
+            // can always read it without special-casing the csp-report action.
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: mirrors the same field present on all other API responses
+            // so monitoring scripts can confirm yt-dlp availability from any endpoint.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            'api_version' => AHOYRIPPER_VERSION,
+            'app_version' => AHOYRIPPER_VERSION,
+            // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+            // API responses so monitoring scripts can track the binary version without
+            // special-casing the csp-report action.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffmpeg_ok: mirrors the same field present on all other API responses
+            // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
             // the csp-report action. Mirrors the same fields in check and health.
@@ -1147,6 +1203,20 @@ if (in_array($action, $internal_actions, true)) {
             // generic consumers can always read it without special-casing csp-report.
             // ffprobe is never invoked for csp-report (no file involved) so value is false.
             'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // report_url: included on all error responses so clients can always link
+            // directly to the GitHub issue tracker with request_id pre-filled.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+            // source_url: null — csp-report is an internal endpoint with no associated
+            // video URL. Consistent with the same null value in action=health and check.
+            'source_url' => null,
+            'source_url_missing' => false,
+            'format_id_missing' => false,
+            // quota fields: -1 signals that quota tracking is not applicable to the
+            // csp-report endpoint (fire-and-forget passive logging).
+            'quota_remaining' => -1,
+            'quota_limit' => -1,
+            'quota_reset' => -1,
+            'quota_reset_unix' => -1,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
     }
