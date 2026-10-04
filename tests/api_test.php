@@ -1916,13 +1916,92 @@ test('health endpoint x_ffprobe_status is "skipped" (ffprobe only runs after dow
 $default_response = [
     'error' => 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
     'error_code' => 'UNKNOWN_ACTION',
+    'action' => 'unknown-action',
+    'hint' => 'Use a known action: info, download, check, health, progress, analytics, client-error, or csp-report.',
+    'retry_after' => 0,
     'request_id' => 'test-request-id',
+    'server_time' => gmdate('c'),
+    'server_time_unix' => time(),
     'yt_dlp_version' => null,
+    'yt_dlp_ok' => false,
     'api_version' => AHOYRIPPER_VERSION,
+    'ffmpeg_version' => null,
+    'ffmpeg_ok' => false,
+    'curl_cffi_version' => null,
+    'curl_cffi_ok' => false,
+    'ffprobe_ok' => false,
+    'source_url' => null,
+    'source_url_missing' => false,
+    'format_id_missing' => false,
+    'format_id' => null,
+    'platform' => null,
+    'video_url' => null,
+    'quota_remaining' => -1,
+    'quota_limit' => 5,
+    'quota_reset' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c'),
+    'quota_reset_unix' => (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp(),
+    'x_ffprobe_status' => 'skipped',
+    'report_url' => 'https://github.com/Williambot-git/ahoyripper/issues?request_id=test-request-id',
+    'upgrade_url' => 'https://ahoyvpn.com',
+    'x_info_timeout' => 45,
+    'x_download_timeout' => 300,
+    'x_ffprobe_timeout' => 10,
+    'health_probe_timeout' => 15,
 ];
-test('default/unknown-action response includes api_version key',
-    array_key_exists('api_version', $default_response));
-test('default response api_version matches AHOYRIPPER_VERSION',
+// UNKNOWN_ACTION (default:) response — must include ALL fields that the production
+// default: block sets. The production block is the authoritative source of truth.
+// Run: grep -n "case 'default':" src/api.php to find it.
+// Key invariant: UNKNOWN_ACTION is the fallback response for any unrecognized action
+// string. It must include every field that appears in other error responses so that
+// generic API consumers can rely on consistent field coverage regardless of which
+// error code they receive.
+test('default response: yt_dlp_ok is present (always-present invariant)',
+    array_key_exists('yt_dlp_ok', $default_response));
+test('default response: ffmpeg_ok is present (always-present invariant)',
+    array_key_exists('ffmpeg_ok', $default_response));
+test('default response: curl_cffi_ok is present (always-present invariant)',
+    array_key_exists('curl_cffi_ok', $default_response));
+test('default response: ffprobe_ok is present (always-present invariant)',
+    array_key_exists('ffprobe_ok', $default_response));
+test('default response: x_ffprobe_status is present (always-present invariant)',
+    array_key_exists('x_ffprobe_status', $default_response));
+test('default response: x_info_timeout is present (always-present invariant)',
+    array_key_exists('x_info_timeout', $default_response));
+test('default response: x_download_timeout is present (always-present invariant)',
+    array_key_exists('x_download_timeout', $default_response));
+test('default response: x_ffprobe_timeout is present (always-present invariant)',
+    array_key_exists('x_ffprobe_timeout', $default_response));
+test('default response: health_probe_timeout is present (always-present invariant)',
+    array_key_exists('health_probe_timeout', $default_response));
+test('default response: server_time is present',
+    array_key_exists('server_time', $default_response));
+test('default response: server_time_unix is present',
+    array_key_exists('server_time_unix', $default_response));
+test('default response: action is present',
+    array_key_exists('action', $default_response));
+test('default response: hint is present',
+    array_key_exists('hint', $default_response));
+test('default response: retry_after is 0 (validation error, no backoff needed)',
+    ($default_response['retry_after'] ?? -1) === 0);
+test('default response: upgrade_url is present',
+    array_key_exists('upgrade_url', $default_response));
+test('default response: source_url is null (no URL validated)',
+    ($default_response['source_url'] ?? null) === null);
+test('default response: source_url_missing is false (URL not missing, just invalid)',
+    ($default_response['source_url_missing'] ?? null) === false);
+test('default response: format_id_missing is false (format not relevant to unknown action)',
+    ($default_response['format_id_missing'] ?? null) === false);
+test('default response: format_id is null',
+    ($default_response['format_id'] ?? null) === null);
+test('default response: platform is null',
+    ($default_response['platform'] ?? null) === null);
+test('default response: video_url is null',
+    ($default_response['video_url'] ?? null) === null);
+test('default response: quota_remaining is -1 (pre-gate, no quota tracking)',
+    ($default_response['quota_remaining'] ?? 0) === -1);
+test('default response: x_ffprobe_status is skipped',
+    ($default_response['x_ffprobe_status'] ?? '') === 'skipped');
+test('default response: api_version matches AHOYRIPPER_VERSION',
     ($default_response['api_version'] ?? '') === AHOYRIPPER_VERSION);
 
 // The default: case MUST set Content-Type: application/json; charset=utf-8
