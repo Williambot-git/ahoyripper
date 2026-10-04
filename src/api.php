@@ -1359,6 +1359,14 @@ if (in_array($action, $internal_actions, true)) {
                 // generic consumers can always read it without special-casing the client-error
                 // action. ffprobe is never invoked for client-error (no file involved).
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // yt_dlp_ok: mirrors the same field present on all other API responses so
+                // generic consumers can always read it without special-casing client-error.
+                // yt-dlp is never invoked for client-error (no rip action involved).
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // ffmpeg_ok: mirrors the same field present on all other API responses so
+                // generic consumers can always read it without special-casing client-error.
+                // ffprobe/ffmpeg is never invoked for client-error (no file involved).
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             fastcgi_finish_request();
             exit;
@@ -1505,6 +1513,14 @@ if (in_array($action, $internal_actions, true)) {
         // generic consumers can always read it without special-casing this action.
         // ffprobe is never invoked for client-error (no file involved).
         'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+        // yt_dlp_ok: mirrors the same field present on all other API responses so
+        // generic consumers can always read it without special-casing this action.
+        // yt-dlp is never invoked for client-error (no rip action involved).
+        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+        // ffmpeg_ok: mirrors the same field present on all other API responses so
+        // generic consumers can always read it without special-casing this action.
+        // ffprobe/ffmpeg is never invoked for client-error (no file involved).
+        'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         // hint: no actionable guidance for METHOD_NOT_ALLOWED client-error — the endpoint
         // is a passive JS error log with no user-facing remediation.
         'hint' => null,
