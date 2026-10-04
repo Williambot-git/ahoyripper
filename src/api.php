@@ -9300,7 +9300,7 @@ switch ($action) {
             // runs after a download completes. Adding it completes the "always present"
             // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
             header('X-FFProbe-Status: skipped');
-        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             echo json_encode([
                 'error' => 'Method Not Allowed. Use POST for analytics beacons.',
                 'error_code' => 'METHOD_NOT_ALLOWED',
@@ -9400,7 +9400,7 @@ switch ($action) {
             // never runs on the analytics endpoint. Adding it here completes the "always
             // present" invariant for all API responses — clients can always find this header.
             header('X-FFProbe-Status: skipped');
-        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             // Rate-limit sentinels (-1) — analytics is a read-only internal action
             // that does not consume from the per-minute download or info rate budget.
             header('X-DL-RateLimit-Limit: -1');
@@ -9455,7 +9455,7 @@ switch ($action) {
             // NOTE: The JSON body 405 handler and the 204 success/empty-body blocks all
             // include this header; this invalid-payload block was the only one missing it.
             header('X-FFProbe-Status: skipped');
-        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
             header('X-DL-RateLimit-Reset: -1');
@@ -9537,7 +9537,7 @@ switch ($action) {
             // never runs on the analytics endpoint. Adding it here completes the "always
             // present" invariant for all API responses — clients can always find this header.
             header('X-FFProbe-Status: skipped');
-        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             // Rate-limit sentinels (-1): analytics is a read-only internal action
             // that does not consume from the per-minute download or info rate budget.
             header('X-DL-RateLimit-Limit: -1');
