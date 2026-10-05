@@ -1911,6 +1911,20 @@ else
 fi
 
 echo ""
+echo "==> Checking health action includes X-HealthProbe-Timeout header (always-present invariant)..."
+# X-HealthProbe-Timeout must be present on ALL health responses (not just probe=1 responses),
+# mirroring the always-present pattern of X-Info-Timeout and X-Download-Timeout.
+# This was added to the health block in caretaker run 261005-0400 after finding that
+# plain health responses (without probe=1) were missing this header while probe=1 responses had it.
+HEALTH_CASE=$(sed -n "/case 'health':/,/case '/p" src/api.php | head -n -1)
+if echo "$HEALTH_CASE" | grep -q "X-HealthProbe-Timeout"; then
+    echo "  ✓ health action includes X-HealthProbe-Timeout header"
+else
+    echo "  ✗ health action missing X-HealthProbe-Timeout header (always-present invariant violated)"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking MISSING_FORMAT and INVALID_FORMAT_ID error codes exist..."
 # Both error codes are returned by the download action when format is absent or invalid.
 # Verify they exist and return HTTP 400 (not 200 or 500).
