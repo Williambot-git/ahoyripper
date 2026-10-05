@@ -1440,7 +1440,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `--no-mtime` | Does not set the downloaded file's modification time to the source video's upload date. The download moment is the meaningful timestamp for a streaming service. |
 | `--write-thumbnail --embed-thumbnail` | Downloads and embeds video thumbnail as metadata (album art for audio, file thumbnail for video). |
 | `--embed-metadata` | Embeds video/audio metadata (title, uploader, upload date, description, chapters) into the downloaded file. |
-| `--force-overwrite` | Overwrites existing files without prompting. Required for clean re-downloads. |
+| `--no-force-overwrite` | (default) Returns an error if the output file already exists, preventing accidental overwrites. Unneeded for streaming responses since files are not persisted between requests. |
 | `--referer <url>` | Sets the HTTP Referer header sent to the source platform. Defaults to `https://ahoyripper.com/`. A custom referer can improve extraction success on platforms that validate the header. |
 | `--user-agent <ua>` | Sets the User-Agent string. AhoyRipper uses a stable, browser-like UA string. |
 | `--add-header Accept-Language: en-US` | Hardcoded Accept-Language for consistent English-language metadata regardless of server locale. |
