@@ -625,6 +625,12 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'server_time' => gmdate('c'),
         'server_time_unix' => time(),
         'ffprobe_ok' => false,
+        // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+        // action=health\&probe=1 yt-dlp connectivity probe. Included here to complete
+        // the "always present" invariant: every API response body includes
+        // health_probe_timeout. Consistent with x_info_timeout, x_download_timeout,
+        // and x_ffprobe_timeout which are also included in this block.
+        'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
     ], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
