@@ -2997,9 +2997,15 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // ffprobe_version: mirrors the field in action=check and action=health so
             // generic consumers can always read it without special-casing MISSING_URL.
             // ffprobe is never invoked in the MISSING_URL path (no URL means no platform
-            // detection, no yt-dlp run, no file to probe). Completes the "always present"
+            // detection, no yt-dlp ran). Completes the "always present"
             // invariant documented in the README: every API response body includes ffprobe_version.
             'ffprobe_version' => null,
+            // ffmpeg_version: mirrors the field in action=check and action=health so
+            // generic consumers can always read it without special-casing MISSING_URL.
+            // ffprobe is never invoked in the MISSING_URL path (no URL means no platform
+            // detection, no yt-dlp ran). Completes the "always present"
+            // invariant documented in the README: every API response body includes ffmpeg_version.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
