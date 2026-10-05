@@ -8431,6 +8431,10 @@ switch ($action) {
             // but the header is included for complete API surface parity — clients can always
             // find it alongside X-FFProbe-Status: skipped in all code paths for this action.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+            // probe. Included for complete API surface parity — all three timeout headers
+            // (X-Info-Timeout, X-Download-Timeout) are present on client-error responses.
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             // X-FFProbe-Status: always 'skipped' on client-error responses since ffprobe only
             // runs after a download completes. Adding it completes the "always present"
             // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
