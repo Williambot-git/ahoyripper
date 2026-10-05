@@ -492,6 +492,23 @@ else
 fi
 
 echo ""
+echo "==> Checking core Open Graph meta tags in public/index.php... "
+# og:title, og:description, og:type, og:locale, og:site_name are the core OG tags.
+# og:url sets the canonical URL for the page in Open Graph.
+# Guard against accidental removal in future edits.
+if grep -q 'meta property="og:title"' public/index.php \
+    && grep -q 'meta property="og:description"' public/index.php \
+    && grep -q 'meta property="og:type"' public/index.php \
+    && grep -q 'meta property="og:locale"' public/index.php \
+    && grep -q 'meta property="og:site_name"' public/index.php \
+    && grep -q 'meta property="og:url"' public/index.php; then
+    echo "  ✓ Core OG tags (title, description, type, locale, site_name, url) present"
+else
+    echo "  ✗ Core Open Graph meta tags missing from index.php"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking og:title:alt and og:description:alt are ABSENT from index.php... "
 # og:title:alt and og:description:alt are NOT valid Open Graph protocol properties.
 # The Open Graph protocol only supports :alt on image properties (og:image:alt).
