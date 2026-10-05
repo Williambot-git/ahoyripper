@@ -5272,6 +5272,7 @@ switch ($action) {
                 'INVALID_URL' => 400,
                 'LOGIN_REQUIRED' => 401,
                 'MISSING_FORMAT' => 400,
+                'MISSING_SORT' => 400,
                 'INVALID_SORT' => 400,
                 'MISSING_URL' => 400,
                 'NOT_ACCEPTABLE' => 406,
