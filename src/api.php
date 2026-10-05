@@ -799,6 +799,11 @@ if ($is_rate_limited) {
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // yt_dlp_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read this field without special-casing
+            // the RATE_LIMIT_EXCEEDED action. yt-dlp version is already loaded
+            // before this gate (lines ~1418-1448), so this value is always accurate.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
             'ffprobe_ok' => false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
