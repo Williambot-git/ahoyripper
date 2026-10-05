@@ -378,6 +378,10 @@ if ($blocked) {
         header('X-Request-ID: ' . $request_id);
         header('X-FFProbe-Status: skipped');
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+        // probe. Included for complete API surface parity — all four timeout headers
+        // (X-Info-Timeout, X-Download-Timeout, X-FFProbe-Timeout) are already present.
+        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
         // the 'check' (line ~6292) and 'health' (line ~6727) action blocks.
         header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
