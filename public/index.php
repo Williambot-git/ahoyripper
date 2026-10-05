@@ -868,7 +868,7 @@ window.addEventListener('appinstalled', function() {
     'URL_TOO_LONG': 'That URL is too long. Try shortening it — remove unnecessary query parameters or use a direct video link.',
     'SERVICE_UNAVAILABLE': 'Server-side lock or quota file could not be opened. Please try again in a few seconds.',
     'CONFIG_ERROR': 'The server is misconfigured — browser impersonation is not available. Contact the server operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.',
-    'UNKNOWN_ACTION': 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, or ?action=progress.',
+    'UNKNOWN_ACTION': 'Unknown action. Use ?action=info, ?action=download, ?action=check, ?action=health, ?action=progress, ?action=analytics, ?action=client-error, or ?action=csp-report.',
     '403': 'The server understood the request but refused to fulfill it. Try again or use AhoyVPN to change your exit IP.',
     '404': 'The requested resource was not found. The content may have been removed or the URL may be incorrect.',
     '429': 'Too many requests. The source site is rate-limiting us — please try again in a few minutes.',
