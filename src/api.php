@@ -2905,7 +2905,7 @@ $sendDailyLimitHeaders = function(int $limit, ?int $remaining) {
     header('X-DailyLimit-Window: 86400');
 };
 
-$validation = function(string $action) use($request_id, $sendDailyLimitHeaders) {
+$validation = function(string $action) use($request_id, $sendDailyLimitHeaders, $rate_window) {
     // Determine the daily limit from the environment to include in error
     // responses. This is the configured limit, not the user's remaining quota
     // (quota tracking is not available at this early validation stage).
