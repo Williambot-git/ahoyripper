@@ -3193,6 +3193,14 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders) 
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
             'upgrade_url' => UPGRADE_URL,
+            // report_url: GitHub issue tracker URL with request_id pre-filled.
+            // Consistent with all other error responses.
+            'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+            // curl_cffi_version and curl_cffi_ok: included on all API responses so
+            // generic consumers can always read these fields without special-casing
+            // the URL_TOO_LONG action. Mirrors the same fields in MISSING_URL and INVALID_URL.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
             // quota_remaining: -1 signals that quota tracking is not available at this
             // early validation stage (before the quota file is opened). Matches the
             // X-DailyLimit-Remaining: -1 header set by $sendDailyLimitHeaders for the
