@@ -7979,6 +7979,7 @@ switch ($action) {
                     'source_url_missing' => false,
                     'format_id' => $format_id,
                     'format_id_missing' => false,
+                    'video_url' => $url,
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
