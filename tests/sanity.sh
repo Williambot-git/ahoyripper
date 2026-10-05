@@ -2112,8 +2112,8 @@ for err_code in MISSING_URL INVALID_URL URL_TOO_LONG; do
     anchor_line=$(grep -n "$anchor" src/api.php | head -1 | cut -d: -f1)
     # x_ffprobe_status appears AFTER the error_code line (in the json_encode body).
     # Search within a 65-line forward window from the anchor to capture the full json_encode.
-    # Measured: MISSING_URL x_ffprobe_status is at line 2798 (57 lines after anchor line 2741).
-    end_line=$(( anchor_line + 65 ))
+    # Measured: MISSING_URL x_ffprobe_status is at line 3034 (75 lines after anchor line 2959).
+    end_line=$(( anchor_line + 85 ))
     BLOCK_LINES=$(sed -n "${anchor_line},${end_line}p" src/api.php)
     if echo "$BLOCK_LINES" | grep -q "'x_ffprobe_status'"; then
         echo "  ✓ $err_code includes x_ffprobe_status field"
