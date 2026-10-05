@@ -805,6 +805,11 @@ if ($is_rate_limited) {
             // Completes the "always present" invariant documented in the README:
             // every API response body includes x_ffprobe_timeout.
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1 yt-dlp connectivity probe. Included for consistency
+            // with all other API response bodies which always include this field.
+            // Completes the "always present" invariant documented in the README.
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             // yt_dlp_ok: mirrors the same field present on all other API responses so
             // generic consumers can always read this field without special-casing
             // the RATE_LIMIT_EXCEEDED action. yt-dlp version is already loaded
@@ -3982,6 +3987,11 @@ switch ($action) {
                 // without special-casing the MISSING_SORT response. Mirrors the same field in
                 // check, health, and all other API responses.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe. Included for consistency
+                // with all other API response bodies which always include this field.
+                // Completes the "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
@@ -4101,6 +4111,11 @@ switch ($action) {
                 // without special-casing the INVALID_SORT response. Mirrors the same field in
                 // check, health, and all other API responses.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1 yt-dlp connectivity probe. Included for consistency
+                // with all other API response bodies which always include this field.
+                // Completes the "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             exit;
         }
