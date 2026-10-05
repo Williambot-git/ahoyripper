@@ -5744,6 +5744,27 @@ switch ($action) {
                 // X-FFProbe-Status: skipped — ffprobe was never reached since the
                 // download rate limit check fires before yt-dlp or ffprobe are invoked.
                 header('X-FFProbe-Status: skipped');
+                // Security headers — the download 429 block was missing the full
+                // security header family (COOP, CORP, CSP, X-Content-Type-Options, etc.).
+                // These were present on all other API error responses but absent here,
+                // creating an inconsistency. Add them now to match the download action's
+                // classified-error and unclassified-error 429 blocks (lines ~6702 and ~6880).
+                // Consistent with: MISSING_FORMAT (line ~3331), INVALID_FORMAT_ID (line ~3481),
+                // PROC_OPEN_FAILED (line ~6350), VERIFICATION_FAILED (line ~7467), and
+                // the download-rate-limit 429 block in the info action (line ~742).
+                header('X-Request-ID: ' . $request_id);
+                header('X-Content-Type-Options: nosniff');
+                header('X-Frame-Options: SAMEORIGIN');
+                header('X-Download-Options: noopen');
+                header('X-Robots-Tag: noindex, noai, noimage, noydir');
+                header('Referrer-Policy: strict-origin-when-cross-origin');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+                header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
+                header('Cross-Origin-Opener-Policy: same-origin');
+                header('Cross-Origin-Resource-Policy: same-origin');
+                header('Reporting-Endpoints: csp-report="/csp-report"');
+                header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
+                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
