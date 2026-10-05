@@ -461,6 +461,9 @@ if ($blocked) {
             // runs, no file to probe). Completes the "always present" invariant documented
             // in the README: every API response includes x_ffprobe_status.
             'x_ffprobe_status' => 'skipped',
+            // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+            // Completes the "always present" invariant: every API response body includes ffprobe_version.
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             // ffprobe_ok: mirrors the same field present on all other API responses so
             // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
             // ffprobe is never invoked in the FORBIDDEN_ORIGIN path (CORS validation fires
@@ -3940,10 +3943,16 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
         'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+        // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+        // Completes the "always present" invariant: every API response body includes ffprobe_version.
+        'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
         // ffprobe_ok: mirrors the field in action=check and action=health for consistency
         // across all API response surfaces. API consumers can confirm ffprobe availability
         // from any endpoint without special-casing the NOT_ACCEPTABLE response.
         'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+        // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+        // action=health&probe=1. Completes the "always present" invariant documented in the README.
+        'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
     ],
     JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
@@ -9755,9 +9764,15 @@ switch ($action) {
                 // curl_cffi_ok: mirrors the field in action=check and action=health so
                 // monitoring scripts can confirm curl_cffi availability from any endpoint.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Completes the "always present" invariant: every API response body includes ffprobe_version.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 // ffprobe_ok: mirrors the field in action=check and action=health so
                 // monitoring scripts can confirm ffprobe availability from any endpoint.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                // action=health&probe=1. Completes the "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
