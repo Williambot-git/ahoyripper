@@ -8456,6 +8456,12 @@ switch ($action) {
                 // API responses so generic consumers can always read this field without
                 // special-casing the client-error 405 response.
                 'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Completes the "always present" invariant: every API response body includes ffprobe_version.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
@@ -9550,6 +9556,7 @@ switch ($action) {
                 // so monitoring scripts can confirm ffmpeg availability from any endpoint.
                 'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // Internal reporting endpoint — no video URL or quota applies.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'source_url' => null,
                 'source_url_missing' => false,
                 'format_id_missing' => false,
