@@ -6282,6 +6282,13 @@ switch ($action) {
             // --no-progress is the correct modern flag (consistent with info action
             // at line 3929 and health probe at line 7668).
             '--no-progress',
+            // --progress-template "": suppress all progress output and the 90-day
+            // self-update warning from stderr. yt-dlp emits progress template noise
+            // even during downloads which would prepend garbage to stderr and corrupt
+            // downstream parsing. Note: --no-update was removed in yt-dlp 2024.x;
+            // --progress-template "" is its equivalent replacement. Mirrors the info
+            // action at line 4794 and health probe at line 9051.
+            '--progress-template', json_encode(''),
             '--socket-timeout', (string)$socket_timeout,
             '--referer', $referer,
             '--user-agent', AHOY_USER_AGENT,
