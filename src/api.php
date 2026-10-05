@@ -2988,6 +2988,18 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
             // need to special-case error responses vs. success responses.
             'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffmpeg_version: mirrors the field in action=check and action=health so
+            // generic consumers can always read it without special-casing MISSING_URL.
+            // ffprobe is never invoked in the MISSING_URL path (no URL means no platform
+            // detection, no yt-dlp run, no file to probe). Completes the "always present"
+            // invariant documented in the README: every API response body includes ffmpeg_version.
+            'ffmpeg_version' => null,
+            // ffprobe_version: mirrors the field in action=check and action=health so
+            // generic consumers can always read it without special-casing MISSING_URL.
+            // ffprobe is never invoked in the MISSING_URL path (no URL means no platform
+            // detection, no yt-dlp run, no file to probe). Completes the "always present"
+            // invariant documented in the README: every API response body includes ffprobe_version.
+            'ffprobe_version' => null,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
@@ -3100,6 +3112,24 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: mirrors the same field in MISSING_URL, check, and health so
+            // generic consumers can always read it without special-casing INVALID_URL.
+            // yt-dlp is not invoked in the INVALID_URL path (URL was rejected before
+            // platform detection or yt-dlp ran). Completes the "always present"
+            // invariant documented in the README: every API response body includes yt_dlp_ok.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffmpeg_version: mirrors the same field in MISSING_URL, check, and health so
+            // generic consumers can always read it without special-casing INVALID_URL.
+            // yt-dlp/ffmpeg are not invoked in the INVALID_URL path. Completes the "always
+            // present" invariant documented in the README: every API response body
+            // includes ffmpeg_version.
+            'ffmpeg_version' => null,
+            // ffprobe_version: mirrors the same field in MISSING_URL, check, and health so
+            // generic consumers can always read it without special-casing INVALID_URL.
+            // ffprobe is never invoked in the INVALID_URL path (URL was rejected before
+            // platform detection or yt-dlp ran). Completes the "always present"
+            // invariant documented in the README: every API response body includes ffprobe_version.
+            'ffprobe_version' => null,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
@@ -3203,6 +3233,26 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // METHOD_NOT_ALLOWED, and UNKNOWN_ACTION responses.
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: mirrors the same field in MISSING_URL, INVALID_URL, check, and
+            // health so generic consumers can always read it without special-casing
+            // URL_TOO_LONG. yt-dlp is not invoked in the URL_TOO_LONG path (URL length
+            // check fires before platform detection or yt-dlp ran). Completes the "always
+            // present" invariant documented in the README: every API response body
+            // includes yt_dlp_ok.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL, check,
+            // and health so generic consumers can always read it without special-casing
+            // URL_TOO_LONG. yt-dlp/ffmpeg are not invoked in the URL_TOO_LONG path.
+            // Completes the "always present" invariant documented in the README: every
+            // API response body includes ffmpeg_version.
+            'ffmpeg_version' => null,
+            // ffprobe_version: mirrors the same field in MISSING_URL, INVALID_URL, check,
+            // and health so generic consumers can always read it without special-casing
+            // URL_TOO_LONG. ffprobe is never invoked in the URL_TOO_LONG path (URL length
+            // check fires before platform detection or yt-dlp ran). Completes the "always
+            // present" invariant documented in the README: every API response body
+            // includes ffprobe_version.
+            'ffprobe_version' => null,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
@@ -3334,6 +3384,20 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors the same field in MISSING_URL, INVALID_URL, URL_TOO_LONG,
+                // check, and health so generic consumers can always read it without
+                // special-casing MISSING_FORMAT. yt-dlp is not invoked in the MISSING_FORMAT
+                // path (format validation fires before yt-dlp runs). Completes the "always
+                // present" invariant documented in the README: every API response body
+                // includes yt_dlp_ok.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL, check,
+                // and health so generic consumers can always read it without special-casing
+                // MISSING_FORMAT. yt-dlp/ffmpeg are not invoked in the MISSING_FORMAT path
+                // (format validation fires before yt-dlp runs). Completes the "always
+                // present" invariant documented in the README: every API response body
+                // includes ffmpeg_version.
+                'ffmpeg_version' => null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -3471,6 +3535,20 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors the same field in MISSING_URL, INVALID_URL, URL_TOO_LONG,
+                // MISSING_FORMAT, check, and health so generic consumers can always read it
+                // without special-casing INVALID_FORMAT_ID. yt-dlp is not invoked in the
+                // INVALID_FORMAT_ID path (format validation fires before yt-dlp runs).
+                // Completes the "always present" invariant documented in the README: every
+                // API response body includes yt_dlp_ok.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL,
+                // MISSING_FORMAT, check, and health so generic consumers can always read it
+                // without special-casing INVALID_FORMAT_ID. yt-dlp/ffmpeg are not invoked in
+                // the INVALID_FORMAT_ID path (format validation fires before yt-dlp runs).
+                // Completes the "always present" invariant documented in the README: every
+                // API response body includes ffmpeg_version.
+                'ffmpeg_version' => null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
