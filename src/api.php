@@ -5644,6 +5644,13 @@ switch ($action) {
                 // "always present" invariant documented in the README: every API response
                 // includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+                // (lines 5598-5599). Adding them to the body completes the "always present"
+                // invariant documented in the README: every API response body includes
+                // x_info_timeout and x_download_timeout. Consistent with the info action
+                // INVALID_API_KEY block and other pre-yt-dlp validation error responses.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
                 'ffprobe_ok' => false,
                 // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                 // Completes the "always present" invariant documented in the README:
@@ -5754,6 +5761,13 @@ switch ($action) {
                     // Completes the "always present" invariant documented in the README:
                     // every API response includes x_ffprobe_status.
                     'x_ffprobe_status' => 'skipped',
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes x_info_timeout and x_download_timeout.
+                    // Consistent with the RATE_LIMIT_EXCEEDED info-action block and other
+                    // download-action error responses (SERVICE_UNAVAILABLE, INVALID_API_KEY).
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // quota fields: set to configured limit and tomorrow's midnight UTC reset.
                     // Consistent with the info action's RATE_LIMIT_EXCEEDED block which
                     // also reports quota from getDailyQuotaLimit() when the rate limit fires
@@ -5892,6 +5906,13 @@ switch ($action) {
                     'quota_limit' => $daily_limit,
                     'quota_reset' => -1,
                     'quota_reset_unix' => -1,
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
+                    // (lines 5853-5854). Completes the "always present" invariant documented
+                    // in the README: every API response body includes x_info_timeout and
+                    // x_download_timeout. Consistent with the info action SERVICE_UNAVAILABLE
+                    // block and other download-action error responses.
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // server_time: ISO 8601 + Unix for client clock synchronization.
                     // Present on all other API responses (MISSING_URL, INVALID_URL,
                     // NOT_ACCEPTABLE, client-error, csp-report, UNKNOWN_ACTION, info,
