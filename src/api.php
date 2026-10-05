@@ -3760,6 +3760,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'retry_after' => 0,
         'request_id' => $request_id,
         'upgrade_url' => UPGRADE_URL,
+        'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
         // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
         // need to special-case error responses vs. success responses.
@@ -5613,6 +5614,7 @@ switch ($action) {
                 // error was raised, but the input URL was valid and accepted.
                 'video_url' => $url,
                 'upgrade_url' => UPGRADE_URL,
+                'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
