@@ -909,6 +909,7 @@ The `format_id` comes from the `id` field in the info response. The API reads th
 | `504` | `CONNECTION_TIMEOUT` | Connection timed out before the source responded — TCP handshake stalled (network-level) |
 | `413` | `FILE_TOO_LARGE` | File exceeds the server's maximum size |
 | `422` | `FORMAT_UNAVAILABLE` | That format is not available for this video — choose another from the list |
+| `422` | `PARSE_ERROR` | The site returned a non-standard or unparseable response while fetching video info. The site may be temporarily unavailable or not supported. |
 | `422` | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) — try another format or wait and retry. `report_url` included in response. |
 | `500` | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. Try again or pick a different format. |
 | `500` | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Quota was not charged. |
