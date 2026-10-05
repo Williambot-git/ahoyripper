@@ -2985,6 +2985,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
             'platform' => null,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
+            // need to special-case error responses vs. success responses.
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
@@ -3680,6 +3683,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         'request_id' => $request_id,
         'upgrade_url' => UPGRADE_URL,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
+        // need to special-case error responses vs. success responses.
+        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
         'api_version' => AHOYRIPPER_VERSION,
         // curl_cffi_version and curl_cffi_ok: included on all API responses so
         // generic consumers can always read these fields without special-casing
@@ -3801,6 +3807,9 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         // link directly to the GitHub issue tracker with request_id pre-filled.
         'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
+        // need to special-case error responses vs. success responses.
+        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
         'api_version' => AHOYRIPPER_VERSION,
         // curl_cffi_version and curl_cffi_ok: included on all API responses so
         // generic consumers can always read these fields without special-casing
