@@ -8001,6 +8001,15 @@ switch ($action) {
                     'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // ffmpeg_version: mirrors the same field in action=check and action=health.
+                    // ffprobe ran (producing the empty/corrupt file) so the binary version
+                    // is known. Completes the "always present" invariant documented in the
+                    // README: every API response body includes ffmpeg_version.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                    // Completes the "always present" invariant: every API response includes
+                    // ffprobe_version alongside ffprobe_ok and ffmpeg_version.
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                     // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
                     // since ffprobe only runs after a download completes. Including it
                     // completes the "always present" invariant documented in the README:
