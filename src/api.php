@@ -1586,21 +1586,6 @@ if (in_array($action, $internal_actions, true)) {
         // generic consumers can always read it without special-casing this action.
         // ffprobe/ffmpeg is never invoked for client-error (no file involved).
         'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
-        // yt_dlp_ok: mirrors the same field present on all other API responses so
-        // generic consumers can always read it without special-casing this action.
-        // yt-dlp is never invoked for client-error (no rip action involved).
-        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
-        // ffprobe_ok: mirrors the same field present on all other API responses so
-        // generic consumers can always read it without special-casing this action.
-        // ffprobe is never invoked for client-error (no file involved).
-        'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
-        // curl_cffi_version: mirrors the field in action=check and action=health
-        // so generic API consumers can always read it without special-casing
-        // the METHOD_NOT_ALLOWED client-error action.
-        'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
-        // curl_cffi_ok: true when curl_cffi is installed and callable.
-        // Mirrors the same field in action=check and action=health.
-        'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
         // hint: no actionable guidance for METHOD_NOT_ALLOWED client-error — the endpoint
         // is a passive JS error log with no user-facing remediation.
         'hint' => null,
