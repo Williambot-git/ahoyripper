@@ -3392,7 +3392,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // with the info response (where video_url holds the resolved page URL).
                 // $url is set at this point — MISSING_FORMAT fires after URL validation.
                 'video_url' => $url,
-                'platform' => null,
+                // platform: derived from URL host — yt-dlp's extractor_key is not
+                // available at this verification point, so derive from URL instead.
+                'platform' => preg_match('/^https?:\/\/(?:www\.)?([^\/]+)/', $url, $pm)
+                    ? clean(str_ireplace(['www.', '.com', '.tv', '.org', '.net', '.io', '.co', '.gg'], '', $pm[1]))
+                    : null,
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
@@ -3559,7 +3563,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // the info response (where video_url holds the resolved page URL).
                 // $url is set here — INVALID_FORMAT_ID fires after URL validation.
                 'video_url' => $url,
-                'platform' => null,
+                // platform: derived from URL host — yt-dlp's extractor_key is not
+                // available at this verification point, so derive from URL instead.
+                'platform' => preg_match('/^https?:\/\/(?:www\.)?([^\/]+)/', $url, $pm)
+                    ? clean(str_ireplace(['www.', '.com', '.tv', '.org', '.net', '.io', '.co', '.gg'], '', $pm[1]))
+                    : null,
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
