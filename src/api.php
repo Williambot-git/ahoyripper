@@ -5295,6 +5295,13 @@ switch ($action) {
                 // video_url: mirrors source_url since parseFormats failed before video URL
                 // was extracted — the yt-dlp output could not be parsed.
                 'video_url' => $url,
+                // playlist metadata: null when parseFormats fails (no playlist info available).
+                // Completes the "always present" invariant documented in README: every info
+                // response includes is_playlist, playlist_count, playlist_title, playlist_id.
+                'is_playlist' => null,
+                'playlist_count' => null,
+                'playlist_title' => null,
+                'playlist_id' => null,
                 'format_id_missing' => false,
                 'format_id' => null,
                 'platform' => null,
@@ -5501,6 +5508,14 @@ switch ($action) {
                 // in the info action. All other info-action error responses include
                 // 'platform' => null for consistent field coverage.
                 'platform' => null,
+                // playlist metadata: null when parseFormats surfaces a classified yt-dlp error
+                // (no playlist info is extracted in the error path). Completes the "always present"
+                // invariant documented in README: every info response includes is_playlist,
+                // playlist_count, playlist_title, playlist_id.
+                'is_playlist' => null,
+                'playlist_count' => null,
+                'playlist_title' => null,
+                'playlist_id' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
                 'upgrade_url' => UPGRADE_URL,
