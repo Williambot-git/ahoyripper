@@ -9270,8 +9270,12 @@ switch ($action) {
                     $probe_cmd[] = '--cookies';
                     $probe_cmd[] = COOKIES_PATH;
                 }
-                // Hardcode en-US: health probe metadata should also be consistent English
-                // to avoid probe failures caused by locale-specific content restrictions.
+                // Hardcode en-US: consistent English-language metadata regardless of browser
+                // locale — mirrors the Accept-Language header added to the info and download
+                // actions so the health probe accurately reflects real ripping behavior.
+                // Accept-Language header is added here even though the probe URL is stable
+                // (YouTube/Health Probe URL) — future deployments may change
+                // HEALTH_PROBE_URL to a different platform where locale matters.
                 $probe_cmd[] = '--add-header';
                 $probe_cmd[] = 'Accept-Language: en-US';
                 $probe_cmd[] = '--';
