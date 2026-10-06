@@ -158,7 +158,12 @@ unset($_raw);
 // hint message in sendServiceUnavailable503(). Keeping it as a constant ensures all
 // three uses stay in sync if the delay ever needs tuning.
 // Override via SERVICE_UNAVAILABLE_RETRY env var if needed (e.g. during load testing).
-define('SERVICE_UNAVAILABLE_RETRY', 5);
+// Use an explicit guard: getenv() returns false for unset AND '' for empty-string;
+// the guard ensures empty-string is treated the same as unset, falling through to
+// the documented default. min=1 prevents zero/negative values.
+$_raw = getenv('SERVICE_UNAVAILABLE_RETRY');
+define('SERVICE_UNAVAILABLE_RETRY', max(1, ($_raw !== false && $_raw !== '') ? (int)$_raw : 5));
+unset($_raw);
 
 // Timeout (seconds) for the info action (metadata fetch). yt-dlp should finish
 // in under 30s for most videos; 45s is generous for slow/unstable sources.
