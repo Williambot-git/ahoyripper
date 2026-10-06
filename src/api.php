@@ -6689,6 +6689,10 @@ switch ($action) {
                     'api_version' => AHOYRIPPER_VERSION,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // clients can always read these fields without branching on error code.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                     // ffprobe is never reached in the DOWNLOAD_TIMEOUT path (yt-dlp timed out
                     // before producing any output file, so no file exists for ffprobe to verify).
@@ -6699,7 +6703,7 @@ switch ($action) {
                     // invariant documented in the README: every API response body includes
                     // x_info_timeout and x_download_timeout. Consistent with all other download
                     // error responses (YTDLP_ERROR, PROC_OPEN_FAILED, DOWNLOAD_CANCELLED, etc.).
-                'ffprobe_ok' => false,
+                    'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
