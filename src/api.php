@@ -7467,7 +7467,8 @@ switch ($action) {
                         // Including them in the JSON body completes the "always present" invariant
                         // documented in the README: every API response body includes x_info_timeout
                         // and x_download_timeout.
-                'ffprobe_ok' => false,
+                        'ffprobe_ok' => false,
+                        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                         'x_info_timeout' => INFO_TIMEOUT,
                         'x_download_timeout' => DOWNLOAD_TIMEOUT,
                         // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set above.
