@@ -5030,6 +5030,7 @@ switch ($action) {
                 // Completes the "always present" invariant documented in the README.
                 'x_ffprobe_status' => 'skipped',
                 'ffprobe_ok' => false,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'x_info_timeout' => INFO_TIMEOUT,
@@ -6564,6 +6565,7 @@ switch ($action) {
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout. Consistent with all other error responses.
                 'ffprobe_ok' => false,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 'x_info_timeout' => INFO_TIMEOUT,
