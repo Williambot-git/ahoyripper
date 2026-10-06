@@ -3037,6 +3037,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // detection, no yt-dlp ran). Completes the "always present"
             // invariant documented in the README: every API response body includes ffmpeg_version.
             'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffmpeg_ok: mirrors the field in action=check and action=health so generic
+            // consumers can always read it without special-casing MISSING_URL. ffprobe is
+            // never invoked in the MISSING_URL path — completing the "always present"
+            // invariant documented in the README: every API response body includes ffmpeg_ok.
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
@@ -3167,6 +3172,11 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // platform detection or yt-dlp ran). Completes the "always present"
             // invariant documented in the README: every API response body includes ffprobe_version.
             'ffprobe_version' => null,
+            // ffmpeg_ok: mirrors the same field in MISSING_URL, check, and health so generic
+            // consumers can always read it without special-casing INVALID_URL. yt-dlp/ffmpeg
+            // are not invoked in the INVALID_URL path — completing the "always present"
+            // invariant documented in the README: every API response body includes ffmpeg_ok.
+            'ffmpeg_ok' => false,
             'api_version' => AHOYRIPPER_VERSION,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
@@ -3290,6 +3300,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // present" invariant documented in the README: every API response body
             // includes ffprobe_version.
             'ffprobe_version' => null,
+            // ffmpeg_ok: mirrors the same field in MISSING_URL, INVALID_URL, check, and health
+            // so generic consumers can always read it without special-casing URL_TOO_LONG.
+            // yt-dlp/ffmpeg are not invoked in the URL_TOO_LONG path — completing the
+            // "always present" invariant documented in the README: every API response body
+            // includes ffmpeg_ok.
+            'ffmpeg_ok' => false,
             'api_version' => AHOYRIPPER_VERSION,
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
