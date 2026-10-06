@@ -524,6 +524,11 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     header('X-FFProbe-Status: skipped');
     // X-FFProbe-Timeout: present for full header coverage even though ffprobe was skipped.
     header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+    // X-HealthProbe-Timeout: included for complete timeout-header parity — all four
+    // timeout headers (X-Info-Timeout, X-Download-Timeout, X-FFProbe-Timeout,
+    // X-HealthProbe-Timeout) are present on every API response path. ffprobe is never
+    // reached in the SERVICE_UNAVAILABLE path, but the header completes the set.
+    header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
     // CSP violation reporting — mirrors the headers set in all other API response paths.
     // Without these, 'report-to csp-report' in the nginx-layer CSP has no defined endpoint
     // group and browser CSP violation reports are silently dropped.
