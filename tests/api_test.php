@@ -485,7 +485,7 @@ return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size
         return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
     }
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
-        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
+        return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451, 'source_url_missing' => false, 'format_id_missing' => false, 'report_url' => $_report_url];
     }
     // HTTP error responses from the source site (e.g. "HTTP Error 403: Forbidden").
     if (preg_match('/http error (\d+)/i', $err_lower, $m)) {
