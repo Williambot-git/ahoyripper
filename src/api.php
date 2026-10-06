@@ -6000,6 +6000,17 @@ switch ($action) {
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     'ffprobe_ok' => false,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set
+                    // above (line 5931). Completes the "always present" invariant:
+                    // every API response body includes x_ffprobe_timeout. Consistent
+                    // with the info action SERVICE_UNAVAILABLE block and the download
+                    // action flock failure block.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout
+                    // for action=health&probe=1 yt-dlp connectivity probe. Completes the
+                    // "always present" invariant: every API response body includes
+                    // health_probe_timeout. Consistent with x_ffprobe_timeout above.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
@@ -6087,6 +6098,17 @@ switch ($action) {
                     // could not be locked), ffprobe was never reached. Set to false to
                     // indicate the verification step was not reached.
                     'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header set
+                    // above (line ~6042). Completes the "always present" invariant:
+                    // every API response body includes x_ffprobe_timeout. Consistent
+                    // with the info action SERVICE_UNAVAILABLE block and the download
+                    // action fopen failure block.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout
+                    // for action=health&probe=1 yt-dlp connectivity probe. Completes the
+                    // "always present" invariant: every API response body includes
+                    // health_probe_timeout. Consistent with x_ffprobe_timeout above.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ], JSON_INVALID_UTF8_SUBSTITUTE);
                 exit;
             }
