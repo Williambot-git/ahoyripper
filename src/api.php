@@ -480,6 +480,18 @@ if ($blocked) {
             // Completes the "always present" invariant documented in the README: every API
             // response body includes ffprobe_ok.
             'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // ffmpeg_version: mirrors the same field in all other API responses so
+            // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
+            // ffprobe/yt-dlp are never invoked in the FORBIDDEN_ORIGIN path (CORS validation
+            // fires before URL validation). Completes the "always present" invariant documented
+            // in the README: every API response body includes ffmpeg_version.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffmpeg_ok: mirrors the same field present on all other API responses so
+            // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
+            // ffprobe/yt-dlp are never invoked in the FORBIDDEN_ORIGIN path (CORS validation
+            // fires before URL validation). Completes the "always present" invariant documented
+            // in the README: every API response body includes ffmpeg_ok.
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
             // yt_dlp_ok: mirrors the same field present on all other API responses so
             // generic consumers can always read it without special-casing FORBIDDEN_ORIGIN.
             // yt-dlp is never invoked in the FORBIDDEN_ORIGIN path (CORS validation fires
