@@ -8014,6 +8014,10 @@ switch ($action) {
                 // ffprobe_version: mirrors ffmpeg_version for API consumers that track it
                 // separately from ffmpeg_version.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors ffprobe_ok — completes the "always present" invariant.
+                // FILE_READ_ERROR fires after download completes; ffprobe was never reached so
+                // ffprobe_ok is false. ffmpeg_ok follows the same false value for consistency.
+                'ffmpeg_ok' => false,
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // generic consumers can always read these fields without special-casing.
                 'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
