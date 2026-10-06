@@ -222,8 +222,8 @@ header_remove('X-Powered-By');
   <meta name="twitter:description" content="Download video & audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo & 1872+ platforms. Free, no signup, no ads.">
   <meta name="twitter:image" content="<?= $BASE_URL ?>/og-image.webp">
   <meta name="twitter:image:width" content="1200">
-  <meta name="twitter:image:height" content="630">
   <meta name="twitter:image:alt" content="AhoyRipper — download video and audio from YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms">
+  <meta name="twitter:image:height" content="630">
 
   <!-- Content Security Policy — defense-in-depth: HTTP header set by nginx handles
        production, but the meta tag ensures CSP is enforced even when the page is
