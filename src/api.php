@@ -5131,6 +5131,10 @@ switch ($action) {
                 'hint' => 'Could not fetch video metadata. The site may be blocking requests or may not be supported. Try another video or format.',
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                // Completes the "always present" invariant: every API response includes
+                // yt_dlp_ok alongside yt_dlp_version.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -5228,6 +5232,10 @@ switch ($action) {
                 'format_id' => null,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                // Completes the "always present" invariant: every API response includes
+                // yt_dlp_ok alongside yt_dlp_version.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -5275,6 +5283,15 @@ switch ($action) {
                 // without special-casing the PARSE_ERROR response. Mirrors the same field in
                 // action=health, check, MISSING_SORT, and INVALID_SORT.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: true when ffmpeg/ffprobe binary is installed and callable.
+                // Completes the "always present" invariant: every API response body includes
+                // ffmpeg_ok alongside ffmpeg_version and ffprobe_ok.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // health_probe_timeout: timeout for action=health&probe=1 yt-dlp connectivity probe.
+                // Included for consistency with all other API response bodies which always include
+                // this field. On PARSE_ERROR the health probe is never reached but the field is
+                // included to complete the "always present" invariant documented in the README.
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ];
             // Surface yt-dlp's raw stderr so the user sees the actual reason
             if ($raw_err) {
