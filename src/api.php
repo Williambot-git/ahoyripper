@@ -648,6 +648,13 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'server_time' => gmdate('c'),
         'server_time_unix' => time(),
         'ffprobe_ok' => false,
+        // ffmpeg_ok: mirrors the same field in all other error responses.
+        // SERVICE_UNAVAILABLE fires before yt-dlp or ffmpeg are invoked, so both
+        // are unavailable. Set to false to complete the "always present" invariant
+        // for ffmpeg_ok alongside ffprobe_ok. Consistent with the check, health,
+        // MISSING_SORT, INVALID_SORT, MISSING_FORMAT, INVALID_FORMAT_ID, and
+        // all other error responses that include ffmpeg_ok.
+        'ffmpeg_ok' => false,
         // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
         // action=health\&probe=1 yt-dlp connectivity probe. Included here to complete
         // the "always present" invariant: every API response body includes
