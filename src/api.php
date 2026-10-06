@@ -6912,6 +6912,11 @@ switch ($action) {
                 // never invoked here (yt-dlp failed before producing a file), but the
                 // header is included so clients always receive the full diagnostic set.
                 header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+                // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+                // probe. Mirrors health_probe_timeout in the JSON body. Included here for
+                // structural consistency with every other API error response — clients always
+                // receive the full diagnostic header set regardless of how yt-dlp exits.
+                header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
                 // CSP headers: classified errors exit() from within a switch block that
                 // bypasses the global headers set at the top of the script. These three
                 // headers are needed to maintain consistent CSP reporting and browser
@@ -7003,7 +7008,18 @@ switch ($action) {
                     // since ffprobe only runs after a download completes. Including it
                     // completes the "always present" invariant documented in the README.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
-                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                    // API responses so monitoring scripts can track the binary version without
+                    // special-casing the classified error path.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                    // Completes the "always present" invariant alongside yt_dlp_version.
+                    'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                    // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes health_probe_timeout. Consistent
+                    // with MISSING_FORMAT, INVALID_FORMAT_ID, and other error responses.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ];
                 // Surface the raw yt-dlp output for classified errors too
                 if ($proc_err) {
@@ -7048,6 +7064,11 @@ switch ($action) {
                 // never invoked here (yt-dlp failed before producing a file), but the
                 // header is included so clients always receive the full diagnostic set.
                 header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+                // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+                // probe. Mirrors health_probe_timeout in the JSON body. Included here for
+                // structural consistency with every other API error response — clients always
+                // receive the full diagnostic header set regardless of how yt-dlp exits.
+                header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
                 // CSP headers: unclassified errors exit() from within a switch block that
                 // bypasses the global headers set at the top of the script. These three
                 // headers are needed to maintain consistent CSP reporting and browser
@@ -7132,11 +7153,25 @@ switch ($action) {
                     // since ffprobe only runs after a successful download. Including it
                     // completes the "always present" invariant documented in README.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                    // API responses so monitoring scripts can track the binary version without
+                    // special-casing the unclassified error path.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffprobe_version mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                    // Completes the "always present" invariant alongside yt_dlp_version.
+                    'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                     // ffprobe_ok: mirrors whether ffprobe is installed and callable.
                     // ffprobe only runs after a successful download; this block represents an
                     // unclassified yt-dlp error, so ffprobe was never reached. Included to
                     // complete the "always present" invariant — every API response includes ffprobe_ok.
                     'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes health_probe_timeout. Consistent
+                    // with the classified error block and other download error responses.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ];
                 if ($proc_err) {
                     $resp['raw_error'] = $proc_err;
