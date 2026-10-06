@@ -1531,6 +1531,8 @@ if (in_array($action, $internal_actions, true)) {
     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
     echo json_encode([
         'status' => 'ok',
+        'action' => $action,
+        'request_id' => $request_id,
         'retry_after' => 0,
         'api_version' => AHOYRIPPER_VERSION,
         'server_time' => gmdate('c'),
