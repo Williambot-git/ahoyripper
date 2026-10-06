@@ -408,52 +408,52 @@ test('AHOY_IMPERSONATE constant defaults to chrome',
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
+return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
     // Standalone "geo restricted" (no characters after "geo") — the single-word
     // form yt-dlp sometimes emits. Separate from the geo.?restricted pattern above
     // (which requires characters after "restricted" and uses (?!.) to prevent
     // "geo restriction" from matching here, since that pattern fires first).
     if (preg_match('/\bgeo restricted\b/i', $err_lower)) {
-        return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'status' => 451];
+return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
     if (preg_match('/video is private|this video is private/i', $err_lower)) {
-        return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'status' => 403];
+return ['code' => 'PRIVATE_VIDEO', 'msg' => 'This video is private and cannot be downloaded.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
     }
     // "authentication required" must be checked separately because the merged pattern
     // "authentication.*required" requires the word "required" to appear twice —
     // yt-dlp only says it once ("authentication required"), so we match it directly.
     // "sign in to confirm" is yt-dlp's bot-confirm message (Google/YouTube).
     if (preg_match('/authentication required|login.*required|this video requires login|sign in to confirm/i', $err_lower)) {
-        return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'status' => 401];
+return ['code' => 'LOGIN_REQUIRED', 'msg' => 'This video requires login or subscription.', 'upgrade_url' => UPGRADE_URL, 'status' => 401];
     }
     if (preg_match('/not.*support|unsupported site|is not a supported URL/i', $err_lower)) {
-        return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'status' => 404];
+return ['code' => 'UNSUPPORTED_SITE', 'msg' => 'This site is not supported by yt-dlp.', 'upgrade_url' => UPGRADE_URL, 'status' => 404];
     }
     if (preg_match('/playlist.*not.*found|does not exist/i', $err_lower)) {
-        return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'status' => 404];
+return ['code' => 'PLAYLIST_MISSING', 'msg' => 'Playlist not found or no longer exists.', 'upgrade_url' => UPGRADE_URL, 'status' => 404];
     }
     if (preg_match('/copyright|\binfringe\b|removed.*by|content.*strike/i', $err_lower)) {
-        return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'status' => 451];
+return ['code' => 'COPYRIGHT_REMOVED', 'msg' => 'This content has been removed due to a copyright claim.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
     if (preg_match('/video (has been )?(removed|delisted|unavailable|deleted)|this video (is no longer available|has been (removed|delisted|deleted))|video (has been )?removed|video (is )?unavailable|video (is )?deleted/i', $err_lower)) {
-        return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'status' => 410];
+return ['code' => 'VIDEO_UNAVAILABLE', 'msg' => 'This video is no longer available or has been removed.', 'upgrade_url' => UPGRADE_URL, 'status' => 410];
     }
     if (preg_match('/too.*many.*requests|429/i', $err_lower)) {
         return ['code' => 'SOURCE_RATE_LIMITED', 'msg' => 'The source site is rate-limiting requests. Try again in a few minutes, or use AhoyVPN for a different exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 429];
     }
     if (preg_match('/age.*restriction|under age|video is age.*restricted|age restricted/i', $err_lower)) {
-        return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'status' => 403];
+return ['code' => 'AGE_RESTRICTED', 'msg' => 'This video is age-restricted and cannot be downloaded without verification.', 'upgrade_url' => UPGRADE_URL, 'status' => 403];
     }
     if (preg_match('/certificate.*expired|ssl.*error|sslerr|tls handshake/i', $err_lower)) {
-        return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly.', 'status' => 502];
+return ['code' => 'SSL_ERROR', 'msg' => 'Secure connection to the source failed. Try again shortly, or use AhoyVPN to change your exit IP.', 'upgrade_url' => UPGRADE_URL, 'status' => 502];
     }
     // yt-dlp 2024.09+ --impersonate feature requires the curl_cffi Python library.
     // Without it, yt-dlp throws "Impersonate target X is not available" (exit 1).
     // Classify this as a CONFIG_ERROR so operators know it's a deployment/dependency
     // issue, not a video or format problem — users should not see FORMAT_UNAVAILABLE.
     if (preg_match('/impersonate.*not available|is not available.*impersonate/i', $err_lower)) {
-        return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'status' => 503];
+return ['code' => 'CONFIG_ERROR', 'msg' => 'Browser impersonation is not available. The curl_cffi Python library may be missing on the server. Contact the operator or set AHOY_IMPERSONATE to an empty string to disable impersonation.', 'upgrade_url' => UPGRADE_URL, 'status' => 503];
     }
     // "process timed out" is produced by PHP-side timeout in the inline
     // proc_open timeout handler (api.php).
@@ -479,10 +479,10 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
         return ['code' => 'CONNECTION_TIMEOUT', 'msg' => 'Connection timed out before the source responded. Use AhoyVPN to change your exit IP and try again.', 'upgrade_url' => UPGRADE_URL, 'status' => 504];
     }
     if (preg_match('/file.*larger|file.*too large|size.*exceed|exceeds.*limit/i', $err_lower)) {
-        return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'status' => 413];
+return ['code' => 'FILE_TOO_LARGE', 'msg' => 'This file exceeds the maximum size for this server. Try an audio-only or lower-resolution format.', 'upgrade_url' => UPGRADE_URL, 'status' => 413];
     }
     if (preg_match('/requested format(?!s)|requested.*not.*available|format.*not.*available|does not contain|does not match/i', $err_lower)) {
-        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
+        return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
     }
     if (preg_match('/\bdisallowed\b(?!\s+content\b)(?!.*\bTOS\b)(?!.*\bterms\b)|content-disallow(ed)?\b|TOS.*violat|terms.*of.*service.*violat|violat.*(TOS|terms.*of.*service)/i', $err_lower)) {
         return ['code' => 'DISALLOWED_CONTENT', 'msg' => 'This content is not available due to a terms of service or legal violation.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
@@ -515,11 +515,11 @@ function classifyYtdlpError($raw_err, $exit_code = null) {
     // exit code 1 still returns GEOBLOCKED (451), not FORMAT_UNAVAILABLE (422).
     if ($exit_code !== null && $exit_code !== 0) {
         if ($exit_code === 1) {
-            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'status' => 422];
+            return ['code' => 'FORMAT_UNAVAILABLE', 'msg' => 'That format is not available for this video. Select another from the list.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
         }
         // Exit codes ≥2 indicate serious errors (download failed, post-processing failed, etc.)
         if ($exit_code >= 2) {
-            return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'status' => 422];
+            return ['code' => 'YTDLP_ERROR', 'msg' => 'yt-dlp encountered an error processing this request.', 'upgrade_url' => UPGRADE_URL, 'status' => 422];
         }
     }
     return null;
