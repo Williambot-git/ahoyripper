@@ -3440,7 +3440,23 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // without special-casing the MISSING_FORMAT response. Mirrors the same field in
                 // check, health, MISSING_SORT, INVALID_SORT, and all other API responses.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                // MISSING_FORMAT fires before yt-dlp runs, so ffprobe is never invoked.
+                // Completes the "always present" invariant documented in the README.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL, check,
+                // and health so generic consumers can always read it without special-casing
+                // MISSING_FORMAT. yt-dlp/ffmpeg are not invoked in the MISSING_FORMAT path
+                // (format validation fires before yt-dlp runs). Completes the "always
+                // present" invariant documented in the README: every API response body
+                // includes ffmpeg_version.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                // MISSING_FORMAT fires before yt-dlp runs, so ffmpeg is never invoked.
+                // Completes the "always present" invariant documented in the README.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the MISSING_FORMAT validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
@@ -3591,7 +3607,23 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // without special-casing the INVALID_FORMAT_ID response. Mirrors the same field in
                 // check, health, MISSING_SORT, INVALID_SORT, and all other API responses.
                 'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffprobe_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffprobe availability from any endpoint.
+                // INVALID_FORMAT_ID fires before yt-dlp runs, so ffprobe is never invoked.
+                // Completes the "always present" invariant documented in the README.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL,
+                // MISSING_FORMAT, check, and health so generic consumers can always read it
+                // without special-casing INVALID_FORMAT_ID. yt-dlp/ffmpeg are not invoked in
+                // the INVALID_FORMAT_ID path (format validation fires before yt-dlp runs).
+                // Completes the "always present" invariant documented in the README: every
+                // API response body includes ffmpeg_version.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                // INVALID_FORMAT_ID fires before yt-dlp runs, so ffmpeg is never invoked.
+                // Completes the "always present" invariant documented in the README.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                 // ffprobe is never reached in the INVALID_FORMAT_ID validation path (yt-dlp
                 // has not run yet, no file exists). Completes the "always present" invariant
