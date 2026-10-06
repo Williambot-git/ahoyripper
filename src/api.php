@@ -581,6 +581,17 @@ function sendServiceUnavailable503(string $request_id, string $action): void
         'retry_after' => SERVICE_UNAVAILABLE_RETRY,
         'request_id' => $request_id,
         'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+        // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+        // Completes the "always present" invariant: every API response includes
+        // yt_dlp_ok alongside yt_dlp_version, giving consumers a boolean availability
+        // signal without needing to parse the version string.
+        'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+        // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+        // API responses so monitoring scripts can track the binary version.
+        'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+        // ffprobe_version: mirrors ffmpeg_version for API consumers that track it
+        // separately from ffmpeg_version.
+        'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
         'api_version' => AHOYRIPPER_VERSION,
         // curl_cffi_version and curl_cffi_ok: included on all API responses so
         // generic consumers can always read these fields without special-casing
