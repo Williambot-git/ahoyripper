@@ -657,6 +657,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
   "request_id": "a3f1b2c9d4e5f678",
   "source_url": "https://www.youtube.com/watch?v=...",
   "source_url_missing": false,
+  "format_id_missing": false,
   "yt_dlp_version": "2026.03.17",
   "api_version": "1.0.0",
   "upgrade_url": "https://ahoyvpn.com",
