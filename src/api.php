@@ -7621,6 +7621,11 @@ switch ($action) {
                         // itself encountered an error (set at line ~6463), and from 'success'
                         // where a stream was confirmed.
                         'x_ffprobe_status' => 'skipped',
+                        // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                        // action=health&probe=1. Included here so API consumers can always read
+                        // this value from any response without null-checking, completing the
+                        // "always present" invariant documented in the README.
+                        'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                     ], JSON_INVALID_UTF8_SUBSTITUTE);
                     exit;
                 }
