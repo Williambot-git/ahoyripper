@@ -8733,9 +8733,6 @@ switch ($action) {
                 // curl_cffi_version: version of curl_cffi. Included on all API responses so
                 // generic consumers can always read this field without special-casing.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
-                // ffprobe_ok: mirrors the same field present on all other API responses
-                // so monitoring scripts can confirm ffprobe availability from any endpoint.
-                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // hint: no actionable guidance for METHOD_NOT_ALLOWED — client must fix
                 // the request method. Consistent with the null hint in the client-error
                 // 200 block and csp-report endpoint.
