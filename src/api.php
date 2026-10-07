@@ -9511,6 +9511,13 @@ switch ($action) {
                         // ffprobe_ok: mirrors the field in action=check and action=health so
                         // monitoring scripts can confirm ffprobe availability from any endpoint.
                         'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                        // x_info_timeout / x_download_timeout: mirror the same fields in the
+                        // top-level health response body. Included in the probe sub-object so
+                        // clients reading probe.* directly get the same timeout metadata available
+                        // at the top level — completing the "always present" invariant for these
+                        // fields within the probe sub-object as well.
+                        'x_info_timeout' => INFO_TIMEOUT,
+                        'x_download_timeout' => DOWNLOAD_TIMEOUT,
                         // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — always
                         // 'skipped' on health since ffprobe only runs after a completed download.
                         // Present here to complete the "always present" invariant documented in
