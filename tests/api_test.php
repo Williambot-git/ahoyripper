@@ -38,7 +38,9 @@ define('MAX_FILENAME_LEN', 80);
 define('INFO_TIMEOUT', 45);
 
 // DOWNLOAD_TIMEOUT: max duration for download action in seconds (mirrors api.php).
-define('DOWNLOAD_TIMEOUT', 3600);
+// NOTE: production default is 300s (YTDLP_DOWNLOAD_TIMEOUT env var), NOT 3600.
+// This constant must stay in sync with src/api.php line 189.
+define('DOWNLOAD_TIMEOUT', 300);
 
 // FFPROBE_TIMEOUT: max duration for ffprobe verification in seconds (mirrors api.php).
 define('FFPROBE_TIMEOUT', 10);
