@@ -3530,6 +3530,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic JSON parsers can rely on these fields being present everywhere.
+                // MISSING_FORMAT fires before yt-dlp runs, so curl_cffi was never invoked —
+                // null/false correctly reflects the unavailability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                 // Completes the "always present" invariant documented in the README:
                 // every API response body includes health_probe_timeout.
@@ -3701,6 +3707,12 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic JSON parsers can rely on these fields being present everywhere.
+                // INVALID_FORMAT_ID fires before yt-dlp runs, so curl_cffi was never invoked —
+                // null/false correctly reflects the unavailability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                 // Completes the "always present" invariant documented in the README:
                 // every API response body includes health_probe_timeout.
