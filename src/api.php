@@ -8227,6 +8227,13 @@ switch ($action) {
                     // documented in the README: every API response body includes x_info_timeout
                     // and x_download_timeout. Consistent with all other error responses.
                     'ffprobe_ok' => false,
+                    // ffmpeg_ok: mirrors the same field present on all other API responses
+                    // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                    // DOWNLOAD_CANCELLED fires after ffprobe ran (producing an empty file),
+                    // so ffmpeg is confirmed available. Completes the "always present"
+                    // invariant documented in the README: every API response body includes
+                    // ffmpeg_ok alongside ffprobe_ok, yt_dlp_ok, and curl_cffi_ok.
+                    'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     // ffmpeg_version: mirrors the same field in action=check and action=health.
