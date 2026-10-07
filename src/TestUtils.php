@@ -323,3 +323,35 @@ function resolvePlaylistFlag($playlist_get) {
     }
     return ['--no-playlist'];
 }
+
+/**
+ * Adapter: call classifyYtdlpError and adapt its api.php return format
+ * to the parseFormats() test format.
+ *
+ * api.php classifyYtdlpError returns:
+ *   ['code' => string, 'msg' => string, 'status' => int, ...]
+ *
+ * parseFormats() error format (test-compatible):
+ *   ['error' => string, 'error_code' => string, 'formats' => array, ...]
+ *
+ * This adapter is a temporary shim while parse_formats_test.php transitions
+ * from an inline classifyYtdlpError copy to the canonical TestUtils.php version.
+ * When all classifyYtdlpError callers in api.php use the same return shape
+ * as parseFormats() (i.e. 'error'/'error_code' keys), this adapter can be removed
+ * and parse_formats_test.php can call classifyYtdlpError directly.
+ *
+ * @param string       $err_msg        Raw yt-dlp error text
+ * @param string|null  &$raw_error_out  Output: raw error text (set to $err_msg)
+ * @return array|null  Test-format error array, or null if unclassified
+ */
+function classifyYtdlpErrorAdapter($err_msg, &$raw_error_out = null) {
+    $raw_error_out = $err_msg;
+    $result = classifyYtdlpError($err_msg);
+    if ($result === null) return null;
+    // Adapt api.php format to test format
+    return [
+        'error' => $result['msg'] ?? $err_msg,
+        'error_code' => $result['code'] ?? 'YTDLP_ERROR',
+        'formats' => $result['formats'] ?? [],
+    ];
+}
