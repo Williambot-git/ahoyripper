@@ -4071,6 +4071,29 @@ switch ($action) {
         // header placement in the 'check' (line ~6287) and 'health' (line ~6715)
         // action blocks, which both set Content-Type immediately after opening.
         header('Content-Type: application/json; charset=utf-8');
+        // X-Info-Timeout: server-side info timeout. Set early here (before any
+        // code path that could exit) so the header is always present on info responses
+        // — including error responses (MISSING_URL, INVALID_API_KEY, etc.) that bypass
+        // the normal header-setting sequence. Clients can always read this for retry
+        // logic without null-checking.
+        header('X-Info-Timeout: ' . INFO_TIMEOUT);
+        // X-Download-Timeout: present on all API responses for consistent client
+        // retry logic regardless of action type.
+        header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
+        // X-FFProbe-Timeout: always 'skipped' on info responses since ffprobe only
+        // runs after a download. Adding it here completes the "always present" invariant
+        // documented in the README for all API response headers.
+        header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+        // X-FFProbe-Status: always 'skipped' on info responses since ffprobe never
+        // runs before a download. Adding it completes the "always present" header
+        // invariant alongside X-FFProbe-Timeout.
+        header('X-FFProbe-Status: skipped');
+        // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+        // probe. Mirrors health_probe_timeout in the JSON body. Present on every API
+        // response (check, health, info, download, analytics, client-error) per the
+        // README invariant — set unconditionally here so the header is present even
+        // when probe=1 is absent, consistent with X-Info-Timeout and X-Download-Timeout.
+        header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
         // X-Server-Time: wire-level clock metadata — mirrors the same headers set in
         // the 'check' (line ~6292) and 'health' (line ~6727) action blocks.
         header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
