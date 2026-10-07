@@ -1531,8 +1531,11 @@ if (in_array($action, $internal_actions, true)) {
         exit;
     }
 
-    // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers. and returns a spurious status:ok from
-    // the wrong handler, confusing API clients that expect no body from client-error.
+    // Fallback for non-FPM SAPIs (CLI, etc.) — manually set required headers
+    // to prevent the PHP-FPM fastcgi_finish_request() path above from sending an
+    // incomplete response. Without these, the FPM path would exit early and return
+    // a spurious status:ok from the wrong handler, confusing API clients that expect
+    // no body from client-error.
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
