@@ -5607,9 +5607,11 @@ switch ($action) {
                 'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
                 'hint' => 'An unexpected error occurred while parsing formats. If the problem persists, please report it with your request_id.',
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
-                // curl_cffi_ok: mirrors the same field present on all other API responses.
-                // Completes the "always present" invariant documented in README: every API
-                // response body includes curl_cffi_ok.
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic JSON parsers can rely on these fields being present everywhere.
+                // parseFormats errors fire before yt-dlp runs, so curl_cffi was never invoked —
+                // null/false correctly reflects the unavailability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // ffprobe_ok: mirrors the same field present on all other API responses.
                 // Completes the "always present" invariant documented in README: every API
