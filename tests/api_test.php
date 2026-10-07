@@ -37,6 +37,15 @@ define('MAX_FILENAME_LEN', 80);
 // Duplicated here for the X-Info-Timeout header constant-guard tests.
 define('INFO_TIMEOUT', 45);
 
+// DOWNLOAD_TIMEOUT: max duration for download action in seconds (mirrors api.php).
+define('DOWNLOAD_TIMEOUT', 3600);
+
+// FFPROBE_TIMEOUT: max duration for ffprobe verification in seconds (mirrors api.php).
+define('FFPROBE_TIMEOUT', 10);
+
+// HEALTH_PROBE_TIMEOUT: max duration for health probe in seconds (mirrors api.php).
+define('HEALTH_PROBE_TIMEOUT', 15);
+
 // UPGRADE_URL: URL for rate-limit and quota-exceeded upsell messaging.
 // Mirrors api.php UPGRADE_URL constant. Defined here so that inline
 // classifyYtdlpError() uses a real value (not undefined constant).
@@ -274,27 +283,47 @@ test('rejects hostname exceeding RFC 1035 limit (253 chars)',
 echo "\n==> Testing INVALID_API_KEY 401 response structure\n";
 
 // The INVALID_API_KEY response is a JSON object with these required fields.
-// This mirrors the exact structure returned by api.php at lines 2619-2666.
+// This mirrors the exact structure returned by api.php at lines 4397-4460.
 define('AHOY_UNLIMITED_KEY_TEST', 'RIPPER2026DEV'); // mirrors api.php AHOY_UNLIMITED_KEY
 
 // A valid key grants unlimited quota; an invalid key returns 401 with these fields.
+// Fields added incrementally to match the always-present invariant documented in README:
+// yt_dlp_ok, ffprobe_version, ffmpeg_version, ffmpeg_ok, server_time, server_time_unix,
+// x_info_timeout, x_download_timeout, x_ffprobe_timeout, x_ffprobe_status.
 $invalid_key_response = [
     'error' => 'Invalid API key.',
     'error_code' => 'INVALID_API_KEY',
     'action' => 'info',
-    'upgrade_url' => UPGRADE_URL,
+    'hint' => 'Provide a valid AhoyVPN unlimited API key via the "key" query parameter.',
     'retry_after' => 0,
     'request_id' => 'test-request-id',
+    'report_url' => 'https://github.com/Williambot-git/ahoyripper/issues?request_id=test-request-id',
     'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     'source_url_missing' => false,
-    // format_id_missing: false — URL was provided, format_id was not yet relevant
+    'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    'upgrade_url' => UPGRADE_URL,
+    'platform' => null,
     'format_id_missing' => false,
     'yt_dlp_version' => null,
+    'yt_dlp_ok' => false,
+    'ffprobe_version' => null,
+    'ffmpeg_version' => null,
+    'ffmpeg_ok' => false,
     'api_version' => AHOYRIPPER_VERSION,
+    'server_time' => '2026-01-01T00:00:00+00:00',
+    'server_time_unix' => 1735689600,
+    'x_info_timeout' => INFO_TIMEOUT,
+    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+    'curl_cffi_version' => null,
+    'curl_cffi_ok' => false,
+    'x_ffprobe_status' => 'skipped',
     'quota_remaining' => -1,
     'quota_limit' => -1,
     'quota_reset' => -1,
     'quota_reset_unix' => -1,
+    'ffprobe_ok' => false,
+    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
 ];
 
 // HTTP status must be 401 (Unauthorized) — distinct from 403 Forbidden.

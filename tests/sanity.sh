@@ -2399,9 +2399,12 @@ echo "==> Checking INVALID_API_KEY response includes health_probe_timeout (alway
 # We only need to verify at least one exists with health_probe_timeout — use the first match.
 ANCHOR_LINE=$(grep -n "Bearer.*header.*Generate" src/api.php | head -1 | cut -d: -f1)
 # From the anchor, search backward 50 lines to reach the start of the json_encode block
-# (the 'echo json_encode([' line), then search forward 60 lines to the closing ']);'
+# (the 'echo json_encode([' line), then search forward 90 lines to the closing ']);'.
+# 90 lines accommodates the ~65-line INVALID_API_KEY JSON body (grew from ~47 lines after
+# adding yt_dlp_ok, ffprobe_version, ffmpeg_version, ffmpeg_ok, x_info_timeout,
+# x_download_timeout, x_ffprobe_timeout fields to complete the always-present invariant).
 BLOCK_START=$(( ANCHOR_LINE > 50 ? ANCHOR_LINE - 50 : 1 ))
-BLOCK_END=$(( ANCHOR_LINE + 60 ))
+BLOCK_END=$(( ANCHOR_LINE + 90 ))
 INVALID_API_KEY_BLOCK=$(sed -n "${BLOCK_START},${BLOCK_END}p" src/api.php)
 if echo "$INVALID_API_KEY_BLOCK" | grep -q "health_probe_timeout"; then
     echo "  ✓ INVALID_API_KEY response includes health_probe_timeout"

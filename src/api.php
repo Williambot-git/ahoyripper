@@ -4420,9 +4420,35 @@ switch ($action) {
                 // METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, and UNKNOWN_ACTION responses.
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors curl_cffi_ok — always present so consumers don't
+                // need to special-case error responses vs. success responses.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // ffprobe_version: mirrors the field in action=check and action=health so
+                // generic consumers can always read it without special-casing INVALID_API_KEY.
+                // ffprobe is never invoked in the INVALID_API_KEY path (yt-dlp has not run yet).
+                // Completes the "always present" invariant documented in the README.
+                'ffprobe_version' => null,
+                // ffmpeg_version: mirrors the field in action=check and action=health so
+                // generic consumers can always read it without special-casing INVALID_API_KEY.
+                // ffprobe is never invoked in the INVALID_API_KEY path (yt-dlp has not run yet).
+                // Completes the "always present" invariant documented in the README.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the field in action=check and action=health so generic
+                // consumers can always read it without special-casing INVALID_API_KEY.
+                // Completes the "always present" invariant documented in the README.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                // Completes the "always present" invariant documented in the README: every
+                // API response body includes x_info_timeout and x_download_timeout.
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — ffprobe
+                // is never invoked in the INVALID_API_KEY path (yt-dlp has not run yet).
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // generic JSON parsers can rely on these fields being present everywhere.
                 // yt-dlp has not run yet in the INVALID_API_KEY path, so curl_cffi was
