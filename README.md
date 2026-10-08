@@ -972,7 +972,7 @@ POST /src/api.php?action=analytics     # Plausible analytics proxy (browser → 
 }
 ```
 
-`action=health&probe=1` runs a live yt-dlp connectivity probe — it calls yt-dlp with `--dump-json` on `{HEALTH_PROBE_VIDEO_ID}` (default: `dQw4w9WgXcQ`) and returns the result, confirming end-to-end reachability to upstream platforms. Probe results are cached for `PROBE_CACHE_TTL` seconds (default 300s) to avoid hammering YouTube on every health check. See the [Analytics](#analytics) section for full details on the privacy-preserving event proxy.
+`action=health&probe=1` runs a live yt-dlp connectivity probe — it calls yt-dlp with `--dump-json` on `HEALTH_PROBE_VIDEO_ID` (default: `dQw4w9WgXcQ` — Rick Astley's "Never Gonna Give You Up") and returns the result, confirming end-to-end reachability to upstream platforms. Probe results are cached for `PROBE_CACHE_TTL` seconds (default 300s) to avoid hammering YouTube on every health check. Override the video ID via the `HEALTH_PROBE_VIDEO_ID` env var (e.g. to a locally available stable video). See the [Analytics](#analytics) section for full details on the privacy-preserving event proxy.
 
 `action=csp-report` receives browser CSP violation reports forwarded by nginx's `report-uri` directive. No authentication is required — nginx rate-limits these at the network layer. Useful for monitoring CSP policy effectiveness in production deployments.
 
