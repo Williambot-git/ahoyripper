@@ -1167,6 +1167,15 @@ if (in_array($action, $internal_actions, true)) {
                 // ffmpeg_ok: mirrors the same field present on all other API responses
                 // so monitoring scripts can confirm ffmpeg availability from any endpoint.
                 'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                // generic consumers can always read these fields without special-casing
+                // the csp-report action. Mirrors the same fields in check and health.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffprobe_ok: mirrors the same field present on all other API responses so
+                // generic consumers can always read it without special-casing csp-report.
+                // ffprobe is never invoked for csp-report (no file involved) so value is false.
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // report_url: included on all error responses so clients can always link
                 // directly to the GitHub issue tracker with request_id pre-filled.
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
