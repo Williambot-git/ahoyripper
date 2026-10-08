@@ -2355,6 +2355,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // Present on all other API responses — this block was missing these fields.
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header. ffprobe is never
+            // invoked in the PARSE_ERROR path (yt-dlp ran but parseFormats returned null).
+            // Completes the "always present" invariant documented in the README: every API
+            // response body includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ];
     }
     // yt-dlp outputs newline-delimited JSON when --yes-playlist is used (playlist=1),
@@ -2606,6 +2611,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header. ffprobe is never
+            // invoked in the PARSE_ERROR path (yt-dlp ran but parseFormats returned null).
+            // Completes the "always present" invariant documented in the README: every API
+            // response body includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ];
     }
 
@@ -2658,6 +2668,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'x_download_timeout' => DOWNLOAD_TIMEOUT,
             'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
             'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
+            // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header. ffprobe is never
+            // invoked in the PARSE_ERROR path (yt-dlp ran but parseFormats returned null).
+            // Completes the "always present" invariant documented in the README: every API
+            // response body includes x_ffprobe_status.
+            'x_ffprobe_status' => 'skipped',
         ];
     }
 
