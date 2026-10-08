@@ -7916,10 +7916,17 @@ switch ($action) {
                     // same fields in the no-stream exit path and all other API responses.
                     'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                     'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                     'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                    // action=health&probe=1. Included here so API consumers can always read
+                    // this value from any response without null-checking, completing the
+                    // "always present" invariant documented in the README.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                     // quota_remaining/quota_limit/quota_reset: file was verified as corrupt/unverifiable,
                     // quota was refunded above. Unlimited-key holders ($unlimited=true) were never
                     // incremented, so quota fields use -1 sentinel values.
