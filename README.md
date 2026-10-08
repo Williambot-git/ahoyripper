@@ -1172,7 +1172,7 @@ On `info` and `download` responses (non-unlimited), additional daily quota heade
 - `X-DailyLimit-Limit` — daily rip limit (default 5, unlimited-key holders see `-1`)
 - `X-DailyLimit-Remaining` — rips left in the current day (`-1` for unlimited-key holders)
 - `X-DailyLimit-Reset` — Unix timestamp of the next daily reset (midnight UTC)
-- `X-DailyLimit-Window` — always `daily` (unlimited-key holders see `unlimited`)
+- `X-DailyLimit-Window` — reset window in seconds (`86400`, unlimited-key holders see `unlimited`)
 
 ### Security Headers
 
