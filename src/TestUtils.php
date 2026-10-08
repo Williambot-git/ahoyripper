@@ -26,6 +26,27 @@ if (!defined('UPGRADE_URL')) {
     define('UPGRADE_URL', 'https://ahoyvpn.com');
 }
 
+// REPORT_URL fallback: mirrors the constant from src/api.php.
+// Used only by classifyYtdlpError() in TestUtils.php for DISALLOWED_CONTENT responses.
+if (!defined('REPORT_URL')) {
+    define('REPORT_URL', 'https://ahoyvpn.com/contact');
+}
+
+// Timeout constants: used by classifyYtdlpError() for DISALLOWED_CONTENT responses.
+// Mirror the canonical constants from src/api.php.
+if (!defined('INFO_TIMEOUT')) {
+    define('INFO_TIMEOUT', 45);
+}
+if (!defined('DOWNLOAD_TIMEOUT')) {
+    define('DOWNLOAD_TIMEOUT', 3600);
+}
+if (!defined('FFPROBE_TIMEOUT')) {
+    define('FFPROBE_TIMEOUT', 10);
+}
+if (!defined('HEALTH_PROBE_TIMEOUT')) {
+    define('HEALTH_PROBE_TIMEOUT', 5);
+}
+
 /**
  * Sanitize a value for JSON output.
  * @param mixed $s

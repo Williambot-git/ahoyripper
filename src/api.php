@@ -2537,10 +2537,29 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             'upgrade_url' => UPGRADE_URL,
             'hint' => null,
             'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
-            // server_time: ISO 8601 + Unix for client clock synchronization.
-            // Present on all other API responses — this block was missing these fields.
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
+            // yt_dlp_version / yt_dlp_ok: binary version and availability flag.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffmpeg_version / ffmpeg_ok / ffprobe_version / ffprobe_ok: same suite.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // curl_cffi_version / curl_cffi_ok: curl_cffi library availability.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // x_info_timeout / x_download_timeout / x_ffprobe_timeout / health_probe_timeout:
+            // timeout field mirrors. Completes the "always present" invariant documented
+            // in the README for every API response body field.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
         ];
     }
 
@@ -2570,10 +2589,29 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             // remediation guidance beyond retrying or trying a different URL.
             'hint' => null,
             'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
-            // server_time: ISO 8601 + Unix for client clock synchronization.
-            // Present on all other API responses — this block was missing these fields.
             'server_time' => gmdate('c'),
             'server_time_unix' => time(),
+            // yt_dlp_version / yt_dlp_ok: binary version and availability flag.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+            // ffmpeg_version / ffmpeg_ok / ffprobe_version / ffprobe_ok: same suite.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+            // curl_cffi_version / curl_cffi_ok: curl_cffi library availability.
+            // Completes the "always present" invariant for PARSE_ERROR responses.
+            'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+            'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+            // x_info_timeout / x_download_timeout / x_ffprobe_timeout / health_probe_timeout:
+            // timeout field mirrors. Completes the "always present" invariant documented
+            // in the README for every API response body field.
+            'x_info_timeout' => INFO_TIMEOUT,
+            'x_download_timeout' => DOWNLOAD_TIMEOUT,
+            'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+            'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
         ];
     }
 
