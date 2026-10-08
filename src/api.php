@@ -6530,7 +6530,7 @@ switch ($action) {
             // --no-progress: suppress all progress output. yt-dlp emits progress
             // template noise to stderr that can corrupt downstream parsing in PHP.
             // --no-progress is the correct modern flag (consistent with info action
-            // at line 3929 and health probe at line 7668).
+            // at line 4951 and health probe at line 9378).
             '--no-progress',
             // --progress-template "": suppress all progress output and the 90-day
             // self-update warning from stderr. yt-dlp emits progress template noise
