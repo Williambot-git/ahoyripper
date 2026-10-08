@@ -788,6 +788,7 @@ if ($is_rate_limited) {
             // X-Info-Timeout: consistent with all other info-action error responses.
             // Clients can use this to set appropriate fetch timeouts on retry.
             header('X-Info-Timeout: ' . INFO_TIMEOUT);
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             $rate_quota_limit = getDailyQuotaLimit();
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
             echo json_encode([
