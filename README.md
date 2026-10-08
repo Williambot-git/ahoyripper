@@ -68,7 +68,8 @@ All API calls require either a `Referer: https://ahoyripper.com` header (browser
 ### Get video info and format list
 
 ```bash
-curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ" \
+# Default sort (by height/quality); use &sort=tbr, &sort=filesize, or &sort=audio_quality
+curl -s -X GET "https://ahoyripper.com/src/api.php?action=info&url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&sort=height" \
   -H "Referer: https://ahoyripper.com/" | python3 -m json.tool
 ```
 
