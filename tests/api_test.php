@@ -438,6 +438,7 @@ test('AHOY_IMPERSONATE constant defaults to chrome',
 
 function classifyYtdlpError($raw_err, $exit_code = null) {
     $err_lower = strtolower($raw_err);
+    $_report_url = 'https://github.com/Williambot-git/ahoyripper/issues?request_id=test-request-id';
     if (preg_match('/geo.*restriction|this video is available in|geo.?restricted(?!.)/i', $err_lower)) {
 return ['code' => 'GEOBLOCKED', 'msg' => 'This video is geo-restricted and not available in your region.', 'upgrade_url' => UPGRADE_URL, 'status' => 451];
     }
