@@ -2450,6 +2450,46 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                     'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
+                    // yt_dlp_version: version of the yt-dlp binary. Included on all API
+                    // responses so monitoring scripts can track the binary version without
+                    // special-casing the classified error path.
+                    'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                    // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                    // Completes the "always present" invariant: every API response includes
+                    // yt_dlp_ok alongside yt_dlp_version.
+                    'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                    // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                    // API responses so monitoring scripts can track the binary version without
+                    // special-casing the classified error path.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffmpeg_ok: true when ffmpeg/ffprobe binary is installed and callable.
+                    // Completes the "always present" invariant alongside yt_dlp_ok and ffprobe_ok.
+                    'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // ffprobe_version mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // ffprobe only runs after a successful download; this block represents a
+                    // classified yt-dlp error, so ffprobe was never reached. Included to
+                    // complete the "always present" invariant — every API response includes ffprobe_ok.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing
+                    // the classified error path.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                    // x_info_timeout / x_download_timeout: mirror the HTTP headers set above.
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes these fields.
+                    'x_info_timeout' => INFO_TIMEOUT,
+                    'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    // x_ffprobe_timeout: mirrors the X-FFProbe-Timeout HTTP header — skipped
+                    // since ffprobe only runs after a download completes. Including it
+                    // completes the "always present" invariant documented in the README.
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
+                    // Completes the "always present" invariant documented in the README:
+                    // every API response body includes health_probe_timeout.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
