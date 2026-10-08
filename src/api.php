@@ -4947,8 +4947,7 @@ switch ($action) {
         $ytdlp_cmd = array_merge($ytdlp_cmd, [
             // --no-progress: suppress all progress output. yt-dlp emits progress
             // template noise even during --skip-download which would prepend garbage
-            // to stderr and corrupt json_decode on stdout. --no-progress is the
-            // correct modern flag (consistent with the health probe at line 5942).
+            // to stderr and corrupt json_decode on stdout.
             '--no-progress',
             '--socket-timeout', (string)$socket_timeout,
             '--retries', '3',
