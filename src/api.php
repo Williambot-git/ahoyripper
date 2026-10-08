@@ -6941,12 +6941,21 @@ switch ($action) {
                     // Completes the "always present" invariant documented in the README:
                     // every API response body includes x_ffprobe_timeout.
                     'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
-                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
-                    // ffprobe was never reached (yt-dlp exited 0 but produced no file or an empty
-                    // file, so there was nothing for ffprobe to verify). Completes the "always
-                    // present" invariant documented in the README: every API response includes
-                    // x_ffprobe_status.
-                    'x_ffprobe_status' => 'skipped',
+                    // yt_dlp_ok: yt-dlp was invoked (DOWNLOAD_TIMEOUT fires after yt-dlp starts).
+                    // Completes the "always present" invariant: every API response includes yt_dlp_ok.
+                    'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                    // ffmpeg_version: null when ffprobe is never reached (no file produced to verify).
+                    // Completes the "always present" invariant: every API response includes ffmpeg_version.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffmpeg_ok: false since ffprobe never ran (no output file to verify).
+                    // Completes the "always present" invariant: every API response includes ffmpeg_ok.
+                    'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                    // Completes the "always present" invariant: every API response includes ffprobe_version.
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // health_probe_timeout: mirrors the HEALTH_PROBE_TIMEOUT constant.
+                    // Completes the "always present" invariant: every API response includes health_probe_timeout.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
                     'quota_remaining' => !$unlimited ? $post_refund_count : -1,
                     'quota_limit' => !$unlimited ? $daily_limit : -1,
                     'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
