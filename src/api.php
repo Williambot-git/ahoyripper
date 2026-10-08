@@ -10151,6 +10151,17 @@ switch ($action) {
                 'server_time_unix' => time(),
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // curl_cffi_version: curl_cffi library version for HTTP requests.
+                // Included on all API responses so monitoring scripts can always
+                // confirm curl_cffi availability from any endpoint.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
+                // API responses so generic consumers can always read this field without
+                // special-casing the analytics 405 response.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                // ffmpeg_ok: mirrors the same field present on all other API responses
+                // so monitoring scripts can confirm ffmpeg availability from any endpoint.
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                 // x_info_timeout / x_download_timeout: mirror the HTTP headers set above
                 // (lines 7972-7973). Adding them to the body lets API consumers read
                 // these values without parsing HTTP headers — consistent with the check
