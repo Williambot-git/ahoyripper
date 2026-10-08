@@ -42,9 +42,15 @@ header('X-Robots-Tag: noindex, noai, noimage, noydir');
 // Relevant if content type is ever misdetected as an attachment; harmless for XML.
 header('X-Download-Options: noopen');
 header_remove('X-Powered-By');
-// Generate a request correlation ID — mirrors the X-Request-ID added by api.php
-// so nginx access log, PHP error log, and client-side events can be correlated.
-$page_request_id = bin2hex(random_bytes(8));
+// Request correlation ID — mirrors the X-Request-ID handling in api.php.
+// If the caller forwarded their own ID (e.g. from the SPA's PAGE_REQUEST_ID),
+// reuse it so nginx access log, PHP error log, and client-side events can
+// all be correlated to the same causal request chain. If none was provided,
+// generate a fresh ID. Use isset()+strlen cap instead of ?: to distinguish
+// an empty string (from a client-supplied header) from an absent header.
+$page_request_id = (isset($_SERVER['HTTP_X_REQUEST_ID']) && strlen($_SERVER['HTTP_X_REQUEST_ID']) <= 64)
+    ? $_SERVER['HTTP_X_REQUEST_ID']
+    : bin2hex(random_bytes(8));
 header('X-Request-ID: ' . $page_request_id);
 
 $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
