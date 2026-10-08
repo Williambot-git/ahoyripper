@@ -7090,6 +7090,13 @@ switch ($action) {
                     // yt_dlp_ok: true when yt-dlp binary is installed and callable.
                     // Completes the "always present" invariant alongside yt_dlp_version.
                     'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                    // ffprobe_version mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffprobe_ok: mirrors whether ffprobe is installed and callable.
+                    // ffprobe only runs after a successful download; this block represents a
+                    // classified yt-dlp error, so ffprobe was never reached. Included to
+                    // complete the "always present" invariant — every API response includes ffprobe_ok.
+                    'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
                     // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                     // Completes the "always present" invariant documented in the README:
                     // every API response body includes health_probe_timeout. Consistent
