@@ -477,14 +477,19 @@ ahoyripper/
 │   ├── health-check.sh          # Deployment health verification script
 │   └── generate-sw-version.php  # PWA SW cache version generator
 ├── tests/
-│   ├── run.sh                        # Unified test runner (runs all suites)
-│   ├── sanity.sh                     # Shell-based sanity / regression checks
-│   ├── api_test.php                  # Unit tests for API action routing and URL validation
-│   ├── classify_ytdlp_error_test.php # Unit tests for yt-dlp error classification
-│   ├── clean_test.php                # Unit tests for the clean() sanitisation function
-│   ├── is_valid_url_test.php         # Unit tests for SSRF URL validation
-│   ├── parse_formats_test.php        # Unit tests for parseFormats()
-│   └── resolve_playlist_flag_test.php # Unit tests for resolvePlaylistFlag()
+│   ├── run.sh                           # Unified test runner (runs all suites)
+│   ├── sanity.sh                        # Shell-based sanity / regression checks
+│   ├── api_test.php                     # Unit tests for API action routing and URL validation
+│   ├── classify_ytdlp_error_test.php    # Unit tests for yt-dlp error classification
+│   ├── clean_test.php                   # Unit tests for the clean() sanitisation function
+│   ├── is_valid_url_test.php            # Unit tests for SSRF URL validation
+│   ├── parse_formats_test.php           # Unit tests for parseFormats()
+│   ├── resolve_playlist_flag_test.php    # Unit tests for resolvePlaylistFlag()
+│   ├── quota_timezone_test.php          # Unit tests for daily-quota UTC-midnight invariance
+│   ├── refund_quota_test.php            # Unit tests for download-quota refund logic
+│   ├── probe_age_seconds_test.php       # Unit tests for probe_age_seconds cache fix
+│   ├── validate_referer_param_test.php  # Unit tests for Referer header validation
+│   └── sanitize_filename_test.php       # Unit tests for filename sanitisation
 ├── .env.example                 # Environment variable template (Docker)
 ├── .dockerignore                # Docker build context exclusions
 ├── CHANGELOG.md                 # Project version history
