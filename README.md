@@ -753,11 +753,11 @@ The `abr` (audio bitrate, in kbps) is present on audio-only formats (`format_typ
 | `COPYRIGHT_REMOVED` | Content removed due to a copyright claim — this content cannot be redistributed | This content cannot be downloaded. `upgrade_url` included in response. |
 | `SOURCE_TIMEOUT` | The source site took too long to respond — some data was transferred but the source stalled (distinct from `CONNECTION_TIMEOUT` which fires when the TCP handshake stalls before any data is transferred) | Try a smaller format (audio-only is fastest) or try again when the site is less busy. `upgrade_url` included in response. |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
-| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
-| `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If the issue persists, the server's network route to the source may be degraded. `upgrade_url` included in response. |
-| `FILE_TOO_LARGE` | File exceeds the server's maximum size | Try audio-only or a lower resolution. `upgrade_url` included in response. |
-| `FORMAT_UNAVAILABLE` | That format is not available for this video | Choose another from the list. `upgrade_url` included in response. |
-| `DISALLOWED_CONTENT` | Content not available due to a terms of service violation | This content cannot be redistributed. `upgrade_url` included in response. |
+| `CONNECTION_FAILED` | Could not connect to the source — TCP handshake refused or errored. Distinct from `CONNECTION_TIMEOUT` (504) where the connection stalled waiting for a response. | Check your network and try again. If persistent, use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
+| `CONNECTION_TIMEOUT` | Connection timed out before the source responded. Distinct from `SOURCE_TIMEOUT` — this fires when the TCP handshake stalls (network-level), whereas `SOURCE_TIMEOUT` fires when yt-dlp receives data but the source takes too long. | Try again. If persistent, use AhoyVPN to change your exit IP and try again. `upgrade_url` included in response. |
+| `FILE_TOO_LARGE` | File exceeds the server's maximum size — the requested format is larger than the configured `MAX_FILESIZE` limit. | Try audio-only or a lower resolution. If you need larger files, use AhoyVPN for higher limits. `upgrade_url` included in response. |
+| `FORMAT_UNAVAILABLE` | The requested format is not available for this source — the source may not support the selected resolution/codec combination. | Try a different format (e.g. bestvideo[ext=mp4]+bestaudio or best). If the format you need is a premium feature, use AhoyVPN for access. `upgrade_url` included in response. |
+| `DISALLOWED_CONTENT` | The content is not allowed to be downloaded by yt-dlp — the source blocks automated access. | Try AhoyVPN to change your exit IP and try again. If persistent, AhoyVPN offers plans with higher limits. `upgrade_url` included in response. |
 | `YTDLP_ERROR` | General yt-dlp error (see `raw_error` field for detail) | Try another format from the list, or wait and try again. `report_url` included in response (file an issue if the error persists). |
 | `FILE_READ_ERROR` | Server-side error — the downloaded file could not be read even though it exists. This is a rare server-side issue. Try again or pick a different format. |
 | `DOWNLOAD_EMPTY` | The downloaded file was empty — the source returned no data (not your format choice). Try another format or wait and retry. Your quota was not charged. |
@@ -1475,8 +1475,8 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `SOURCE_RATE_LIMITED` | Source site is throttling requests | Wait a few minutes and try again. `upgrade_url` included in response. |
 | `SOURCE_TIMEOUT` | Source site took too long to respond — some data was transferred but the source stalled (distinct from `CONNECTION_TIMEOUT` which fires when the TCP handshake stalls before any data is transferred) | Try audio-only (fastest) or a lower resolution. `upgrade_url` included in response. |
 | `DOWNLOAD_TIMEOUT` | Download exceeded the server's per-request timeout (default 5 minutes; configurable). Try a smaller format or audio-only. |
-| `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution |
-| `FORMAT_UNAVAILABLE` | That format is not available for this video | Pick a different format from the list |
+| `FILE_TOO_LARGE` | File exceeds server's maximum size | Choose audio-only or a lower resolution. If you need larger files, use AhoyVPN for higher limits. |
+| `FORMAT_UNAVAILABLE` | That format is not available for this video — the source may not support this resolution/codec combination. | Pick a different format from the list. If the format you need is a premium feature, use AhoyVPN. |
 | `PARSE_ERROR` | Site returned an unrecognizable response | The site may be temporarily unavailable |
 | `RATE_LIMIT_EXCEEDED` | Too many requests (rate limit) | Wait ~60 seconds and retry, or get AhoyVPN for unlimited access |
 | `DAILY_LIMIT` | Daily free quota (5 rips) exhausted | Quota resets at midnight UTC. Get AhoyVPN for unlimited rips |
@@ -1492,14 +1492,14 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `PROC_OPEN_FAILED` | Server could not start the download process | The server may be restarting or overloaded — try again shortly. `report_url` included in response (file an issue if the error persists). |
 | `SERVICE_UNAVAILABLE` | Rate-limit or quota file could not be opened or locked | The server's quota system is temporarily unavailable — retry after 5 seconds (`retry_after` field in response). If persistent, the server may be overloaded or the quota storage may be inaccessible. |
 | `PROBE_FAILED` | The yt-dlp health probe failed — yt-dlp could not fetch the test video | Check `yt_dlp_version` and `ffmpeg_version` in the health response. Update yt-dlp (`pip install -U yt-dlp`) and ensure `curl_cffi` is installed. If the issue persists, the server's network route to YouTube may be blocked or degraded. |
-| `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | This content cannot be redistributed |
+| `DISALLOWED_CONTENT` | Content blocked due to a terms of service or legal violation | Try AhoyVPN to change your exit IP. If persistent, AhoyVPN offers plans with higher limits. |
 | `YTDLP_ERROR` | General yt-dlp error — the site may not be supported or yt-dlp timed out | Try another format, update yt-dlp (`pip install -U yt-dlp`), or try again shortly. `report_url` included in response (file an issue if the error persists). |
 | `CONFIG_ERROR` | Browser impersonation not available — `curl_cffi` library missing | Set `AHOY_IMPERSONATE=` (empty) in `.env` to disable, or install: `pip install curl_cffi` |
 | `SOURCE_NOT_FOUND` | Source returned HTTP 404 — content moved or deleted | Try another video. `upgrade_url` included in response. |
 | `SOURCE_HTTP_ERROR` | Source site returned HTTP 4xx/5xx | Try again shortly. `upgrade_url` included in response. |
 | `SSL_ERROR` | Secure connection to the source failed | Try again shortly. `upgrade_url` included in response. |
-| `CONNECTION_FAILED` | Could not connect to the source | Check your network and try again. `upgrade_url` included in response. |
-| `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, the server's route to the source platform may be degraded. `upgrade_url` included in response. |
+| `CONNECTION_FAILED` | Could not connect to the source — TCP handshake refused or errored before data transfer. Distinct from `CONNECTION_TIMEOUT` (504) where the connection stalled waiting for a response. | Check your network and try again. If persistent, use AhoyVPN to change your exit IP. `upgrade_url` included in response. |
+| `CONNECTION_TIMEOUT` | TCP handshake stalled before the source responded — network-level timeout (distinct from `SOURCE_TIMEOUT` which fires after data transfer begins) | Try again. If persistent, use AhoyVPN to change your exit IP and try again. `upgrade_url` included in response. |
 | `INVALID_FORMAT_ID` | Format ID rejected as invalid | Refresh to get a fresh format list, then pick a valid format |
 | `MISSING_FORMAT` | No format selected on download | Select a format from the list before downloading |
 | `MISSING_SORT` | No sort value provided | Use one of: `height`, `filesize`, `filesize_asc`, `tbr`, `quality`, `audio_quality` |
