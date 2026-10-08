@@ -9001,6 +9001,11 @@ switch ($action) {
             // API responses so generic consumers can always read this field without
             // special-casing the client-error 200 response.
             'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+            // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+            // Completes the "always present" invariant: every API response body includes
+            // ffprobe_version alongside ffmpeg_version. Mirrors the same field in the
+            // client-error 405 block, health action, check action, and all other responses.
+            'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
             'retry_after' => 0,
             'source_url' => null,
             'source_url_missing' => false,
