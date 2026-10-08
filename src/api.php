@@ -2512,16 +2512,52 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
             }
             // Always include 'formats' => [] so API consumers can always
             // access response.formats without checking if the key exists first.
+            // quota fields: same as classified path (quota already refunded above).
             return [
                 'error' => 'yt-dlp error: ' . $err_msg,
                 'error_code' => 'YTDLP_ERROR',
-                'upgrade_url' => UPGRADE_URL,
-                'raw_error' => $err_msg,
-                'formats' => [],
+                'action' => 'info',
+                'request_id' => $request_id,
+                'source_url' => $url,
+                'source_url_missing' => false,
+                'video_url' => $url,
+                'format_id_missing' => false,
+                'format_id' => null,
                 'platform' => $first_valid['extractor_key'] ?? null,
+                'formats' => [],
+                'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
+                'hint' => null,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
+                'api_version' => AHOYRIPPER_VERSION,
+                // yt_dlp_version / yt_dlp_ok: binary version and availability flag.
+                'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                // ffmpeg_version / ffmpeg_ok / ffprobe_version / ffprobe_ok: same suite.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // curl_cffi_version / curl_cffi_ok: curl_cffi library availability.
+                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // x_ffprobe_status: skipped since ffprobe only runs after a download.
+                // Completes the "always present" invariant documented in the README.
+                'x_ffprobe_status' => 'skipped',
+                'x_info_timeout' => INFO_TIMEOUT,
+                'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
+                // quota fields: same as classified path — quota was refunded above when
+                // this unclassified error block was reached (inside the if (!$out || $exit !== 0)
+                // block which already called refundQuota at line ~5291).
+                'quota_remaining' => !$unlimited ? max(0, $daily_limit - $daily_data['c']) : -1,
+                'quota_limit' => !$unlimited ? $daily_limit : -1,
+                'quota_reset' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c') : -1,
+                'quota_reset_unix' => !$unlimited ? (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp() : -1,
+                // raw_error: include the (already-truncated) error message for diagnostics.
+                'raw_error' => $err_msg,
             ];
         }
         // True JSON parse failure — return a structured PARSE_ERROR so the
