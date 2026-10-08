@@ -1281,7 +1281,7 @@ AhoyRipper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) under the hood. It su
 
 | Platform | Type | Notes |
 |----------|------|-------|
-| [YouTube](https://youtube.com) | Video + Audio | Largest platform |
+| [YouTube](https://youtube.com) | Video + Audio | Largest platform; includes YouTube Shorts |
 | [X/Twitter](https://x.com) | Video | |
 | [TikTok](https://tiktok.com) | Video + Audio | |
 | [SoundCloud](https://soundcloud.com) | Audio | |
