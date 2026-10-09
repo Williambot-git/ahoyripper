@@ -1131,6 +1131,21 @@ else
 fi
 
 echo ""
+echo "==> Checking twitter:image sub-properties (alt, dimensions) in public/index.php..."
+# twitter:image:alt provides a text alternative for screen readers and non-visual clients
+# per RFC 6947 §4.1 (text alternatives for images in social metadata).
+# twitter:image:width and twitter:image:height are recommended by the Twitter Cards spec
+# for accurate rendering without layout shift. Guard against regression.
+if grep -q 'twitter:image:alt' public/index.php \
+    && grep -q 'twitter:image:width.*content=' public/index.php \
+    && grep -q 'twitter:image:height.*content=' public/index.php; then
+    echo "  ✓ twitter:image:alt, twitter:image:width, twitter:image:height present"
+else
+    echo "  ✗ twitter:image sub-properties (alt/width/height) missing from index.php"
+    exit 1
+fi
+
+echo ""
 echo "==> Checking og-image.svg platform count consistency (1872+)... "
 # The og-image.svg <desc> and <text> element must both say "1872".
 # This was previously 1873 but was corrected when platform count was standardized to 1872+.
