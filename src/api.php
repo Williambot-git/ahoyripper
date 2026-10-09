@@ -9536,12 +9536,6 @@ switch ($action) {
                     // template noise even during --skip-download which would prepend garbage
                     // to stderr and corrupt json_decode on stdout.
                     '--no-progress',
-                    // -q 1: yt-dlp verbosity — suppresses all stderr output EXCEPT errors.
-                    // Unlike --quiet which also suppresses errors (making diagnosis impossible),
-                    // -q 1 keeps error messages visible while eliminating the self-update check
-                    // and other boilerplate that pollutes stderr during health probes.
-                    // Mirrors the ffprobe -v quiet pattern used in the download action.
-                    '-q', '1',
                     '--retries', '3',
                     // --extractor-retries: retry known extractor errors (rate limits, temporary
                     // 5xx) separately from generic --retries. Mirrors the info and download
