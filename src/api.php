@@ -8297,6 +8297,11 @@ switch ($action) {
             header('X-DailyLimit-Window: ' . (!$unlimited ? '86400' : 'unlimited'));
             $retry_delta = DOWNLOAD_TIMEOUT;
             header('Retry-After: ' . max(0, $retry_delta));
+            // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+            // probe. Mirrors health_probe_timeout in the JSON body. Set unconditionally
+            // on every download-action error response for structural consistency — clients
+            // can always find this header without null-checking.
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             echo json_encode([
                 'error' => 'Failed to read downloaded file.',
                 'error_code' => 'FILE_READ_ERROR',
