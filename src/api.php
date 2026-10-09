@@ -9994,6 +9994,10 @@ switch ($action) {
             // complete API surface parity — clients can always find both X-FFProbe-Timeout
             // and X-FFProbe-Status: skipped on every response.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // X-HealthProbe-Timeout: timeout for action=health&probe=1 yt-dlp connectivity
+            // probe. Included for complete timeout-header parity alongside X-Info-Timeout
+            // and X-Download-Timeout — all three are present on every API response path.
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
             header('X-DL-RateLimit-Remaining: -1');
