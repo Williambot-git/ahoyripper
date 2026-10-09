@@ -3610,13 +3610,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // present" invariant documented in the README: every API response body
                 // includes yt_dlp_ok.
                 'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
-                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL, check,
-                // and health so generic consumers can always read it without special-casing
-                // MISSING_FORMAT. yt-dlp/ffmpeg are not invoked in the MISSING_FORMAT path
-                // (format validation fires before yt-dlp runs). Completes the "always
-                // present" invariant documented in the README: every API response body
-                // includes ffmpeg_version.
-                'ffmpeg_version' => null,
+                // api_version: follows the "always present" invariant documented in
+                // the README: every API response body includes api_version.
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -3674,12 +3669,9 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
-                // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // generic JSON parsers can rely on these fields being present everywhere.
                 // MISSING_FORMAT fires before yt-dlp runs, so curl_cffi was never invoked —
                 // null/false correctly reflects the unavailability.
-                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
-                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                 // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                 // Completes the "always present" invariant documented in the README:
                 // every API response body includes health_probe_timeout.
@@ -3787,13 +3779,8 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // Completes the "always present" invariant documented in the README: every
                 // API response body includes yt_dlp_ok.
                 'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
-                // ffmpeg_version: mirrors the same field in MISSING_URL, INVALID_URL,
-                // MISSING_FORMAT, check, and health so generic consumers can always read it
-                // without special-casing INVALID_FORMAT_ID. yt-dlp/ffmpeg are not invoked in
-                // the INVALID_FORMAT_ID path (format validation fires before yt-dlp runs).
-                // Completes the "always present" invariant documented in the README: every
-                // API response body includes ffmpeg_version.
-                'ffmpeg_version' => null,
+                // api_version: follows the "always present" invariant documented in
+                // the README: every API response body includes api_version.
                 'api_version' => AHOYRIPPER_VERSION,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
@@ -3851,12 +3838,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
                 // has not run yet, no file exists). Completes the "always present" invariant
                 // documented in the README: every API response includes x_ffprobe_status.
                 'x_ffprobe_status' => 'skipped',
-                // curl_cffi_version and curl_cffi_ok: included on all API responses so
-                // generic JSON parsers can rely on these fields being present everywhere.
-                // INVALID_FORMAT_ID fires before yt-dlp runs, so curl_cffi was never invoked —
-                // null/false correctly reflects the unavailability.
-                'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
-                'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+
                 // health_probe_timeout: mirrors the X-HealthProbe-Timeout HTTP header.
                 // Completes the "always present" invariant documented in the README:
                 // every API response body includes health_probe_timeout.
@@ -10280,9 +10262,6 @@ switch ($action) {
                 'quota_limit' => -1,
                 'quota_reset' => -1,
                 'quota_reset_unix' => -1,
-                // request_id: present on all API responses for correlation/debugging.
-                // Mirrors the X-Request-ID HTTP header set above (line 7207).
-                'request_id' => $request_id,
                 // curl_cffi_ok: mirrors the field in action=check and action=health so
                 // monitoring scripts can confirm curl_cffi availability from any endpoint.
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
@@ -10292,9 +10271,6 @@ switch ($action) {
                 // ffprobe_ok: mirrors the field in action=check and action=health so
                 // monitoring scripts can confirm ffprobe availability from any endpoint.
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
-                // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
-                // action=health&probe=1. Completes the "always present" invariant documented in the README.
-                'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
             ], JSON_INVALID_UTF8_SUBSTITUTE);
             break;
         }
