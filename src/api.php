@@ -1444,6 +1444,11 @@ if (in_array($action, $internal_actions, true)) {
                 // generic consumers can always read it without special-casing the client-error
                 // action. ffprobe is never invoked for client-error (no file involved).
                 'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+                // Included on all API responses so monitoring scripts can track ffprobe binary
+                // version without special-casing the client-error response. Consistent with
+                // yt_dlp_version present in this block alongside yt_dlp_ok.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 // yt_dlp_ok: mirrors the same field present on all other API responses so
                 // generic consumers can always read it without special-casing client-error.
                 // yt-dlp is never invoked for client-error (no rip action involved).
