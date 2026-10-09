@@ -4073,6 +4073,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         // across all API response surfaces. API consumers can confirm ffprobe availability
         // from any endpoint without special-casing the METHOD_NOT_ALLOWED response.
         'ffprobe_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+        // ffmpeg_version: mirrors the same field in all other API responses so
+        // generic consumers can always read it without special-casing METHOD_NOT_ALLOWED.
+        // ffprobe/yt-dlp are never invoked in the METHOD_NOT_ALLOWED path (HTTP method
+        // fires before URL validation). Completes the "always present" invariant documented
+        // in the README: every API response body includes ffmpeg_version.
+        'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+        // ffmpeg_ok: mirrors the same field present on all other API responses so
+        // generic consumers can always read it without special-casing METHOD_NOT_ALLOWED.
+        // Completes the "always present" invariant alongside yt_dlp_ok and ffprobe_ok.
+        'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+        // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
+        // Completes the "always present" invariant: every API response body includes
+        // ffprobe_version alongside ffmpeg_version. Mirrors the same field in
+        // action=health and action=check.
+        'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+        // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+        // action=health&probe=1. Completes the "always present" invariant documented
+        // in the README: every API response body includes health_probe_timeout.
+        'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
     ],
     JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
