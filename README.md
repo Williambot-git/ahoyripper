@@ -678,7 +678,7 @@ The `source_url` field in the info response is the exact URL that was ripped —
 }
 ```
 
-> **Note:** `api_version` appears on `action=check`, `action=info`, `action=download`, and `action=health` responses — consistent across all endpoints so API consumers always have the version.
+> **Note:** `api_version` appears on every API response (`action=check`, `action=info`, `action=download`, `action=health`, `action=progress`, `action=analytics`, `action=client-error`, `action=csp-report`, and `UNKNOWN_ACTION`) — consistent across all endpoints so API consumers always have the version.
 
 ### Info Response Headers
 
