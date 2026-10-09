@@ -5114,14 +5114,12 @@ switch ($action) {
             // A platform-specific referer (e.g. youtube.com) can improve extraction success
             // for platforms that validate the referer header. validateRefererParam() returns
             // a safe fallback when the provided origin is not in $allowed_origins.
-            '--referer', validateRefererParam($_GET['referer'] ?? ''),
-            '--user-agent', AHOY_USER_AGENT,
         ]);
         // Build the final flag block before the URL separator (--).
         // All flags must appear BEFORE the URL (--); yt-dlp rejects flags placed
-        // after the URL separator. Consolidating --impersonate, --cookies, and
-        // --add-header into a single array_merge ensures correct flag ordering
-        // (mirrors the download action pattern at line ~5481).
+        // after the URL separator. Consolidating --impersonate, --cookies,
+        // --user-agent, --referer, and --add-header into a single array_merge
+        // ensures correct flag ordering (mirrors the download action pattern).
         $final_flags = [];
         if (AHOY_IMPERSONATE !== '') {
             $final_flags[] = '--impersonate';
@@ -5132,6 +5130,8 @@ switch ($action) {
             $final_flags[] = COOKIES_PATH;
         }
         $final_flags = array_merge($final_flags, [
+            '--referer', validateRefererParam($_GET['referer'] ?? ''),
+            '--user-agent', AHOY_USER_AGENT,
             '--add-header', 'Accept-Language: en-US',
             '--',
             $url,
