@@ -2505,6 +2505,11 @@ function parseFormats($json_str, &$raw_error_out = null, $sort = 'height', $exit
                     // Completes the "always present" invariant documented in the README:
                     // every API response body includes health_probe_timeout.
                     'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
+                    // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header. ffprobe is never
+                    // invoked in the classified error path (yt-dlp error means no download completed).
+                    // Completes the "always present" invariant documented in the README: every API
+                    // response body includes x_ffprobe_status.
+                    'x_ffprobe_status' => 'skipped',
                 ];
             }
             // Unclassified yt-dlp error: use truncated version for the user-facing
