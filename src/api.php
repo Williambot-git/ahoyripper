@@ -9996,8 +9996,12 @@ switch ($action) {
             // only runs after a download completes. Adding it completes the "always present"
             // invariant alongside X-FFProbe-Timeout — clients can always find both headers.
             header('X-FFProbe-Status: skipped');
-            // X-FFProbe-Timeout: always 'skipped' on csp-report responses since ffprobe
-            // only runs after a download completes. Adding it for consistent header coverage.
+            // X-FFProbe-Timeout: timeout value for ffprobe post-download verification.
+            // Set to the configured FFPROBE_TIMEOUT on all API responses so clients can
+            // always find this header without null-checking. ffprobe itself is never
+            // invoked for csp-report (no file on disk) but the header is present for
+            // complete API surface parity — clients can always find both X-FFProbe-Timeout
+            // and X-FFProbe-Status: skipped on every response.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             // X-DL-RateLimit-*: download-specific rate limit (not applicable here, so -1).
             header('X-DL-RateLimit-Limit: -1');
