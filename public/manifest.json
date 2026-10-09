@@ -58,10 +58,10 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshot-ui.png",
-      "sizes": "1280x720",
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "label": "AhoyRipper format selection interface showing available video and audio formats"
+      "label": "AhoyRipper app icon"
     }
   ],
   "icons": [
