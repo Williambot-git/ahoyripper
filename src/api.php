@@ -5611,6 +5611,7 @@ switch ($action) {
                 'FILE_TOO_LARGE' => 413,
                 'MISSING_REFERER' => 403,
                 'INVALID_ORIGIN' => 403,
+                'METHOD_NOT_ALLOWED' => 405,
                 'FORMAT_UNAVAILABLE' => 422,
                 'GEOBLOCKED' => 451,
                 'INVALID_FORMAT_ID' => 400,
