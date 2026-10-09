@@ -444,7 +444,6 @@ header_remove('X-Powered-By');
           class="rip-input"
           id="urlInput"
           aria-label="Video or audio URL to download"
-          aria-describedby="errorBox"
           placeholder="Paste a link here..."
           value="<?= htmlspecialchars($default_url, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>"
           autocomplete="off"
@@ -484,7 +483,7 @@ header_remove('X-Powered-By');
          task. aria-atomic="true" ensures the full message is read even if only
          part of the text changes. -->
     <div class="rip-progress" id="progressBox" role="status" aria-live="polite" aria-atomic="true">
-      <div class="spinner" aria-label="Loading" role="status"></div>
+      <div class="spinner" aria-label="Loading"></div>
       <p class="progress-text" id="progressText">Fetching info...</p>
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progressBar" style="width:30%"></div>
