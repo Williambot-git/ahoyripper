@@ -7580,6 +7580,11 @@ switch ($action) {
                 // documented in the README: every API response body includes x_info_timeout
                 // and x_download_timeout.
                 'ffprobe_ok' => false,
+                // ffmpeg_ok: mirrors ffprobe_ok — completes the "always present" invariant.
+                // DOWNLOAD_EMPTY fires after yt-dlp exits 0 but produces no/empty file;
+                // ffprobe never runs so ffprobe_ok is false. ffmpeg_ok follows the same
+                // value for consistency with FILE_READ_ERROR and VERIFICATION_FAILED.
+                'ffmpeg_ok' => false,
                 // ffmpeg_version: version of the ffmpeg/ffprobe binary. Included on all
                 // API responses so monitoring scripts can track the binary version without
                 // special-casing the DOWNLOAD_EMPTY response. Mirrors the same field in
