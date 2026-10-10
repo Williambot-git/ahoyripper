@@ -5259,7 +5259,7 @@ switch ($action) {
                 'upgrade_url' => UPGRADE_URL,
                 'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                 'retry_after' => max(0, $retry_delta),
-                'hint' => 'The server is overloaded or the media tool is unavailable. Wait a moment and retry. If persistent, the server may need maintenance.',
+                'hint' => 'The server could not start the media tool. This is usually temporary (overload or maintenance). Wait and retry. If it persists, the server may need attention.',
                 'request_id' => $request_id,
                 'source_url' => $url,
                 'source_url_missing' => false,
