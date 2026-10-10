@@ -375,7 +375,110 @@ header_remove('X-Powered-By');
           "price": "0",
           "priceCurrency": "USD",
           "availability": "https://schema.org/OnlineOnly"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "<?= $BASE_URL ?>/#faqpage",
+        "name": "AhoyRipper FAQ",
+        "description": "Frequently asked questions about AhoyRipper — free online media ripper for YouTube, TikTok, X, SoundCloud, Instagram, Facebook, Reddit, Vimeo and 1872+ platforms.",
+        "url": "<?= $BASE_URL ?>",
+        "inLanguage": "en",
+        "isPartOf": {
+          "@id": "<?= $BASE_URL ?>/#website"
         },
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is AhoyRipper?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AhoyRipper is a free, browser-based tool for downloading video and audio from the internet. It streams media directly through our servers — nothing is stored on our infrastructure. No signup, no tracking, no ads.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What platforms are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Every platform that yt-dlp supports — currently 1872+ sites. The supported platforms table lists the most popular ones including YouTube, TikTok, X/Twitter, SoundCloud, Instagram, Facebook, Reddit, and Vimeo.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a daily limit?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The free tier allows 5 rips per day (each info or download API call counts as one rip). The quota resets at midnight UTC. Get AhoyVPN for unlimited rips.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does AhoyRipper store my downloaded files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Files are streamed directly from the source to your browser. Nothing is stored on our servers — the download happens entirely between you and the source platform.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why did my download fail?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Common reasons include: GEOBLOCKED — the video is not available in our server's region (use AhoyVPN to change exit IP); LOGIN_REQUIRED — the video requires a platform account (pass cookies); AGE_RESTRICTED — YouTube requires age verification (pass browser cookies); SOURCE_TIMEOUT — the source site is slow or overloaded (try audio-only); CONNECTION_TIMEOUT — the TCP connection stalled before data was received (try again); DOWNLOAD_TIMEOUT — the file exceeded the server's per-request timeout (try a smaller format).",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I download an entire playlist?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes — paste the playlist URL and add &playlist=1 to the download URL. Each video in the playlist counts as one rip.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why do some videos say 'Login required'?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Some content such as age-restricted YouTube videos or private Instagram posts requires an active platform session. Export your browser cookies in Netscape format and mount them into AhoyRipper to enable access.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What's the difference between format types?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Combined (bestvideo+bestaudio or single file) contains both video and audio — best for watching on a device. Video-only is a video stream without audio — requires a separate audio track or a media player that can merge them. Audio-only is the smallest file size — ideal for music or podcasts.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "I hit my daily limit. How do I get more?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Get AhoyVPN at ahoyvpn.com — it includes an unlimited AhoyRipper API key that bypasses the daily cap entirely.",
+              "language": "en"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use the API directly with my own tool?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The API is documented in the README. Use your AhoyVPN unlimited key in the Authorization: Bearer header for unlimited access.",
+              "language": "en"
+            }
+          }
+        ]
       }
     ]
   }
