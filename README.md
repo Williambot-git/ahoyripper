@@ -245,6 +245,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
     "curl_cffi_ok": true,
     "ffprobe_ok": true,
     "x_ffprobe_status": "skipped",
+    "x_ffprobe_timeout": 10,
+    "health_probe_timeout": 15,
     "platform": null
   },
   "yt_dlp_probe_cache_expires_at": "2026-09-18T00:05:00+00:00",
@@ -253,6 +255,7 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
   "probe_cached_at": "2026-09-18T00:00:00+00:00",
   "x_ffprobe_status": "skipped",
   "x_ffprobe_timeout": 10,
+  "health_probe_timeout": 15,
   "server_uptime_seconds": 86400,
   "load_avg": 0.15,
   "memory_available_pct": 72.4,
@@ -268,9 +271,9 @@ curl -s "https://ahoyripper.com/src/api.php?action=health&probe=1" | python3 -m 
 }
 ```
 
-The `yt_dlp_probe` sub-object contains `action`, `ok`, `title`, `source_url`, `yt_dlp_version`, `api_version`, `upgrade_url`, `report_url`, `server_time`, `server_time_unix`, `request_id`, `probe_age_seconds`, `probe_cached_at`, `curl_cffi_version`, `curl_cffi_ok`, `ffprobe_ok`, `x_ffprobe_status`, and `platform` on all probe results (not just failures). `yt_dlp_version`, `api_version`, `upgrade_url`, `report_url`, `server_time`, `server_time_unix`, and `request_id` are included even when the probe fails, so clients always have version, issue-filing, and clock-synchronization information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`). When the probe fails (`ok: false`), `http_status` carries the semantically appropriate HTTP status code (e.g. `403` for `SOURCE_FORBIDDEN`, `502` for upstream yt-dlp errors, `504` for timeouts, `500` for process failures) — this is the same code the health endpoint returns as the HTTP response status, so HTTP-level monitoring (PagerDuty, cloud health checks) fires on the correct status without inspecting the JSON body.
+The `yt_dlp_probe` sub-object contains `action`, `ok`, `title`, `source_url`, `yt_dlp_version`, `api_version`, `upgrade_url`, `report_url`, `server_time`, `server_time_unix`, `request_id`, `probe_age_seconds`, `probe_cached_at`, `curl_cffi_version`, `curl_cffi_ok`, `ffprobe_ok`, `x_ffprobe_status`, `x_ffprobe_timeout`, `health_probe_timeout`, and `platform` on all probe results (not just failures). `yt_dlp_version`, `api_version`, `upgrade_url`, `report_url`, `server_time`, `server_time_unix`, and `request_id` are included even when the probe fails, so clients always have version, issue-filing, and clock-synchronization information regardless of probe outcome. `probe_cached_at` is an ISO 8601 timestamp of when the cached result was originally computed (absent/freshly computed results have `null`). When the probe fails (`ok: false`), `http_status` carries the semantically appropriate HTTP status code (e.g. `403` for `SOURCE_FORBIDDEN`, `502` for upstream yt-dlp errors, `504` for timeouts, `500` for process failures) — this is the same code the health endpoint returns as the HTTP response status, so HTTP-level monitoring (PagerDuty, cloud health checks) fires on the correct status without inspecting the JSON body.
 
-`probe_age_seconds` and `probe_cached_at` also appear at the **top-level** of the health response (alongside `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds`) — not only inside `yt_dlp_probe`. This lets monitoring clients read cache staleness without needing to dig into the nested sub-object.
+`probe_age_seconds`, `probe_cached_at`, and `health_probe_timeout` also appear at the **top-level** of the health response (alongside `yt_dlp_probe_cache_expires_at` and `yt_dlp_probe_cache_ttl_seconds`) — not only inside `yt_dlp_probe`. This lets monitoring clients read cache staleness and probe timeout configuration without needing to dig into the nested sub-object.
 
 The probe is cached for 5 minutes (`yt_dlp_probe_cache_ttl_seconds: 300`). Repeated calls within that window return the cached result without calling yt-dlp again. This prevents hammering YouTube during health-check storms.
 
