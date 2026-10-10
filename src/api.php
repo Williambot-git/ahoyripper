@@ -817,6 +817,14 @@ if ($is_rate_limited) {
                 // the RATE_LIMIT_EXCEEDED action. Mirrors the same fields in check and health.
                 'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
                 'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
+                // ffmpeg_version and ffmpeg_ok: included on all API responses so generic
+                // consumers can always read these fields without special-casing the
+                // RATE_LIMIT_EXCEEDED path. Mirrors the same fields in check and health.
+                'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                // ffprobe_version: mirrors ffmpeg_version for API consumers that track it
+                // separately. ffprobe is never reached in the rate-limit path so ffprobe_ok=false.
+                'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                 // quota fields: included for consistency with all other error responses.
                 // At this point in the code (rate-limit gate, before daily-quota gate),
                 // the quota file has not been opened so exact remaining is unknown.
@@ -6147,6 +6155,32 @@ switch ($action) {
                     // download-action error responses (SERVICE_UNAVAILABLE, INVALID_API_KEY).
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
+                    'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+                    // health_probe_timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+                    // action=health&probe=1. Included here so API consumers can always read
+                    // this value from any response without null-checking, completing the
+                    // "always present" invariant documented in the README.
+                    'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
+                    // yt_dlp_ok: true when yt-dlp binary is installed and callable.
+                    // Completes the "always present" invariant: every API response includes
+                    // yt_dlp_ok alongside yt_dlp_version, giving consumers a boolean
+                    // availability signal without needing to parse the version string.
+                    'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
+                    // ffmpeg_version: version of the ffmpeg/ffprobe binary.
+                    // Included on all API responses so monitoring scripts can track the binary version.
+                    'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffprobe_version: mirrors ffmpeg_version for API consumers that track it
+                    // separately from ffmpeg_version.
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+                    // ffmpeg_ok: mirrors ffprobe_ok — completes the "always present" invariant.
+                    // Rate limit fires before any yt-dlp run, so ffprobe was never reached.
+                    'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    // ffprobe_ok: false — rate limit fires before yt-dlp, so ffprobe never ran.
+                    'ffprobe_ok' => false,
+                    // curl_cffi_version and curl_cffi_ok: included on all API responses so
+                    // generic consumers can always read these fields without special-casing.
+                    'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
+                    'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     // quota fields: set to configured limit and tomorrow's midnight UTC reset.
                     // Consistent with the info action's RATE_LIMIT_EXCEEDED block which
                     // also reports quota from getDailyQuotaLimit() when the rate limit fires
@@ -7986,6 +8020,7 @@ switch ($action) {
                     'curl_cffi_ok' => !empty($GLOBALS['__curl_cffi_version']) && $GLOBALS['__curl_cffi_version'] !== 'not installed',
                     'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                     'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
+                    'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
                     'ffprobe_ok' => false,
                     'x_info_timeout' => INFO_TIMEOUT,
                     'x_download_timeout' => DOWNLOAD_TIMEOUT,
