@@ -6410,6 +6410,9 @@ switch ($action) {
                     'error_code' => 'SERVICE_UNAVAILABLE',
                     'action' => 'download',
                     'upgrade_url' => UPGRADE_URL,
+                    // report_url: included on all error responses so clients can always
+                    // link directly to the GitHub issue tracker with request_id pre-filled.
+                    'report_url' => ISSUE_BASE_URL . '?request_id=' . $request_id,
                     'retry_after' => SERVICE_UNAVAILABLE_RETRY,
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
