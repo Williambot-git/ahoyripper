@@ -4256,6 +4256,16 @@ if (in_array($action, $json_actions, true) && $accept !== '' && $accept !== '*/*
         'x_info_timeout' => INFO_TIMEOUT,
         'x_download_timeout' => DOWNLOAD_TIMEOUT,
         'x_ffprobe_timeout' => FFPROBE_TIMEOUT,
+        // ffmpeg_version: mirrors the same field in all other API responses so
+        // generic consumers can always read it without special-casing NOT_ACCEPTABLE.
+        // yt-dlp/ffmpeg are never invoked in the NOT_ACCEPTABLE path (Accept-header
+        // validation fires before any URL processing). Completes the "always present"
+        // invariant documented in the README: every API response body includes ffmpeg_version.
+        'ffmpeg_version' => $GLOBALS['__ffmpeg_version'] ?? null,
+        // ffmpeg_ok: mirrors the same field present on all other API responses so
+        // generic consumers can always read it without special-casing NOT_ACCEPTABLE.
+        // Completes the "always present" invariant alongside yt_dlp_ok and ffprobe_ok.
+        'ffmpeg_ok' => !empty($GLOBALS['__ffmpeg_version']) && strpos($GLOBALS['__ffmpeg_version'], 'not installed') === false,
         // ffprobe_version: mirrors ffmpeg_version (ffprobe is part of the ffmpeg suite).
         // Completes the "always present" invariant: every API response body includes ffprobe_version.
         'ffprobe_version' => $GLOBALS['__ffmpeg_version'] ?? null,
