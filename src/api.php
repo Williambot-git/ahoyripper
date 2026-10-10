@@ -101,6 +101,19 @@ define('QUOTA_DIR', getenv('QUOTA_DIR') !== false && getenv('QUOTA_DIR') !== ''
     ? rtrim(getenv('QUOTA_DIR'), '/')
     : '/tmp');
 
+// CSP header value for all enforced API responses (check, info, download, health, etc.).
+// Centralised here so all 43+ call sites stay in sync when img-src domains or worker-src
+// rules change. Contains the full set of third-party CDN domains needed by thumbnail and
+// video-cover images loaded by the JS frontend. report-to and report-uri are included so
+// CSP violation reports are routed correctly whether they arrive via the modern Reporting
+// API (Reporting-Endpoints) or legacy report-uri (Safari / older Firefox).
+define('CSP_ENFORCE', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; frame-ancestors 'none'; report-to csp-report; report-uri /csp-report;");
+
+// CSP header value for CSP-Report-Only responses used during development / audit.
+// Identical directive set to CSP_ENFORCE but switches the header name so browsers
+// report violations without blocking content — safe for iterating CSP changes.
+define('CSP_REPORT_ONLY', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; frame-ancestors 'none'; report-to csp-report; report-uri /csp-report;");
+
 // Ensure QUOTA_DIR exists before any fopen() calls that write state files.
 // This prevents 503 SERVICE_UNAVAILABLE errors when /tmp is wiped between
 // container restarts (QUOTA_DIR=/tmp default), or when a custom QUOTA_DIR
@@ -212,7 +225,7 @@ header('X-Frame-Options: SAMEORIGIN');
 header_remove('X-Powered-By');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+header('Content-Security-Policy: ' . CSP_ENFORCE);
 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
 header('X-Download-Options: noopen');
 // X-Robots-Tag: prevent all API responses from being indexed or crawled.
@@ -396,7 +409,7 @@ if ($blocked) {
         // exit path because this block calls exit() before the normal script flow
         // continues. Add them here explicitly so FORBIDDEN_ORIGIN responses are
         // fully consistent with all other API error responses.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('X-Robots-Tag: noindex, noai, noimage, noydir');
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
@@ -590,7 +603,7 @@ function sendServiceUnavailable503(string $request_id, string $action): void
     // enforcement CSP set in all other API response paths. Without this, browsers
     // apply a default restrictive CSP and ServiceWorker registrations at this origin
     // would be blocked (worker-src 'self' requires explicit 'self' to allow workers).
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+    header('Content-Security-Policy: ' . CSP_ENFORCE);
     echo json_encode([
         'error' => 'Service temporarily unavailable.',
         'error_code' => 'SERVICE_UNAVAILABLE',
@@ -1127,7 +1140,7 @@ if (in_array($action, $internal_actions, true)) {
             header('X-FFProbe-Status: skipped');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy-Report-Only: ' . CSP_REPORT_ONLY);
             // Cache-Control: no-store — csp-report is a live feed of policy violations;
             // it must never be cached. Set explicitly here since the top-of-script header
             // block is bypassed by fastcgi_finish_request(). The non-FPM fallback below
@@ -1244,8 +1257,8 @@ if (in_array($action, $internal_actions, true)) {
         // Required alongside the CSP header below so the /csp-report endpoint can receive
         // violation reports in report-only mode without blocking legitimate reports.
         // Matches the FPM-path header set at line 641.
-        header('Content-Security-Policy-Report-Only: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; report-to csp-report; report-uri /csp-report;');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        header('Content-Security-Policy-Report-Only: ' . CSP_REPORT_ONLY);
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         echo json_encode([
             'status' => 'ok',
             'action' => $action,
@@ -1403,7 +1416,7 @@ if (in_array($action, $internal_actions, true)) {
             header('X-Server-Time-Unix: ' . time());
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
             // ffprobe is never reached for client-error (no file involved).
             // Completes the "always present" invariant documented in the README:
@@ -1513,7 +1526,7 @@ if (in_array($action, $internal_actions, true)) {
         header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         echo json_encode([
             'status' => 'ok',
             'action' => $action,
@@ -1590,7 +1603,7 @@ if (in_array($action, $internal_actions, true)) {
     header('X-DailyLimit-Window: unlimited');
     header('Reporting-Endpoints: csp-report="/csp-report"');
     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\'; img-src \'self\' data:; connect-src \'self\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report;');
+    header('Content-Security-Policy: ' . CSP_ENFORCE);
     echo json_encode([
         'status' => 'ok',
         'action' => $action,
@@ -3159,7 +3172,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
         // CSP + Reporting headers — consistent with the INVALID_SORT block and the
         // health action. NOTE: 'upgrade-insecure-requests' is absent — it only applies
         // to HTML documents, not JSON API responses.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Content-Type: required for correct JSON rendering in browsers and API clients.
@@ -3303,7 +3316,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
         // CSP + Reporting headers — consistent with the INVALID_SORT block and the
         // health action. NOTE: 'upgrade-insecure-requests' is absent — it only applies
         // to HTML documents, not JSON API responses.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         header('Content-Type: application/json; charset=utf-8');
@@ -3581,7 +3594,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // CSP is report-only on public API; blocking CSP lives in nginx.
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
@@ -3753,7 +3766,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
             // CSP is report-only on public API; blocking CSP lives in nginx.
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
@@ -3996,7 +4009,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
     // CSP and Reporting headers: GET-gate 405 was missing these.
     // Mirrors the headers set in the POST-gate 405 blocks (analytics, client-error, csp-report).
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+    header('Content-Security-Policy: ' . CSP_ENFORCE);
     header('Reporting-Endpoints: csp-report="/csp-report"');
     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
     // Rate-limit headers on 405: check is not a download action (X-DL-RateLimit=-1)
@@ -4307,7 +4320,7 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('X-RateLimit-Limit: -1');
@@ -4412,7 +4425,7 @@ switch ($action) {
             // (line ~6999) which is the reference implementation for complete header
             // coverage. NOTE: 'upgrade-insecure-requests' is intentionally ABSENT — it
             // only applies to HTML documents and has no effect on JSON responses.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             // X-RateLimit-*: validation errors occur before rate-limit tracking is consulted,
@@ -4558,7 +4571,7 @@ switch ($action) {
             // CSP + Reporting headers — consistent with the health action (line ~6999)
             // and the info action's INVALID_SORT block. NOTE: 'upgrade-insecure-requests'
             // is absent — it only applies to HTML documents, not JSON API responses.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('X-Download-Options: noopen');
@@ -4738,7 +4751,7 @@ switch ($action) {
                 header('X-RateLimit-Window: 5');
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
@@ -4831,7 +4844,7 @@ switch ($action) {
                 header('X-RateLimit-Window: 5');
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 header('X-Info-Timeout: ' . INFO_TIMEOUT);
                 header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
@@ -4939,7 +4952,7 @@ switch ($action) {
                 // (health action at line ~6999 is the reference implementation).
                 // NOTE: 'upgrade-insecure-requests' is intentionally ABSENT — it only
                 // applies to HTML documents and has no effect on JSON responses.
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
                 // X-RateLimit-*: -1 sentinels since the per-minute rate-limit gate was
@@ -5199,7 +5212,7 @@ switch ($action) {
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
@@ -5385,7 +5398,7 @@ switch ($action) {
             header('X-Download-Timeout: ' . DOWNLOAD_TIMEOUT);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
             header('X-Content-Type-Options: nosniff');
@@ -5488,7 +5501,7 @@ switch ($action) {
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store');
             header('X-Request-ID: ' . $request_id);
@@ -5703,7 +5716,7 @@ switch ($action) {
             // response. The parseFormats classified-yt-dlp-error block was missing these.
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             // Rate-limit sentinels: info action uses the generic request rate limit
             // (X-RateLimit-Window = $rate_window = 60s). X-DL-RateLimit and X-DailyLimit
             // are "unavailable" since the info action does not consume those limits.
@@ -6127,7 +6140,7 @@ switch ($action) {
                 header('Cross-Origin-Resource-Policy: same-origin');
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 echo json_encode([
                     'error' => 'Too many download requests. Slow down.',
                     'error_code' => 'RATE_LIMIT_EXCEEDED',
@@ -6271,7 +6284,7 @@ switch ($action) {
                 header('Cache-Control: no-store');
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (daily quota file open failed, no download is possible). Use -1 sentinel.
@@ -6372,7 +6385,7 @@ switch ($action) {
                 header('Cache-Control: no-store');
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 header('Retry-After: ' . SERVICE_UNAVAILABLE_RETRY);
                 // X-DL-RateLimit-*: download-specific rate limit — not applicable here
                 // (could not acquire daily quota lock, no download is possible). Use -1 sentinel.
@@ -6789,7 +6802,7 @@ switch ($action) {
             header('X-Robots-Tag: noindex, noai, noimage, noydir');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             // Rate-limit sentinels (-1): no download rate limit was consumed because
             // proc_open itself failed before yt-dlp could run. However, the info call
             // above consumed the generic request rate limit, so X-RateLimit-Window
@@ -7008,7 +7021,7 @@ switch ($action) {
                 // CSP reporting and browser security policy enforcement for timeouts.
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
                 // have rate-limit metadata regardless of how the download ends (classified or not).
                 // Mirrors the headers set at line ~3822 for classified YTDLP_ERROR downloads.
@@ -7205,7 +7218,7 @@ switch ($action) {
                 // security policy enforcement even when yt-dlp returns a classified error.
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 // X-DL-RateLimit-*: surface download-specific rate limit state in classified
                 // error responses so clients always have rate-limit metadata, even when yt-dlp
                 // produces a recognized error (GEOBLOCKED, AGE_RESTRICTED, etc.) instead of an
@@ -7364,7 +7377,7 @@ switch ($action) {
                 // security policy enforcement even when yt-dlp returns an unrecognized error.
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 // X-DL-RateLimit-*: surface download-specific rate limit state so clients always
                 // have rate-limit metadata regardless of how the download ends (classified or not).
                 // Mirrors the headers set at line ~3155 for successful downloads.
@@ -7515,7 +7528,7 @@ switch ($action) {
             // (e.g. PROC_OPEN_FAILED at line ~3971).
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             // X-RateLimit-*: generic request-rate limit sentinels (-1) since
             // DOWNLOAD_EMPTY occurs before the download rate limit gate. yt-dlp exited 0
             // but produced no/empty file — no download rate limit was consumed.
@@ -7817,7 +7830,7 @@ switch ($action) {
                     header('X-Robots-Tag: noindex, noai, noimage, noydir');
                     header('Reporting-Endpoints: csp-report="/csp-report"');
                     header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                    header('Content-Security-Policy: ' . CSP_ENFORCE);
                     header('X-RateLimit-Limit: ' . ($unlimited ? '-1' : (string)$rate_limit));
                     header('X-RateLimit-Remaining: ' . ($unlimited ? '-1' : (string)$rate_remaining));
                     header('X-RateLimit-Reset: ' . ($unlimited ? '-1' : (string)$rate_reset_ts));
@@ -8002,7 +8015,7 @@ switch ($action) {
                 // for verification failures (both VERIFICATION_FAILED and VERIFICATION_TIMEOUT).
                 header('Reporting-Endpoints: csp-report="/csp-report"');
                 header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-                header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+                header('Content-Security-Policy: ' . CSP_ENFORCE);
                 // http_response_code must be set AFTER all headers including CSP.
                 // VERIFICATION_TIMEOUT uses 504 to distinguish from VERIFICATION_FAILED (500).
                 // Both are retryable, but 504 signals the verification step timed out
@@ -8333,7 +8346,7 @@ switch ($action) {
             header('Cache-Control: no-store');
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; frame-ancestors \'none\'; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             // X-FFProbe-Status: ffprobe was never reached — the file could not be opened
             // for reading, so no file was ever produced for ffprobe to verify.
             // Mark as skipped so clients can distinguish this from VERIFICATION_FAILED
@@ -8686,7 +8699,7 @@ switch ($action) {
         // no effect and could cause unexpected browser behavior. It belongs only in
         // HTML page CSP headers (nginx-level for the root location, and api.php's
         // top-of-script block for HTML error responses).
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // The check action is a lightweight ping with zero dependency on yt-dlp,
@@ -8944,7 +8957,7 @@ switch ($action) {
             // Set the same CSP and Reporting-Endpoints headers that the top-of-script
             // block applies to all other responses. Mirrors the csp-report and analytics
             // POST-gate 405 responses for consistency.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             // Rate-limit sentinels: -1 = not applicable (fire-and-forget endpoint).
@@ -9100,7 +9113,7 @@ switch ($action) {
         // its own response — repeat CSP here so the action is always fully hardened.
         // Note: upgrade-insecure-requests is intentionally ABSENT — this is a JSON API
         // endpoint, not an HTML document, so the directive has no effect here.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Cache-Control: no-store');
         // Reporting-Endpoints + Report-To: enables the browser's Reporting API for CSP
         // violation reports from this endpoint. Matches the headers set by every other API
@@ -9301,7 +9314,7 @@ switch ($action) {
         // JSON API endpoint — that directive only applies to HTML documents.
         // It has no effect on JSON responses and could cause unexpected browser
         // behavior if left in. It belongs only in HTML page CSP headers.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Remaining security headers — the top-of-script block sets these globally
@@ -10099,7 +10112,7 @@ switch ($action) {
             // CSP and Reporting headers: csp-report 405 block bypasses the top-of-script
             // block that sets these globally — repeat them here so the response is fully
             // hardened regardless of how this action is served.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo json_encode([
@@ -10278,7 +10291,7 @@ switch ($action) {
             header('Cross-Origin-Resource-Policy: same-origin');
             // CSP and Reporting headers — analytics 405 was missing these.
             // Mirrors the headers set in the csp-report and client-error 405 blocks.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             // X-FFProbe-Status: always 'skipped' on analytics responses since ffprobe only
@@ -10383,7 +10396,7 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Cache-Control: no-store');
@@ -10436,7 +10449,7 @@ switch ($action) {
             header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
             header('Cross-Origin-Opener-Policy: same-origin');
             header('Cross-Origin-Resource-Policy: same-origin');
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             header('Cache-Control: no-store');
@@ -10555,7 +10568,7 @@ switch ($action) {
             header('X-Server-Time: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             header('X-Server-Time-Unix: ' . time());
             // CSP and Reporting headers: complete the security header family.
-            header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+            header('Content-Security-Policy: ' . CSP_ENFORCE);
             header('Reporting-Endpoints: csp-report="/csp-report"');
             header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
             echo '';
@@ -10610,7 +10623,7 @@ switch ($action) {
         header('Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https://i.ytimg.com https://*.tikcdn.com https://*.tiktokcdn.com https://pbs.twimg.com https://*.twimg.com https://*.sndcdn.com https://*.vimeocdn.com https://*.instagram.com https://*.fbcdn.net https://v16.tiktokcdn.com https://v26.tiktokcdn.com https://*.tiktok.com https://vxtiktok.com https://*.mediaJx.com https://fonts.googleapis.com; connect-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; font-src \'self\' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src \'none\'; worker-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests; frame-ancestors \'none\'; report-to csp-report; report-uri /csp-report;');
+        header('Content-Security-Policy: ' . CSP_ENFORCE);
         header('Reporting-Endpoints: csp-report="/csp-report"');
         header('Report-To: {"group":"csp-report","max_age":86400,"endpoints":[{"url":"/csp-report"}]}');
         // Rate-limit headers for consistency with the rest of the API.
