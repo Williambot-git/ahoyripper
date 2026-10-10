@@ -435,6 +435,7 @@ if ($blocked) {
             'upgrade_url' => UPGRADE_URL,
             'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
             'api_version' => AHOYRIPPER_VERSION,
+            'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
             // curl_cffi_version and curl_cffi_ok: included on all API responses so
             // generic consumers can always read these fields without special-casing
             // the FORBIDDEN_ORIGIN action. Mirrors the same fields in check and health.
@@ -4753,6 +4754,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // x_ffprobe_status: skipped — ffprobe runs post-download to verify the output
                     // file. Since this error fires before yt-dlp is even invoked (quota file
                     // could not be opened), ffprobe was never reached. Clients can check this
@@ -4844,6 +4846,7 @@ switch ($action) {
                     'source_url_missing' => ($url ?? '') === '',
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // x_ffprobe_status: mirrors the X-FFProbe-Status HTTP header — skipped since
                     // ffprobe is never reached in the SERVICE_UNAVAILABLE path (quota file could
                     // not be locked). Completes the "always present" invariant documented in
@@ -4987,6 +4990,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // curl_cffi_version and curl_cffi_ok: included on all API responses so
                     // generic consumers can always read these fields without special-casing
                     // the DAILY_LIMIT action.
@@ -5990,6 +5994,7 @@ switch ($action) {
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 'api_version' => AHOYRIPPER_VERSION,
+                'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                 'server_time' => gmdate('c'),
                 'server_time_unix' => time(),
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
@@ -6302,6 +6307,7 @@ switch ($action) {
                     'platform' => null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // curl_cffi_version and curl_cffi_ok: included on all API responses so
                     // generic consumers can always read these fields without special-casing
                     // the SERVICE_UNAVAILABLE action. yt-dlp has not run yet in the fopen
@@ -6395,6 +6401,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // curl_cffi_version and curl_cffi_ok: included on all API responses so
                     // generic consumers can always read these fields without special-casing
                     // the SERVICE_UNAVAILABLE action. yt-dlp has not run yet in the flock
@@ -6534,6 +6541,7 @@ switch ($action) {
                     'request_id' => $request_id,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     // x_ffprobe_status: mirrors X-FFProbe-Status header — skipped since
                     // ffprobe only runs after a download completes. Completes the "always
                     // present" invariant documented in README: every API response body
@@ -8021,6 +8029,7 @@ switch ($action) {
                         : null,
                     'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                     'api_version' => AHOYRIPPER_VERSION,
+                    'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                     'server_time' => gmdate('c'),
                     'server_time_unix' => time(),
                     // curl_cffi_version and curl_cffi_ok: included on all API responses so
@@ -10289,6 +10298,7 @@ switch ($action) {
                 'api_version' => AHOYRIPPER_VERSION,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
                 // curl_cffi_version: curl_cffi library version for HTTP requests.
+                'yt_dlp_ok' => $GLOBALS['__ytdlp_ok'] ?? null,
                 // Included on all API responses so monitoring scripts can always
                 // confirm curl_cffi availability from any endpoint.
                 'curl_cffi_version' => $GLOBALS['__curl_cffi_version'] ?? null,
