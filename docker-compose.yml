@@ -23,6 +23,12 @@ services:
       - HEALTH_PROBE_TIMEOUT=${HEALTH_PROBE_TIMEOUT:-15}
       - HEALTH_PROBE_VIDEO_ID=${HEALTH_PROBE_VIDEO_ID:-dQw4w9WgXcQ}
       - FFPROBE_TIMEOUT=${FFPROBE_TIMEOUT:-10}
+      # Binary path overrides — change these if yt-dlp, ffprobe, or ffmpeg are
+      # installed in non-standard locations (e.g. /usr/bin/ on some systems,
+      # or /usr/local/bin/ on macOS). Changing these invalidates the version cache.
+      - YTDLP_PATH=${YTDLP_PATH:-/usr/local/bin/yt-dlp}
+      - FFPROBE_PATH=${FFPROBE_PATH:-/usr/bin/ffprobe}
+      - FFMPEG_PATH=${FFMPEG_PATH:-/usr/bin/ffmpeg}
       - DL_RATE_LIMIT=${DL_RATE_LIMIT:-10}
       - RATE_LIMIT=${RATE_LIMIT:-30}
       # PLAUSIBLE_HOST: empty (default) routes analytics through the self-hosted
