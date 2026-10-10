@@ -6820,6 +6820,12 @@ switch ($action) {
             // ffprobe was never reached (proc_open failed), but include the timeout value
             // so clients have the full diagnostic header set regardless of outcome.
             header('X-FFProbe-Timeout: ' . FFPROBE_TIMEOUT);
+            // X-HealthProbe-Timeout: mirrors HEALTH_PROBE_TIMEOUT — the timeout for
+            // action=health&probe=1. Included here for complete timeout-header parity
+            // with all other API responses. Every response path should emit all four
+            // timeout headers (X-Info-Timeout, X-Download-Timeout, X-FFProbe-Timeout,
+            // X-HealthProbe-Timeout) so clients never need to branch on error code.
+            header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             // retry_after: delta-seconds until the download can be retried.
             // Per RFC 9110, Retry-After accepts either an HTTP-date or delta-seconds;
             // delta-seconds is simpler and consistent with all other Retry-After
