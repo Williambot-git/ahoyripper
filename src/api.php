@@ -9611,7 +9611,7 @@ switch ($action) {
                     // The limit is intentionally very high (50 GB) to only fire on genuine
                     // oversized-content edge cases (e.g. extremely high-bitrate 8K streams).
                     '--max-filesize', '50G',
-                    '--socket-timeout', (string)max(1, floor(HEALTH_PROBE_TIMEOUT / 2)),
+                    '--socket-timeout', (string)max(1, HEALTH_PROBE_TIMEOUT - 5),
                     '--referer', 'https://ahoyripper.com',
                     '--user-agent', AHOY_USER_AGENT,
                     // --ffmpeg-location: explicitly point yt-dlp at the ffmpeg binary.
