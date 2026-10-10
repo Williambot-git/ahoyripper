@@ -6723,7 +6723,7 @@ switch ($action) {
             // --no-progress: suppress all progress output. yt-dlp emits progress
             // template noise to stderr that can corrupt downstream parsing in PHP.
             // --no-progress is the correct modern flag (consistent with info action
-            // at line 4951 and health probe at line 9378).
+            // at line 5113 and health probe at line 9615).
             '--no-progress',
             // --progress-template "": suppress all progress output and the 90-day
             // self-update warning from stderr. yt-dlp emits progress template noise
@@ -9627,7 +9627,7 @@ switch ($action) {
                     // yt-dlp validates SSL certificates by default (yt-dlp 2024.09+ removed
                     // --no-check-certificates; SSL errors now trigger extractor retry logic).
                     // --max-filesize: prevent unexpectedly large content from being selected.
-                    // Mirrors the info action (line ~3954) and download action (line ~5201).
+                    // Mirrors the info action (line 5138) and download action (line 6692).
                     // The limit is intentionally very high (50 GB) to only fire on genuine
                     // oversized-content edge cases (e.g. extremely high-bitrate 8K streams).
                     '--max-filesize', '50G',
