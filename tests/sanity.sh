@@ -928,7 +928,10 @@ REQUIRED_THUMB_DOMAINS=(
     "tiktok.com"
 )
 # Check api.php CSP (PHP sets its own CSP header)
-API_CSP=$(grep "Content-Security-Policy" src/api.php | sed "s/.*Content-Security-Policy[ ]*//")
+# NOTE: grep "Content-Security-Policy" matches the define() line where
+# 'Content-Security-Policy' appears as a string VALUE, so we must grep for
+# the define name specifically to extract the actual CSP directive string.
+API_CSP=$(grep "define.*CSP_ENFORCE" src/api.php | sed 's/^[^,]*,\s*"//;s/"\s*);.*//')
 missing=0
 for domain in "${REQUIRED_THUMB_DOMAINS[@]}"; do
     if ! echo "$API_CSP" | grep -q "$domain"; then
@@ -989,7 +992,10 @@ fi
 
 echo ""
 echo "==> Checking API PHP CSP includes upgrade-insecure-requests... "
-if grep "Content-Security-Policy" src/api.php | grep -q "upgrade-insecure-requests"; then
+# Use the already-extracted $API_CSP so we're checking the actual CSP directive string,
+# not grepping the raw PHP source (which contains 'Content-Security-Policy' as a
+# string VALUE in define() and as a header() argument name on every call site).
+if echo "$API_CSP" | grep -q "upgrade-insecure-requests"; then
     echo "  ✓ API PHP CSP includes upgrade-insecure-requests"
 else
     echo "  ✗ API PHP CSP missing upgrade-insecure-requests"
@@ -2019,10 +2025,18 @@ for err_line in "$MISSING_FORMAT_ERR_LINE" "$INVALID_FORMAT_ERR_LINE"; do
             /Content-Security-Policy/ && NR >= start - 15 && NR < start { found=1; print }
         ' src/api.php)
     fi
-    # Extract just the CSP directive value (strip header("..."); wrapper).
-    # The awk above returns the full CSP line:  header("Content-Security-Policy: ...");
-    # We want just the quoted string content between header( " ... " );
-    csp_content=$(echo "$csp_line" | sed 's/.*Content-Security-Policy: *//; s/";*$//')
+    # Extract just the CSP directive value (strip header("...", "...", ...)
+    # wrapper). The awk above returns the full CSP line. We want the quoted
+    # string content. Two forms exist:
+    #   1. header('Content-Security-Policy: ' . CSP_ENFORCE);  ← variable
+    #   2. header('Content-Security-Policy: default-src ...');  ← inline
+    # For form 1, $csp_content is ' . CSP_ENFORCE); — resolve the constant.
+    csp_raw=$(echo "$csp_line" | sed 's/.*Content-Security-Policy: *//; s/";*$//')
+    if echo "$csp_raw" | grep -q "CSP_ENFORCE"; then
+        csp_content=$(grep "define.*CSP_ENFORCE" src/api.php | sed 's/^[^,]*,\s*"//;s/"\s*);.*//')
+    else
+        csp_content="$csp_raw"
+    fi
     if ! echo "$csp_content" | grep -q "googleapis.com"; then
         echo "  ✗ MISSING_FORMAT/INVALID_FORMAT_ID CSP missing googleapis.com (font source stripped)"
         exit 1
