@@ -61,35 +61,95 @@ Allow: /
 
 # Block AI training crawlers that ignore robots.txt conventions.
 # These bots systematically scrape content for LLM / generative AI training.
+# IMPORTANT: Each User-agent block needs its own Disallow rule — bots only obey
+# the first matching block, so each AI crawler must be listed individually with
+# Disallow: / to be properly blocked (they don't fall through to User-agent: *).
 User-agent: AdsBot
+Disallow: /
+
 User-agent: AiBot
+Disallow: /
+
 User-agent: Amazonbot
+Disallow: /
+
 User-agent: Bytespider
+Disallow: /
+
 User-agent: CCBot
+Disallow: /
+
 User-agent: ChatGPT-User
+Disallow: /
+
 User-agent: ClaudeBot
+Disallow: /
+
 User-agent: Claudebot
+Disallow: /
+
 User-agent: CohereBot
+Disallow: /
+
 User-agent: Cometbot
+Disallow: /
+
 User-agent: Diffbot
+Disallow: /
+
 User-agent: Google-Extended
+Disallow: /
+
 User-agent: GPTBot
+Disallow: /
+
 User-agent: GoogleOther
+Disallow: /
+
 User-agent: GrokBot
+Disallow: /
+
 User-agent: DeepSeekBot
+Disallow: /
+
 User-agent: SentiBot
+Disallow: /
+
 User-agent: AnthropicBot
+Disallow: /
+
 User-agent: ImagesiftBot
+Disallow: /
+
 User-agent: KenjinBot
+Disallow: /
+
 User-agent: Meta-ExternalAgent
+Disallow: /
+
 User-agent: Meta-ExternalFetcher
+Disallow: /
+
 User-agent: Omgilibot
+Disallow: /
+
 User-agent: Omgili
+Disallow: /
+
 User-agent: Omgili Media Bot
+Disallow: /
+
 User-agent: PerplexityBot
+Disallow: /
+
 User-agent: PetalBot
+Disallow: /
+
 User-agent: SemrushBot-Crawler
+Disallow: /
+
 User-agent: YouBot
+Disallow: /
 # Applebot and FacebookBot are allowed — they are legitimate crawlers used for
 # search indexing (Applebot: Spotlight/Siri) and social link previews (FacebookBot:
 # Open Graph meta tags). They are NOT AI training scrapers. Blocking them would
