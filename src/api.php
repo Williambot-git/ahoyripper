@@ -805,6 +805,7 @@ if ($is_rate_limited) {
             header('X-HealthProbe-Timeout: ' . HEALTH_PROBE_TIMEOUT);
             $rate_quota_limit = getDailyQuotaLimit();
             $rate_quota_reset = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->getTimestamp();
+            $rate_quota_reset_iso = (new DateTime('tomorrow midnight', new DateTimeZone('UTC')))->format('c');
             echo json_encode([
                 'error' => 'Too many requests. Slow down.',
                 'error_code' => 'RATE_LIMIT_EXCEEDED',
@@ -825,6 +826,10 @@ if ($is_rate_limited) {
                 'format_id' => null,
                 'platform' => null,
                 'yt_dlp_version' => $GLOBALS['__ytdlp_version'] ?? null,
+                // yt_dlp_ok: mirrors the same field present on all other API responses so
+                // generic consumers can always read it without special-casing this block.
+                // yt-dlp version is already loaded before this gate, so this value is accurate.
+                'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
                 'api_version' => AHOYRIPPER_VERSION,
                 // curl_cffi_version and curl_cffi_ok: included on all API responses so
                 // generic consumers can always read these fields without special-casing
@@ -845,14 +850,13 @@ if ($is_rate_limited) {
                 // Use configured limit and reset timestamp — same pattern as MISSING_URL.
                 'quota_remaining' => -1,
                 'quota_limit' => $rate_quota_limit,
-                'quota_reset' => $rate_quota_reset,
-                // quota_reset_unix carries the same Unix timestamp as quota_reset.
-                // Both fields must always contain the same reset timestamp so clients
-                // can use either field interchangeably without special-casing -1.
-                // The -1 sentinel pattern is reserved for quota_remaining (which uses
-                // -1 to signal "unknown" or "unlimited") — quota_reset always has
-                // a concrete reset timestamp or -1 only when the daily-quota concept
-                // itself does not apply (e.g. check/health actions).
+                // quota_reset: ISO 8601 string — mirrors the same field in all other responses.
+                'quota_reset' => $rate_quota_reset_iso,
+                // quota_reset_unix: Unix integer — mirrors the same field in all other responses.
+                // Both carry the same reset timestamp; clients can use either format.
+                // The -1 sentinel is reserved for quota_remaining (signals "unknown" or "unlimited")
+                // — quota_reset has a concrete ISO timestamp or -1 only when the daily-quota
+                // concept does not apply (e.g. check/health actions).
                 'quota_reset_unix' => $rate_quota_reset,
             // server_time: ISO 8601 + Unix for client clock synchronization.
             // Present on all other API responses; rate-limit block was missing these.
@@ -880,11 +884,6 @@ if ($is_rate_limited) {
             // with all other API response bodies which always include this field.
             // Completes the "always present" invariant documented in the README.
             'health_probe_timeout' => HEALTH_PROBE_TIMEOUT,
-            // yt_dlp_ok: mirrors the same field present on all other API responses so
-            // generic consumers can always read this field without special-casing
-            // the RATE_LIMIT_EXCEEDED action. yt-dlp version is already loaded
-            // before this gate (lines ~1418-1448), so this value is always accurate.
-            'yt_dlp_ok' => !empty($GLOBALS['__ytdlp_version']) && strpos($GLOBALS['__ytdlp_version'], 'not installed') === false,
             'ffprobe_ok' => false,
         ], JSON_INVALID_UTF8_SUBSTITUTE);
         return;
