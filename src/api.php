@@ -9863,6 +9863,14 @@ switch ($action) {
                             $probe_http_status = 504;
                         } elseif (($probe_classified['code'] ?? '') === 'PROC_OPEN_FAILED') {
                             $probe_http_status = 500;
+                        } elseif (($probe_classified['code'] ?? '') === 'CONNECTION_FAILED') {
+                            $probe_http_status = 502;
+                        } elseif (($probe_classified['code'] ?? '') === 'SOURCE_RATE_LIMITED') {
+                            $probe_http_status = 429;
+                        } elseif (($probe_classified['code'] ?? '') === 'SOURCE_FORBIDDEN') {
+                            $probe_http_status = 403;
+                        } elseif (($probe_classified['code'] ?? '') === 'SOURCE_NOT_FOUND') {
+                            $probe_http_status = 404;
                         }
                     }
                     $GLOBALS['__ytdlp_probe'] = [
