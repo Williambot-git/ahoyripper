@@ -2164,9 +2164,12 @@ test('MISSING_URL: error_code is MISSING_URL',
 $invalid_url_response = [
     'error' => 'Invalid URL.',
     'error_code' => 'INVALID_URL',
+    'action' => 'info',
     'source_url' => 'not-a-url',
     // source_url_missing is intentionally absent here
 ];
+test('INVALID_URL: action is present',
+    array_key_exists('action', $invalid_url_response));
 test('INVALID_URL: source_url_missing key is absent',
     !array_key_exists('source_url_missing', $invalid_url_response));
 test('INVALID_URL: source_url is the invalid string (not null)',

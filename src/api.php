@@ -3343,6 +3343,7 @@ $validation = function(string $action) use($request_id, $sendDailyLimitHeaders, 
         echo json_encode([
             'error' => 'Invalid URL. Please paste a valid video link.',
             'error_code' => 'INVALID_URL',
+            'action' => $action,
             // retry_after: 0 signals "retry immediately once input is corrected" — a
             // validation error has no server-side backoff; the client just needs to
             // provide valid input. Consistent with MISSING_URL and INVALID_FORMAT_ID.
