@@ -5197,17 +5197,17 @@ switch ($action) {
         ]);
         // Build the final flag block before the URL separator (--).
         // All flags must appear BEFORE the URL (--); yt-dlp rejects flags placed
-        // after the URL separator. Consolidating --impersonate, --cookies,
+        // after the URL separator. Consolidating --cookies, --impersonate,
         // --user-agent, --referer, and --add-header into a single array_merge
         // ensures correct flag ordering (mirrors the download action pattern).
         $final_flags = [];
-        if (AHOY_IMPERSONATE !== '') {
-            $final_flags[] = '--impersonate';
-            $final_flags[] = AHOY_IMPERSONATE;
-        }
         if (COOKIES_PATH !== '') {
             $final_flags[] = '--cookies';
             $final_flags[] = COOKIES_PATH;
+        }
+        if (AHOY_IMPERSONATE !== '') {
+            $final_flags[] = '--impersonate';
+            $final_flags[] = AHOY_IMPERSONATE;
         }
         $final_flags = array_merge($final_flags, [
             '--referer', validateRefererParam($_GET['referer'] ?? ''),
