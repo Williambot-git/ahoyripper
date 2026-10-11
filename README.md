@@ -187,7 +187,8 @@ curl -s "https://ahoyripper.com/src/api.php?action=check" | python3 -m json.tool
   "source_url": null,
   "source_url_missing": true,
   "format_id_missing": false,
-  "hint": null
+  "hint": null,
+  "report_url": "https://github.com/Williambot-git/ahoyripper/issues/new?request_id=..."
 }
 ```
 
