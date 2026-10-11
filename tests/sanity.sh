@@ -408,16 +408,15 @@ fi
 echo ""
 echo "==> Checking PWA manifest screenshots use UI assets (not brand/social share images)... "
 # PWA screenshots must show the app UI, not brand/logo images (og-image, logos).
-# Use favicon-512.png (the app icon) as the screenshot — it exists and is a valid UI
-# representation. og-image.webp (social share card) is a brand asset and non-compliant.
-# Guard against regression: the screenshot src must NOT be og-image.*
+# favicon-512.png (app icon) is also not a valid UI screenshot — it is a brand asset.
+# screenshot-ui.png is the actual app UI screenshot. Guard against regression.
 MANIFEST_PATH="$PROJECT_ROOT/public/manifest.json"
 SCREENSHOT_SRC=$(php -r 'echo json_decode(file_get_contents($argv[1]))->screenshots[0]->src ?? "";' "$MANIFEST_PATH")
 # Screenshots are optional in manifest.json. If absent/empty, that is valid PWA spec.
 # Only fail if a screenshot IS present AND uses a brand/social share asset (non-compliant).
-if echo "$SCREENSHOT_SRC" | grep -qE '^/(og-image|og-image\.webp|og-image\.png)$'; then
+if echo "$SCREENSHOT_SRC" | grep -qE '^/(og-image|og-image\.webp|og-image\.png|favicon-512\.png)$'; then
     echo "  ✗ manifest screenshots uses brand asset '"'"'$SCREENSHOT_SRC'"'"' (non-compliant PWA screenshot)"
-    echo "    Use favicon-512.png or an actual UI screenshot instead."
+    echo "    Use an actual UI screenshot (e.g. screenshot-ui.png) instead."
     exit 1
 fi
 if [ -z "$SCREENSHOT_SRC" ]; then
