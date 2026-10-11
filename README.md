@@ -1477,7 +1477,7 @@ AhoyRipper passes a consistent set of flags to yt-dlp on every invocation (info,
 | `-f <format>` | (download only) Format selector ID from the info response (e.g. `22`, `bestaudio[ext=m4a]`). |
 | `-o <template>` | (download only) Output filename template. yt-dlp auto-appends the file extension. |
 
-> **Note:** yt-dlp 2024.09 removed `--no-check-certificates` — SSL certificate validation is always enabled. SSL errors now trigger extractor retry logic instead.
+> **Note:** yt-dlp 2024.09 removed `--no-check-certificates` and its alias `--no-check-certificate` (singular) — SSL certificate validation is always enabled. SSL errors now trigger extractor retry logic instead.
 
 ### Common error codes
 
